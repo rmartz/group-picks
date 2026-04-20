@@ -11,13 +11,11 @@ export default function ProfilePage() {
 
   if (!user) return null;
 
-  const providerIds = user.providerData.map((p) => p.providerId);
-
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
       <UserProfileView
         initialDisplayName={user.displayName ?? ""}
-        providerIds={providerIds}
+        providerIds={user.providerData.map((p) => p.providerId)}
         onSave={updateDisplayName}
       />
     </main>

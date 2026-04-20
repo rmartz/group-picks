@@ -34,8 +34,6 @@ export function UserProfileView({
     }
   }
 
-  const providerLabels = USER_PROFILE_COPY.providers;
-
   return (
     <div className="w-full max-w-sm space-y-8">
       <h1 className="text-2xl font-semibold">{USER_PROFILE_COPY.title}</h1>
@@ -83,8 +81,9 @@ export function UserProfileView({
         <ul className="space-y-1">
           {providerIds.map((providerId) => (
             <li key={providerId} className="text-sm text-zinc-600">
-              {(providerLabels as Record<string, string>)[providerId] ??
-                providerId}
+              {(USER_PROFILE_COPY.providers as Record<string, string>)[
+                providerId
+              ] ?? providerId}
             </li>
           ))}
         </ul>
