@@ -1,7 +1,9 @@
 import {
+  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseSignOut,
 } from "firebase/auth";
 import { getClientAuth } from "@/lib/firebase/client";
@@ -20,6 +22,14 @@ export async function sendPasswordReset(email: string) {
 
 export async function signOut() {
   return firebaseSignOut(getClientAuth());
+}
+
+export async function signInWithGoogle() {
+  const credential = await signInWithPopup(
+    getClientAuth(),
+    new GoogleAuthProvider(),
+  );
+  await createSession(await credential.user.getIdToken());
 }
 
 export async function createSession(idToken: string) {
