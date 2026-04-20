@@ -1,3 +1,5 @@
+import { SignOutButton } from "@/components/auth/SignOutButton";
+
 export default function Home() {
   return (
     <div className="flex flex-1 items-center justify-center">
@@ -9,6 +11,7 @@ export default function Home() {
           Edit <code className="font-mono text-sm">src/app/page.tsx</code> to
           get started.
         </p>
+        <SignOutButton />
       </main>
     </div>
   );
