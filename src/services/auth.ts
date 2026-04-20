@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
+  updateProfile,
 } from "firebase/auth";
 import { getClientAuth } from "@/lib/firebase/client";
 
@@ -49,4 +50,10 @@ export async function createSession(idToken: string) {
 export async function deleteSession() {
   const response = await fetch("/api/auth/session", { method: "DELETE" });
   if (!response.ok) throw new Error("Failed to delete session");
+}
+
+export async function updateDisplayName(displayName: string) {
+  const user = getClientAuth().currentUser;
+  if (!user) throw new Error("No authenticated user");
+  await updateProfile(user, { displayName });
 }
