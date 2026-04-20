@@ -53,6 +53,12 @@ pnpm build-storybook  # Build static Storybook
 - **Redux slices**: File suffix `-slice.ts`.
 - **Presentational views**: Components extracted for testability use the `{Component}View` suffix.
 
+## Firebase & Data Model
+
+- **No breaking Firestore schema changes without a migration.** A breaking change is any modification that makes existing documents unreadable or incorrect at runtime: removing or renaming a field the app reads, changing a field's type or enum values, or restructuring a collection path. If a PR introduces such a change, it must include either a migration script that backfills existing documents or explicit documentation of the upgrade path before the PR may be merged.
+- **Serialization functions are the schema boundary.** All reads and writes to Firestore go through `firebaseTo{Domain}()` / `{domain}ToFirebase()` converters. When the Firestore shape changes, update the relevant converter and add or adjust tests — do not scatter raw field names across the codebase.
+- **Additive changes are safe; subtractive changes are not.** Adding a new optional field to a document is non-breaking. Removing a field, changing its type, or making a previously-optional field required is breaking and requires a migration.
+
 ## User-Facing Text
 
 - For any new or modified UI component, store user-facing strings in a co-located copy file
