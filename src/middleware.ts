@@ -35,6 +35,9 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!uid) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const signIn = new URL("/sign-in", request.url);
     signIn.searchParams.set("next", pathname);
     return NextResponse.redirect(signIn);
