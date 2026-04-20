@@ -37,16 +37,25 @@ describe("SignInForm", () => {
     expect(screen.getByText(SIGN_IN_COPY.googleButton)).toBeDefined();
   });
 
-  it("renders the Apple sign-in button", () => {
+  it("hides the Apple sign-in button when NEXT_PUBLIC_APPLE_SSO_ENABLED is not set", () => {
+    render(<SignInForm />);
+    expect(screen.queryByText(SIGN_IN_COPY.appleButton)).toBeNull();
+  });
+
+  it("renders the Apple sign-in button when NEXT_PUBLIC_APPLE_SSO_ENABLED is true", () => {
+    vi.stubEnv("NEXT_PUBLIC_APPLE_SSO_ENABLED", "true");
     render(<SignInForm />);
     expect(screen.getByText(SIGN_IN_COPY.appleButton)).toBeDefined();
+    vi.unstubAllEnvs();
   });
 
   it("calls signInWithApple when Apple button is clicked", () => {
+    vi.stubEnv("NEXT_PUBLIC_APPLE_SSO_ENABLED", "true");
     vi.mocked(signInWithApple).mockResolvedValue(undefined);
     render(<SignInForm />);
     fireEvent.click(screen.getByText(SIGN_IN_COPY.appleButton));
     expect(vi.mocked(signInWithApple)).toHaveBeenCalledOnce();
+    vi.unstubAllEnvs();
   });
 
   it("renders the submit button", () => {
