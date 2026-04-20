@@ -6,7 +6,7 @@ export type Ballot = readonly string[];
 export type RankedResult = readonly (readonly string[])[];
 
 // Runs a single instant-runoff election among the given candidates.
-// Returns the winner(s); multiple candidates are returned only when all are tied.
+// Returns the winner(s) as an unsorted array; multiple candidates are returned only when all are tied.
 function runSingleElection(
   ballots: readonly string[][],
   candidates: ReadonlySet<string>,
@@ -33,7 +33,7 @@ function runSingleElection(
 
     const min = Math.min(...votes);
     const max = Math.max(...votes);
-    if (min === max) return [...remaining].sort();
+    if (min === max) return [...remaining];
 
     const eliminated = new Set(
       [...counts.entries()].filter(([, v]) => v === min).map(([c]) => c),
@@ -43,13 +43,12 @@ function runSingleElection(
       b.filter((c) => !eliminated.has(c)),
     );
   }
-
-  return [];
 }
 
 // Runs iterative ranked-choice voting on the given ballots and returns an ordered
-// ranking of all candidates. Each inner array contains candidates tied at that rank.
-// Pass `allCandidates` to include candidates that may not appear on any ballot.
+// ranking of all candidates. Each inner array contains candidates tied at that rank,
+// sorted alphabetically. Pass `allCandidates` to include candidates that may not
+// appear on any ballot.
 export function runRankedChoice(
   ballots: readonly Ballot[],
   allCandidates?: readonly string[],
@@ -62,8 +61,8 @@ export function runRankedChoice(
   let currentBallots = ballots.map((b) => [...b]);
 
   while (remaining.size > 0) {
-    const tier = runSingleElection(currentBallots, remaining);
-    result.push([...tier]);
+    const tier = [...runSingleElection(currentBallots, remaining)].sort();
+    result.push(tier);
     const tierSet = new Set(tier);
     for (const c of tier) remaining.delete(c);
     currentBallots = currentBallots.map((b) =>
