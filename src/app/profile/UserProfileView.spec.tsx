@@ -1,5 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import { UserProfileView } from "./UserProfileView";
 import { USER_PROFILE_COPY } from "./copy";
 
@@ -60,7 +66,7 @@ describe("UserProfileView", () => {
       />,
     );
     expect(
-      screen.getByText(USER_PROFILE_COPY.providers.password),
+      screen.getByText(USER_PROFILE_COPY.providers["password"]!),
     ).toBeDefined();
   });
 
@@ -73,7 +79,7 @@ describe("UserProfileView", () => {
       />,
     );
     expect(
-      screen.getByText(USER_PROFILE_COPY.providers["google.com"]),
+      screen.getByText(USER_PROFILE_COPY.providers["google.com"]!),
     ).toBeDefined();
   });
 
@@ -86,5 +92,67 @@ describe("UserProfileView", () => {
       />,
     );
     expect(screen.getByText("github.com")).toBeDefined();
+  });
+
+  it("shows success message after a successful save", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    render(
+      <UserProfileView
+        initialDisplayName="Alice"
+        providerIds={[]}
+        onSave={onSave}
+      />,
+    );
+    fireEvent.submit(
+      screen
+        .getByRole("button", { name: USER_PROFILE_COPY.saveButton })
+        .closest("form")!,
+    );
+    await waitFor(() => {
+      expect(screen.getByText(USER_PROFILE_COPY.successMessage)).toBeDefined();
+    });
+  });
+
+  it("shows error message after a failed save", async () => {
+    const onSave = vi.fn().mockRejectedValue(new Error("update failed"));
+    render(
+      <UserProfileView
+        initialDisplayName="Alice"
+        providerIds={[]}
+        onSave={onSave}
+      />,
+    );
+    fireEvent.submit(
+      screen
+        .getByRole("button", { name: USER_PROFILE_COPY.saveButton })
+        .closest("form")!,
+    );
+    await waitFor(() => {
+      expect(screen.getByText(USER_PROFILE_COPY.errors.default)).toBeDefined();
+    });
+  });
+
+  it("disables the save button while saving", async () => {
+    let resolve: () => void;
+    const onSave = vi.fn().mockReturnValue(
+      new Promise<void>((res) => {
+        resolve = res;
+      }),
+    );
+    render(
+      <UserProfileView
+        initialDisplayName="Alice"
+        providerIds={[]}
+        onSave={onSave}
+      />,
+    );
+    const button = screen.getByRole("button", {
+      name: USER_PROFILE_COPY.saveButton,
+    });
+    fireEvent.submit(button.closest("form")!);
+    await waitFor(() => {
+      expect((button as HTMLButtonElement).disabled).toBe(true);
+    });
+    resolve!();
   });
 });

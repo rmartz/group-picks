@@ -51,6 +51,7 @@ export function UserProfileView({
             id="displayName"
             type="text"
             autoComplete="name"
+            required
             value={displayName}
             onChange={(e) => {
               setDisplayName(e.target.value);
@@ -81,9 +82,7 @@ export function UserProfileView({
         <ul className="space-y-1">
           {providerIds.map((providerId) => (
             <li key={providerId} className="text-sm text-zinc-600">
-              {(USER_PROFILE_COPY.providers as Record<string, string>)[
-                providerId
-              ] ?? providerId}
+              {USER_PROFILE_COPY.providers[providerId] ?? providerId}
             </li>
           ))}
         </ul>

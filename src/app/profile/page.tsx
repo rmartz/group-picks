@@ -7,9 +7,7 @@ import { UserProfileView } from "./UserProfileView";
 export default function ProfilePage() {
   const { user, loading } = useAuth();
 
-  if (loading) return null;
-
-  if (!user) return null;
+  if (loading || !user) return null;
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
