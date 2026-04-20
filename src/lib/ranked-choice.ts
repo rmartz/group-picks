@@ -43,6 +43,7 @@ function runSingleElection(
       b.filter((c) => !eliminated.has(c)),
     );
   }
+  throw new Error("runSingleElection: loop exited without a winner");
 }
 
 // Runs iterative ranked-choice voting on the given ballots and returns an ordered
