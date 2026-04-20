@@ -42,32 +42,11 @@ export default function SignInForm() {
     }
   }
 
-  async function handleGoogleSignIn() {
+  async function handleOAuthSignIn(providerSignIn: () => Promise<void>) {
     setError(undefined);
     setLoading(true);
     try {
-      await signInWithGoogle();
-      router.push(getRedirectPath());
-    } catch (err) {
-      const code = (err as FirebaseError).code;
-      if (
-        code === "auth/popup-closed-by-user" ||
-        code === "auth/cancelled-popup-request"
-      ) {
-        return;
-      }
-      const messages = SIGN_IN_COPY.errors;
-      setError((messages as Record<string, string>)[code] ?? messages.default);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleAppleSignIn() {
-    setError(undefined);
-    setLoading(true);
-    try {
-      await signInWithApple();
+      await providerSignIn();
       router.push(getRedirectPath());
     } catch (err) {
       const code = (err as FirebaseError).code;
@@ -90,7 +69,7 @@ export default function SignInForm() {
       <button
         type="button"
         onClick={() => {
-          void handleGoogleSignIn();
+          void handleOAuthSignIn(signInWithGoogle);
         }}
         disabled={loading}
         className="flex w-full items-center justify-center gap-2 rounded border px-4 py-2 text-sm font-medium disabled:opacity-50"
@@ -124,7 +103,7 @@ export default function SignInForm() {
       <button
         type="button"
         onClick={() => {
-          void handleAppleSignIn();
+          void handleOAuthSignIn(signInWithApple);
         }}
         disabled={loading}
         className="flex w-full items-center justify-center gap-2 rounded border px-4 py-2 text-sm font-medium disabled:opacity-50"

@@ -25,11 +25,10 @@ export async function signOut() {
   return firebaseSignOut(getClientAuth());
 }
 
-export async function signInWithGoogle() {
-  const credential = await signInWithPopup(
-    getClientAuth(),
-    new GoogleAuthProvider(),
-  );
+async function signInWithOAuthProvider(
+  provider: GoogleAuthProvider | OAuthProvider,
+) {
+  const credential = await signInWithPopup(getClientAuth(), provider);
   try {
     await createSession(await credential.user.getIdToken());
   } catch (err) {
@@ -38,17 +37,12 @@ export async function signInWithGoogle() {
   }
 }
 
+export async function signInWithGoogle() {
+  return signInWithOAuthProvider(new GoogleAuthProvider());
+}
+
 export async function signInWithApple() {
-  const credential = await signInWithPopup(
-    getClientAuth(),
-    new OAuthProvider("apple.com"),
-  );
-  try {
-    await createSession(await credential.user.getIdToken());
-  } catch (err) {
-    await firebaseSignOut(getClientAuth());
-    throw err;
-  }
+  return signInWithOAuthProvider(new OAuthProvider("apple.com"));
 }
 
 export async function createSession(idToken: string) {

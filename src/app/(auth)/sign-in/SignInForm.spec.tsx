@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import SignInForm from "./SignInForm";
 import { SIGN_IN_COPY } from "./copy";
-import * as authService from "@/services/auth";
+import { signInWithApple } from "@/services/auth";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -43,12 +43,10 @@ describe("SignInForm", () => {
   });
 
   it("calls signInWithApple when Apple button is clicked", () => {
-    const signInWithAppleMock = vi
-      .spyOn(authService, "signInWithApple")
-      .mockResolvedValue(undefined);
+    vi.mocked(signInWithApple).mockResolvedValue(undefined);
     render(<SignInForm />);
     fireEvent.click(screen.getByText(SIGN_IN_COPY.appleButton));
-    expect(signInWithAppleMock).toHaveBeenCalledOnce();
+    expect(vi.mocked(signInWithApple)).toHaveBeenCalledOnce();
   });
 
   it("renders the submit button", () => {
