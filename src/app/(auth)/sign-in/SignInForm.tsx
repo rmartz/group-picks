@@ -45,6 +45,12 @@ export default function SignInForm() {
       router.push(getRedirectPath());
     } catch (err) {
       const code = (err as FirebaseError).code;
+      if (
+        code === "auth/popup-closed-by-user" ||
+        code === "auth/cancelled-popup-request"
+      ) {
+        return;
+      }
       const messages = SIGN_IN_COPY.errors;
       setError((messages as Record<string, string>)[code] ?? messages.default);
     } finally {

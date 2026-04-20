@@ -15,15 +15,9 @@ vi.mock("@/services/auth", () => ({
 afterEach(cleanup);
 
 describe("SignOutButton", () => {
-  it("renders the sign out button", () => {
-    render(<SignOutButton />);
-    expect(screen.getByText(SIGN_OUT_BUTTON_COPY.button)).toBeDefined();
-  });
-
-  it("renders a button element", () => {
+  it("renders a button with the correct label", () => {
     render(<SignOutButton />);
     const button = screen.getByRole("button");
-    expect(button).toBeDefined();
     expect(button.textContent).toBe(SIGN_OUT_BUTTON_COPY.button);
   });
 });
