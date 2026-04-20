@@ -4,6 +4,7 @@ export const SIGN_IN_COPY = {
   emailPlaceholder: "you@example.com",
   passwordLabel: "Password",
   submitButton: "Sign in",
+  appleButton: "Continue with Apple",
   googleButton: "Continue with Google",
   orDivider: "or",
   forgotPasswordLink: "Forgot password?",

@@ -1,5 +1,6 @@
 import {
   GoogleAuthProvider,
+  OAuthProvider,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -28,6 +29,19 @@ export async function signInWithGoogle() {
   const credential = await signInWithPopup(
     getClientAuth(),
     new GoogleAuthProvider(),
+  );
+  try {
+    await createSession(await credential.user.getIdToken());
+  } catch (err) {
+    await firebaseSignOut(getClientAuth());
+    throw err;
+  }
+}
+
+export async function signInWithApple() {
+  const credential = await signInWithPopup(
+    getClientAuth(),
+    new OAuthProvider("apple.com"),
   );
   try {
     await createSession(await credential.user.getIdToken());

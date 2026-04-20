@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import SignInForm from "./SignInForm";
 import { SIGN_IN_COPY } from "./copy";
+import * as authService from "@/services/auth";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -12,6 +13,7 @@ vi.mock("@/services/auth", () => ({
   signIn: vi.fn(),
   createSession: vi.fn(),
   signInWithGoogle: vi.fn(),
+  signInWithApple: vi.fn(),
 }));
 
 afterEach(cleanup);
@@ -33,6 +35,20 @@ describe("SignInForm", () => {
   it("renders the Google sign-in button", () => {
     render(<SignInForm />);
     expect(screen.getByText(SIGN_IN_COPY.googleButton)).toBeDefined();
+  });
+
+  it("renders the Apple sign-in button", () => {
+    render(<SignInForm />);
+    expect(screen.getByText(SIGN_IN_COPY.appleButton)).toBeDefined();
+  });
+
+  it("calls signInWithApple when Apple button is clicked", () => {
+    const signInWithAppleMock = vi
+      .spyOn(authService, "signInWithApple")
+      .mockResolvedValue(undefined);
+    render(<SignInForm />);
+    fireEvent.click(screen.getByText(SIGN_IN_COPY.appleButton));
+    expect(signInWithAppleMock).toHaveBeenCalledOnce();
   });
 
   it("renders the submit button", () => {
