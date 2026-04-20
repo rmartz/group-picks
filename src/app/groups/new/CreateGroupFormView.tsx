@@ -1,5 +1,3 @@
-"use client";
-
 import { CREATE_GROUP_COPY } from "./copy";
 
 interface CreateGroupFormViewProps {
