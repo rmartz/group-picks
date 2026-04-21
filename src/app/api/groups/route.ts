@@ -37,10 +37,13 @@ export async function POST(request: Request) {
     creatorId: uid,
   });
 
-  await db.ref(`groups/${groupId}`).set({
-    public: publicData,
-    members: { [uid]: true },
-  });
+  await Promise.all([
+    db.ref(`groups/${groupId}`).set({
+      public: publicData,
+      members: { [uid]: true },
+    }),
+    db.ref(`users/${uid}/groups/${groupId}`).set(true),
+  ]);
 
   return NextResponse.json({ groupId }, { status: 201 });
 }
