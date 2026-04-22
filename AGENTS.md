@@ -55,9 +55,10 @@ pnpm build-storybook  # Build static Storybook
 
 ## Firebase & Data Model
 
-- **No breaking Firestore schema changes without a migration.** A breaking change is any modification that makes existing documents unreadable or incorrect at runtime: removing or renaming a field the app reads, changing a field's type or enum values, or restructuring a collection path. If a PR introduces such a change, it must include either a migration script that backfills existing documents or explicit documentation of the upgrade path before the PR may be merged.
+- **Pre-launch: database state is ephemeral.** The app has not launched yet. All Firestore data can be cleared and re-seeded as needed. Breaking schema changes do not require migration scripts before launch — simply wipe the database if needed.
+- **Post-launch: no breaking schema changes without a migration.** Once the app has launched, a breaking change is any modification that makes existing documents unreadable or incorrect at runtime: removing or renaming a field the app reads, changing a field's type or enum values, or restructuring a collection path. Such changes must include either a migration script that backfills existing documents or explicit documentation of the upgrade path before the PR may be merged.
 - **Serialization functions are the schema boundary.** All reads and writes to Firestore go through `firebaseTo{Domain}()` / `{domain}ToFirebase()` converters. When the Firestore shape changes, update the relevant converter and add or adjust tests — do not scatter raw field names across the codebase.
-- **Additive changes are safe; subtractive changes are not.** Adding a new optional field to a document is non-breaking. Removing a field, changing its type, or making a previously-optional field required is breaking and requires a migration.
+- **Additive changes are safe; subtractive changes are not** (post-launch). Adding a new optional field to a document is non-breaking. Removing a field, changing its type, or making a previously-optional field required is breaking and requires a migration.
 
 ## User-Facing Text
 
