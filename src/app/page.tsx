@@ -1,17 +1,18 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { HOME_PAGE_COPY } from "./copy";
 
 export default function Home() {
   return (
     <div className="flex flex-1 items-center justify-center">
       <main className="flex flex-col items-center gap-6 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">Group Picks</h1>
-        <Link
-          href="/groups"
-          className="rounded bg-black px-6 py-3 text-sm font-medium text-white"
-        >
-          My Groups
-        </Link>
+        <h1 className="text-4xl font-semibold tracking-tight">
+          {HOME_PAGE_COPY.title}
+        </h1>
+        <Button asChild>
+          <Link href="/groups">{HOME_PAGE_COPY.myGroupsButton}</Link>
+        </Button>
         <SignOutButton />
       </main>
     </div>
