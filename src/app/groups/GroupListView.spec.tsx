@@ -2,18 +2,9 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { GroupListView } from "./GroupListView";
 import { GROUP_LIST_COPY } from "./copy";
+import { makeGroup } from "@/lib/fixtures/group";
 
 afterEach(cleanup);
-
-function makeGroup(overrides?: Partial<{ id: string; name: string }>) {
-  return {
-    id: overrides?.id ?? "group-1",
-    name: overrides?.name ?? "Test Group",
-    createdAt: new Date("2024-01-01"),
-    creatorId: "user-1",
-    memberIds: ["user-1"],
-  };
-}
 
 describe("GroupListView", () => {
   it("renders the page title", () => {

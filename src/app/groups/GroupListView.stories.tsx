@@ -1,15 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { GroupListView } from "./GroupListView";
-
-function makeGroup(id: string, name: string) {
-  return {
-    id,
-    name,
-    createdAt: new Date("2024-01-15"),
-    creatorId: "user-1",
-    memberIds: ["user-1"],
-  };
-}
+import { makeGroup } from "@/lib/fixtures/group";
 
 const meta: Meta<typeof GroupListView> = {
   title: "Groups/GroupListView",
@@ -28,15 +19,15 @@ export const Empty: Story = {
 export const WithGroups: Story = {
   args: {
     groups: [
-      makeGroup("g1", "Friday Night Picks"),
-      makeGroup("g2", "Oscar Season 2024"),
-      makeGroup("g3", "Super Bowl Squares"),
+      makeGroup({ id: "g1", name: "Friday Night Picks" }),
+      makeGroup({ id: "g2", name: "Oscar Season 2024" }),
+      makeGroup({ id: "g3", name: "Super Bowl Squares" }),
     ],
   },
 };
 
 export const SingleGroup: Story = {
   args: {
-    groups: [makeGroup("g1", "Friday Night Picks")],
+    groups: [makeGroup({ id: "g1", name: "Friday Night Picks" })],
   },
 };
