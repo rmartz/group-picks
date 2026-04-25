@@ -193,12 +193,12 @@ rotate_environment() {
   for key in FIREBASE_CLIENT_EMAIL FIREBASE_PRIVATE_KEY; do
     vercel env rm "$key" "$vercel_env" --yes 2>/dev/null || true
   done
-  echo "$new_client_email" | vercel env add FIREBASE_CLIENT_EMAIL "$vercel_env"
-  echo "$new_private_key"  | vercel env add FIREBASE_PRIVATE_KEY "$vercel_env"
+  printf '%s' "$new_client_email" | vercel env add FIREBASE_CLIENT_EMAIL "$vercel_env"
+  printf '%s' "$new_private_key"  | vercel env add FIREBASE_PRIVATE_KEY "$vercel_env"
 
   if [[ -n "$new_sentry_token" ]]; then
     vercel env rm SENTRY_AUTH_TOKEN "$vercel_env" --yes 2>/dev/null || true
-    echo "$new_sentry_token" | vercel env add SENTRY_AUTH_TOKEN "$vercel_env"
+    printf '%s' "$new_sentry_token" | vercel env add SENTRY_AUTH_TOKEN "$vercel_env"
   fi
 
   # Trigger redeploy and wait
@@ -258,6 +258,30 @@ rotate_environment() {
   echo "$env rotation complete."
   echo ""
 }
+
+# ── Shared-project guard ─────────────────────────────────────────────────────
+# If two environments share a FIREBASE_PROJECT_ID, rotating both in one run
+# will delete the first environment's new key during the second rotation
+# (it appears "old" relative to that run's OLD_KEY_IDS snapshot).
+# Require separate --env= invocations when a project ID is shared.
+
+declare -A SEEN_PROJECT_IDS=()
+for env in "${ENVS_TO_ROTATE[@]}"; do
+  config_file="$DEPLOYMENT_DIR/$env.yml"
+  project_id=$(grep "^  FIREBASE_PROJECT_ID:" "$config_file" | awk -F'"' '{print $2}' | tr -d ' ')
+  if [[ -z "$project_id" ]]; then
+    continue  # Missing project ID is caught with a clearer error inside rotate_environment()
+  fi
+  if [[ -n "${SEEN_PROJECT_IDS[$project_id]+x}" ]]; then
+    echo "ERROR: FIREBASE_PROJECT_ID \"$project_id\" is shared between environments: ${SEEN_PROJECT_IDS[$project_id]} and $env."
+    echo "Rotating both in one run would delete the first environment's new key during"
+    echo "the second rotation. Rotate each environment separately instead:"
+    echo "  scripts/rotate-keys.sh --env=${SEEN_PROJECT_IDS[$project_id]}"
+    echo "  scripts/rotate-keys.sh --env=$env"
+    exit 1
+  fi
+  SEEN_PROJECT_IDS[$project_id]="$env"
+done
 
 # ── Run ───────────────────────────────────────────────────────────────────────
 
