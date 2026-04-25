@@ -15,7 +15,19 @@ pnpm test             # Run tests with Vitest
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
+pnpm run env:pull     # Pull .env.local from Vercel
+pnpm run env:validate # Validate deployment config files against schema
+pnpm run secrets-check # Config validation + gitleaks scan (also runs pre-commit)
 ```
+
+## Deployment Config
+
+Public (non-secret) environment config lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml`. Only `NEXT_PUBLIC_*` and explicitly allowlisted keys are permitted; patterns matching `*SECRET*`, `*_TOKEN*`, or `*PRIVATE_KEY*` are hard-denied.
+
+- To update a public config value: `scripts/update-config.sh --env=<env> KEY=value`
+- To load public config from a Firebase console JSON download: `scripts/update-config.sh --env=<env> --firebase-config=path/to/config.json`
+- To rotate all secrets (Firebase + Sentry + Vercel): `scripts/rotate-keys.sh --env=<env>`
+- Secrets checks run automatically on every commit via `.husky/pre-commit`; also enforced in CI via `.github/workflows/secret-scan.yml`
 
 ## TypeScript
 
