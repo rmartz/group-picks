@@ -8,9 +8,13 @@
 # Set single_environment: true ONLY when this project intentionally uses
 # a single environment (e.g. ephemeral data with no meaningful staging/prod
 # distinction). The default is false — both environments must be present.
+#
+# NOTE: staging is temporarily disabled — the staging Firebase project does not
+# yet have a Realtime Database instance due to a Firebase console issue.
+# Re-add "- staging" below and set single_environment: false once the RTDB is
+# provisioned and staging credentials are ready.
 
 environments:
-  - staging
   - production
 
-single_environment: false
+single_environment: true

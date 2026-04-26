@@ -4,6 +4,11 @@
 # Usage:
 #   scripts/deploy-config.sh --env=staging
 #   scripts/deploy-config.sh --env=production
+#   scripts/deploy-config.sh --env=production --vercel-env=preview
+#
+# The --vercel-env flag overrides the default Vercel target environment (useful when
+# deploying production credentials to the preview environment temporarily, e.g. while
+# staging is disabled).
 #
 # Reads the current values from the deployment YAML file and upserts them to
 # Vercel via the REST API. Empty values are skipped.
@@ -19,10 +24,12 @@ DEPLOYMENT_DIR="$PROJECT_ROOT/deployment"
 # ── Argument parsing ──────────────────────────────────────────────────────────
 
 ENV_NAME=""
+VERCEL_ENV_OVERRIDE=""
 
 for arg in "$@"; do
   case "$arg" in
-    --env=*) ENV_NAME="${arg#--env=}" ;;
+    --env=*)        ENV_NAME="${arg#--env=}" ;;
+    --vercel-env=*) VERCEL_ENV_OVERRIDE="${arg#--vercel-env=}" ;;
     *) echo "ERROR: Unknown argument: $arg"; exit 1 ;;
   esac
 done
@@ -74,11 +81,15 @@ fi
 
 # ── Map environment name to Vercel target ─────────────────────────────────────
 
-case "$ENV_NAME" in
-  staging)    VERCEL_ENV="preview" ;;
-  production) VERCEL_ENV="production" ;;
-  *) echo "ERROR: Unknown environment: $ENV_NAME"; exit 1 ;;
-esac
+if [[ -n "$VERCEL_ENV_OVERRIDE" ]]; then
+  VERCEL_ENV="$VERCEL_ENV_OVERRIDE"
+else
+  case "$ENV_NAME" in
+    staging)    VERCEL_ENV="preview" ;;
+    production) VERCEL_ENV="production" ;;
+    *) echo "ERROR: Unknown environment: $ENV_NAME"; exit 1 ;;
+  esac
+fi
 
 # ── Sync YAML variables to Vercel ────────────────────────────────────────────
 
