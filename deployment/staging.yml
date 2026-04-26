@@ -13,16 +13,16 @@ environment: staging
 
 variables:
   # Firebase Client SDK — safe to expose; access control is enforced by Firebase security rules
-  NEXT_PUBLIC_FIREBASE_API_KEY: ""
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ""
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: ""
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ""
-  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ""
-  NEXT_PUBLIC_FIREBASE_APP_ID: ""
+  NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyBECVyfSZAlCbpq8PhXMO7ibrobmthnwGQ"
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "group-picks-staging.firebaseapp.com"
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: "group-picks-staging"
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "group-picks-staging.firebasestorage.app"
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "96289728286"
+  NEXT_PUBLIC_FIREBASE_APP_ID: "1:96289728286:web:5070269973d98906f18b0f"
   NEXT_PUBLIC_FIREBASE_DATABASE_URL: ""
 
   # Firebase Admin SDK — project identifiers only, not credentials
-  FIREBASE_PROJECT_ID: ""
+  FIREBASE_PROJECT_ID: "group-picks-staging"
   FIREBASE_DATABASE_URL: ""
 
   # Sentry — slugs only, not credentials
