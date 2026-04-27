@@ -17,6 +17,7 @@
     "build-storybook": "storybook build",
     "prepare": "husky",
     "env:pull": "scripts/generate-local-env.sh",
+    "env:deploy": "scripts/deploy-config.sh",
     "env:validate": "node scripts/validate-config.mjs",
     "secrets-check": "node scripts/secrets-check.mjs"
   },
@@ -36,10 +37,10 @@
     ]
   },
   "dependencies": {
-    "@sentry/nextjs": "^10.47.0",
     "@reduxjs/toolkit": "^2.11.2",
-    "@vercel/analytics": "^2.0.1",
+    "@sentry/nextjs": "^10.47.0",
     "@tanstack/react-query": "^5.99.2",
+    "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "firebase": "^12.12.0",
@@ -77,6 +78,7 @@
     "tailwindcss": "^4",
     "typescript": "^6",
     "typescript-eslint": "^8.59.0",
+    "vercel": "^52.0.0",
     "vite": "^8.0.9",
     "vitest": "^4.1.4"
   }

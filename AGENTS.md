@@ -16,6 +16,7 @@ pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
 pnpm run env:pull     # Pull .env.local from Vercel
+pnpm run env:deploy   # Deploy deployment YAML to Vercel (requires --env=<staging|production>)
 pnpm run env:validate # Validate deployment config files against schema
 pnpm run secrets-check # Config validation + gitleaks scan (also runs pre-commit)
 ```
@@ -25,9 +26,13 @@ pnpm run secrets-check # Config validation + gitleaks scan (also runs pre-commit
 Public (non-secret) environment config lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml`. Only `NEXT_PUBLIC_*` and explicitly allowlisted keys are permitted; patterns matching `*SECRET*`, `*_TOKEN*`, or `*PRIVATE_KEY*` are hard-denied.
 
 - To update a public config value: `scripts/update-config.sh --env=<env> KEY=value`
-- To load public config from a Firebase console JSON download: `scripts/update-config.sh --env=<env> --firebase-config=path/to/config.json`
+- To load public config from a Firebase console JSON download: `scripts/update-config.sh --env=<env> --firebase-config=path/to/config.json` (accepts both strict JSON and the JS object literal format produced by the Firebase console)
+- To update and immediately deploy to Vercel: add `--sync` to the above commands
+- To deploy the current YAML to Vercel without modifying it: `scripts/deploy-config.sh --env=<env>`
+- To deploy one env's config to a different Vercel target: `scripts/deploy-config.sh --env=production --vercel-env=preview` (used while staging is disabled)
 - To rotate all secrets (Firebase + Sentry + Vercel): `scripts/rotate-keys.sh --env=<env>`
 - Secrets checks run automatically on every commit via `.husky/pre-commit`; also enforced in CI via `.github/workflows/secret-scan.yml`
+- All scripts use `pnpm exec vercel` — no global vercel install required; vercel is a devDependency
 
 ## TypeScript
 

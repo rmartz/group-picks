@@ -18,10 +18,19 @@ regexes = [
   '''firebase-adminsdk-xxx''',
   # Example/truncated keys in ARCHITECTURE.md and README
   '''xxx@o\w+\.ingest\.sentry\.io''',
-  # The .env.example file itself — it contains only placeholder values
 ]
 paths = [
+  # .env.example contains only placeholder values
   ".env.example",
+  # deployment YMLs contain only NEXT_PUBLIC_* Firebase client keys (intentionally public).
+  # Schema enforcement (deployment/schema.yml) hard-denies all secret patterns in these files.
+  '''deployment/.*\.yml''',
+]
+# Commits that introduced intentionally-public Firebase client config values.
+# Using commits = [...] is the reliable suppression mechanism in gitleaks v8.24.3
+# (top-level [[allowlists]] array tables are silently ignored in that version).
+commits = [
+  "a9cfa8a5f6596a47d3a515f7844c88dd64ebad63",
 ]
 
 # Project-specific rules for secrets not covered by the default ruleset
