@@ -1,13 +1,12 @@
 # gitleaks configuration
 # https://github.com/gitleaks/gitleaks
 #
-# Extends the shared base config from vercel-deploy-scripts with project-specific
-# allowlists and rules.
+# Extends the default gitleaks ruleset with project-specific patterns and allowlists.
 
 title = "group-picks"
 
 [extend]
-path = "node_modules/vercel-deploy-scripts/.gitleaks.toml"
+useDefault = true
 
 [allowlist]
 description = "Known safe patterns — placeholder values in documentation and config examples"
