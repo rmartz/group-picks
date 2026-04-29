@@ -16,10 +16,10 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepare": "husky",
-    "env:pull": "scripts/generate-local-env.sh",
+    "env:pull": "generate-local-env",
     "env:deploy": "scripts/deploy-config.sh",
     "env:validate": "node scripts/validate-config.mjs",
-    "secrets-check": "node scripts/secrets-check.mjs"
+    "secrets-check": "pnpm run env:validate && secrets-check --config .gitleaks.toml"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,tsx,jsx}": [
@@ -56,6 +56,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "vercel-deploy-scripts": "github:rmartz/vercel-deploy-scripts#v1.1.0",
     "@storybook/addon-a11y": "^10.3.5",
     "@storybook/addon-docs": "^10.3.5",
     "@storybook/nextjs-vite": "^10.3.5",

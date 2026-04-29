@@ -132,6 +132,9 @@ importers:
       vercel:
         specifier: ^52.0.0
         version: 52.0.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(rollup@4.60.2)(typescript@6.0.3)
+      vercel-deploy-scripts:
+        specifier: github:rmartz/vercel-deploy-scripts#v1.1.0
+        version: git+https://git@github.com:rmartz/vercel-deploy-scripts.git#cb36f10273b6ccea3966d48937da6d6875819860
       vite:
         specifier: ^8.0.10
         version: 8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
@@ -5708,6 +5711,12 @@ packages:
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
+
+  vercel-deploy-scripts@git+https://git@github.com:rmartz/vercel-deploy-scripts.git#cb36f10273b6ccea3966d48937da6d6875819860:
+    resolution: {commit: cb36f10273b6ccea3966d48937da6d6875819860, repo: git@github.com:rmartz/vercel-deploy-scripts.git, type: git}
+    version: 0.0.0
+    engines: {node: '>=18'}
+    hasBin: true
 
   vercel@52.0.0:
     resolution: {integrity: sha512-yLQn/wrGWVjvoCKQJuqi+aZvy+yYNDY9tSWiq6sH3LlTZ8zdEIHS7hB07TTsYTLQQWb55rW0h5d05QPExMVcSA==}
@@ -11820,6 +11829,8 @@ snapshots:
   validate-npm-package-name@7.0.2: {}
 
   vary@1.1.2: {}
+
+  vercel-deploy-scripts@git+https://git@github.com:rmartz/vercel-deploy-scripts.git#cb36f10273b6ccea3966d48937da6d6875819860: {}
 
   vercel@52.0.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(rollup@4.60.2)(typescript@6.0.3):
     dependencies:

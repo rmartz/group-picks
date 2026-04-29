@@ -10,6 +10,8 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+      shell: bash
     - uses: pnpm/action-setup@v5
       with:
         version: 10
