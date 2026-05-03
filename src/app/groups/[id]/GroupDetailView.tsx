@@ -1,5 +1,6 @@
 import type { Group } from "@/lib/types/group";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { LeaveGroupButton } from "./LeaveGroupButton";
 
 interface GroupDetailViewProps {
   group: Group;
@@ -19,6 +20,7 @@ export function GroupDetailView({ group }: GroupDetailViewProps) {
           <dd>{group.memberIds.length}</dd>
         </div>
       </dl>
+      <LeaveGroupButton groupId={group.id} />
     </main>
   );
 }

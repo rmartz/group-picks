@@ -1,3 +1,11 @@
+export class LeaveGroupLastMemberError extends Error {}
+
+export async function leaveGroup(groupId: string): Promise<void> {
+  const response = await fetch(`/api/groups/${groupId}`, { method: "DELETE" });
+  if (response.status === 409) throw new LeaveGroupLastMemberError();
+  if (!response.ok) throw new Error("Failed to leave group");
+}
+
 export async function createGroup(name: string): Promise<string> {
   const response = await fetch("/api/groups", {
     method: "POST",

@@ -23,3 +23,11 @@ export async function getGroupById(id: string): Promise<Group | undefined> {
 
   return firebaseToGroup(id, publicData, memberIds);
 }
+
+export async function removeMember(
+  groupId: string,
+  uid: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`groups/${groupId}/members/${uid}`).remove();
+}
