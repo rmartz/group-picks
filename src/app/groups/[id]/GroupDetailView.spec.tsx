@@ -15,30 +15,44 @@ function makeGroup() {
   };
 }
 
+function makeMembers() {
+  return [
+    { uid: "user-123", name: "Alice" },
+    { uid: "user-456", name: "Bob" },
+  ];
+}
+
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
-    const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={makeGroup()} members={makeMembers()} />);
 
-    expect(screen.getByText(group.name)).toBeDefined();
+    expect(screen.getByText("Friday Night Picks")).toBeDefined();
   });
 
-  it("renders the member count", () => {
-    const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+  it("renders member names", () => {
+    render(<GroupDetailView group={makeGroup()} members={makeMembers()} />);
 
-    expect(
-      screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
-    ).toBeDefined();
-    expect(screen.getByText(String(group.memberIds.length))).toBeDefined();
+    expect(screen.getByText("Alice")).toBeDefined();
+    expect(screen.getByText("Bob")).toBeDefined();
   });
 
-  it("renders the created at label", () => {
-    const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+  it("renders the members section title", () => {
+    render(<GroupDetailView group={makeGroup()} members={makeMembers()} />);
 
-    expect(
-      screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
-    ).toBeDefined();
+    expect(screen.getByText(GROUP_DETAIL_COPY.membersTitle)).toBeDefined();
+  });
+
+  it("renders the categories placeholder when no categories exist", () => {
+    render(<GroupDetailView group={makeGroup()} members={makeMembers()} />);
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.categoriesTitle)).toBeDefined();
+    expect(screen.getByText(GROUP_DETAIL_COPY.noCategories)).toBeDefined();
+  });
+
+  it("renders the picks placeholder when no picks exist", () => {
+    render(<GroupDetailView group={makeGroup()} members={makeMembers()} />);
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.picksTitle)).toBeDefined();
+    expect(screen.getByText(GROUP_DETAIL_COPY.noPicks)).toBeDefined();
   });
 });

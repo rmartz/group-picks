@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { GroupDetailView } from "./GroupDetailView";
 
 export default async function GroupDetailPage({
@@ -14,7 +14,9 @@ export default async function GroupDetailPage({
   const { id } = await params;
   const group = await getGroupById(id);
 
-  if (!group) notFound();
+  if (!group?.memberIds.includes(uid)) notFound();
 
-  return <GroupDetailView group={group} />;
+  const members = await getMemberDisplayNames(group.memberIds);
+
+  return <GroupDetailView group={group} members={members} />;
 }
