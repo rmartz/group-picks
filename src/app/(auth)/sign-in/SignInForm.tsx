@@ -12,6 +12,8 @@ import {
 } from "@/services/auth";
 import { SIGN_IN_COPY } from "./copy";
 
+const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
+
 export default function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,7 +23,16 @@ export default function SignInForm() {
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
+  const rawInviteToken = searchParams.get("invite_token");
+  const inviteToken =
+    rawInviteToken && INVITE_TOKEN_FORMAT.test(rawInviteToken)
+      ? rawInviteToken
+      : undefined;
+
   function getRedirectPath() {
+    if (inviteToken) {
+      return `/invite/${inviteToken}`;
+    }
     const next = searchParams.get("next");
     return next?.startsWith("/") && !next.startsWith("//") ? next : "/";
   }
@@ -180,7 +191,12 @@ export default function SignInForm() {
         </Link>
         <span>
           {SIGN_IN_COPY.signUpPrompt}{" "}
-          <Link href="/sign-up" className="underline">
+          <Link
+            href={
+              inviteToken ? `/sign-up?invite_token=${inviteToken}` : "/sign-up"
+            }
+            className="underline"
+          >
             {SIGN_IN_COPY.signUpLink}
           </Link>
         </span>
