@@ -35,17 +35,21 @@ export async function DELETE(
   const { id } = await params;
   const group = await getGroupById(id);
 
-  if (!group?.memberIds.includes(uid)) {
+  if (!group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
+  if (!group.memberIds.includes(uid)) {
     return NextResponse.json({ error: "Not a member" }, { status: 403 });
   }
 
-  if (group.memberIds.length === 1) {
+  const { lastMember } = await removeMember(id, uid);
+  if (lastMember) {
     return NextResponse.json(
       { error: "Cannot leave as last member" },
       { status: 409 },
     );
   }
 
-  await removeMember(id, uid);
   return new NextResponse(null, { status: 204 });
 }
