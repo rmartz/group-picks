@@ -2,6 +2,7 @@ import { getDatabase } from "firebase-admin/database";
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
   firebaseToGroupInvite,
+  groupInviteToFirebase,
   type FirebaseGroupInvite,
 } from "@/lib/firebase/schema/invite";
 import type { GroupInvite } from "@/lib/types/invite";
@@ -26,6 +27,32 @@ export async function getGroupInviteByToken(
   const raw: unknown = snap.val();
   if (!isFirebaseGroupInvite(raw)) return undefined;
   return firebaseToGroupInvite(token, raw);
+}
+
+export async function createGroupInvite(
+  groupId: string,
+  oldToken: string | undefined,
+): Promise<string> {
+  const db = getDatabase(getAdminApp());
+
+  if (oldToken) {
+    await db.ref(`invites/${oldToken}/active`).set(false);
+  }
+
+  const token = crypto.randomUUID().replace(/-/g, "");
+
+  await db.ref(`invites/${token}`).set(
+    groupInviteToFirebase({
+      groupId,
+      createdAt: new Date(),
+      expiresAt: undefined,
+      active: true,
+    }),
+  );
+
+  await db.ref(`groups/${groupId}/public/inviteToken`).set(token);
+
+  return token;
 }
 
 export async function addGroupMember(

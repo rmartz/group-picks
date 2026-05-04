@@ -4,6 +4,7 @@ export interface FirebaseGroupPublic {
   name: string;
   createdAt: number;
   creatorId: string;
+  inviteToken?: string;
 }
 
 export function groupToFirebase(
@@ -27,5 +28,6 @@ export function firebaseToGroup(
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
     memberIds,
+    inviteToken: data.inviteToken,
   };
 }

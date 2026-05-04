@@ -31,3 +31,18 @@ export async function createGroup(name: string): Promise<string> {
   const data = (await response.json()) as { groupId: string };
   return data.groupId;
 }
+
+export async function regenerateInvite(groupId: string): Promise<string> {
+  const response = await fetch(`/api/groups/${groupId}/invite`, {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("Failed to regenerate invite");
+
+  const contentType = response.headers.get("content-type");
+  if (response.redirected || !contentType?.includes("application/json")) {
+    throw new Error("Failed to regenerate invite");
+  }
+
+  const data = (await response.json()) as { token: string };
+  return data.token;
+}

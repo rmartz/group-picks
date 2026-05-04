@@ -3,6 +3,7 @@ import { getDatabase } from "firebase-admin/database";
 import { getAdminApp } from "@/lib/firebase/admin";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { groupToFirebase } from "@/lib/firebase/schema/group";
+import { groupInviteToFirebase } from "@/lib/firebase/schema/invite";
 
 export async function POST(request: Request) {
   const uid = await getVerifiedUid();
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
     );
   }
 
+  const inviteToken = crypto.randomUUID().replace(/-/g, "");
+
   const publicData = groupToFirebase({
     name,
     createdAt: new Date(),
@@ -38,9 +41,18 @@ export async function POST(request: Request) {
   });
 
   await db.ref(`groups/${groupId}`).set({
-    public: publicData,
+    public: { ...publicData, inviteToken },
     members: { [uid]: true },
   });
+
+  await db.ref(`invites/${inviteToken}`).set(
+    groupInviteToFirebase({
+      groupId,
+      createdAt: new Date(),
+      expiresAt: undefined,
+      active: true,
+    }),
+  );
 
   return NextResponse.json({ groupId }, { status: 201 });
 }
