@@ -19,14 +19,9 @@ export async function getCategoriesByGroupId(
 
   if (!snap.exists()) return [];
 
-  const categories: Category[] = [];
-  snap.forEach((child) => {
-    categories.push(
-      firebaseToCategory(child.key, child.val() as FirebaseCategoryPublic),
-    );
-  });
-
-  return categories;
+  return Object.entries(
+    snap.val() as Record<string, FirebaseCategoryPublic>,
+  ).map(([id, data]) => firebaseToCategory(id, data));
 }
 
 export async function getCategoryById(
