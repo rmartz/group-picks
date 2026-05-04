@@ -23,13 +23,6 @@ export default function SignUpForm() {
       ? rawInviteToken
       : undefined;
 
-  function getRedirectPath() {
-    if (inviteToken) {
-      return `/invite/${inviteToken}`;
-    }
-    return "/";
-  }
-
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     setError(undefined);
@@ -37,7 +30,7 @@ export default function SignUpForm() {
     try {
       const credential = await signUp(email, password);
       await createSession(await credential.user.getIdToken());
-      router.push(getRedirectPath());
+      router.push(inviteToken ? `/invite/${inviteToken}` : "/");
     } catch (err) {
       const code = (err as FirebaseError).code;
       const messages = SIGN_UP_COPY.errors;

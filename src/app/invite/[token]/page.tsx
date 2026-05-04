@@ -52,7 +52,8 @@ export default async function InvitePage({ params }: InvitePageProps) {
     );
   }
 
-  if (invite.expiresAt !== undefined && invite.expiresAt < new Date()) {
+  const now = new Date();
+  if (invite.expiresAt !== undefined && invite.expiresAt < now) {
     return (
       <InviteErrorPage
         title={JOIN_GROUP_COPY.expiredTitle}
