@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GROUP_DETAIL_COPY } from "./copy";
 
 interface InviteLinkSectionProps {
@@ -8,16 +8,30 @@ interface InviteLinkSectionProps {
 }
 
 export function InviteLinkSection({ inviteToken }: InviteLinkSectionProps) {
+  const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
-  const inviteUrl = `${window.location.origin}/invite/${inviteToken}`;
+  useEffect(() => {
+    setInviteUrl(`${window.location.origin}/invite/${inviteToken}`);
+    return () => {
+      clearTimeout(timeoutRef.current);
+    };
+  }, [inviteToken]);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(inviteUrl);
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      // clipboard access denied — silently ignore
+    }
   }
 
   return (
