@@ -128,4 +128,3 @@ describe("SignUpForm", () => {
     expect(signInLink?.getAttribute("href")).toBe("/sign-in");
   });
 });
-
