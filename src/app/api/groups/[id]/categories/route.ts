@@ -62,9 +62,7 @@ export async function POST(
     creatorId: uid,
   });
 
-  await db
-    .ref(`groups/${groupId}/categories/${categoryId}`)
-    .set(categoryData);
+  await db.ref(`groups/${groupId}/categories/${categoryId}`).set(categoryData);
 
   return NextResponse.json({ categoryId }, { status: 201 });
 }
