@@ -1,5 +1,6 @@
 import type { Group } from "@/lib/types/group";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { InviteLinkSection } from "./InviteLinkSection";
 
 interface GroupDetailViewProps {
   group: Group;
@@ -18,6 +19,7 @@ export function GroupDetailView({ group }: GroupDetailViewProps) {
           <dt className="font-medium">{GROUP_DETAIL_COPY.membersLabel}:</dt>
           <dd>{group.memberIds.length}</dd>
         </div>
+        <InviteLinkSection inviteToken={group.inviteToken} />
       </dl>
     </main>
   );

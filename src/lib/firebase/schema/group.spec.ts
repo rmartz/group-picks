@@ -15,6 +15,7 @@ function makeFirebaseGroupPublic(
     name: "Test Group",
     createdAt: FIXED_TIMESTAMP,
     creatorId: "user-123",
+    inviteToken: "token-abc",
     ...overrides,
   };
 }
@@ -25,11 +26,13 @@ describe("groupToFirebase", () => {
       name: "My Group",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
+      inviteToken: "tok-xyz",
     });
 
     expect(result.name).toBe("My Group");
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-abc");
+    expect(result.inviteToken).toBe("tok-xyz");
   });
 });
 
@@ -45,6 +48,7 @@ describe("firebaseToGroup", () => {
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
     expect(result.memberIds).toEqual(["user-123", "user-456"]);
+    expect(result.inviteToken).toBe("token-abc");
   });
 
   it("handles empty member list", () => {

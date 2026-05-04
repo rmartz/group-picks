@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "firebase-admin/database";
+import { randomUUID } from "crypto";
 import { getAdminApp } from "@/lib/firebase/admin";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { groupToFirebase } from "@/lib/firebase/schema/group";
@@ -31,16 +32,22 @@ export async function POST(request: Request) {
     );
   }
 
+  const inviteToken = randomUUID();
+
   const publicData = groupToFirebase({
     name,
     createdAt: new Date(),
     creatorId: uid,
+    inviteToken,
   });
 
-  await db.ref(`groups/${groupId}`).set({
-    public: publicData,
-    members: { [uid]: true },
-  });
+  await Promise.all([
+    db.ref(`groups/${groupId}`).set({
+      public: publicData,
+      members: { [uid]: true },
+    }),
+    db.ref(`invites/${inviteToken}`).set(groupId),
+  ]);
 
   return NextResponse.json({ groupId }, { status: 201 });
 }
