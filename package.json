@@ -33,7 +33,8 @@
     "onlyBuiltDependencies": [
       "@firebase/util",
       "esbuild",
-      "protobufjs"
+      "protobufjs",
+      "vercel-deploy-scripts"
     ]
   },
   "dependencies": {
