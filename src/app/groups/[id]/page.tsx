@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
+import { getOrCreateGroupInvite } from "@/server/data/invites";
 import { GroupDetailView } from "./GroupDetailView";
 
 export default async function GroupDetailPage({
@@ -16,5 +17,13 @@ export default async function GroupDetailPage({
 
   if (!group) notFound();
 
-  return <GroupDetailView group={group} />;
+  const invite = await getOrCreateGroupInvite(id);
+
+  return (
+    <GroupDetailView
+      group={group}
+      inviteToken={invite.token}
+      inviteExpiresAt={invite.expiresAt?.toISOString() ?? null}
+    />
+  );
 }

@@ -1,11 +1,18 @@
 import type { Group } from "@/lib/types/group";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { InviteLinkSection } from "./InviteLinkSection";
 
 interface GroupDetailViewProps {
   group: Group;
+  inviteToken: string;
+  inviteExpiresAt: string | null;
 }
 
-export function GroupDetailView({ group }: GroupDetailViewProps) {
+export function GroupDetailView({
+  group,
+  inviteToken,
+  inviteExpiresAt,
+}: GroupDetailViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
       <h1 className="text-2xl font-semibold">{group.name}</h1>
@@ -19,6 +26,11 @@ export function GroupDetailView({ group }: GroupDetailViewProps) {
           <dd>{group.memberIds.length}</dd>
         </div>
       </dl>
+      <InviteLinkSection
+        groupId={group.id}
+        token={inviteToken}
+        initialExpiresAt={inviteExpiresAt}
+      />
     </main>
   );
 }

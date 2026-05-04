@@ -18,14 +18,26 @@ function makeGroup() {
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(
+      <GroupDetailView
+        group={group}
+        inviteToken="test-token"
+        inviteExpiresAt={null}
+      />,
+    );
 
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
   it("renders the member count", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(
+      <GroupDetailView
+        group={group}
+        inviteToken="test-token"
+        inviteExpiresAt={null}
+      />,
+    );
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
@@ -35,10 +47,29 @@ describe("GroupDetailView", () => {
 
   it("renders the created at label", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(
+      <GroupDetailView
+        group={group}
+        inviteToken="test-token"
+        inviteExpiresAt={null}
+      />,
+    );
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
     ).toBeDefined();
+  });
+
+  it("renders the invite link section", () => {
+    const group = makeGroup();
+    render(
+      <GroupDetailView
+        group={group}
+        inviteToken="test-token"
+        inviteExpiresAt={null}
+      />,
+    );
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.inviteTitle)).toBeDefined();
   });
 });
