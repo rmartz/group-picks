@@ -6,13 +6,26 @@ import {
 } from "@/lib/firebase/schema/invite";
 import type { GroupInvite } from "@/lib/types/invite";
 
+function isFirebaseGroupInvite(data: unknown): data is FirebaseGroupInvite {
+  if (typeof data !== "object" || data === null) return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d["groupId"] === "string" &&
+    typeof d["createdAt"] === "number" &&
+    (d["expiresAt"] === null || typeof d["expiresAt"] === "number") &&
+    typeof d["active"] === "boolean"
+  );
+}
+
 export async function getGroupInviteByToken(
   token: string,
 ): Promise<GroupInvite | undefined> {
   const db = getDatabase(getAdminApp());
   const snap = await db.ref(`invites/${token}`).get();
   if (!snap.exists()) return undefined;
-  return firebaseToGroupInvite(token, snap.val() as FirebaseGroupInvite);
+  const raw: unknown = snap.val();
+  if (!isFirebaseGroupInvite(raw)) return undefined;
+  return firebaseToGroupInvite(token, raw);
 }
 
 export async function addGroupMember(

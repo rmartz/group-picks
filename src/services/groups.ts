@@ -4,17 +4,14 @@ export async function joinGroup(token: string): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
   });
+  if (!response.ok) throw new Error("Failed to join group");
 
-  const data = (await response.json()) as { groupId?: string; error?: string };
-
-  if (!response.ok) {
-    throw new Error(data.error ?? "Failed to join group");
-  }
-
-  if (!data.groupId) {
+  const contentType = response.headers.get("content-type");
+  if (response.redirected || !contentType?.includes("application/json")) {
     throw new Error("Failed to join group");
   }
 
+  const data = (await response.json()) as { groupId: string };
   return data.groupId;
 }
 

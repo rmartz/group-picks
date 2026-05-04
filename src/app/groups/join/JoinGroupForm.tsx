@@ -8,11 +8,10 @@ import { JOIN_GROUP_COPY } from "./copy";
 
 interface JoinGroupFormProps {
   token: string;
-  groupId: string;
   groupName: string;
 }
 
-export function JoinGroupForm({ token, groupId, groupName }: JoinGroupFormProps) {
+export function JoinGroupForm({ token, groupName }: JoinGroupFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -21,8 +20,8 @@ export function JoinGroupForm({ token, groupId, groupName }: JoinGroupFormProps)
     setError(undefined);
     setLoading(true);
     try {
-      await joinGroup(token);
-      router.push(`/groups/${groupId}`);
+      const joinedGroupId = await joinGroup(token);
+      router.push(`/groups/${joinedGroupId}`);
     } catch {
       setError(JOIN_GROUP_COPY.errors.default);
     } finally {

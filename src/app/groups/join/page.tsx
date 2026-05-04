@@ -81,7 +81,5 @@ export default async function JoinGroupPage({
     );
   }
 
-  return (
-    <JoinGroupForm token={token} groupId={group.id} groupName={group.name} />
-  );
+  return <JoinGroupForm token={token} groupName={group.name} />;
 }

@@ -1,6 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { JoinGroupFormView } from "./JoinGroupFormView";
 import { JOIN_GROUP_COPY } from "./copy";
 
@@ -18,7 +17,9 @@ describe("JoinGroupFormView", () => {
     );
 
     expect(screen.getByText("Book Club")).toBeDefined();
-    expect(screen.getByText(JOIN_GROUP_COPY.joinPrompt, { exact: false })).toBeDefined();
+    expect(
+      screen.getByText(JOIN_GROUP_COPY.joinPrompt, { exact: false }),
+    ).toBeDefined();
   });
 
   it("renders the join button when not loading", () => {
@@ -75,8 +76,7 @@ describe("JoinGroupFormView", () => {
     expect(screen.getByText(JOIN_GROUP_COPY.errors.default)).toBeDefined();
   });
 
-  it("calls onJoin when the button is clicked", async () => {
-    const user = userEvent.setup();
+  it("calls onJoin when the button is clicked", () => {
     let called = false;
 
     render(
@@ -90,7 +90,7 @@ describe("JoinGroupFormView", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button"));
     expect(called).toBe(true);
   });
 });

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getVerifiedUid } from "@/server/utils/auth";
-import {
-  getGroupInviteByToken,
-  addGroupMember,
-} from "@/server/data/invites";
+import { getGroupInviteByToken, addGroupMember } from "@/server/data/invites";
+import { getGroupById } from "@/server/data/groups";
+
+const TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
 
 export async function POST(request: Request) {
   const uid = await getVerifiedUid();
@@ -23,6 +23,14 @@ export async function POST(request: Request) {
   }
 
   const token = body.token.trim();
+
+  if (!TOKEN_FORMAT.test(token)) {
+    return NextResponse.json(
+      { error: "Invalid invite token" },
+      { status: 400 },
+    );
+  }
+
   const invite = await getGroupInviteByToken(token);
 
   if (!invite) {
@@ -42,6 +50,14 @@ export async function POST(request: Request) {
   if (invite.expiresAt !== undefined && invite.expiresAt < new Date()) {
     return NextResponse.json(
       { error: "Invite link has expired" },
+      { status: 410 },
+    );
+  }
+
+  const group = await getGroupById(invite.groupId);
+  if (!group) {
+    return NextResponse.json(
+      { error: "Invalid invite token" },
       { status: 410 },
     );
   }
