@@ -15,6 +15,7 @@ export default async function CreateCategoryPage({
   const group = await getGroupById(id);
 
   if (!group) notFound();
+  if (!group.memberIds.includes(uid)) notFound();
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
