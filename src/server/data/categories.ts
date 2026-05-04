@@ -28,3 +28,15 @@ export async function getCategoriesByGroupId(
 
   return categories;
 }
+
+export async function getCategoryById(
+  categoryId: string,
+): Promise<Category | undefined> {
+  const db = getDatabase(getAdminApp());
+
+  const snap = await db.ref(`categories/${categoryId}`).get();
+
+  if (!snap.exists()) return undefined;
+
+  return firebaseToCategory(categoryId, snap.val() as FirebaseCategoryPublic);
+}
