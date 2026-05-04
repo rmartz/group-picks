@@ -41,4 +41,17 @@ describe("GroupDetailView", () => {
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
     ).toBeDefined();
   });
+
+  it("renders a create category link pointing to the group's new category page", () => {
+    const group = makeGroup();
+    render(<GroupDetailView group={group} />);
+
+    const link = screen.getByRole("link", {
+      name: GROUP_DETAIL_COPY.createCategoryButton,
+    });
+    expect(link).toBeDefined();
+    expect((link as HTMLAnchorElement).href).toContain(
+      `/groups/${group.id}/categories/new`,
+    );
+  });
 });
