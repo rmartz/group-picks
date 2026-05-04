@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { getDatabase } from "firebase-admin/database";
-import { getAdminApp } from "@/lib/firebase/admin";
 import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupByInviteToken } from "@/server/data/invites";
+import { getGroupInviteByToken, addGroupMember } from "@/server/data/invites";
+import { getGroupById } from "@/server/data/groups";
 
 export async function POST(
   _request: Request,
@@ -14,7 +13,12 @@ export async function POST(
   }
 
   const { token } = await params;
-  const group = await getGroupByInviteToken(token);
+  const invite = await getGroupInviteByToken(token);
+  if (!invite?.active) {
+    return NextResponse.json({ error: "Invite not found" }, { status: 404 });
+  }
+
+  const group = await getGroupById(invite.groupId);
   if (!group) {
     return NextResponse.json({ error: "Invite not found" }, { status: 404 });
   }
@@ -23,8 +27,7 @@ export async function POST(
     return NextResponse.json({ groupId: group.id });
   }
 
-  const db = getDatabase(getAdminApp());
-  await db.ref(`groups/${group.id}/members/${uid}`).set(true);
+  await addGroupMember(group.id, uid);
 
   return NextResponse.json({ groupId: group.id });
 }

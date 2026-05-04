@@ -41,13 +41,19 @@ export async function POST(request: Request) {
     inviteToken,
   });
 
-  await Promise.all([
-    db.ref(`groups/${groupId}`).set({
+  const now = Date.now();
+  await db.ref().update({
+    [`groups/${groupId}`]: {
       public: publicData,
       members: { [uid]: true },
-    }),
-    db.ref(`invites/${inviteToken}`).set(groupId),
-  ]);
+    },
+    [`invites/${inviteToken}`]: {
+      groupId,
+      createdAt: now,
+      expiresAt: null,
+      active: true,
+    },
+  });
 
   return NextResponse.json({ groupId }, { status: 201 });
 }

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupByInviteToken } from "@/server/data/invites";
+import { getGroupInviteByToken } from "@/server/data/invites";
+import { getGroupById } from "@/server/data/groups";
 import { InviteView } from "./InviteView";
 import { INVITE_COPY } from "./copy";
 
@@ -13,7 +14,17 @@ export default async function InvitePage({
   if (!uid) redirect("/sign-in");
 
   const { token } = await params;
-  const group = await getGroupByInviteToken(token);
+  const invite = await getGroupInviteByToken(token);
+
+  if (!invite?.active) {
+    return (
+      <main className="flex min-h-screen items-center justify-center p-4">
+        <p className="text-muted-foreground">{INVITE_COPY.notFound}</p>
+      </main>
+    );
+  }
+
+  const group = await getGroupById(invite.groupId);
 
   if (!group) {
     return (
