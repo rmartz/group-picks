@@ -11,7 +11,7 @@ export default async function InvitePage({
   params: Promise<{ token: string }>;
 }) {
   const [uid, { token }] = await Promise.all([getVerifiedUid(), params]);
-  if (!uid) redirect(`/sign-in?invite_token=${token}`);
+  if (!uid) redirect(`/sign-in?next=/invite/${token}`);
   const invite = await getGroupInviteByToken(token);
 
   if (!invite?.active) {
