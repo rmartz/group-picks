@@ -3,3 +3,20 @@ export const GROUP_DETAIL_COPY = {
   createdAtLabel: "Created",
   notFound: "Group not found.",
 } as const;
+
+export const CATEGORY_LIST_COPY = {
+  title: "Categories",
+  empty: "No categories yet.",
+  deleteButton: "Delete",
+  deletingButton: "Deleting…",
+  addCategoryLabel: "New category name",
+  addCategoryPlaceholder: "e.g. Best Movie",
+  addButton: "Add Category",
+  addingButton: "Adding…",
+  errors: {
+    delete: "Failed to delete category.",
+    hasPicks:
+      "Cannot delete a category that has picks. Remove all picks first.",
+    create: "Failed to add category.",
+  },
+} as const;
