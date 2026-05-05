@@ -37,6 +37,18 @@ describe("pickToFirebase", () => {
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-abc");
   });
+
+  it("omits description when it is undefined", () => {
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      description: undefined,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+    });
+
+    expect(result.description).toBeUndefined();
+  });
 });
 
 describe("firebaseToPick", () => {
@@ -51,5 +63,13 @@ describe("firebaseToPick", () => {
     expect(result.categoryId).toBe("cat-123");
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
+  });
+
+  it("returns undefined description when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ description: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.description).toBeUndefined();
   });
 });

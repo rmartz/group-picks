@@ -37,6 +37,18 @@ describe("categoryToFirebase", () => {
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-abc");
   });
+
+  it("omits description when it is undefined", () => {
+    const result = categoryToFirebase({
+      name: "Best Movies",
+      description: undefined,
+      groupId: "group-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+    });
+
+    expect(result.description).toBeUndefined();
+  });
 });
 
 describe("firebaseToCategory", () => {
@@ -51,5 +63,13 @@ describe("firebaseToCategory", () => {
     expect(result.groupId).toBe("group-123");
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
+  });
+
+  it("returns undefined description when absent from Firebase data", () => {
+    const data = makeFirebaseCategoryPublic({ description: undefined });
+
+    const result = firebaseToCategory("cat-xyz", data);
+
+    expect(result.description).toBeUndefined();
   });
 });

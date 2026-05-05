@@ -2,7 +2,7 @@ import type { GroupPick } from "@/lib/types/pick";
 
 export interface FirebasePickPublic {
   title: string;
-  description: string;
+  description?: string;
   categoryId: string;
   createdAt: number;
   creatorId: string;

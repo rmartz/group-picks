@@ -40,10 +40,26 @@ describe("CategoryDetailView", () => {
   });
 
   it("renders the category description", () => {
-    const category = makeCategory();
+    const category = makeCategory({ description: "Pick your favourite movie" });
     render(<CategoryDetailView category={category} picks={[]} />);
 
-    expect(screen.getByText(category.description)).toBeDefined();
+    expect(screen.getByText("Pick your favourite movie")).toBeDefined();
+  });
+
+  it("does not render category description when absent", () => {
+    const category = makeCategory({ description: undefined });
+    render(<CategoryDetailView category={category} picks={[]} />);
+
+    expect(
+      screen.queryByText("Pick your favourite movie of the year"),
+    ).toBeNull();
+  });
+
+  it("does not render category description when whitespace-only", () => {
+    const category = makeCategory({ description: "   " });
+    render(<CategoryDetailView category={category} picks={[]} />);
+
+    expect(screen.queryByText("   ")).toBeNull();
   });
 
   it("renders the picks section heading", () => {
@@ -72,10 +88,26 @@ describe("CategoryDetailView", () => {
 
   it("renders pick descriptions when provided", () => {
     const category = makeCategory();
-    const pick = makePick();
+    const pick = makePick({ description: "A classic film about hope" });
     render(<CategoryDetailView category={category} picks={[pick]} />);
 
-    expect(screen.getByText(pick.description)).toBeDefined();
+    expect(screen.getByText("A classic film about hope")).toBeDefined();
+  });
+
+  it("does not render pick description when absent", () => {
+    const category = makeCategory();
+    const pick = makePick({ description: undefined });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    expect(screen.queryByText("A classic film about hope")).toBeNull();
+  });
+
+  it("does not render pick description when whitespace-only", () => {
+    const category = makeCategory();
+    const pick = makePick({ description: "   " });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    expect(screen.queryByText("   ")).toBeNull();
   });
 
   it("renders multiple picks", () => {

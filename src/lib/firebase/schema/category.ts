@@ -2,7 +2,7 @@ import type { Category } from "@/lib/types/category";
 
 export interface FirebaseCategoryPublic {
   name: string;
-  description: string;
+  description?: string;
   groupId: string;
   createdAt: number;
   creatorId: string;
