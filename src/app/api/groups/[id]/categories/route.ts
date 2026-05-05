@@ -1,0 +1,82 @@
+import { NextResponse } from "next/server";
+import { getVerifiedUid } from "@/server/utils/auth";
+import { getGroupById } from "@/server/data/groups";
+import {
+  getCategoriesByGroupId,
+  createCategory,
+} from "@/server/data/categories";
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const uid = await getVerifiedUid();
+  if (!uid) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const group = await getGroupById(id);
+
+  if (!group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
+  if (!group.memberIds.includes(uid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const categories = await getCategoriesByGroupId(id);
+
+  return NextResponse.json({
+    categories: categories.map((c) => ({
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+    })),
+  });
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const uid = await getVerifiedUid();
+  if (!uid) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const group = await getGroupById(id);
+
+  if (!group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
+  if (!group.memberIds.includes(uid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  let body: { name: unknown; description: unknown };
+  try {
+    body = (await request.json()) as { name: unknown; description: unknown };
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  if (typeof body.name !== "string" || !body.name.trim()) {
+    return NextResponse.json({ error: "name is required" }, { status: 400 });
+  }
+
+  const name = body.name.trim();
+  const description =
+    typeof body.description === "string" ? body.description.trim() : "";
+
+  const categoryId = await createCategory({
+    groupId: id,
+    name,
+    description,
+    creatorId: uid,
+  });
+
+  return NextResponse.json({ categoryId }, { status: 201 });
+}
