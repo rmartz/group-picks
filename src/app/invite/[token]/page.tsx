@@ -24,12 +24,24 @@ function InviteErrorPage({
   );
 }
 
+const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
+
 export default async function InvitePage({ params }: InvitePageProps) {
   const { token } = await params;
 
+  if (!INVITE_TOKEN_FORMAT.test(token)) {
+    return (
+      <InviteErrorPage
+        title={JOIN_GROUP_COPY.invalidTitle}
+        description={JOIN_GROUP_COPY.invalidDescription}
+      />
+    );
+  }
+
   const uid = await getVerifiedUid();
   if (!uid) {
-    redirect(`/sign-in?invite_token=${token}`);
+    const signInUrl = new URLSearchParams({ invite_token: token }).toString();
+    redirect(`/sign-in?${signInUrl}`);
   }
 
   const invite = await getGroupInviteByToken(token);
