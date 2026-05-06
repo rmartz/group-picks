@@ -3,6 +3,7 @@ export const GROUP_DETAIL_COPY = {
   createdAtLabel: "Created",
   notFound: "Group not found.",
   inviteLabel: "Invite Link",
+  expiresAtLabel: "Expires",
   generateButton: "Generate Invite Link",
   regenerateButton: "Revoke & Regenerate",
   regeneratingButton: "Regenerating…",

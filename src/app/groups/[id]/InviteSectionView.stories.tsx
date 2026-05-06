@@ -9,6 +9,7 @@ const meta: Meta<typeof InviteSectionView> = {
   component: InviteSectionView,
   args: {
     inviteUrl: INVITE_URL,
+    expiresAt: new Date("2026-05-13T12:00:00.000Z"),
     onRegenerate: () => undefined,
     onCopy: () => undefined,
     regenerating: false,

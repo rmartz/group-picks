@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
+import { getGroupInviteByToken } from "@/server/data/invites";
 import { GroupDetailView } from "./GroupDetailView";
 import { InviteSection } from "./InviteSection";
 
@@ -26,12 +27,17 @@ export default async function GroupDetailPage({
     (/^(localhost|127\.0\.0\.1)(:\d+)?$/.exec(host) ? "http" : "https");
   const origin = `${protocol}://${host}`;
 
+  const invite = group.inviteToken
+    ? await getGroupInviteByToken(group.inviteToken)
+    : undefined;
+
   return (
     <>
       <GroupDetailView group={group} />
       <InviteSection
         groupId={group.id}
         initialToken={group.inviteToken}
+        initialExpiresAt={invite?.expiresAt}
         origin={origin}
       />
     </>

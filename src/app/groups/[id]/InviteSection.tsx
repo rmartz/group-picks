@@ -8,15 +8,18 @@ import { GROUP_DETAIL_COPY } from "./copy";
 interface InviteSectionProps {
   groupId: string;
   initialToken: string | undefined;
+  initialExpiresAt: Date | undefined;
   origin: string;
 }
 
 export function InviteSection({
   groupId,
   initialToken,
+  initialExpiresAt,
   origin,
 }: InviteSectionProps) {
   const [token, setToken] = useState(initialToken);
+  const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
   const [regenerating, setRegenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -38,8 +41,9 @@ export function InviteSection({
     setError(undefined);
     setRegenerating(true);
     try {
-      const newToken = await regenerateInvite(groupId);
-      setToken(newToken);
+      const result = await regenerateInvite(groupId);
+      setToken(result.token);
+      setExpiresAt(new Date(result.expiresAt));
       setCopied(false);
     } catch {
       setError(GROUP_DETAIL_COPY.inviteErrors.default);
@@ -65,6 +69,7 @@ export function InviteSection({
   return (
     <InviteSectionView
       inviteUrl={inviteUrl}
+      expiresAt={expiresAt}
       onRegenerate={() => void handleRegenerate()}
       onCopy={() => void handleCopy()}
       regenerating={regenerating}
