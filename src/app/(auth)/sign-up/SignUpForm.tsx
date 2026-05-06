@@ -94,7 +94,9 @@ export default function SignUpForm() {
       <p className="text-sm">
         {SIGN_UP_COPY.signInPrompt}{" "}
         <Link
-          href={inviteToken ? `/sign-in?invite_token=${inviteToken}` : "/sign-in"}
+          href={
+            inviteToken ? `/sign-in?invite_token=${inviteToken}` : "/sign-in"
+          }
           className="underline"
         >
           {SIGN_UP_COPY.signInLink}

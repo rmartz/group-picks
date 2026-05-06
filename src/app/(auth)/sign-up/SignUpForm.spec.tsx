@@ -1,5 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import SignUpForm from "./SignUpForm";
 import { SIGN_UP_COPY } from "./copy";
 import { signUp, createSession } from "@/services/auth";
@@ -65,7 +71,9 @@ describe("SignUpForm", () => {
     fireEvent.change(screen.getByLabelText(SIGN_UP_COPY.passwordLabel), {
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }));
+    fireEvent.click(
+      screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }),
+    );
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/");
@@ -86,7 +94,9 @@ describe("SignUpForm", () => {
     fireEvent.change(screen.getByLabelText(SIGN_UP_COPY.passwordLabel), {
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }));
+    fireEvent.click(
+      screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }),
+    );
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/invite/abc123");
@@ -107,7 +117,9 @@ describe("SignUpForm", () => {
     fireEvent.change(screen.getByLabelText(SIGN_UP_COPY.passwordLabel), {
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }));
+    fireEvent.click(
+      screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }),
+    );
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/");
@@ -119,7 +131,9 @@ describe("SignUpForm", () => {
 
     render(<SignUpForm />);
     const signInLink = screen.getByText(SIGN_UP_COPY.signInLink).closest("a");
-    expect(signInLink?.getAttribute("href")).toBe("/sign-in?invite_token=abc123");
+    expect(signInLink?.getAttribute("href")).toBe(
+      "/sign-in?invite_token=abc123",
+    );
   });
 
   it("links to /sign-in without invite_token when no invite_token param is present", () => {

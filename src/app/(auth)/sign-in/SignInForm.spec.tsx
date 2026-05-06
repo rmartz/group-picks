@@ -1,5 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import SignInForm from "./SignInForm";
 import { SIGN_IN_COPY } from "./copy";
 import { signIn, signInWithApple, createSession } from "@/services/auth";
@@ -104,7 +110,9 @@ describe("SignInForm", () => {
     fireEvent.change(screen.getByLabelText(SIGN_IN_COPY.passwordLabel), {
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: SIGN_IN_COPY.submitButton }));
+    fireEvent.click(
+      screen.getByRole("button", { name: SIGN_IN_COPY.submitButton }),
+    );
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/invite/abc123");
@@ -125,7 +133,9 @@ describe("SignInForm", () => {
     fireEvent.change(screen.getByLabelText(SIGN_IN_COPY.passwordLabel), {
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: SIGN_IN_COPY.submitButton }));
+    fireEvent.click(
+      screen.getByRole("button", { name: SIGN_IN_COPY.submitButton }),
+    );
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/");
@@ -137,7 +147,9 @@ describe("SignInForm", () => {
 
     render(<SignInForm />);
     const signUpLink = screen.getByText(SIGN_IN_COPY.signUpLink).closest("a");
-    expect(signUpLink?.getAttribute("href")).toBe("/sign-up?invite_token=abc123");
+    expect(signUpLink?.getAttribute("href")).toBe(
+      "/sign-up?invite_token=abc123",
+    );
   });
 
   it("links to /sign-up without invite_token when no invite_token param is present", () => {
