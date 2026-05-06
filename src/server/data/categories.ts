@@ -25,13 +25,13 @@ export async function getCategoriesByGroupId(
 }
 
 export async function getCategoryById(
-  categoryId: string,
+  id: string,
 ): Promise<Category | undefined> {
   const db = getDatabase(getAdminApp());
-
-  const snap = await db.ref(`categories/${categoryId}/public`).get();
+  const snap = await db.ref(`categories/${id}/public`).get();
 
   if (!snap.exists()) return undefined;
 
-  return firebaseToCategory(categoryId, snap.val() as FirebaseCategoryPublic);
+  const data = snap.val() as FirebaseCategoryPublic;
+  return firebaseToCategory(id, data);
 }

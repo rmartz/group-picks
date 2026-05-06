@@ -21,6 +21,7 @@ function makeCategory(overrides?: Partial<{ id: string; name: string }>) {
     groupId: "group-1",
     name: overrides?.name ?? "Best Movie",
     createdAt: new Date("2025-01-15T12:00:00.000Z"),
+    creatorId: "user-123",
   };
 }
 

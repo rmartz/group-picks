@@ -24,6 +24,7 @@ variables:
   # Firebase Admin SDK — project identifiers only, not credentials
   FIREBASE_PROJECT_ID: "group-picks"
   FIREBASE_DATABASE_URL: "https://group-picks-default-rtdb.firebaseio.com"
+  FIREBASE_SA_EMAIL: "firebase-adminsdk-fbsvc@group-picks.iam.gserviceaccount.com"
 
   # Sentry — slugs only, not credentials
   SENTRY_ORG: ""
