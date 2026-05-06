@@ -14,7 +14,7 @@
 # Re-add "- staging" below and set single_environment: false once the RTDB is
 # provisioned and staging credentials are ready.
 
-environments:
+active:
   - production
 
 single_environment: true
