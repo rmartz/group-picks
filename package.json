@@ -33,8 +33,7 @@
     "onlyBuiltDependencies": [
       "@firebase/util",
       "esbuild",
-      "protobufjs",
-      "vercel-deploy-scripts"
+      "protobufjs"
     ]
   },
   "dependencies": {
@@ -56,7 +55,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "vercel-deploy-scripts": "github:rmartz/vercel-deploy-scripts#v2.1.0",
+    "vercel-deploy-scripts": "github:rmartz/vercel-deploy-scripts#v2.3.3",
     "@storybook/addon-a11y": "^10.3.5",
     "@storybook/addon-docs": "^10.3.5",
     "@storybook/nextjs-vite": "^10.3.5",
