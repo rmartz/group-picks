@@ -3,8 +3,7 @@
 import { useState } from "react";
 import type { Category } from "@/lib/types/category";
 import { createCategory, updateCategory } from "@/services/categories";
-import { CreateCategoryFormView } from "./CreateCategoryFormView";
-import { EditCategoryFormView } from "./EditCategoryFormView";
+import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
 
 interface CategoryListProps {
@@ -113,81 +112,26 @@ export function CategoryList({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">
-          {CATEGORY_COPY.categoriesHeading}
-        </h2>
-        {!showCreateForm && (
-          <button
-            onClick={startCreate}
-            disabled={loading}
-            className="rounded bg-black px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-          >
-            {CATEGORY_COPY.addCategoryButton}
-          </button>
-        )}
-      </div>
-
-      {showCreateForm && (
-        <div className="rounded border p-4">
-          <CreateCategoryFormView
-            name={createName}
-            description={createDescription}
-            onNameChange={setCreateName}
-            onDescriptionChange={setCreateDescription}
-            onSubmit={(e) => void handleCreate(e)}
-            onCancel={cancelCreate}
-            loading={loading}
-            error={error}
-          />
-        </div>
-      )}
-
-      {categories.length === 0 && !showCreateForm && (
-        <p className="text-sm text-gray-500">
-          {CATEGORY_COPY.noCategoriesMessage}
-        </p>
-      )}
-
-      <ul className="space-y-3">
-        {categories.map((category) => (
-          <li key={category.id} className="rounded border p-4">
-            {editingId === category.id ? (
-              <EditCategoryFormView
-                name={editName}
-                description={editDescription}
-                onNameChange={setEditName}
-                onDescriptionChange={setEditDescription}
-                onSubmit={(e) => void handleEdit(e)}
-                onCancel={cancelEdit}
-                loading={loading}
-                error={error}
-              />
-            ) : (
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <p className="font-medium">{category.name}</p>
-                  {category.description && (
-                    <p className="text-sm text-gray-600">
-                      {category.description}
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    startEdit(category);
-                  }}
-                  disabled={loading}
-                  className="shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
-                >
-                  {CATEGORY_COPY.editButton}
-                </button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <CategoryListView
+      categories={categories}
+      showCreateForm={showCreateForm}
+      editingId={editingId}
+      createName={createName}
+      createDescription={createDescription}
+      editName={editName}
+      editDescription={editDescription}
+      loading={loading}
+      error={error}
+      onStartCreate={startCreate}
+      onCancelCreate={cancelCreate}
+      onStartEdit={startEdit}
+      onCancelEdit={cancelEdit}
+      onCreateNameChange={setCreateName}
+      onCreateDescriptionChange={setCreateDescription}
+      onEditNameChange={setEditName}
+      onEditDescriptionChange={setEditDescription}
+      onCreateSubmit={(e) => void handleCreate(e)}
+      onEditSubmit={(e) => void handleEdit(e)}
+    />
   );
 }
