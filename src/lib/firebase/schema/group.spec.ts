@@ -54,4 +54,20 @@ describe("firebaseToGroup", () => {
 
     expect(result.memberIds).toEqual([]);
   });
+
+  it("includes inviteToken when present", () => {
+    const data = makeFirebaseGroupPublic({ inviteToken: "abc123token" });
+
+    const result = firebaseToGroup("group-3", data, []);
+
+    expect(result.inviteToken).toBe("abc123token");
+  });
+
+  it("sets inviteToken to undefined when absent", () => {
+    const data = makeFirebaseGroupPublic();
+
+    const result = firebaseToGroup("group-4", data, []);
+
+    expect(result.inviteToken).toBeUndefined();
+  });
 });
