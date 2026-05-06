@@ -1,13 +1,9 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
 afterEach(cleanup);
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: vi.fn() }),
-}));
 
 function makeGroup() {
   return {

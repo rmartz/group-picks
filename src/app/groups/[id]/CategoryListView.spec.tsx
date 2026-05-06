@@ -57,7 +57,11 @@ describe("CategoryListView", () => {
   it("renders a delete button for each category", () => {
     const categories = [makeCategory({ id: "cat-1", name: "Best Movie" })];
     renderView({ categories });
-    expect(screen.getByText(CATEGORY_LIST_COPY.deleteButton)).toBeDefined();
+    expect(
+      screen.getByRole("button", {
+        name: `${CATEGORY_LIST_COPY.deleteButton} Best Movie`,
+      }),
+    ).toBeDefined();
   });
 
   it("calls onDeleteCategory when delete button is clicked", () => {
@@ -65,7 +69,11 @@ describe("CategoryListView", () => {
     const categories = [makeCategory({ id: "cat-42", name: "Best Movie" })];
     renderView({ categories, onDeleteCategory });
 
-    fireEvent.click(screen.getByText(CATEGORY_LIST_COPY.deleteButton));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `${CATEGORY_LIST_COPY.deleteButton} Best Movie`,
+      }),
+    );
 
     expect(onDeleteCategory).toHaveBeenCalledWith("cat-42");
   });

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { Category } from "@/lib/types/category";
 import {
   deleteCategory as deleteCategoryService,
@@ -20,7 +19,6 @@ export function CategoryList({
   initialCategories,
   groupId,
 }: CategoryListProps) {
-  const router = useRouter();
   const [categories, setCategories] = useState(initialCategories);
   const [deletingId, setDeletingId] = useState<string | undefined>();
   const [deleteError, setDeleteError] = useState<string | undefined>();
@@ -50,10 +48,14 @@ export function CategoryList({
     if (!newCategoryName.trim()) return;
     setAdding(true);
     setAddError(undefined);
+    const name = newCategoryName.trim();
     try {
-      await createCategoryService(groupId, newCategoryName.trim());
+      const categoryId = await createCategoryService(groupId, name);
+      setCategories((prev) => [
+        ...prev,
+        { id: categoryId, groupId, name, createdAt: new Date() },
+      ]);
       setNewCategoryName("");
-      router.refresh();
     } catch {
       setAddError(CATEGORY_LIST_COPY.errors.create);
     } finally {

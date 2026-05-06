@@ -39,6 +39,7 @@ export function CategoryListView({
               <span>{category.name}</span>
               <button
                 type="button"
+                aria-label={`${CATEGORY_LIST_COPY.deleteButton} ${category.name}`}
                 onClick={() => {
                   onDeleteCategory(category.id);
                 }}
