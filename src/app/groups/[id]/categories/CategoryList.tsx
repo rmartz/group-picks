@@ -57,7 +57,7 @@ export function CategoryList({
     setError(undefined);
     setLoading(true);
     try {
-      const categoryId = await createCategory(
+      const { categoryId, creatorId, createdAt } = await createCategory(
         groupId,
         createName.trim(),
         createDescription.trim(),
@@ -67,8 +67,8 @@ export function CategoryList({
         groupId,
         name: createName.trim(),
         description: createDescription.trim(),
-        createdAt: new Date(),
-        creatorId: "",
+        createdAt,
+        creatorId,
       };
       setCategories((prev) => [...prev, newCategory]);
       setShowCreateForm(false);
@@ -121,7 +121,8 @@ export function CategoryList({
         {!showCreateForm && (
           <button
             onClick={startCreate}
-            className="rounded bg-black px-3 py-1.5 text-sm font-medium text-white"
+            disabled={loading}
+            className="rounded bg-black px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           >
             {CATEGORY_COPY.addCategoryButton}
           </button>
@@ -174,8 +175,11 @@ export function CategoryList({
                   )}
                 </div>
                 <button
-                  onClick={() => { startEdit(category); }}
-                  className="shrink-0 rounded border px-3 py-1 text-sm font-medium"
+                  onClick={() => {
+                    startEdit(category);
+                  }}
+                  disabled={loading}
+                  className="shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
                 >
                   {CATEGORY_COPY.editButton}
                 </button>

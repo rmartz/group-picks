@@ -71,12 +71,15 @@ export async function POST(
   const description =
     typeof body.description === "string" ? body.description.trim() : "";
 
-  const categoryId = await createCategory({
+  const { id: categoryId, createdAt } = await createCategory({
     groupId: id,
     name,
     description,
     creatorId: uid,
   });
 
-  return NextResponse.json({ categoryId }, { status: 201 });
+  return NextResponse.json(
+    { categoryId, creatorId: uid, createdAt: createdAt.toISOString() },
+    { status: 201 },
+  );
 }

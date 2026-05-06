@@ -47,20 +47,21 @@ export async function getCategoryById(
 
 export async function createCategory(
   category: Pick<Category, "groupId" | "name" | "description" | "creatorId">,
-): Promise<string> {
+): Promise<{ id: string; createdAt: Date }> {
   const db = getDatabase(getAdminApp());
   const ref = db.ref("categories").push();
   const id = ref.key;
   if (!id) throw new Error("Failed to generate category ID");
 
+  const createdAt = new Date();
   const publicData = categoryToFirebase({
     ...category,
-    createdAt: new Date(),
+    createdAt,
   });
 
   await db.ref(`categories/${id}`).set({ public: publicData });
 
-  return id;
+  return { id, createdAt };
 }
 
 export async function updateCategory(
