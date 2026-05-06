@@ -53,7 +53,7 @@ export function CategoryList({
       const categoryId = await createCategoryService(groupId, name);
       setCategories((prev) => [
         ...prev,
-        { id: categoryId, groupId, name, createdAt: new Date() },
+        { id: categoryId, groupId, name, createdAt: new Date(), creatorId: "" },
       ]);
       setNewCategoryName("");
     } catch {

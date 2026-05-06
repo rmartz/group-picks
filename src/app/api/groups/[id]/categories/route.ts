@@ -61,6 +61,6 @@ export async function POST(
     return NextResponse.json({ error: "name is required" }, { status: 400 });
   }
 
-  const categoryId = await createCategory(groupId, body.name.trim());
+  const categoryId = await createCategory(groupId, body.name.trim(), uid);
   return NextResponse.json({ categoryId }, { status: 201 });
 }

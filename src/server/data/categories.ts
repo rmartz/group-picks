@@ -32,12 +32,15 @@ export async function getCategoriesByGroup(
 }
 
 export async function getCategoryById(
-  categoryId: string,
+  id: string,
 ): Promise<Category | undefined> {
   const db = getDatabase(getAdminApp());
-  const snap = await db.ref(`categories/${categoryId}/public`).get();
+  const snap = await db.ref(`categories/${id}/public`).get();
+
   if (!snap.exists()) return undefined;
-  return firebaseToCategory(categoryId, snap.val() as FirebaseCategoryPublic);
+
+  const data = snap.val() as FirebaseCategoryPublic;
+  return firebaseToCategory(id, data);
 }
 
 export async function categoryHasPicks(categoryId: string): Promise<boolean> {
@@ -49,6 +52,7 @@ export async function categoryHasPicks(categoryId: string): Promise<boolean> {
 export async function createCategory(
   groupId: string,
   name: string,
+  creatorId: string,
 ): Promise<string> {
   const db = getDatabase(getAdminApp());
   const ref = db.ref("categories").push();
@@ -59,6 +63,7 @@ export async function createCategory(
     groupId,
     name,
     createdAt: new Date(),
+    creatorId,
   });
   await db.ref(`categories/${categoryId}/public`).set(publicData);
   return categoryId;

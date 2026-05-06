@@ -12,6 +12,7 @@ function makeCategory(overrides?: Partial<Category>): Category {
     groupId: "group-1",
     name: "Best Movie",
     createdAt: new Date("2025-03-10T09:00:00.000Z"),
+    creatorId: "user-1",
     ...overrides,
   };
 }

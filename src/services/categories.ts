@@ -4,7 +4,9 @@ interface ApiCategory {
   id: string;
   groupId: string;
   name: string;
+  description?: string;
   createdAt: string;
+  creatorId: string;
 }
 
 export class CategoryHasPicksError extends Error {
