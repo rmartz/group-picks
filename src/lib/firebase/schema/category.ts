@@ -1,36 +1,37 @@
 import type { Category } from "@/lib/types/category";
 
-export interface FirebaseCategory {
+export interface FirebaseCategoryPublic {
   name: string;
+  description?: string;
+  groupId: string;
   createdAt: number;
   creatorId: string;
-  description?: string;
 }
 
 export function categoryToFirebase(
-  category: Pick<Category, "name" | "description" | "createdAt" | "creatorId">,
-): FirebaseCategory {
-  const result: FirebaseCategory = {
+  category: Pick<
+    Category,
+    "name" | "description" | "groupId" | "createdAt" | "creatorId"
+  >,
+): FirebaseCategoryPublic {
+  return {
     name: category.name,
+    description: category.description,
+    groupId: category.groupId,
     createdAt: category.createdAt.getTime(),
     creatorId: category.creatorId,
   };
-  if (category.description !== undefined) {
-    result.description = category.description;
-  }
-  return result;
 }
 
 export function firebaseToCategory(
   id: string,
-  groupId: string,
-  data: FirebaseCategory,
+  data: FirebaseCategoryPublic,
 ): Category {
   return {
     id,
-    groupId,
     name: data.name,
     description: data.description,
+    groupId: data.groupId,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
   };

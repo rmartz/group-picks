@@ -58,6 +58,7 @@ export async function POST(
   const categoryData = categoryToFirebase({
     name,
     description,
+    groupId,
     createdAt: new Date(),
     creatorId: uid,
   });
