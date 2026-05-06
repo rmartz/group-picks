@@ -73,9 +73,7 @@ describe("CategoryDetailView", () => {
     const category = makeCategory();
     render(<CategoryDetailView category={category} picks={[]} />);
 
-    expect(
-      screen.getByText(CATEGORY_DETAIL_COPY.noPicksMessage),
-    ).toBeDefined();
+    expect(screen.getByText(CATEGORY_DETAIL_COPY.noPicksMessage)).toBeDefined();
   });
 
   it("renders pick titles when picks are provided", () => {
