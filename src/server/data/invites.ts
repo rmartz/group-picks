@@ -71,9 +71,7 @@ export async function setGroupInviteExpiry(
   const tokenSnap = await db.ref(`groups/${groupId}/inviteToken`).get();
   if (!tokenSnap.exists()) return;
   const token = tokenSnap.val() as string;
-  await db
-    .ref(`invites/${token}/expiresAt`)
-    .set(expiresAt?.getTime() ?? null);
+  await db.ref(`invites/${token}/expiresAt`).set(expiresAt?.getTime() ?? null);
 }
 
 export async function addGroupMember(

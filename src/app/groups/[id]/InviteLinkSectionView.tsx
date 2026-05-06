@@ -27,8 +27,7 @@ export function InviteLinkSectionView({
   onSave,
   onClearExpiry,
 }: InviteLinkSectionViewProps) {
-  const isExpired =
-    expiresAt !== null && new Date(expiresAt) < new Date();
+  const isExpired = expiresAt !== null && new Date(expiresAt) < new Date();
 
   return (
     <section className="space-y-3 rounded border p-4 text-sm">
@@ -53,7 +52,9 @@ export function InviteLinkSectionView({
       </div>
 
       <div className="flex items-center gap-2 text-sm text-gray-600">
-        <span className="font-medium">{GROUP_DETAIL_COPY.inviteExpiresAtLabel}:</span>
+        <span className="font-medium">
+          {GROUP_DETAIL_COPY.inviteExpiresAtLabel}:
+        </span>
         {expiresAt === null ? (
           <span>{GROUP_DETAIL_COPY.inviteExpiresNever}</span>
         ) : (

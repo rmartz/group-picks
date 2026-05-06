@@ -56,14 +56,20 @@ describe("InviteLinkSectionView", () => {
     render(<InviteLinkSectionView {...makeDefaultProps({ copied: true })} />);
 
     expect(
-      screen.getByRole("button", { name: GROUP_DETAIL_COPY.inviteCopiedButton }),
+      screen.getByRole("button", {
+        name: GROUP_DETAIL_COPY.inviteCopiedButton,
+      }),
     ).toBeDefined();
   });
 
   it("shows 'Never' when expiresAt is null", () => {
-    render(<InviteLinkSectionView {...makeDefaultProps({ expiresAt: null })} />);
+    render(
+      <InviteLinkSectionView {...makeDefaultProps({ expiresAt: null })} />,
+    );
 
-    expect(screen.getByText(GROUP_DETAIL_COPY.inviteExpiresNever)).toBeDefined();
+    expect(
+      screen.getByText(GROUP_DETAIL_COPY.inviteExpiresNever),
+    ).toBeDefined();
   });
 
   it("shows the expiry date when expiresAt is set", () => {
@@ -95,9 +101,7 @@ describe("InviteLinkSectionView", () => {
       />,
     );
 
-    expect(
-      screen.queryByText(GROUP_DETAIL_COPY.inviteExpiredBadge),
-    ).toBeNull();
+    expect(screen.queryByText(GROUP_DETAIL_COPY.inviteExpiredBadge)).toBeNull();
   });
 
   it("renders the expiry date input", () => {
@@ -110,11 +114,11 @@ describe("InviteLinkSectionView", () => {
 
   it("calls onExpiryChange when the date input changes", () => {
     const onExpiryChange = vi.fn();
-    render(
-      <InviteLinkSectionView {...makeDefaultProps({ onExpiryChange })} />,
-    );
+    render(<InviteLinkSectionView {...makeDefaultProps({ onExpiryChange })} />);
 
-    const input = screen.getByLabelText(GROUP_DETAIL_COPY.inviteExpiryDateLabel);
+    const input = screen.getByLabelText(
+      GROUP_DETAIL_COPY.inviteExpiryDateLabel,
+    );
     fireEvent.change(input, { target: { value: "2099-06-15" } });
     expect(onExpiryChange).toHaveBeenCalledWith("2099-06-15");
   });
