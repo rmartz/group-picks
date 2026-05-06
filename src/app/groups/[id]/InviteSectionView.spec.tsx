@@ -51,9 +51,7 @@ describe("InviteSectionView", () => {
       />,
     );
 
-    expect(
-      screen.queryByLabelText(GROUP_DETAIL_COPY.inviteLabel),
-    ).toBeNull();
+    expect(screen.queryByLabelText(GROUP_DETAIL_COPY.inviteLabel)).toBeNull();
   });
 
   it("renders the generate button when no invite URL exists", () => {
@@ -69,7 +67,9 @@ describe("InviteSectionView", () => {
     );
 
     const buttons = screen.getAllByRole("button");
-    expect(buttons.some((b) => b.textContent === GROUP_DETAIL_COPY.generateButton)).toBe(true);
+    expect(
+      buttons.some((b) => b.textContent === GROUP_DETAIL_COPY.generateButton),
+    ).toBe(true);
   });
 
   it("renders the regenerate button when an invite URL exists", () => {

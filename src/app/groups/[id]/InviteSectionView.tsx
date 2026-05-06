@@ -33,7 +33,9 @@ export function InviteSectionView({
             onClick={onCopy}
             className="rounded border px-3 py-1 text-sm font-medium"
           >
-            {copied ? GROUP_DETAIL_COPY.copiedButton : GROUP_DETAIL_COPY.copyButton}
+            {copied
+              ? GROUP_DETAIL_COPY.copiedButton
+              : GROUP_DETAIL_COPY.copyButton}
           </button>
         </div>
       )}

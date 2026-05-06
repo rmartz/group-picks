@@ -40,19 +40,18 @@ export async function POST(request: Request) {
     creatorId: uid,
   });
 
-  await db.ref(`groups/${groupId}`).set({
-    public: { ...publicData, inviteToken },
-    members: { [uid]: true },
-  });
-
-  await db.ref(`invites/${inviteToken}`).set(
-    groupInviteToFirebase({
+  await db.ref().update({
+    [`groups/${groupId}`]: {
+      public: { ...publicData, inviteToken },
+      members: { [uid]: true },
+    },
+    [`invites/${inviteToken}`]: groupInviteToFirebase({
       groupId,
       createdAt: new Date(),
       expiresAt: undefined,
       active: true,
     }),
-  );
+  });
 
   return NextResponse.json({ groupId }, { status: 201 });
 }

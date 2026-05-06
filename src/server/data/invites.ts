@@ -35,22 +35,22 @@ export async function createGroupInvite(
 ): Promise<string> {
   const db = getDatabase(getAdminApp());
 
-  if (oldToken) {
-    await db.ref(`invites/${oldToken}/active`).set(false);
-  }
-
   const token = crypto.randomUUID().replace(/-/g, "");
 
-  await db.ref(`invites/${token}`).set(
-    groupInviteToFirebase({
+  const updates: Record<string, unknown> = {
+    [`invites/${token}`]: groupInviteToFirebase({
       groupId,
       createdAt: new Date(),
       expiresAt: undefined,
       active: true,
     }),
-  );
+    [`groups/${groupId}/public/inviteToken`]: token,
+  };
+  if (oldToken) {
+    updates[`invites/${oldToken}/active`] = false;
+  }
 
-  await db.ref(`groups/${groupId}/public/inviteToken`).set(token);
+  await db.ref().update(updates);
 
   return token;
 }

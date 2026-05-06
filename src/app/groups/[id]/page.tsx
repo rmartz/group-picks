@@ -20,7 +20,10 @@ export default async function GroupDetailPage({
 
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
-  const protocol = host.startsWith("localhost") ? "http" : "https";
+  const forwarded = headersList.get("x-forwarded-proto");
+  const protocol =
+    forwarded?.split(",").at(0)?.trim() ??
+    (/^(localhost|127\.0\.0\.1)(:\d+)?$/.exec(host) ? "http" : "https");
   const origin = `${protocol}://${host}`;
 
   return (
