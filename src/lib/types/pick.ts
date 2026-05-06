@@ -1,8 +1,8 @@
-export interface Category {
+export interface GroupPick {
   id: string;
-  name: string;
+  title: string;
   description?: string;
-  groupId: string;
+  categoryId: string;
   createdAt: Date;
   creatorId: string;
 }

@@ -29,7 +29,7 @@ export function CategoryList({
   function startEdit(category: Category) {
     setEditingId(category.id);
     setEditName(category.name);
-    setEditDescription(category.description);
+    setEditDescription(category.description ?? "");
     setError(undefined);
     setShowCreateForm(false);
   }

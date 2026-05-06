@@ -42,7 +42,8 @@ export async function getCategoryById(
 
   if (!snap.exists()) return undefined;
 
-  return firebaseToCategory(id, snap.val() as FirebaseCategoryPublic);
+  const data = snap.val() as FirebaseCategoryPublic;
+  return firebaseToCategory(id, data);
 }
 
 export async function createCategory(

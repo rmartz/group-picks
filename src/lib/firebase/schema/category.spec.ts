@@ -12,9 +12,9 @@ function makeFirebaseCategoryPublic(
   overrides?: Partial<FirebaseCategoryPublic>,
 ): FirebaseCategoryPublic {
   return {
-    groupId: "group-1",
     name: "Best Movies",
     description: "Vote on the best movies",
+    groupId: "group-1",
     createdAt: FIXED_TIMESTAMP,
     creatorId: "user-123",
     ...overrides,
@@ -37,6 +37,18 @@ describe("categoryToFirebase", () => {
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-123");
   });
+
+  it("omits description when it is undefined", () => {
+    const result = categoryToFirebase({
+      name: "Best Movies",
+      description: undefined,
+      groupId: "group-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+    });
+
+    expect(result.description).toBeUndefined();
+  });
 });
 
 describe("firebaseToCategory", () => {
@@ -50,6 +62,14 @@ describe("firebaseToCategory", () => {
     expect(result.description).toBe("Vote on the best movies");
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
+  });
+
+  it("returns undefined description when absent from Firebase data", () => {
+    const data = makeFirebaseCategoryPublic({ description: undefined });
+
+    const result = firebaseToCategory("cat-xyz", data);
+
+    expect(result.description).toBeUndefined();
   });
 
   it("round-trips through Firebase format", () => {

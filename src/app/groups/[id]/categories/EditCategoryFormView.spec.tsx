@@ -42,15 +42,13 @@ describe("EditCategoryFormView", () => {
       />,
     );
 
-    const nameInput = screen.getByLabelText(
-      CATEGORY_COPY.editForm.nameLabel,
-    );
+    const nameInput = screen.getByLabelText(CATEGORY_COPY.editForm.nameLabel);
     const descInput = screen.getByLabelText(
       CATEGORY_COPY.editForm.descriptionLabel,
     );
 
-    expect(nameInput.value).toBe("Best Movies");
-    expect(descInput.value).toBe("Vote on movies");
+    expect((nameInput as HTMLInputElement).value).toBe("Best Movies");
+    expect((descInput as HTMLInputElement).value).toBe("Vote on movies");
   });
 
   it("renders save and cancel buttons", () => {
@@ -125,14 +123,10 @@ describe("EditCategoryFormView", () => {
       />,
     );
 
-    const submitBtn = screen.getByText(
-      CATEGORY_COPY.editForm.submitButton,
-    );
-    const cancelBtn = screen.getByText(
-      CATEGORY_COPY.editForm.cancelButton,
-    );
+    const submitBtn = screen.getByText(CATEGORY_COPY.editForm.submitButton);
+    const cancelBtn = screen.getByText(CATEGORY_COPY.editForm.cancelButton);
 
-    expect(submitBtn.disabled).toBe(true);
-    expect(cancelBtn.disabled).toBe(true);
+    expect((submitBtn as HTMLButtonElement).disabled).toBe(true);
+    expect((cancelBtn as HTMLButtonElement).disabled).toBe(true);
   });
 });
