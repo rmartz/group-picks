@@ -64,13 +64,10 @@ export async function getOrCreateGroupInvite(
 }
 
 export async function setGroupInviteExpiry(
-  groupId: string,
+  token: string,
   expiresAt: Date | undefined,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  const tokenSnap = await db.ref(`groups/${groupId}/inviteToken`).get();
-  if (!tokenSnap.exists()) return;
-  const token = tokenSnap.val() as string;
   await db.ref(`invites/${token}/expiresAt`).set(expiresAt?.getTime() ?? null);
 }
 

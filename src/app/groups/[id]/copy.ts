@@ -14,5 +14,6 @@ export const GROUP_DETAIL_COPY = {
   inviteExpiredBadge: "Expired",
   errors: {
     saveFailed: "Failed to save expiry. Please try again.",
+    copyFailed: "Failed to copy link. Please copy it manually.",
   },
 } as const;

@@ -35,12 +35,17 @@ export function InviteLinkSection({
       : `/groups/join?token=${token}`;
 
   function handleCopy() {
-    void navigator.clipboard.writeText(inviteUrl).then(() => {
-      setCopied(true);
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    });
+    navigator.clipboard.writeText(inviteUrl).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => {
+          setCopied(false);
+        }, 2000);
+      },
+      () => {
+        setError(GROUP_DETAIL_COPY.errors.copyFailed);
+      },
+    );
   }
 
   async function handleSave() {
@@ -48,7 +53,7 @@ export function InviteLinkSection({
     setLoading(true);
     try {
       const newExpiresAt = expiryInput
-        ? new Date(expiryInput).toISOString()
+        ? new Date(`${expiryInput}T23:59:59`).toISOString()
         : null;
       await setInviteExpiry(groupId, newExpiresAt);
       setExpiresAt(newExpiresAt);

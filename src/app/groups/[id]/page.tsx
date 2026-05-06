@@ -16,6 +16,7 @@ export default async function GroupDetailPage({
   const group = await getGroupById(id);
 
   if (!group) notFound();
+  if (!group.memberIds.includes(uid)) notFound();
 
   const invite = await getOrCreateGroupInvite(id);
 

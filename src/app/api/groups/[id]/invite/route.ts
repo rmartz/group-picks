@@ -81,7 +81,7 @@ export async function PATCH(
   }
 
   const invite = await getOrCreateGroupInvite(id);
-  await setGroupInviteExpiry(id, expiresAt);
+  await setGroupInviteExpiry(invite.token, expiresAt);
 
   return NextResponse.json({
     token: invite.token,
