@@ -7,6 +7,8 @@ import {
 
 const FIXED_DATE = new Date("2025-03-10T09:00:00.000Z");
 const FIXED_TIMESTAMP = FIXED_DATE.getTime();
+const CLOSES_AT = new Date("2025-03-17T09:00:00.000Z");
+const CLOSED_AT = new Date("2025-03-17T11:00:00.000Z");
 
 function makeFirebaseCategoryPublic(
   overrides?: Partial<FirebaseCategoryPublic>,
@@ -17,6 +19,15 @@ function makeFirebaseCategoryPublic(
     groupId: "group-1",
     createdAt: FIXED_TIMESTAMP,
     creatorId: "user-123",
+    topPickCount: 3,
+    rankedBallots: [
+      ["pick-1", "pick-2"],
+      ["pick-2", "pick-1"],
+    ],
+    rankedCount: 2,
+    totalCount: 4,
+    closesAt: CLOSES_AT.getTime(),
+    closedAt: CLOSED_AT.getTime(),
     ...overrides,
   };
 }
@@ -29,6 +40,12 @@ describe("categoryToFirebase", () => {
       description: "Vote on the best movies",
       createdAt: FIXED_DATE,
       creatorId: "user-123",
+      topPickCount: 3,
+      rankedBallots: [["pick-1", "pick-2"]],
+      rankedCount: 1,
+      totalCount: 3,
+      closesAt: CLOSES_AT,
+      closedAt: CLOSED_AT,
     });
 
     expect(result.groupId).toBe("group-1");
@@ -36,6 +53,12 @@ describe("categoryToFirebase", () => {
     expect(result.description).toBe("Vote on the best movies");
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-123");
+    expect(result.topPickCount).toBe(3);
+    expect(result.rankedBallots).toEqual([["pick-1", "pick-2"]]);
+    expect(result.rankedCount).toBe(1);
+    expect(result.totalCount).toBe(3);
+    expect(result.closesAt).toBe(CLOSES_AT.getTime());
+    expect(result.closedAt).toBe(CLOSED_AT.getTime());
   });
 
   it("omits description when it is undefined", () => {
@@ -62,6 +85,15 @@ describe("firebaseToCategory", () => {
     expect(result.description).toBe("Vote on the best movies");
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
+    expect(result.topPickCount).toBe(3);
+    expect(result.rankedBallots).toEqual([
+      ["pick-1", "pick-2"],
+      ["pick-2", "pick-1"],
+    ]);
+    expect(result.rankedCount).toBe(2);
+    expect(result.totalCount).toBe(4);
+    expect(result.closesAt).toEqual(CLOSES_AT);
+    expect(result.closedAt).toEqual(CLOSED_AT);
   });
 
   it("returns undefined description when absent from Firebase data", () => {

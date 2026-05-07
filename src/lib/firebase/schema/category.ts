@@ -6,12 +6,28 @@ export interface FirebaseCategoryPublic {
   groupId: string;
   createdAt: number;
   creatorId: string;
+  topPickCount?: number;
+  rankedBallots?: string[][];
+  rankedCount?: number;
+  totalCount?: number;
+  closesAt?: number;
+  closedAt?: number;
 }
 
 export function categoryToFirebase(
   category: Pick<
     Category,
-    "name" | "description" | "groupId" | "createdAt" | "creatorId"
+    | "name"
+    | "description"
+    | "groupId"
+    | "createdAt"
+    | "creatorId"
+    | "topPickCount"
+    | "rankedBallots"
+    | "rankedCount"
+    | "totalCount"
+    | "closesAt"
+    | "closedAt"
   >,
 ): FirebaseCategoryPublic {
   return {
@@ -20,6 +36,12 @@ export function categoryToFirebase(
     groupId: category.groupId,
     createdAt: category.createdAt.getTime(),
     creatorId: category.creatorId,
+    topPickCount: category.topPickCount,
+    rankedBallots: category.rankedBallots,
+    rankedCount: category.rankedCount,
+    totalCount: category.totalCount,
+    closesAt: category.closesAt?.getTime(),
+    closedAt: category.closedAt?.getTime(),
   };
 }
 
@@ -34,5 +56,11 @@ export function firebaseToCategory(
     groupId: data.groupId,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
+    topPickCount: data.topPickCount,
+    rankedBallots: data.rankedBallots,
+    rankedCount: data.rankedCount,
+    totalCount: data.totalCount,
+    closesAt: data.closesAt === undefined ? undefined : new Date(data.closesAt),
+    closedAt: data.closedAt === undefined ? undefined : new Date(data.closedAt),
   };
 }

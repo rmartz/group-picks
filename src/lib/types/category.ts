@@ -5,4 +5,10 @@ export interface Category {
   groupId: string;
   createdAt: Date;
   creatorId: string;
+  topPickCount?: number;
+  rankedBallots?: string[][];
+  rankedCount?: number;
+  totalCount?: number;
+  closesAt?: Date;
+  closedAt?: Date;
 }

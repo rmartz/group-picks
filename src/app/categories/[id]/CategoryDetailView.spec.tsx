@@ -127,4 +127,55 @@ describe("CategoryDetailView", () => {
 
     expect(screen.queryByText(CATEGORY_DETAIL_COPY.noPicksMessage)).toBeNull();
   });
+
+  it("renders locked top picks state when pick is still open", () => {
+    const category = makeCategory({
+      topPickCount: 3,
+      rankedCount: 2,
+      totalCount: 5,
+    });
+    const picks = [
+      makePick({ id: "pick-1", title: "Movie One" }),
+      makePick({ id: "pick-2", title: "Movie Two" }),
+      makePick({ id: "pick-3", title: "Movie Three" }),
+    ];
+
+    render(<CategoryDetailView category={category} picks={picks} />);
+
+    expect(
+      screen.getByText(CATEGORY_DETAIL_COPY.topPicksLockedHeadline),
+    ).toBeDefined();
+    expect(
+      screen.getByText(CATEGORY_DETAIL_COPY.topPicksLockedDescription),
+    ).toBeDefined();
+    expect(screen.getByText("2/5")).toBeDefined();
+    expect(screen.queryByText("#1 Movie One")).toBeNull();
+  });
+
+  it("renders only top N ranked picks when the pick is closed", () => {
+    const category = makeCategory({
+      topPickCount: 2,
+      rankedBallots: [
+        ["pick-1", "pick-2", "pick-3"],
+        ["pick-1", "pick-3", "pick-2"],
+        ["pick-2", "pick-1", "pick-3"],
+      ],
+      closedAt: new Date("2025-01-21T00:00:00.000Z"),
+    });
+    const picks = [
+      makePick({ id: "pick-1", title: "Movie One" }),
+      makePick({ id: "pick-2", title: "Movie Two" }),
+      makePick({ id: "pick-3", title: "Movie Three" }),
+    ];
+
+    render(<CategoryDetailView category={category} picks={picks} />);
+
+    expect(screen.getByText("Top 2")).toBeDefined();
+    expect(screen.getByText("#1 Movie One")).toBeDefined();
+    expect(screen.getByText("#2 Movie Two")).toBeDefined();
+    expect(screen.queryByText("#3 Movie Three")).toBeNull();
+    expect(
+      screen.queryByText(CATEGORY_DETAIL_COPY.topPicksLockedHeadline),
+    ).toBeNull();
+  });
 });
