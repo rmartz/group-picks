@@ -1,9 +1,17 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 afterEach(cleanup);
+
+vi.mock("./categories/CategoryList", () => ({
+  CategoryList: () => <div data-testid="category-list" />,
+}));
 
 function makeGroup() {
   return {
@@ -18,14 +26,14 @@ function makeGroup() {
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
   it("renders the member count", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
@@ -35,7 +43,7 @@ describe("GroupDetailView", () => {
 
   it("renders the created at label", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),

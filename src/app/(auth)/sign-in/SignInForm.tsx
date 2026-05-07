@@ -10,6 +10,9 @@ import {
   signInWithApple,
   signInWithGoogle,
 } from "@/services/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { SIGN_IN_COPY } from "./copy";
 
 const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
@@ -78,13 +81,14 @@ export default function SignInForm() {
   return (
     <div className="w-full max-w-sm space-y-6">
       <h1 className="text-2xl font-semibold">{SIGN_IN_COPY.title}</h1>
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={() => {
           void handleOAuthSignIn(signInWithGoogle);
         }}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded border px-4 py-2 text-sm font-medium disabled:opacity-50"
+        className="w-full"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -111,15 +115,16 @@ export default function SignInForm() {
           <path fill="none" d="M0 0h48v48H0z" />
         </svg>
         {SIGN_IN_COPY.googleButton}
-      </button>
+      </Button>
       {appleEnabled && (
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => {
             void handleOAuthSignIn(signInWithApple);
           }}
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded border px-4 py-2 text-sm font-medium disabled:opacity-50"
+          className="w-full"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -130,7 +135,7 @@ export default function SignInForm() {
             <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.3-150.3-93.2c-52.3-65.3-95.9-166.3-95.9-262.6 0-175.1 114.4-267.3 227.2-267.3 59.7 0 109.4 39.5 147.2 39.5 35.8 0 92.1-42.2 160.9-42.2 25.9 0 108.2 2.6 168.1 80.1zm-128.5-111.3c26.5-31.7 45.4-75.8 45.4-119.9 0-6.1-.5-12.2-1.6-17.3-42.8 1.6-93.5 28.5-124.1 64.8-22.4 25.2-44.7 68.7-44.7 113.4 0 6.7 1.1 13.4 1.6 15.5 2.7.5 7 1.1 11.3 1.1 38.4 0 86.2-25.8 112.1-57.6z" />
           </svg>
           {SIGN_IN_COPY.appleButton}
-        </button>
+        </Button>
       )}
       <div className="flex items-center gap-3 text-sm text-gray-400">
         <hr className="flex-1" />
@@ -144,10 +149,8 @@ export default function SignInForm() {
         className="space-y-4"
       >
         <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium">
-            {SIGN_IN_COPY.emailLabel}
-          </label>
-          <input
+          <Label htmlFor="email">{SIGN_IN_COPY.emailLabel}</Label>
+          <Input
             id="email"
             type="email"
             autoComplete="email"
@@ -157,14 +160,12 @@ export default function SignInForm() {
               setEmail(e.target.value);
             }}
             placeholder={SIGN_IN_COPY.emailPlaceholder}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className="w-full"
           />
         </div>
         <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium">
-            {SIGN_IN_COPY.passwordLabel}
-          </label>
-          <input
+          <Label htmlFor="password">{SIGN_IN_COPY.passwordLabel}</Label>
+          <Input
             id="password"
             type="password"
             autoComplete="current-password"
@@ -173,17 +174,13 @@ export default function SignInForm() {
             onChange={(e) => {
               setPassword(e.target.value);
             }}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className="w-full"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading} className="w-full">
           {SIGN_IN_COPY.submitButton}
-        </button>
+        </Button>
       </form>
       <div className="flex items-center justify-between text-sm">
         <Link href="/forgot-password" className="underline">
