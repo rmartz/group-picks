@@ -1,6 +1,7 @@
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
 import { CATEGORY_DETAIL_COPY } from "./copy";
+import { ReopenPickButton } from "./ReopenPickButton";
 
 interface CategoryDetailViewProps {
   category: Category;
@@ -33,9 +34,25 @@ export function CategoryDetailView({
           <ul className="space-y-2">
             {picks.map((pick) => (
               <li key={pick.id} className="rounded-md border p-3 text-sm">
-                <p className="font-medium">{pick.title}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medium">{pick.title}</p>
+                  {pick.closedAt !== undefined && (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                      {CATEGORY_DETAIL_COPY.closedBadge}
+                    </span>
+                  )}
+                </div>
                 {pick.description?.trim() && (
                   <p className="text-muted-foreground">{pick.description}</p>
+                )}
+                {pick.closedAt !== undefined && (
+                  <div className="mt-2">
+                    <ReopenPickButton
+                      groupId={category.groupId}
+                      categoryId={category.id}
+                      pickId={pick.id}
+                    />
+                  </div>
                 )}
               </li>
             ))}
