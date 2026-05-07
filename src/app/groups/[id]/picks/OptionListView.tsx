@@ -52,10 +52,7 @@ export function OptionListView({
           >
             <span className="font-medium">{option.name}</span>
             <span className="text-sm text-gray-500">
-              {OPTION_LIST_COPY.interestCount(
-                option.interestedCount,
-                options.length,
-              )}
+              {OPTION_LIST_COPY.interestCount(option.interestedCount)}
             </span>
             <HeartButton
               interested={interestedOptionIds.includes(option.id)}

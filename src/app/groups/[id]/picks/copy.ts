@@ -12,7 +12,6 @@ export const OPTION_LIST_COPY = {
     markInterested: "Mark interested",
     removeInterest: "Remove interest",
   },
-  interestCount: (interested: number, total: number) =>
-    `${String(interested)}/${String(total)} interested`,
+  interestCount: (count: number) => `${String(count)} interested`,
   headerCaption: "Tap a heart to mark interest",
 } as const;

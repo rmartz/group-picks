@@ -1,4 +1,4 @@
-import { getDatabase, ServerValue } from "firebase-admin/database";
+import { getDatabase } from "firebase-admin/database";
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
   firebaseToInterests,
@@ -24,6 +24,11 @@ export async function getUserInterestsForPick(
   return firebaseToInterests(pickId, categoryId, data);
 }
 
+interface PickInterestData {
+  interests?: Record<string, Record<string, true>>;
+  options?: Record<string, { interestedCount?: number }>;
+}
+
 export async function toggleOptionInterest(
   categoryId: string,
   pickId: string,
@@ -31,27 +36,41 @@ export async function toggleOptionInterest(
   userId: string,
 ): Promise<boolean> {
   const db = getDatabase(getAdminApp());
-  const interestRef = db.ref(
-    `categories/${categoryId}/picks/${pickId}/interests/${userId}/${optionId}`,
-  );
-  const optionInterestedCountRef = db.ref(
-    `categories/${categoryId}/picks/${pickId}/options/${optionId}/interestedCount`,
-  );
+  const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
 
-  const result = await interestRef.transaction(
-    (current: true | undefined | null) => {
-      if (current) {
-        return null; // remove
-      }
-      return true; // add
-    },
-  );
+  let nowInterested = false;
 
-  const nowInterested = result.snapshot.exists();
+  await pickRef.transaction((current: PickInterestData | null) => {
+    if (current === null) return current;
 
-  await optionInterestedCountRef.set(
-    ServerValue.increment(nowInterested ? 1 : -1),
-  );
+    const wasInterested = current.interests?.[userId]?.[optionId] === true;
+    nowInterested = !wasInterested;
+
+    const existingUserInterests = current.interests?.[userId] ?? {};
+    const withoutOption = Object.fromEntries(
+      Object.entries(existingUserInterests).filter(([k]) => k !== optionId),
+    ) as Record<string, true>;
+    const userInterests: Record<string, true> = wasInterested
+      ? withoutOption
+      : { ...existingUserInterests, [optionId]: true };
+
+    const currentCount = current.options?.[optionId]?.interestedCount ?? 0;
+
+    return {
+      ...current,
+      interests: {
+        ...(current.interests ?? {}),
+        [userId]: userInterests,
+      },
+      options: {
+        ...(current.options ?? {}),
+        [optionId]: {
+          ...(current.options?.[optionId] ?? {}),
+          interestedCount: currentCount + (wasInterested ? -1 : 1),
+        },
+      },
+    };
+  });
 
   return nowInterested;
 }

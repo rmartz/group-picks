@@ -49,9 +49,7 @@ describe("OptionListView", () => {
 
     render(<OptionListView {...defaultProps} options={options} />);
 
-    expect(
-      screen.getByText(OPTION_LIST_COPY.interestCount(1, 1)),
-    ).toBeDefined();
+    expect(screen.getByText(OPTION_LIST_COPY.interestCount(1))).toBeDefined();
   });
 
   it("renders zero interest count when no one is interested", () => {
@@ -59,9 +57,7 @@ describe("OptionListView", () => {
 
     render(<OptionListView {...defaultProps} options={options} />);
 
-    expect(
-      screen.getByText(OPTION_LIST_COPY.interestCount(0, 1)),
-    ).toBeDefined();
+    expect(screen.getByText(OPTION_LIST_COPY.interestCount(0))).toBeDefined();
   });
 
   it("renders the suggest buttons", () => {
@@ -150,12 +146,10 @@ describe("OptionListView", () => {
 
     render(<OptionListView {...defaultProps} options={options} />);
 
-    expect(
-      screen.getByText(OPTION_LIST_COPY.interestCount(1, 2)),
-    ).toBeDefined();
-    expect(
-      screen.getAllByText(OPTION_LIST_COPY.interestCount(0, 2)),
-    ).toHaveLength(1);
+    expect(screen.getByText(OPTION_LIST_COPY.interestCount(1))).toBeDefined();
+    expect(screen.getAllByText(OPTION_LIST_COPY.interestCount(0))).toHaveLength(
+      1,
+    );
   });
 
   it("calls onToggleInterest when a heart button is clicked", () => {
