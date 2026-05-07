@@ -200,8 +200,8 @@ node "$SCRIPT_DIR/validate-config.mjs" --env="$ENV_NAME"
 
 if [[ "$SYNC" == "true" ]]; then
   echo ""
-  exec "$SCRIPT_DIR/deploy-config.sh" --env="$ENV_NAME"
+  exec pnpm exec sync-env --env="$ENV_NAME"
 fi
 
 echo ""
-echo "YAML updated. Run 'scripts/deploy-config.sh --env=$ENV_NAME' to push to Vercel."
+echo "YAML updated. Run 'pnpm exec sync-env --env=$ENV_NAME' to push to Vercel."
