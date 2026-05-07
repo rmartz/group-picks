@@ -12,11 +12,7 @@ const meta: Meta<typeof GroupDetailView> = {
       creatorId: "user-123",
       memberIds: ["user-123", "user-456", "user-789"],
     },
-    members: [
-      { uid: "user-123", name: "Alice" },
-      { uid: "user-456", name: "Bob" },
-      { uid: "user-789", name: "Carol" },
-    ],
+    categories: [],
   },
 };
 
@@ -24,18 +20,3 @@ export default meta;
 type Story = StoryObj<typeof GroupDetailView>;
 
 export const Default: Story = {};
-
-export const SingleMember: Story = {
-  args: {
-    members: [{ uid: "user-123", name: "Alice" }],
-  },
-};
-
-export const ManyMembers: Story = {
-  args: {
-    members: Array.from({ length: 10 }, (_, i) => ({
-      uid: `user-${i}`,
-      name: `Member ${i + 1}`,
-    })),
-  },
-};

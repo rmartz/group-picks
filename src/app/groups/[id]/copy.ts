@@ -1,8 +1,5 @@
 export const GROUP_DETAIL_COPY = {
-  membersTitle: "Members",
-  categoriesTitle: "Categories",
-  picksTitle: "Picks",
-  noCategories: "No categories yet.",
-  noPicks: "No picks yet.",
+  membersLabel: "Members",
+  createdAtLabel: "Created",
   notFound: "Group not found.",
 } as const;
