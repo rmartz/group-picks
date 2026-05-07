@@ -1,8 +1,11 @@
 import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
 import { PickStatus, type GroupPick } from "@/lib/types/pick";
+import { PickStatusChip } from "@/components/PickStatusChip";
 import { GROUP_DETAIL_COPY } from "./copy";
 import { CategoryList } from "./categories/CategoryList";
+
+const CLOSED_PICK_BORDER_COLOR = "#cdb8ad";
 
 interface GroupDetailViewProps {
   group: Group;
@@ -69,12 +72,14 @@ function PicksByCategory({ categories, picks }: PicksByCategoryProps) {
                 style={{
                   borderLeftWidth: "3px",
                   borderLeftColor:
-                    pick.status === PickStatus.Open ? "black" : "#cdb8ad",
+                    pick.status === PickStatus.Open
+                      ? "black"
+                      : CLOSED_PICK_BORDER_COLOR,
                 }}
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{pick.title}</p>
-                  <GroupPickStatusChip status={pick.status} />
+                  <PickStatusChip status={pick.status} />
                 </div>
                 {pick.dueDate && (
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -90,24 +95,5 @@ function PicksByCategory({ categories, picks }: PicksByCategoryProps) {
         </div>
       ))}
     </div>
-  );
-}
-
-interface GroupPickStatusChipProps {
-  status: PickStatus;
-}
-
-function GroupPickStatusChip({ status }: GroupPickStatusChipProps) {
-  if (status === PickStatus.Open) {
-    return (
-      <span className="inline-flex shrink-0 items-center rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
-        ● {GROUP_DETAIL_COPY.statusOpen}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex shrink-0 items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-      {GROUP_DETAIL_COPY.statusClosed}
-    </span>
   );
 }

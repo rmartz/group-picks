@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { CategoryDetailView } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
+import { PICK_STATUS_CHIP_COPY } from "@/components/PickStatusChip.copy";
 import type { Category } from "@/lib/types/category";
 import { PickStatus, type GroupPick } from "@/lib/types/pick";
 
@@ -135,7 +136,7 @@ describe("CategoryDetailView", () => {
     render(<CategoryDetailView category={category} picks={[pick]} />);
 
     expect(
-      screen.getByText(`● ${CATEGORY_DETAIL_COPY.statusOpen}`),
+      screen.getByText(`● ${PICK_STATUS_CHIP_COPY.statusOpen}`),
     ).toBeDefined();
   });
 
@@ -144,7 +145,7 @@ describe("CategoryDetailView", () => {
     const pick = makePick({ status: PickStatus.Closed });
     render(<CategoryDetailView category={category} picks={[pick]} />);
 
-    expect(screen.getByText(CATEGORY_DETAIL_COPY.statusClosed)).toBeDefined();
+    expect(screen.getByText(PICK_STATUS_CHIP_COPY.statusClosed)).toBeDefined();
   });
 
   it("renders the due date with closes prefix for an open pick", () => {

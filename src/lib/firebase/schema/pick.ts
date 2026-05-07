@@ -33,16 +33,21 @@ export function pickToFirebase(
   };
 }
 
+const VALID_PICK_STATUSES = new Set<string>(Object.values(PickStatus));
+
 export function firebaseToPick(
   id: string,
   data: FirebasePickPublic,
 ): GroupPick {
+  const status = VALID_PICK_STATUSES.has(data.status)
+    ? (data.status as PickStatus)
+    : PickStatus.Open;
   return {
     id,
     title: data.title,
     description: data.description,
     categoryId: data.categoryId,
-    status: (data.status as PickStatus) ?? PickStatus.Open,
+    status,
     dueDate: data.dueDate != null ? new Date(data.dueDate) : undefined,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,

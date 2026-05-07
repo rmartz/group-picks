@@ -1,5 +1,6 @@
 import type { Category } from "@/lib/types/category";
 import { PickStatus, type GroupPick } from "@/lib/types/pick";
+import { PickStatusChip } from "@/components/PickStatusChip";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 
 interface CategoryDetailViewProps {
@@ -54,24 +55,5 @@ export function CategoryDetailView({
         )}
       </section>
     </main>
-  );
-}
-
-interface PickStatusChipProps {
-  status: PickStatus;
-}
-
-function PickStatusChip({ status }: PickStatusChipProps) {
-  if (status === PickStatus.Open) {
-    return (
-      <span className="inline-flex shrink-0 items-center rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
-        ● {CATEGORY_DETAIL_COPY.statusOpen}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex shrink-0 items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-      {CATEGORY_DETAIL_COPY.statusClosed}
-    </span>
   );
 }

@@ -129,4 +129,12 @@ describe("firebaseToPick", () => {
 
     expect(result.status).toBe(PickStatus.Closed);
   });
+
+  it("defaults to open status when Firebase data has an unrecognized status value", () => {
+    const data = makeFirebasePickPublic({ status: "unknown" });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.status).toBe(PickStatus.Open);
+  });
 });
