@@ -37,16 +37,32 @@ const meta: Meta<typeof CategoryListView> = {
     editDescription: "",
     loading: false,
     error: undefined,
+    showCreatePickForCategoryId: undefined,
+    createPickCategoryId: "cat-1",
+    createPickName: "",
+    createPickDescription: "",
+    createPickTopCount: "3",
+    createPickDueDate: "",
+    pickLoading: false,
+    pickError: undefined,
     onStartCreate: () => undefined,
     onCancelCreate: () => undefined,
+    onStartCreatePick: () => undefined,
+    onCancelCreatePick: () => undefined,
     onStartEdit: noopCategory,
     onCancelEdit: () => undefined,
     onCreateNameChange: () => undefined,
     onCreateDescriptionChange: () => undefined,
     onEditNameChange: () => undefined,
     onEditDescriptionChange: () => undefined,
+    onCreatePickCategoryChange: () => undefined,
+    onCreatePickNameChange: () => undefined,
+    onCreatePickDescriptionChange: () => undefined,
+    onCreatePickTopCountChange: () => undefined,
+    onCreatePickDueDateChange: () => undefined,
     onCreateSubmit: () => undefined,
     onEditSubmit: () => undefined,
+    onCreatePickSubmit: () => undefined,
   },
 };
 
@@ -73,6 +89,15 @@ export const EditFormOpen: Story = {
     editingId: "cat-1",
     editName: "Best Movies",
     editDescription: "Vote on your favorite movies of all time",
+  },
+};
+
+export const CreatePickFormOpen: Story = {
+  args: {
+    showCreatePickForCategoryId: "cat-1",
+    createPickCategoryId: "cat-1",
+    createPickName: "Greatest Movie",
+    createPickTopCount: "5",
   },
 };
 

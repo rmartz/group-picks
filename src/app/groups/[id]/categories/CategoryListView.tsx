@@ -1,5 +1,6 @@
 import type { Category } from "@/lib/types/category";
 import { CreateCategoryFormView } from "./CreateCategoryFormView";
+import { CreatePickFormView } from "./CreatePickFormView";
 import { EditCategoryFormView } from "./EditCategoryFormView";
 import { CATEGORY_COPY } from "./copy";
 
@@ -13,16 +14,32 @@ export interface CategoryListViewProps {
   editDescription: string;
   loading: boolean;
   error: string | undefined;
+  showCreatePickForCategoryId: string | undefined;
+  createPickCategoryId: string;
+  createPickName: string;
+  createPickDescription: string;
+  createPickTopCount: string;
+  createPickDueDate: string;
+  pickLoading: boolean;
+  pickError: string | undefined;
   onStartCreate: () => void;
   onCancelCreate: () => void;
+  onStartCreatePick: (categoryId: string) => void;
+  onCancelCreatePick: () => void;
   onStartEdit: (category: Category) => void;
   onCancelEdit: () => void;
   onCreateNameChange: (name: string) => void;
   onCreateDescriptionChange: (description: string) => void;
   onEditNameChange: (name: string) => void;
   onEditDescriptionChange: (description: string) => void;
+  onCreatePickCategoryChange: (categoryId: string) => void;
+  onCreatePickNameChange: (name: string) => void;
+  onCreatePickDescriptionChange: (description: string) => void;
+  onCreatePickTopCountChange: (topCount: string) => void;
+  onCreatePickDueDateChange: (dueDate: string) => void;
   onCreateSubmit: (e: React.SyntheticEvent) => void;
   onEditSubmit: (e: React.SyntheticEvent) => void;
+  onCreatePickSubmit: (e: React.SyntheticEvent) => void;
 }
 
 export function CategoryListView({
@@ -35,16 +52,32 @@ export function CategoryListView({
   editDescription,
   loading,
   error,
+  showCreatePickForCategoryId,
+  createPickCategoryId,
+  createPickName,
+  createPickDescription,
+  createPickTopCount,
+  createPickDueDate,
+  pickLoading,
+  pickError,
   onStartCreate,
   onCancelCreate,
+  onStartCreatePick,
+  onCancelCreatePick,
   onStartEdit,
   onCancelEdit,
   onCreateNameChange,
   onCreateDescriptionChange,
   onEditNameChange,
   onEditDescriptionChange,
+  onCreatePickCategoryChange,
+  onCreatePickNameChange,
+  onCreatePickDescriptionChange,
+  onCreatePickTopCountChange,
+  onCreatePickDueDateChange,
   onCreateSubmit,
   onEditSubmit,
+  onCreatePickSubmit,
 }: CategoryListViewProps) {
   return (
     <div className="space-y-4">
@@ -108,15 +141,47 @@ export function CategoryListView({
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={() => {
-                    onStartEdit(category);
-                  }}
-                  disabled={loading}
-                  className="shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
-                >
-                  {CATEGORY_COPY.editButton}
-                </button>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    onClick={() => {
+                      onStartCreatePick(category.id);
+                    }}
+                    disabled={loading || pickLoading}
+                    className="rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
+                  >
+                    {CATEGORY_COPY.addPickButton}
+                  </button>
+                  <button
+                    onClick={() => {
+                      onStartEdit(category);
+                    }}
+                    disabled={loading}
+                    className="rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
+                  >
+                    {CATEGORY_COPY.editButton}
+                  </button>
+                </div>
+              </div>
+            )}
+            {showCreatePickForCategoryId === category.id && (
+              <div className="mt-4 rounded border p-4">
+                <CreatePickFormView
+                  categories={categories}
+                  categoryId={createPickCategoryId}
+                  name={createPickName}
+                  description={createPickDescription}
+                  topCount={createPickTopCount}
+                  dueDate={createPickDueDate}
+                  loading={pickLoading}
+                  error={pickError}
+                  onCategoryChange={onCreatePickCategoryChange}
+                  onNameChange={onCreatePickNameChange}
+                  onDescriptionChange={onCreatePickDescriptionChange}
+                  onTopCountChange={onCreatePickTopCountChange}
+                  onDueDateChange={onCreatePickDueDateChange}
+                  onSubmit={onCreatePickSubmit}
+                  onCancel={onCancelCreatePick}
+                />
               </div>
             )}
           </li>
