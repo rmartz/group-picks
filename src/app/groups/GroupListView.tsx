@@ -12,8 +12,8 @@ export function GroupListView({ groups }: GroupListViewProps) {
     <main className="mx-auto max-w-lg space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{GROUP_LIST_COPY.title}</h1>
-        <Button asChild>
-          <Link href="/groups/new">{GROUP_LIST_COPY.newGroupButton}</Link>
+        <Button render={<Link href="/groups/new" />}>
+          {GROUP_LIST_COPY.newGroupButton}
         </Button>
       </div>
       {groups.length === 0 ? (

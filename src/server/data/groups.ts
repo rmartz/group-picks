@@ -35,3 +35,20 @@ export async function getGroupsByUserId(uid: string): Promise<Group[]> {
   const groups = await Promise.all(groupIds.map((id) => getGroupById(id)));
   return groups.filter((g): g is Group => g !== undefined);
 }
+
+export async function removeMember(
+  groupId: string,
+  uid: string,
+): Promise<{ lastMember: boolean }> {
+  const db = getDatabase(getAdminApp());
+  const result = await db
+    .ref(`groups/${groupId}/members`)
+    .transaction((members: Record<string, unknown> | null) => {
+      if (!members) return members;
+      if (Object.keys(members).length <= 1) return undefined;
+      return Object.fromEntries(
+        Object.entries(members).filter(([key]) => key !== uid),
+      );
+    });
+  return { lastMember: !result.committed };
+}

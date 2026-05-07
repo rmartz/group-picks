@@ -10,8 +10,8 @@ export default function Home() {
         <h1 className="text-4xl font-semibold tracking-tight">
           {HOME_PAGE_COPY.title}
         </h1>
-        <Button asChild>
-          <Link href="/groups">{HOME_PAGE_COPY.myGroupsButton}</Link>
+        <Button render={<Link href="/groups" />}>
+          {HOME_PAGE_COPY.myGroupsButton}
         </Button>
         <SignOutButton />
       </main>
