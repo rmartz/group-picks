@@ -1,4 +1,5 @@
 export const OPTION_LIST_COPY = {
+  suggestFormLabel: "Suggest an option",
   suggestPlaceholder: "Option name",
   suggestButton: "Suggest",
   ownerCount: {

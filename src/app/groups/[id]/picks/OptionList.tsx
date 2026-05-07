@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { PickOption } from "@/lib/types/option";
+import { getClientAuth } from "@/lib/firebase/client";
 import { createOption } from "@/services/options";
 import { OptionListView } from "./OptionListView";
 import { OPTION_LIST_COPY } from "./copy";
@@ -29,16 +30,18 @@ export function OptionList({
     setError(undefined);
     setLoading(true);
     try {
+      const trimmedName = newOptionName.trim();
+      const creatorId = getClientAuth().currentUser?.uid ?? "";
       const { optionId, createdAt } = await createOption(
         groupId,
         categoryId,
         pickId,
-        newOptionName.trim(),
+        trimmedName,
       );
       const newOption: PickOption = {
         id: optionId,
-        name: newOptionName.trim(),
-        creatorId: "",
+        name: trimmedName,
+        creatorId,
         owners: [],
         createdAt,
         pickId,

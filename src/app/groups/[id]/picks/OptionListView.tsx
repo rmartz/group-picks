@@ -40,7 +40,7 @@ export function OptionListView({
         ))}
       </ul>
 
-      <form aria-label="form" onSubmit={onSuggest} className="space-y-2">
+      <form aria-label={OPTION_LIST_COPY.suggestFormLabel} onSubmit={onSuggest} className="space-y-2">
         <div className="flex gap-2">
           <Input
             value={newOptionName}
