@@ -9,6 +9,10 @@ vi.mock("next/navigation", () => ({
 
 afterEach(cleanup);
 
+vi.mock("./categories/CategoryList", () => ({
+  CategoryList: () => <div data-testid="category-list" />,
+}));
+
 function makeGroup() {
   return {
     id: "group-1",
@@ -22,14 +26,14 @@ function makeGroup() {
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
   it("renders the member count", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
@@ -39,7 +43,7 @@ describe("GroupDetailView", () => {
 
   it("renders the created at label", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
