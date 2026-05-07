@@ -37,11 +37,16 @@ export function firebaseToPick(
   id: string,
   data: FirebasePickPublic,
 ): GroupPick {
+  const isValidClosedAt =
+    typeof data.closedAt === "number" &&
+    Number.isFinite(data.closedAt) &&
+    data.closedAt > 0 &&
+    data.closedAt <= Date.now();
+
   return {
     id,
     categoryId: data.categoryId,
-    closedAt:
-      typeof data.closedAt === "number" ? new Date(data.closedAt) : undefined,
+    closedAt: isValidClosedAt ? new Date(data.closedAt) : undefined,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
     description: data.description,

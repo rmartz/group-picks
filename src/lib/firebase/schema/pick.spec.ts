@@ -99,4 +99,21 @@ describe("firebaseToPick", () => {
 
     expect(result.closedAt).toEqual(FIXED_DATE);
   });
+
+  it("returns undefined closedAt when timestamp is in the future", () => {
+    const future = Date.now() + 5_000;
+    const data = makeFirebasePickPublic({ closedAt: future });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedAt).toBeUndefined();
+  });
+
+  it("returns undefined closedAt when timestamp is invalid", () => {
+    const data = makeFirebasePickPublic({ closedAt: Number.NaN });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedAt).toBeUndefined();
+  });
 });
