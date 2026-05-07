@@ -19,3 +19,13 @@ export async function getPicksByCategory(
     firebaseToPick(id, pickData),
   );
 }
+
+export async function getPicksByGroup(
+  categoryIds: string[],
+): Promise<GroupPick[]> {
+  if (categoryIds.length === 0) return [];
+  const results = await Promise.all(
+    categoryIds.map((id) => getPicksByCategory(id)),
+  );
+  return results.flat();
+}

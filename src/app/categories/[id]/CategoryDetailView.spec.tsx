@@ -3,7 +3,7 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { CategoryDetailView } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 import type { Category } from "@/lib/types/category";
-import type { GroupPick } from "@/lib/types/pick";
+import { PickStatus, type GroupPick } from "@/lib/types/pick";
 
 afterEach(cleanup);
 
@@ -25,6 +25,7 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
     title: "The Shawshank Redemption",
     description: "A classic film about hope",
     categoryId: "cat-1",
+    status: PickStatus.Open,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
     creatorId: "user-123",
     ...overrides,
@@ -126,5 +127,60 @@ describe("CategoryDetailView", () => {
     render(<CategoryDetailView category={category} picks={[pick]} />);
 
     expect(screen.queryByText(CATEGORY_DETAIL_COPY.noPicksMessage)).toBeNull();
+  });
+
+  it("renders the open status chip for an open pick", () => {
+    const category = makeCategory();
+    const pick = makePick({ status: PickStatus.Open });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    expect(
+      screen.getByText(`● ${CATEGORY_DETAIL_COPY.statusOpen}`),
+    ).toBeDefined();
+  });
+
+  it("renders the closed status chip for a closed pick", () => {
+    const category = makeCategory();
+    const pick = makePick({ status: PickStatus.Closed });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    expect(screen.getByText(CATEGORY_DETAIL_COPY.statusClosed)).toBeDefined();
+  });
+
+  it("renders the due date with closes prefix for an open pick", () => {
+    const category = makeCategory();
+    const dueDate = new Date("2025-03-15T00:00:00.000Z");
+    const pick = makePick({ status: PickStatus.Open, dueDate });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    const formatted = dueDate.toLocaleDateString();
+    expect(
+      screen.getByText(`${CATEGORY_DETAIL_COPY.closesPrefix} ${formatted}`),
+    ).toBeDefined();
+  });
+
+  it("renders the due date with closed prefix for a closed pick", () => {
+    const category = makeCategory();
+    const dueDate = new Date("2025-03-15T00:00:00.000Z");
+    const pick = makePick({ status: PickStatus.Closed, dueDate });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    const formatted = dueDate.toLocaleDateString();
+    expect(
+      screen.getByText(`${CATEGORY_DETAIL_COPY.closedPrefix} ${formatted}`),
+    ).toBeDefined();
+  });
+
+  it("does not render a due date when absent", () => {
+    const category = makeCategory();
+    const pick = makePick({ dueDate: undefined });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    expect(
+      screen.queryByText(new RegExp(CATEGORY_DETAIL_COPY.closesPrefix)),
+    ).toBeNull();
+    expect(
+      screen.queryByText(new RegExp(CATEGORY_DETAIL_COPY.closedPrefix)),
+    ).toBeNull();
   });
 });

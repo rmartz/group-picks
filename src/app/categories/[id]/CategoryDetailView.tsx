@@ -1,5 +1,5 @@
 import type { Category } from "@/lib/types/category";
-import type { GroupPick } from "@/lib/types/pick";
+import { PickStatus, type GroupPick } from "@/lib/types/pick";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 
 interface CategoryDetailViewProps {
@@ -33,9 +33,20 @@ export function CategoryDetailView({
           <ul className="space-y-2">
             {picks.map((pick) => (
               <li key={pick.id} className="rounded-md border p-3 text-sm">
-                <p className="font-medium">{pick.title}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-medium">{pick.title}</p>
+                  <PickStatusChip status={pick.status} />
+                </div>
                 {pick.description?.trim() && (
                   <p className="text-muted-foreground">{pick.description}</p>
+                )}
+                {pick.dueDate && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {pick.status === PickStatus.Open
+                      ? CATEGORY_DETAIL_COPY.closesPrefix
+                      : CATEGORY_DETAIL_COPY.closedPrefix}{" "}
+                    {pick.dueDate.toLocaleDateString()}
+                  </p>
                 )}
               </li>
             ))}
@@ -43,5 +54,24 @@ export function CategoryDetailView({
         )}
       </section>
     </main>
+  );
+}
+
+interface PickStatusChipProps {
+  status: PickStatus;
+}
+
+function PickStatusChip({ status }: PickStatusChipProps) {
+  if (status === PickStatus.Open) {
+    return (
+      <span className="inline-flex shrink-0 items-center rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+        ● {CATEGORY_DETAIL_COPY.statusOpen}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+      {CATEGORY_DETAIL_COPY.statusClosed}
+    </span>
   );
 }
