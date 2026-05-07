@@ -42,7 +42,7 @@ export function OptionList({
         id: optionId,
         name: trimmedName,
         creatorId,
-        owners: [],
+        owners: creatorId ? [creatorId] : [],
         createdAt,
         pickId,
         categoryId,
