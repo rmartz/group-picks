@@ -25,6 +25,8 @@ variables:
   FIREBASE_PROJECT_ID: "group-picks-staging"
   FIREBASE_DATABASE_URL: ""
 
-  # Sentry — slugs only, not credentials
+  # Sentry — slugs and public DSN (NEXT_PUBLIC_SENTRY_DSN is bundled into client JS; not a secret)
+  # SENTRY_DSN (server-side) and SENTRY_AUTH_TOKEN are managed as Vercel secrets — not committed here
   SENTRY_ORG: "reedmartz"
   SENTRY_PROJECT: "group-picks"
+  NEXT_PUBLIC_SENTRY_DSN: "https://afdaac1d008d17a140375eb11d8ef9b3@o4511071618072576.ingest.us.sentry.io/4511351012851712"
