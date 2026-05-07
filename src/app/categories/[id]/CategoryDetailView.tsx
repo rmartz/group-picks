@@ -24,6 +24,7 @@ export function CategoryDetailView({
     rankedCount !== undefined && totalCount !== undefined && totalCount > 0
       ? Math.min(100, Math.max(0, (rankedCount / totalCount) * 100))
       : 0;
+  const progressWidth = `${progressPercent.toFixed(2)}%`;
   const topResults =
     shouldShowTopPicks && isClosed
       ? runRankedChoice(
@@ -112,7 +113,7 @@ export function CategoryDetailView({
                       <div
                         className="h-1.5 rounded bg-foreground"
                         style={{
-                          width: progressPercent.toString() + "%",
+                          width: progressWidth,
                         }}
                       />
                     </div>
