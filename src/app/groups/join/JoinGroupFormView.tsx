@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { JOIN_GROUP_COPY } from "./copy";
 
 interface JoinGroupFormViewProps {
@@ -21,14 +22,9 @@ export function JoinGroupFormView({
         <span className="font-medium text-gray-900">{groupName}</span>.
       </p>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <button
-        type="button"
-        onClick={onJoin}
-        disabled={loading}
-        className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
+      <Button type="button" onClick={onJoin} disabled={loading}>
         {loading ? JOIN_GROUP_COPY.joiningButton : JOIN_GROUP_COPY.joinButton}
-      </button>
+      </Button>
     </main>
   );
 }
