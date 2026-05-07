@@ -1,6 +1,7 @@
 import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { LeaveGroupButton } from "./LeaveGroupButton";
 import { CategoryList } from "./categories/CategoryList";
 
 interface GroupDetailViewProps {
@@ -23,6 +24,7 @@ export function GroupDetailView({ group, categories }: GroupDetailViewProps) {
         </div>
       </dl>
       <CategoryList groupId={group.id} initialCategories={categories} />
+      <LeaveGroupButton groupId={group.id} />
     </main>
   );
 }
