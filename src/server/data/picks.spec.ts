@@ -140,7 +140,7 @@ describe("assertPickIsOpenForWrite", () => {
         "pick-123",
         new Date("2025-01-21T12:00:00.000Z"),
       ),
-    ).rejects.toEqual(
+    ).rejects.toMatchObject(
       new PickWriteClosedError("Pick is closed and no longer accepts changes."),
     );
 

@@ -37,6 +37,11 @@ export function firebaseToPick(
   id: string,
   data: FirebasePickPublic,
 ): GroupPick {
+  const dueDate =
+    data.dueDate !== undefined ? new Date(data.dueDate) : undefined;
+  const closedAt =
+    data.closedAt !== undefined ? new Date(data.closedAt) : undefined;
+
   return {
     id,
     title: data.title,
@@ -44,7 +49,7 @@ export function firebaseToPick(
     categoryId: data.categoryId,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
-    dueDate: data.dueDate === undefined ? undefined : new Date(data.dueDate),
-    closedAt: data.closedAt === undefined ? undefined : new Date(data.closedAt),
+    dueDate,
+    closedAt,
   };
 }
