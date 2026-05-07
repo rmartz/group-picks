@@ -3,7 +3,7 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { CategoryDetailView } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 import type { Category } from "@/lib/types/category";
-import type { GroupPick } from "@/lib/types/pick";
+import { PickStatus, type GroupPick } from "@/lib/types/pick";
 
 afterEach(cleanup);
 
@@ -25,8 +25,10 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
     title: "The Shawshank Redemption",
     description: "A classic film about hope",
     categoryId: "cat-1",
+    closedAt: undefined,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
     creatorId: "user-123",
+    status: PickStatus.Open,
     ...overrides,
   };
 }
@@ -84,6 +86,27 @@ describe("CategoryDetailView", () => {
     expect(screen.getByText(pick.title)).toBeDefined();
   });
 
+  it("renders closed status for closed picks", () => {
+    const category = makeCategory();
+    const pick = makePick({
+      closedAt: new Date("2025-01-21T12:00:00.000Z"),
+      status: PickStatus.Closed,
+    });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    expect(
+      screen.getByText(CATEGORY_DETAIL_COPY.closedPickLabel),
+    ).toBeDefined();
+  });
+
+  it("renders open status for open picks", () => {
+    const category = makeCategory();
+    const pick = makePick({ status: PickStatus.Open });
+    render(<CategoryDetailView category={category} picks={[pick]} />);
+
+    expect(screen.getByText(CATEGORY_DETAIL_COPY.pickOpenLabel)).toBeDefined();
+  });
+
   it("renders pick descriptions when provided", () => {
     const category = makeCategory();
     const pick = makePick({ description: "A classic film about hope" });
@@ -126,5 +149,41 @@ describe("CategoryDetailView", () => {
     render(<CategoryDetailView category={category} picks={[pick]} />);
 
     expect(screen.queryByText(CATEGORY_DETAIL_COPY.noPicksMessage)).toBeNull();
+  });
+
+  it("renders close pick button for open picks when action is provided", () => {
+    const category = makeCategory();
+    const pick = makePick({ status: PickStatus.Open });
+    render(
+      <CategoryDetailView
+        category={category}
+        closePickAction={() => Promise.resolve()}
+        picks={[pick]}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: CATEGORY_DETAIL_COPY.closePickButton,
+      }),
+    ).toBeDefined();
+  });
+
+  it("does not render close pick button for closed picks", () => {
+    const category = makeCategory();
+    const pick = makePick({ status: PickStatus.Closed });
+    render(
+      <CategoryDetailView
+        category={category}
+        closePickAction={() => Promise.resolve()}
+        picks={[pick]}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: CATEGORY_DETAIL_COPY.closePickButton,
+      }),
+    ).toBeNull();
   });
 });

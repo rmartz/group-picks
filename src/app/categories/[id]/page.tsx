@@ -1,8 +1,11 @@
+import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getCategoryById } from "@/server/data/categories";
-import { getPicksByCategory } from "@/server/data/picks";
+import { getGroupById } from "@/server/data/groups";
+import { closePick, getPicksByCategory } from "@/server/data/picks";
 import { CategoryDetailView } from "./CategoryDetailView";
+import { CATEGORY_DETAIL_COPY } from "./copy";
 
 export default async function CategoryDetailPage({
   params,
@@ -20,5 +23,41 @@ export default async function CategoryDetailPage({
 
   if (!category) notFound();
 
-  return <CategoryDetailView category={category} picks={picks} />;
+  const group = await getGroupById(category.groupId);
+  if (!group) notFound();
+
+  const canClosePicks = group.memberIds.includes(uid);
+
+  async function closePickAction(formData: FormData) {
+    "use server";
+
+    const actionUid = await getVerifiedUid();
+    if (!actionUid) redirect("/sign-in");
+
+    const latestCategory = await getCategoryById(id);
+    if (!latestCategory) throw new Error(CATEGORY_DETAIL_COPY.closePickError);
+
+    const latestGroup = await getGroupById(latestCategory.groupId);
+    if (!latestGroup?.memberIds.includes(actionUid)) {
+      throw new Error(CATEGORY_DETAIL_COPY.closePickError);
+    }
+
+    const pickId = formData.get("pickId");
+    if (typeof pickId !== "string" || !pickId.trim()) {
+      throw new Error(CATEGORY_DETAIL_COPY.closePickError);
+    }
+
+    const wasClosed = await closePick(id, pickId);
+    if (!wasClosed) throw new Error(CATEGORY_DETAIL_COPY.closePickError);
+
+    revalidatePath(`/categories/${id}`);
+  }
+
+  return (
+    <CategoryDetailView
+      category={category}
+      closePickAction={canClosePicks ? closePickAction : undefined}
+      picks={picks}
+    />
+  );
 }

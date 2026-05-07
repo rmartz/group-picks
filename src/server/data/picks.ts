@@ -4,7 +4,7 @@ import {
   firebaseToPick,
   type FirebasePickPublic,
 } from "@/lib/firebase/schema/pick";
-import type { GroupPick } from "@/lib/types/pick";
+import { PickStatus, type GroupPick } from "@/lib/types/pick";
 
 export async function getPicksByCategory(
   categoryId: string,
@@ -18,4 +18,25 @@ export async function getPicksByCategory(
   return Object.entries(data).map(([id, pickData]) =>
     firebaseToPick(id, pickData),
   );
+}
+
+export async function closePick(
+  categoryId: string,
+  pickId: string,
+): Promise<boolean> {
+  const db = getDatabase(getAdminApp());
+  const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
+  const snap = await pickRef.get();
+
+  if (!snap.exists()) return false;
+
+  const pick = snap.val() as FirebasePickPublic;
+  if ((pick.status ?? PickStatus.Open) === PickStatus.Closed) return true;
+
+  await pickRef.update({
+    closedAt: Date.now(),
+    status: PickStatus.Closed,
+  });
+
+  return true;
 }
