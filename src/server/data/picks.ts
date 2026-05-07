@@ -56,7 +56,7 @@ export async function assertPickIsOpenForWrite(
 
   const result = await pickRef.transaction(
     (currentData: FirebasePickPublic | null) => {
-      if (currentData === null) return;
+      if (currentData === null) return undefined;
       if (currentData.closedAt !== undefined) return currentData;
       if (
         currentData.dueDate === undefined ||
