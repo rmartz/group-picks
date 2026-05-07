@@ -60,7 +60,7 @@ export function firebaseToCategory(
     rankedBallots: data.rankedBallots,
     rankedCount: data.rankedCount,
     totalCount: data.totalCount,
-    closesAt: data.closesAt === undefined ? undefined : new Date(data.closesAt),
-    closedAt: data.closedAt === undefined ? undefined : new Date(data.closedAt),
+    closesAt: data.closesAt !== undefined ? new Date(data.closesAt) : undefined,
+    closedAt: data.closedAt !== undefined ? new Date(data.closedAt) : undefined,
   };
 }

@@ -112,7 +112,7 @@ export function CategoryDetailView({
                       <div
                         className="h-1.5 rounded bg-foreground"
                         style={{
-                          width: `${String(progressPercent)}%`,
+                          width: progressPercent.toString() + "%",
                         }}
                       />
                     </div>
