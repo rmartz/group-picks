@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
+import { getCategoriesByGroupId } from "@/server/data/categories";
 import { GroupDetailView } from "./GroupDetailView";
 import { InviteSection } from "./InviteSection";
 
@@ -17,6 +18,9 @@ export default async function GroupDetailPage({
   const group = await getGroupById(id);
 
   if (!group) notFound();
+  if (!group.memberIds.includes(uid)) notFound();
+
+  const categories = await getCategoriesByGroupId(id);
 
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
@@ -28,7 +32,7 @@ export default async function GroupDetailPage({
 
   return (
     <>
-      <GroupDetailView group={group} />
+      <GroupDetailView group={group} categories={categories} />
       <InviteSection
         groupId={group.id}
         initialToken={group.inviteToken}
