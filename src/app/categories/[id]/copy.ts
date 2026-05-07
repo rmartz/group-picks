@@ -3,7 +3,7 @@ export const CATEGORY_DETAIL_COPY = {
   noPicksMessage: "No picks have been added to this category yet.",
   topPicksLabelPrefix: "Top",
   topPicksLockedLabel: "🔒 Top picks",
-  topPicksLockedHeadline: "revealed when the pick closes",
+  topPicksLockedHeadline: "Revealed when the pick closes",
   topPicksLockedDescription:
     "Top picks are calculated once, after everyone has ranked. Hiding live results also keeps later voters from being swayed.",
   topPicksProgressLabel: "PROGRESS",
