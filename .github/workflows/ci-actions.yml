@@ -41,3 +41,17 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
       - run: pnpm build
+
+  sync-env:
+    name: Sync public env vars to Vercel
+    runs-on: ubuntu-latest
+    # Only runs on merges to main, not on PRs — avoids pushing mid-PR config changes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [tests, lint, format, build]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Push public vars to all Vercel environments
+        run: pnpm exec sync-env
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
