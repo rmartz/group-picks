@@ -14,6 +14,24 @@ export interface FirebasePickPublic {
   creatorId: string;
 }
 
+function pickOptionToFirebase(option: PickOption): FirebasePickOption {
+  return {
+    ownerIds: option.ownerIds,
+    title: option.title,
+  };
+}
+
+function firebaseToPickOption(
+  optionId: string,
+  optionData: FirebasePickOption,
+): PickOption {
+  return {
+    id: optionId,
+    ownerIds: optionData.ownerIds,
+    title: optionData.title,
+  };
+}
+
 export function pickToFirebase(
   pick: Pick<
     GroupPick,
@@ -31,7 +49,7 @@ export function pickToFirebase(
       : Object.fromEntries(
           pick.options.map((option) => [
             option.id,
-            { ownerIds: option.ownerIds, title: option.title },
+            pickOptionToFirebase(option),
           ]),
         );
 
@@ -52,11 +70,9 @@ export function firebaseToPick(
   const options =
     data.options === undefined
       ? undefined
-      : Object.entries(data.options).map(([optionId, optionData]) => ({
-          id: optionId,
-          ownerIds: optionData.ownerIds,
-          title: optionData.title,
-        }));
+      : Object.entries(data.options).map(([optionId, optionData]) =>
+          firebaseToPickOption(optionId, optionData),
+        );
 
   return {
     id,
