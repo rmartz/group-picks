@@ -12,6 +12,10 @@ vi.mock("./InviteLinkSection", () => ({
   ),
 }));
 
+vi.mock("./categories/CategoryList", () => ({
+  CategoryList: () => <div data-testid="category-list" />,
+}));
+
 function makeGroup() {
   return {
     id: "group-1",
@@ -26,14 +30,14 @@ function makeGroup() {
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
   it("renders the member count", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
@@ -43,7 +47,7 @@ describe("GroupDetailView", () => {
 
   it("renders the created at label", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
@@ -52,7 +56,7 @@ describe("GroupDetailView", () => {
 
   it("renders the invite link section with the invite token", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} />);
+    render(<GroupDetailView group={group} categories={[]} />);
 
     expect(screen.getByTestId("invite-link-section")).toBeDefined();
     expect(screen.getByText(group.inviteToken)).toBeDefined();
