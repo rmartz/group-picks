@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
+import { getCategoriesByGroupId } from "@/server/data/categories";
 import { GroupDetailView } from "./GroupDetailView";
 import { InviteSection } from "./InviteSection";
 
@@ -19,6 +20,8 @@ export default async function GroupDetailPage({
 
   if (!group) notFound();
 
+  if (!group.memberIds.includes(uid)) notFound();
+
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
   const forwarded = headersList.get("x-forwarded-proto");
@@ -27,13 +30,16 @@ export default async function GroupDetailPage({
     (/^(localhost|127\.0\.0\.1)(:\d+)?$/.exec(host) ? "http" : "https");
   const origin = `${protocol}://${host}`;
 
-  const invite = group.inviteToken
-    ? await getGroupInviteByToken(group.inviteToken)
-    : undefined;
+  const [invite, categories] = await Promise.all([
+    group.inviteToken
+      ? getGroupInviteByToken(group.inviteToken)
+      : Promise.resolve(undefined),
+    getCategoriesByGroupId(id),
+  ]);
 
   return (
     <>
-      <GroupDetailView group={group} />
+      <GroupDetailView group={group} categories={categories} />
       <InviteSection
         groupId={group.id}
         initialToken={group.inviteToken}
