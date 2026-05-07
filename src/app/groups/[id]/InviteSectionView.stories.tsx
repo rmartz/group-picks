@@ -26,6 +26,7 @@ export const Default: Story = {};
 export const NoToken: Story = {
   args: {
     inviteUrl: undefined,
+    expiresAt: undefined,
   },
 };
 
