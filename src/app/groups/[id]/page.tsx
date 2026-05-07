@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
 import { getCategoriesByGroupId } from "@/server/data/categories";
 import { GroupDetailClient } from "./GroupDetailClient";
@@ -18,9 +18,10 @@ export default async function GroupDetailPage({
 
   if (!group?.memberIds.includes(uid)) notFound();
 
-  const [invite, categories] = await Promise.all([
+  const [invite, categories, memberNames] = await Promise.all([
     getGroupInviteByToken(group.inviteToken),
     getCategoriesByGroupId(id),
+    getMemberDisplayNames(group.memberIds),
   ]);
 
   return (
@@ -29,6 +30,7 @@ export default async function GroupDetailPage({
       categories={categories}
       currentUserId={uid}
       initialInviteExpiresAt={invite?.expiresAt?.toISOString()}
+      memberNames={memberNames}
     />
   );
 }

@@ -5,6 +5,11 @@ import { InviteSection } from "./InviteSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
 import { CategoryList } from "./categories/CategoryList";
 
+interface MemberName {
+  uid: string;
+  name: string;
+}
+
 interface GroupDetailViewProps {
   group: Group;
   categories: Category[];
@@ -13,6 +18,7 @@ interface GroupDetailViewProps {
   isLeaving?: boolean;
   leaveError?: string;
   initialInviteExpiresAt?: string;
+  memberNames: MemberName[];
 }
 
 export function GroupDetailView({
@@ -23,6 +29,7 @@ export function GroupDetailView({
   isLeaving = false,
   leaveError,
   initialInviteExpiresAt,
+  memberNames,
 }: GroupDetailViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-8 p-6">
@@ -34,7 +41,13 @@ export function GroupDetailView({
         </div>
         <div className="flex gap-2">
           <dt className="font-medium">{GROUP_DETAIL_COPY.membersLabel}:</dt>
-          <dd>{group.memberIds.length}</dd>
+          <dd>
+            <ul className="space-y-1">
+              {memberNames.map((m) => (
+                <li key={m.uid}>{m.name}</li>
+              ))}
+            </ul>
+          </dd>
         </div>
       </dl>
       <InviteSection

@@ -13,6 +13,7 @@ interface GroupDetailClientProps {
   categories: Category[];
   currentUserId: string;
   initialInviteExpiresAt?: string;
+  memberNames: { uid: string; name: string }[];
 }
 
 export function GroupDetailClient({
@@ -20,6 +21,7 @@ export function GroupDetailClient({
   categories,
   currentUserId,
   initialInviteExpiresAt,
+  memberNames,
 }: GroupDetailClientProps) {
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
@@ -53,6 +55,7 @@ export function GroupDetailClient({
       isLeaving={isLeaving}
       leaveError={error}
       initialInviteExpiresAt={initialInviteExpiresAt}
+      memberNames={memberNames}
     />
   );
 }
