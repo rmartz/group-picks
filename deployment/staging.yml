@@ -26,5 +26,5 @@ variables:
   FIREBASE_DATABASE_URL: ""
 
   # Sentry — slugs only, not credentials
-  SENTRY_ORG: ""
-  SENTRY_PROJECT: ""
+  SENTRY_ORG: "reedmartz"
+  SENTRY_PROJECT: "group-picks"

@@ -27,5 +27,5 @@ variables:
   FIREBASE_SA_EMAIL: "firebase-adminsdk-fbsvc@group-picks.iam.gserviceaccount.com"
 
   # Sentry — slugs only, not credentials
-  SENTRY_ORG: ""
-  SENTRY_PROJECT: ""
+  SENTRY_ORG: "reedmartz"
+  SENTRY_PROJECT: "group-picks"
