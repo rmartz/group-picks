@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   pickToFirebase,
   firebaseToPick,
+  removeOwnerFromPickOption,
   type FirebasePickPublic,
 } from "./pick";
 
@@ -38,6 +39,30 @@ describe("pickToFirebase", () => {
     expect(result.creatorId).toBe("user-abc");
   });
 
+  it("converts options and owner IDs to Firebase format", () => {
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      description: "A classic film about hope",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      options: [
+        {
+          id: "option-a",
+          ownerIds: ["user-abc", "user-def"],
+          title: "Movie night",
+        },
+      ],
+    });
+
+    expect(result.options).toEqual({
+      "option-a": {
+        ownerIds: ["user-abc", "user-def"],
+        title: "Movie night",
+      },
+    });
+  });
+
   it("omits description when it is undefined", () => {
     const result = pickToFirebase({
       title: "The Shawshank Redemption",
@@ -45,6 +70,7 @@ describe("pickToFirebase", () => {
       categoryId: "cat-abc",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
+      options: undefined,
     });
 
     expect(result.description).toBeUndefined();
@@ -71,5 +97,66 @@ describe("firebaseToPick", () => {
     const result = firebaseToPick("pick-xyz", data);
 
     expect(result.description).toBeUndefined();
+  });
+
+  it("converts Firebase options to pick options", () => {
+    const data = makeFirebasePickPublic({
+      options: {
+        "option-a": {
+          ownerIds: ["user-123"],
+          title: "Movie night",
+        },
+      },
+    });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.options).toEqual([
+      {
+        id: "option-a",
+        ownerIds: ["user-123"],
+        title: "Movie night",
+      },
+    ]);
+  });
+});
+
+describe("removeOwnerFromPickOption", () => {
+  it("removes the owner from the option owner list", () => {
+    const result = removeOwnerFromPickOption(
+      [
+        {
+          id: "option-a",
+          ownerIds: ["user-123", "user-456"],
+          title: "Movie night",
+        },
+      ],
+      "option-a",
+      "user-456",
+    );
+
+    expect(result).toEqual([
+      {
+        id: "option-a",
+        ownerIds: ["user-123"],
+        title: "Movie night",
+      },
+    ]);
+  });
+
+  it("deletes the option when no owners remain", () => {
+    const result = removeOwnerFromPickOption(
+      [
+        {
+          id: "option-a",
+          ownerIds: ["user-123"],
+          title: "Movie night",
+        },
+      ],
+      "option-a",
+      "user-123",
+    );
+
+    expect(result).toEqual([]);
   });
 });

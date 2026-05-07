@@ -1,6 +1,12 @@
-import type { GroupPick } from "@/lib/types/pick";
+import type { GroupPick, PickOption } from "@/lib/types/pick";
+
+export interface FirebasePickOption {
+  ownerIds: string[];
+  title: string;
+}
 
 export interface FirebasePickPublic {
+  options?: Record<string, FirebasePickOption>;
   title: string;
   description?: string;
   categoryId: string;
@@ -11,10 +17,26 @@ export interface FirebasePickPublic {
 export function pickToFirebase(
   pick: Pick<
     GroupPick,
-    "title" | "description" | "categoryId" | "createdAt" | "creatorId"
+    | "title"
+    | "description"
+    | "categoryId"
+    | "createdAt"
+    | "creatorId"
+    | "options"
   >,
 ): FirebasePickPublic {
+  const options =
+    pick.options === undefined
+      ? undefined
+      : Object.fromEntries(
+          pick.options.map((option) => [
+            option.id,
+            { ownerIds: option.ownerIds, title: option.title },
+          ]),
+        );
+
   return {
+    options,
     title: pick.title,
     description: pick.description,
     categoryId: pick.categoryId,
@@ -27,12 +49,39 @@ export function firebaseToPick(
   id: string,
   data: FirebasePickPublic,
 ): GroupPick {
+  const options =
+    data.options === undefined
+      ? undefined
+      : Object.entries(data.options).map(([optionId, optionData]) => ({
+          id: optionId,
+          ownerIds: optionData.ownerIds,
+          title: optionData.title,
+        }));
+
   return {
     id,
+    options,
     title: data.title,
     description: data.description,
     categoryId: data.categoryId,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
   };
+}
+
+export function removeOwnerFromPickOption(
+  options: readonly PickOption[],
+  optionId: string,
+  ownerId: string,
+): PickOption[] {
+  return options
+    .map((option) => {
+      if (option.id !== optionId) return option;
+
+      const ownerIds = option.ownerIds.filter((id) => id !== ownerId);
+      if (ownerIds.length === 0) return undefined;
+
+      return { ...option, ownerIds };
+    })
+    .filter((option): option is PickOption => option !== undefined);
 }
