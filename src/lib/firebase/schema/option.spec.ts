@@ -59,6 +59,14 @@ describe("firebaseToOption", () => {
     expect(result.creatorId).toBe("user-1");
     expect(result.owners).toEqual(["user-1"]);
     expect(result.createdAt).toEqual(FIXED_DATE);
+    expect(result.interestedCount).toBe(0);
+  });
+
+  it("reads interestedCount from Firebase data when present", () => {
+    const data = makeFirebaseOptionPublic({ interestedCount: 3 });
+    const result = firebaseToOption("opt-1", "cat-1", "pick-1", data);
+
+    expect(result.interestedCount).toBe(3);
   });
 
   it("converts multiple owners from record to array", () => {

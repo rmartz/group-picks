@@ -12,6 +12,7 @@ const mockOptions: PickOption[] = [
     createdAt: new Date("2025-01-01"),
     pickId: "pick-1",
     categoryId: "cat-1",
+    interestedCount: 2,
   },
   {
     id: "opt-2",
@@ -21,6 +22,7 @@ const mockOptions: PickOption[] = [
     createdAt: new Date("2025-01-02"),
     pickId: "pick-1",
     categoryId: "cat-1",
+    interestedCount: 0,
   },
 ];
 
@@ -32,8 +34,10 @@ const meta: Meta<typeof OptionListView> = {
     newOptionName: "",
     loading: false,
     error: undefined,
+    interestedOptionIds: [],
     onNewOptionNameChange: () => undefined,
     onSuggest: () => undefined,
+    onToggleInterest: () => undefined,
   },
 };
 
@@ -61,5 +65,20 @@ export const WithError: Story = {
     options: mockOptions,
     newOptionName: "Tacos",
     error: OPTION_LIST_COPY.errors.default,
+  },
+};
+
+export const WithInterests: Story = {
+  args: {
+    options: mockOptions,
+    interestedOptionIds: ["opt-1"],
+  },
+};
+
+export const PickClosed: Story = {
+  args: {
+    options: mockOptions,
+    interestedOptionIds: ["opt-1"],
+    pickClosed: true,
   },
 };
