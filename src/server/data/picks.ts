@@ -53,6 +53,7 @@ export async function assertPickIsOpenForWrite(
   const db = getDatabase(getAdminApp());
   const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
   const nowTimestamp = now.getTime();
+  const transactionState = { closedBecauseOverdue: false };
 
   const result = await pickRef.transaction(
     (currentData: FirebasePickPublic | null) => {
@@ -65,6 +66,7 @@ export async function assertPickIsOpenForWrite(
         return currentData;
       }
 
+      transactionState.closedBecauseOverdue = true;
       return { ...currentData, closedAt: nowTimestamp };
     },
   );
@@ -77,14 +79,12 @@ export async function assertPickIsOpenForWrite(
     pickId,
     result.snapshot.val() as FirebasePickPublic,
   );
-  const closedBecauseOverdue =
-    pick.dueDate !== undefined &&
-    pick.dueDate.getTime() <= nowTimestamp &&
-    pick.closedAt?.getTime() === nowTimestamp;
 
   if (pick.closedAt !== undefined) {
     throw new PickWriteClosedError(
-      closedBecauseOverdue ? PICK_DUE_DATE_PASSED_ERROR : PICK_CLOSED_ERROR,
+      transactionState.closedBecauseOverdue
+        ? PICK_DUE_DATE_PASSED_ERROR
+        : PICK_CLOSED_ERROR,
     );
   }
 

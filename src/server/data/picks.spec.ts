@@ -34,7 +34,9 @@ describe("assertPickIsOpenForWrite", () => {
   it("returns the pick when it is still open", async () => {
     const transaction = vi.fn(
       (
-        update: (currentData: FirebasePickPublic | null) => FirebasePickPublic,
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
       ) => {
         const currentPick = makeFirebasePickPublic({
           dueDate: new Date("2025-01-20T12:00:00.000Z").getTime(),
