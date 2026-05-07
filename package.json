@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest",
+    "test": "vitest --project=node --project=hooks --project=components",
     "tsc": "tsc --noEmit",
     "lint": "eslint --max-warnings 0 .",
     "format": "prettier --write .",
