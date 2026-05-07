@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
-import {
-  getCategoryById,
-  categoryHasPicks,
-  deleteCategory,
-} from "@/server/data/categories";
+import { getCategoryById, updateCategory } from "@/server/data/categories";
 
-export async function DELETE(
-  _request: Request,
+export async function PATCH(
+  request: Request,
   { params }: { params: Promise<{ id: string; categoryId: string }> },
 ) {
   const uid = await getVerifiedUid();
@@ -16,9 +12,9 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id: groupId, categoryId } = await params;
+  const { id, categoryId } = await params;
+  const group = await getGroupById(id);
 
-  const group = await getGroupById(groupId);
   if (!group) {
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
@@ -28,25 +24,31 @@ export async function DELETE(
   }
 
   const category = await getCategoryById(categoryId);
+
   if (!category) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  if (category.groupId !== groupId) {
+  if (category.groupId !== id) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  const hasPicks = await categoryHasPicks(categoryId);
-  if (hasPicks) {
-    return NextResponse.json(
-      {
-        error:
-          "Cannot delete a category that has picks. Remove all picks first.",
-      },
-      { status: 409 },
-    );
+  let body: { name: unknown; description: unknown };
+  try {
+    body = (await request.json()) as { name: unknown; description: unknown };
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  await deleteCategory(categoryId);
-  return new NextResponse(null, { status: 204 });
+  if (typeof body.name !== "string" || !body.name.trim()) {
+    return NextResponse.json({ error: "name is required" }, { status: 400 });
+  }
+
+  const name = body.name.trim();
+  const description =
+    typeof body.description === "string" ? body.description.trim() : "";
+
+  await updateCategory(categoryId, { name, description });
+
+  return NextResponse.json({ categoryId });
 }

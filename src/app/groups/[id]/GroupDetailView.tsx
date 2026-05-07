@@ -1,7 +1,7 @@
 import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
 import { GROUP_DETAIL_COPY } from "./copy";
-import { CategoryList } from "./CategoryList";
+import { CategoryList } from "./categories/CategoryList";
 
 interface GroupDetailViewProps {
   group: Group;
@@ -22,7 +22,7 @@ export function GroupDetailView({ group, categories }: GroupDetailViewProps) {
           <dd>{group.memberIds.length}</dd>
         </div>
       </dl>
-      <CategoryList initialCategories={categories} groupId={group.id} />
+      <CategoryList groupId={group.id} initialCategories={categories} />
     </main>
   );
 }

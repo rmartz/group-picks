@@ -7,28 +7,31 @@ import {
 } from "@/lib/firebase/schema/category";
 import type { Category } from "@/lib/types/category";
 
-export async function getCategoriesByGroup(
+export async function getCategoriesByGroupId(
   groupId: string,
 ): Promise<Category[]> {
   const db = getDatabase(getAdminApp());
+  // Requires a Firebase Realtime Database index on "public/groupId" at the
+  // "categories" path. Add to database rules:
+  //   "categories": { ".indexOn": ["public/groupId"] }
   const snap = await db
-    .ref("categories")
+    .ref(`categories`)
     .orderByChild("public/groupId")
     .equalTo(groupId)
     .get();
 
   if (!snap.exists()) return [];
 
-  const results: Category[] = [];
+  const categories: Category[] = [];
   snap.forEach((child) => {
     const id = child.key;
     if (!id) return;
     const publicData = (child.val() as { public: FirebaseCategoryPublic })
       .public;
-    results.push(firebaseToCategory(id, publicData));
+    categories.push(firebaseToCategory(id, publicData));
   });
 
-  return results;
+  return categories;
 }
 
 export async function getCategoryById(
@@ -50,23 +53,33 @@ export async function categoryHasPicks(categoryId: string): Promise<boolean> {
 }
 
 export async function createCategory(
-  groupId: string,
-  name: string,
-  creatorId: string,
-): Promise<string> {
+  category: Pick<Category, "groupId" | "name" | "description" | "creatorId">,
+): Promise<{ id: string; createdAt: Date }> {
   const db = getDatabase(getAdminApp());
   const ref = db.ref("categories").push();
-  const categoryId = ref.key;
-  if (!categoryId) throw new Error("Failed to generate category ID");
+  const id = ref.key;
+  if (!id) throw new Error("Failed to generate category ID");
 
+  const createdAt = new Date();
   const publicData = categoryToFirebase({
-    groupId,
-    name,
-    createdAt: new Date(),
-    creatorId,
+    ...category,
+    createdAt,
   });
-  await db.ref(`categories/${categoryId}/public`).set(publicData);
-  return categoryId;
+
+  await db.ref(`categories/${id}`).set({ public: publicData });
+
+  return { id, createdAt };
+}
+
+export async function updateCategory(
+  id: string,
+  updates: Pick<Category, "name" | "description">,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${id}/public`).update({
+    name: updates.name,
+    description: updates.description,
+  });
 }
 
 export async function deleteCategory(categoryId: string): Promise<void> {

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
-import { getCategoriesByGroup, createCategory } from "@/server/data/categories";
+import {
+  getCategoriesByGroupId,
+  createCategory,
+} from "@/server/data/categories";
 
 export async function GET(
   _request: Request,
@@ -12,8 +15,9 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id: groupId } = await params;
-  const group = await getGroupById(groupId);
+  const { id } = await params;
+  const group = await getGroupById(id);
+
   if (!group) {
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
@@ -22,7 +26,8 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const categories = await getCategoriesByGroup(groupId);
+  const categories = await getCategoriesByGroupId(id);
+
   return NextResponse.json({
     categories: categories.map((c) => ({
       ...c,
@@ -40,8 +45,9 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id: groupId } = await params;
-  const group = await getGroupById(groupId);
+  const { id } = await params;
+  const group = await getGroupById(id);
+
   if (!group) {
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
@@ -50,9 +56,9 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  let body: { name: unknown };
+  let body: { name: unknown; description: unknown };
   try {
-    body = (await request.json()) as { name: unknown };
+    body = (await request.json()) as { name: unknown; description: unknown };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -61,6 +67,19 @@ export async function POST(
     return NextResponse.json({ error: "name is required" }, { status: 400 });
   }
 
-  const categoryId = await createCategory(groupId, body.name.trim(), uid);
-  return NextResponse.json({ categoryId }, { status: 201 });
+  const name = body.name.trim();
+  const description =
+    typeof body.description === "string" ? body.description.trim() : "";
+
+  const { id: categoryId, createdAt } = await createCategory({
+    groupId: id,
+    name,
+    description,
+    creatorId: uid,
+  });
+
+  return NextResponse.json(
+    { categoryId, creatorId: uid, createdAt: createdAt.toISOString() },
+    { status: 201 },
+  );
 }
