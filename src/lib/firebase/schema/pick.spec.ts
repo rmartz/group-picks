@@ -38,6 +38,24 @@ describe("pickToFirebase", () => {
     expect(result.creatorId).toBe("user-abc");
   });
 
+  it("converts due date and closed date to Firebase timestamps", () => {
+    const dueDate = new Date("2025-01-20T12:00:00.000Z");
+    const closedAt = new Date("2025-01-21T15:30:00.000Z");
+
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      description: "A classic film about hope",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      dueDate,
+      closedAt,
+    });
+
+    expect(result.dueDate).toBe(dueDate.getTime());
+    expect(result.closedAt).toBe(closedAt.getTime());
+  });
+
   it("omits description when it is undefined", () => {
     const result = pickToFirebase({
       title: "The Shawshank Redemption",
@@ -63,6 +81,20 @@ describe("firebaseToPick", () => {
     expect(result.categoryId).toBe("cat-123");
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
+  });
+
+  it("converts due date and closed date when present", () => {
+    const dueDate = new Date("2025-01-20T12:00:00.000Z");
+    const closedAt = new Date("2025-01-21T15:30:00.000Z");
+    const data = makeFirebasePickPublic({
+      dueDate: dueDate.getTime(),
+      closedAt: closedAt.getTime(),
+    });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.dueDate).toEqual(dueDate);
+    expect(result.closedAt).toEqual(closedAt);
   });
 
   it("returns undefined description when absent from Firebase data", () => {
