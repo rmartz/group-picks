@@ -37,7 +37,7 @@ export default async function GroupDetailPage({
       <InviteSection
         groupId={group.id}
         initialToken={group.inviteToken}
-        initialExpiresAt={invite?.expiresAt}
+        initialExpiresAt={invite?.expiresAt?.toISOString()}
         origin={origin}
       />
     </>

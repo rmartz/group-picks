@@ -8,7 +8,7 @@ import { GROUP_DETAIL_COPY } from "./copy";
 interface InviteSectionProps {
   groupId: string;
   initialToken: string | undefined;
-  initialExpiresAt: Date | undefined;
+  initialExpiresAt: string | undefined;
   origin: string;
 }
 
@@ -19,7 +19,9 @@ export function InviteSection({
   origin,
 }: InviteSectionProps) {
   const [token, setToken] = useState(initialToken);
-  const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
+  const [expiresAt, setExpiresAt] = useState(
+    initialExpiresAt ? new Date(initialExpiresAt) : undefined,
+  );
   const [regenerating, setRegenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | undefined>();

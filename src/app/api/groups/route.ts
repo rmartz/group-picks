@@ -4,6 +4,7 @@ import { getAdminApp } from "@/lib/firebase/admin";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { groupToFirebase } from "@/lib/firebase/schema/group";
 import { groupInviteToFirebase } from "@/lib/firebase/schema/invite";
+import { INVITE_TTL } from "@/server/data/invites";
 
 export async function POST(request: Request) {
   const uid = await getVerifiedUid();
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
   }
 
   const inviteToken = crypto.randomUUID().replace(/-/g, "");
+  const inviteCreatedAt = new Date();
 
   const publicData = groupToFirebase({
     name,
@@ -47,8 +49,8 @@ export async function POST(request: Request) {
     },
     [`invites/${inviteToken}`]: groupInviteToFirebase({
       groupId,
-      createdAt: new Date(),
-      expiresAt: undefined,
+      createdAt: inviteCreatedAt,
+      expiresAt: new Date(inviteCreatedAt.getTime() + INVITE_TTL),
       active: true,
     }),
   });
