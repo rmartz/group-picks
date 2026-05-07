@@ -21,3 +21,5 @@ runs:
         cache: "pnpm"
     - run: pnpm install ${{ inputs.frozen-lockfile == 'true' && '--frozen-lockfile' || '--no-frozen-lockfile' }}
       shell: bash
+      env:
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
