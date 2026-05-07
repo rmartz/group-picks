@@ -69,7 +69,7 @@ export function firebaseToPick(
   };
 }
 
-export function removeOwnerFromPickOption(
+export function removeOwnerFromPickOptions(
   options: readonly PickOption[],
   optionId: string,
   ownerId: string,

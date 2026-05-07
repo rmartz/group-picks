@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   pickToFirebase,
   firebaseToPick,
-  removeOwnerFromPickOption,
+  removeOwnerFromPickOptions,
   type FirebasePickPublic,
 } from "./pick";
 
@@ -75,6 +75,19 @@ describe("pickToFirebase", () => {
 
     expect(result.description).toBeUndefined();
   });
+
+  it("returns undefined options when they are not provided", () => {
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      description: "A classic film about hope",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      options: undefined,
+    });
+
+    expect(result.options).toBeUndefined();
+  });
 });
 
 describe("firebaseToPick", () => {
@@ -99,6 +112,14 @@ describe("firebaseToPick", () => {
     expect(result.description).toBeUndefined();
   });
 
+  it("returns undefined options when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ options: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.options).toBeUndefined();
+  });
+
   it("converts Firebase options to pick options", () => {
     const data = makeFirebasePickPublic({
       options: {
@@ -121,9 +142,9 @@ describe("firebaseToPick", () => {
   });
 });
 
-describe("removeOwnerFromPickOption", () => {
+describe("removeOwnerFromPickOptions", () => {
   it("removes the owner from the option owner list", () => {
-    const result = removeOwnerFromPickOption(
+    const result = removeOwnerFromPickOptions(
       [
         {
           id: "option-a",
@@ -145,7 +166,7 @@ describe("removeOwnerFromPickOption", () => {
   });
 
   it("deletes the option when no owners remain", () => {
-    const result = removeOwnerFromPickOption(
+    const result = removeOwnerFromPickOptions(
       [
         {
           id: "option-a",
