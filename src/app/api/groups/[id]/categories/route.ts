@@ -1,8 +1,40 @@
 import { NextResponse } from "next/server";
-import { getDatabase } from "firebase-admin/database";
-import { getAdminApp } from "@/lib/firebase/admin";
 import { getVerifiedUid } from "@/server/utils/auth";
-import { categoryToFirebase } from "@/lib/firebase/schema/category";
+import { getGroupById } from "@/server/data/groups";
+import {
+  getCategoriesByGroupId,
+  createCategory,
+} from "@/server/data/categories";
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const uid = await getVerifiedUid();
+  if (!uid) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const group = await getGroupById(id);
+
+  if (!group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
+  if (!group.memberIds.includes(uid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const categories = await getCategoriesByGroupId(id);
+
+  return NextResponse.json({
+    categories: categories.map((c) => ({
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+    })),
+  });
+}
 
 export async function POST(
   request: Request,
@@ -13,25 +45,20 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id: groupId } = await params;
-  const db = getDatabase(getAdminApp());
+  const { id } = await params;
+  const group = await getGroupById(id);
 
-  const [groupSnap, memberSnap] = await Promise.all([
-    db.ref(`groups/${groupId}/public`).get(),
-    db.ref(`groups/${groupId}/members/${uid}`).get(),
-  ]);
-
-  if (!groupSnap.exists()) {
+  if (!group) {
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
-  if (!memberSnap.exists()) {
+  if (!group.memberIds.includes(uid)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  let body: { name: unknown; description?: unknown };
+  let body: { name: unknown; description: unknown };
   try {
-    body = (await request.json()) as { name: unknown; description?: unknown };
+    body = (await request.json()) as { name: unknown; description: unknown };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -42,28 +69,17 @@ export async function POST(
 
   const name = body.name.trim();
   const description =
-    typeof body.description === "string" && body.description.trim()
-      ? body.description.trim()
-      : undefined;
+    typeof body.description === "string" ? body.description.trim() : "";
 
-  const categoryRef = db.ref(`groups/${groupId}/categories`).push();
-  const categoryId = categoryRef.key;
-  if (!categoryId) {
-    return NextResponse.json(
-      { error: "Failed to generate category ID" },
-      { status: 500 },
-    );
-  }
-
-  const categoryData = categoryToFirebase({
+  const { id: categoryId, createdAt } = await createCategory({
+    groupId: id,
     name,
     description,
-    groupId,
-    createdAt: new Date(),
     creatorId: uid,
   });
 
-  await db.ref(`groups/${groupId}/categories/${categoryId}`).set(categoryData);
-
-  return NextResponse.json({ categoryId }, { status: 201 });
+  return NextResponse.json(
+    { categoryId, creatorId: uid, createdAt: createdAt.toISOString() },
+    { status: 201 },
+  );
 }

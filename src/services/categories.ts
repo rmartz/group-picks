@@ -1,8 +1,8 @@
 export async function createCategory(
   groupId: string,
   name: string,
-  description: string | undefined,
-): Promise<string> {
+  description: string,
+): Promise<{ categoryId: string; creatorId: string; createdAt: Date }> {
   const response = await fetch(`/api/groups/${groupId}/categories`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -15,6 +15,31 @@ export async function createCategory(
     throw new Error("Failed to create category");
   }
 
-  const data = (await response.json()) as { categoryId: string };
-  return data.categoryId;
+  const data = (await response.json()) as {
+    categoryId: string;
+    creatorId: string;
+    createdAt: string;
+  };
+  return {
+    categoryId: data.categoryId,
+    creatorId: data.creatorId,
+    createdAt: new Date(data.createdAt),
+  };
+}
+
+export async function updateCategory(
+  groupId: string,
+  categoryId: string,
+  name: string,
+  description: string,
+): Promise<void> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description }),
+    },
+  );
+  if (!response.ok) throw new Error("Failed to update category");
 }

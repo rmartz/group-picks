@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteSession, signOut } from "@/services/auth";
+import { Button } from "@/components/ui/button";
 import { SIGN_OUT_BUTTON_COPY } from "./SignOutButton.copy";
 
 export function SignOutButton() {
@@ -28,16 +29,16 @@ export function SignOutButton() {
 
   return (
     <div>
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={() => {
           void handleSignOut();
         }}
         disabled={loading}
-        className="rounded border px-4 py-2 text-sm font-medium disabled:opacity-50"
       >
         {SIGN_OUT_BUTTON_COPY.button}
-      </button>
+      </Button>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );

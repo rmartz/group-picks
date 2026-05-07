@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { USER_PROFILE_COPY } from "./copy";
 
 interface UserProfileViewProps {
@@ -44,10 +47,10 @@ export function UserProfileView({
         className="space-y-4"
       >
         <div className="space-y-1">
-          <label htmlFor="displayName" className="text-sm font-medium">
+          <Label htmlFor="displayName">
             {USER_PROFILE_COPY.displayNameLabel}
-          </label>
-          <input
+          </Label>
+          <Input
             id="displayName"
             type="text"
             autoComplete="name"
@@ -58,7 +61,7 @@ export function UserProfileView({
               setSuccess(false);
             }}
             placeholder={USER_PROFILE_COPY.displayNamePlaceholder}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className="w-full"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -67,13 +70,9 @@ export function UserProfileView({
             {USER_PROFILE_COPY.successMessage}
           </p>
         )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading} className="w-full">
           {USER_PROFILE_COPY.saveButton}
-        </button>
+        </Button>
       </form>
       <section className="space-y-2">
         <h2 className="text-sm font-medium">

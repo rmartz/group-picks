@@ -1,12 +1,14 @@
-import Link from "next/link";
 import type { Group } from "@/lib/types/group";
+import type { Category } from "@/lib/types/category";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { CategoryList } from "./categories/CategoryList";
 
 interface GroupDetailViewProps {
   group: Group;
+  categories: Category[];
 }
 
-export function GroupDetailView({ group }: GroupDetailViewProps) {
+export function GroupDetailView({ group, categories }: GroupDetailViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
       <h1 className="text-2xl font-semibold">{group.name}</h1>
@@ -20,12 +22,7 @@ export function GroupDetailView({ group }: GroupDetailViewProps) {
           <dd>{group.memberIds.length}</dd>
         </div>
       </dl>
-      <Link
-        href={`/groups/${group.id}/categories/new`}
-        className="inline-block rounded bg-black px-4 py-2 text-sm font-medium text-white"
-      >
-        {GROUP_DETAIL_COPY.createCategoryButton}
-      </Link>
+      <CategoryList groupId={group.id} initialCategories={categories} />
     </main>
   );
 }
