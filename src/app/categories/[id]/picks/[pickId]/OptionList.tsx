@@ -90,7 +90,12 @@ export function OptionList({
       } else {
         setOptions((prev) => [
           ...prev,
-          { id: optionId, title: suggestion.title, pickId, ownerIds: [currentUserId] },
+          {
+            id: optionId,
+            title: suggestion.title,
+            pickId,
+            ownerIds: [currentUserId],
+          },
         ]);
       }
       setSuggestions((prev) => prev.filter((s) => s.id !== suggestion.id));
