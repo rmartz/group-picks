@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
 import { getCategoriesByGroupId } from "@/server/data/categories";
-import { GroupDetailView } from "./GroupDetailView";
+import { GroupDetailClient } from "./GroupDetailClient";
 
 export default async function GroupDetailPage({
   params,
@@ -19,5 +19,5 @@ export default async function GroupDetailPage({
 
   const categories = await getCategoriesByGroupId(id);
 
-  return <GroupDetailView group={group} categories={categories} />;
+  return <GroupDetailClient group={group} categories={categories} />;
 }

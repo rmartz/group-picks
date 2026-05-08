@@ -3,10 +3,6 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
-
 afterEach(cleanup);
 
 vi.mock("./categories/CategoryList", () => ({
@@ -26,14 +22,14 @@ function makeGroup() {
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} categories={[]} />);
+    render(<GroupDetailView group={group} categories={[]} onLeave={vi.fn()} />);
 
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
   it("renders the member count", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} categories={[]} />);
+    render(<GroupDetailView group={group} categories={[]} onLeave={vi.fn()} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
@@ -43,7 +39,7 @@ describe("GroupDetailView", () => {
 
   it("renders the created at label", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} categories={[]} />);
+    render(<GroupDetailView group={group} categories={[]} onLeave={vi.fn()} />);
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
