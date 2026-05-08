@@ -14,6 +14,7 @@ const meta: Meta<typeof GroupDetailView> = {
       memberIds: ["user-123", "user-456", "user-789"],
     },
     categories: [],
+    currentUserId: "user-123",
   },
 };
 
