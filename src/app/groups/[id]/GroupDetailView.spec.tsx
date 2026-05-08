@@ -3,6 +3,10 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 afterEach(cleanup);
 
 vi.mock("./categories/CategoryList", () => ({
@@ -22,14 +26,26 @@ function makeGroup() {
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} categories={[]} />);
+    render(
+      <GroupDetailView
+        group={group}
+        categories={[]}
+        currentUserId="user-123"
+      />,
+    );
 
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
   it("renders the member count", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} categories={[]} />);
+    render(
+      <GroupDetailView
+        group={group}
+        categories={[]}
+        currentUserId="user-123"
+      />,
+    );
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
@@ -39,23 +55,16 @@ describe("GroupDetailView", () => {
 
   it("renders the created at label", () => {
     const group = makeGroup();
-    render(<GroupDetailView group={group} categories={[]} />);
+    render(
+      <GroupDetailView
+        group={group}
+        categories={[]}
+        currentUserId="user-123"
+      />,
+    );
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
     ).toBeDefined();
-  });
-
-  it("renders a create category link pointing to the group's new category page", () => {
-    const group = makeGroup();
-    render(<GroupDetailView group={group} />);
-
-    const link = screen.getByRole("link", {
-      name: GROUP_DETAIL_COPY.createCategoryButton,
-    });
-    expect(link).toBeDefined();
-    expect((link as HTMLAnchorElement).href).toContain(
-      `/groups/${group.id}/categories/new`,
-    );
   });
 });

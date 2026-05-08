@@ -22,7 +22,7 @@ export function CreateCategoryForm({ groupId }: CreateCategoryFormProps) {
     setError(undefined);
     setLoading(true);
     try {
-      await createCategory(groupId, name, description || undefined);
+      await createCategory(groupId, name, description);
       router.push(`/groups/${groupId}`);
     } catch {
       setError(CREATE_CATEGORY_COPY.errors.default);
