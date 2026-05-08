@@ -45,6 +45,29 @@ export async function joinOption(
     .set(true);
 }
 
+export async function unjoinOption(
+  pickId: string,
+  optionId: string,
+  ownerUid: string,
+): Promise<{ deleted: boolean }> {
+  const db = getDatabase(getAdminApp());
+  const ownersRef = db.ref(`picks/${pickId}/options/${optionId}/ownerIds`);
+  const snap = await ownersRef.get();
+  const remaining = snap.exists()
+    ? Object.keys(snap.val() as Record<string, true>).filter(
+        (uid) => uid !== ownerUid,
+      )
+    : [];
+
+  if (remaining.length === 0) {
+    await db.ref(`picks/${pickId}/options/${optionId}`).remove();
+    return { deleted: true };
+  }
+
+  await ownersRef.child(ownerUid).remove();
+  return { deleted: false };
+}
+
 export async function getOptionsByCategory(
   pickIds: string[],
 ): Promise<Option[]> {

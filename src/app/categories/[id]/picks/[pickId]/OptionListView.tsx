@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Option } from "@/lib/types/option";
+import { HeartButton } from "./HeartButton";
 import { PICK_DETAIL_COPY } from "./copy";
 
 export interface OptionListViewProps {
@@ -9,9 +10,11 @@ export interface OptionListViewProps {
   newTitle: string;
   loading: boolean;
   error: string | undefined;
+  currentUserId: string;
   onNewTitleChange: (title: string) => void;
   onAddSubmit: (e: React.SyntheticEvent) => void;
   onAdoptSuggestion: (option: Option) => void;
+  onToggleOwner: (option: Option) => void;
 }
 
 export function OptionListView({
@@ -20,9 +23,11 @@ export function OptionListView({
   newTitle,
   loading,
   error,
+  currentUserId,
   onNewTitleChange,
   onAddSubmit,
   onAdoptSuggestion,
+  onToggleOwner,
 }: OptionListViewProps) {
   return (
     <div className="space-y-6">
@@ -38,8 +43,18 @@ export function OptionListView({
         ) : (
           <ul className="space-y-2">
             {options.map((option) => (
-              <li key={option.id} className="rounded-md border p-3 text-sm">
+              <li
+                key={option.id}
+                className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+              >
                 <p className="font-medium">{option.title}</p>
+                <HeartButton
+                  hearted={option.ownerIds.includes(currentUserId)}
+                  disabled={loading}
+                  onClick={() => {
+                    onToggleOwner(option);
+                  }}
+                />
               </li>
             ))}
           </ul>
