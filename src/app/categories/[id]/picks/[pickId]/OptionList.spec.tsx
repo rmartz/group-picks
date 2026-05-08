@@ -44,6 +44,7 @@ const baseProps = {
   pickId: "pick-1",
   currentUserId: "user-1",
   initialSuggestions: [],
+  pickClosed: false,
 };
 
 describe("OptionList heart toggle", () => {
@@ -136,5 +137,35 @@ describe("OptionList heart toggle", () => {
       expect(screen.getByText("Pizza")).toBeDefined();
     });
     expect(screen.getByText(PICK_DETAIL_COPY.errors.default)).toBeDefined();
+  });
+
+  it("does not fire toggle requests when the pick is closed", () => {
+    const option = makeOption({ ownerIds: ["user-2"] });
+
+    render(
+      <OptionList
+        {...baseProps}
+        initialOptions={[option]}
+        pickClosed={true}
+      />,
+    );
+
+    const button = screen.getByRole("button", {
+      name: new RegExp(PICK_DETAIL_COPY.heart.closed),
+    });
+    fireEvent.click(button);
+
+    expect(mockJoinOptionOwner).not.toHaveBeenCalled();
+    expect(mockUnjoinOptionOwner).not.toHaveBeenCalled();
+  });
+
+  it("hides the add-option form when the pick is closed", () => {
+    render(
+      <OptionList {...baseProps} initialOptions={[]} pickClosed={true} />,
+    );
+
+    expect(
+      screen.queryByPlaceholderText(PICK_DETAIL_COPY.addOptionPlaceholder),
+    ).toBeNull();
   });
 });

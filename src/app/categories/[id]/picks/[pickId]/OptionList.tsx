@@ -17,6 +17,7 @@ interface OptionListProps {
   currentUserId: string;
   initialOptions: Option[];
   initialSuggestions: Option[];
+  pickClosed: boolean;
 }
 
 export function OptionList({
@@ -26,6 +27,7 @@ export function OptionList({
   currentUserId,
   initialOptions,
   initialSuggestions,
+  pickClosed,
 }: OptionListProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [suggestions, setSuggestions] = useState<Option[]>(initialSuggestions);
@@ -166,6 +168,7 @@ export function OptionList({
       loading={loading}
       error={error}
       currentUserId={currentUserId}
+      pickClosed={pickClosed}
       onNewTitleChange={setNewTitle}
       onAddSubmit={(e) => void handleAddSubmit(e)}
       onAdoptSuggestion={(opt) => void handleAdoptSuggestion(opt)}

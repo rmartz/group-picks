@@ -22,6 +22,7 @@ const meta = {
     loading: false,
     error: undefined,
     currentUserId: "user-1",
+    pickClosed: false,
     onNewTitleChange: () => undefined,
     onAddSubmit: () => undefined,
     onAdoptSuggestion: () => undefined,
@@ -77,5 +78,24 @@ export const Loading: Story = {
 export const WithError: Story = {
   args: {
     error: "Something went wrong. Please try again.",
+  },
+};
+
+export const ClosedPick: Story = {
+  args: {
+    pickClosed: true,
+    options: [
+      makeOption({
+        id: "opt-1",
+        title: "The Shawshank Redemption",
+        ownerIds: ["user-1", "user-2"],
+      }),
+      makeOption({
+        id: "opt-2",
+        title: "Inception",
+        ownerIds: ["user-2"],
+      }),
+    ],
+    suggestions: [makeOption({ id: "sug-1", title: "The Matrix" })],
   },
 };

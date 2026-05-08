@@ -3,27 +3,39 @@ import { PICK_DETAIL_COPY } from "./copy";
 export interface HeartButtonProps {
   hearted: boolean;
   disabled?: boolean;
+  pickClosed?: boolean;
   onClick: () => void;
 }
 
-export function HeartButton({ hearted, disabled, onClick }: HeartButtonProps) {
+export function HeartButton({
+  hearted,
+  disabled,
+  pickClosed,
+  onClick,
+}: HeartButtonProps) {
+  const isDisabled = disabled === true || pickClosed === true;
+  const baseLabel = hearted
+    ? PICK_DETAIL_COPY.heart.removeOwnership
+    : PICK_DETAIL_COPY.heart.addOwnership;
+  const ariaLabel = pickClosed
+    ? `${baseLabel} (${PICK_DETAIL_COPY.heart.closed})`
+    : baseLabel;
+  const title = pickClosed ? PICK_DETAIL_COPY.heart.closed : undefined;
+
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
-      aria-label={
-        hearted
-          ? PICK_DETAIL_COPY.heart.removeOwnership
-          : PICK_DETAIL_COPY.heart.addOwnership
-      }
+      disabled={isDisabled}
+      aria-label={ariaLabel}
       aria-pressed={hearted}
+      title={title}
       className={[
         "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors",
         hearted
           ? "bg-black text-white"
           : "border border-gray-300 bg-transparent text-gray-400",
-        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+        isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
       ].join(" ")}
     >
       {hearted ? (
