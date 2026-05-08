@@ -24,6 +24,18 @@ export async function getGroupById(id: string): Promise<Group | undefined> {
   return firebaseToGroup(id, publicData, memberIds);
 }
 
+export async function getGroupsByUserId(uid: string): Promise<Group[]> {
+  const db = getDatabase(getAdminApp());
+
+  const membershipSnap = await db.ref(`users/${uid}/groups`).get();
+  if (!membershipSnap.exists()) return [];
+
+  const groupIds = Object.keys(membershipSnap.val() as Record<string, unknown>);
+
+  const groups = await Promise.all(groupIds.map((id) => getGroupById(id)));
+  return groups.filter((g): g is Group => g !== undefined);
+}
+
 export async function getMemberDisplayNames(
   uids: string[],
 ): Promise<{ uid: string; name: string }[]> {
