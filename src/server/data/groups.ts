@@ -52,12 +52,28 @@ export async function removeMember(
   uid: string,
 ): Promise<{ lastMember: boolean }> {
   const db = getDatabase(getAdminApp());
-  const snap = await db.ref(`groups/${groupId}/members`).get();
-  if (!snap.exists()) return { lastMember: true };
-  const members = snap.val() as Record<string, unknown>;
-  if (Object.keys(members).length <= 1) return { lastMember: true };
+  // Atomically check-and-remove the calling member: if they are the last
+  // member, abort the transaction (returning undefined leaves the data
+  // untouched and result.committed === false). Otherwise, write back the
+  // members object with the calling uid removed in a single atomic step.
+  // Concurrency-safety matters here: without the transaction, two concurrent
+  // calls in a two-member group can both pass the last-member guard and
+  // both delete their own uid, leaving the group with an empty members map.
+  const result = await db
+    .ref(`groups/${groupId}/members`)
+    .transaction((members: Record<string, unknown> | null) => {
+      if (!members) return members;
+      if (Object.keys(members).length <= 1) return undefined;
+      return Object.fromEntries(
+        Object.entries(members).filter(([key]) => key !== uid),
+      );
+    });
+  if (!result.committed) return { lastMember: true };
+  // Best-effort follow-up: clean up the user-index entry. The transaction
+  // already removed the user from the group (which is the user-facing
+  // change), so a failure here would leave a dangling user-index entry but
+  // would not affect group membership.
   await db.ref("/").update({
-    [`groups/${groupId}/members/${uid}`]: null,
     [`users/${uid}/groups/${groupId}`]: null,
   });
   return { lastMember: false };
