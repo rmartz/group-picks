@@ -35,6 +35,8 @@ export async function POST(request: Request) {
     name,
     createdAt: new Date(),
     creatorId: uid,
+    adminIds: [uid],
+    picksRestricted: false,
   });
 
   await db.ref("/").update({

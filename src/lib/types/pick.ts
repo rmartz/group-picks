@@ -1,3 +1,9 @@
+export interface PickOption {
+  id: string;
+  ownerIds: string[];
+  title: string;
+}
+
 export interface GroupPick {
   id: string;
   title: string;
@@ -9,4 +15,5 @@ export interface GroupPick {
   closedManually?: boolean;
   createdAt: Date;
   creatorId: string;
+  options?: PickOption[];
 }

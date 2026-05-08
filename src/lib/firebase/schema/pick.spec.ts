@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import {
   pickToFirebase,
   firebaseToPick,
+  removeOwnerFromPickOptions,
   type FirebasePickPublic,
 } from "./pick";
 
@@ -48,6 +49,32 @@ describe("pickToFirebase", () => {
     expect(result.creatorId).toBe("user-abc");
   });
 
+  it("converts options and owner IDs to Firebase format", () => {
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      description: "A classic film about hope",
+      topCount: 3,
+      dueDate: FIXED_DUE_DATE,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      options: [
+        {
+          id: "option-a",
+          ownerIds: ["user-abc", "user-def"],
+          title: "Movie night",
+        },
+      ],
+    });
+
+    expect(result.options).toEqual({
+      "option-a": {
+        ownerIds: ["user-abc", "user-def"],
+        title: "Movie night",
+      },
+    });
+  });
+
   it("omits optional fields when they are undefined", () => {
     const result = pickToFirebase({
       title: "The Shawshank Redemption",
@@ -57,10 +84,25 @@ describe("pickToFirebase", () => {
       categoryId: "cat-abc",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
+      options: undefined,
     });
 
     expect(result.description).toBeUndefined();
     expect(result.dueDate).toBeUndefined();
+  });
+
+  it("returns undefined options when they are not provided", () => {
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      description: "A classic film about hope",
+      topCount: 1,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      options: undefined,
+    });
+
+    expect(result.options).toBeUndefined();
   });
 
   it("serializes closedAt as a timestamp when provided", () => {
@@ -146,6 +188,35 @@ describe("firebaseToPick", () => {
     expect(result.dueDate).toBeUndefined();
   });
 
+  it("returns undefined options when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ options: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.options).toBeUndefined();
+  });
+
+  it("converts Firebase options to pick options", () => {
+    const data = makeFirebasePickPublic({
+      options: {
+        "option-a": {
+          ownerIds: ["user-123"],
+          title: "Movie night",
+        },
+      },
+    });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.options).toEqual([
+      {
+        id: "option-a",
+        ownerIds: ["user-123"],
+        title: "Movie night",
+      },
+    ]);
+  });
+
   it("deserializes closedAt from a timestamp", () => {
     const data = makeFirebasePickPublic({ closedAt: CLOSED_TIMESTAMP });
 
@@ -202,5 +273,45 @@ describe("firebaseToPick", () => {
     const result = firebaseToPick("pick-xyz", data);
 
     expect(result.closedManually).toBeUndefined();
+  });
+});
+
+describe("removeOwnerFromPickOptions", () => {
+  it("removes the owner from the option owner list", () => {
+    const result = removeOwnerFromPickOptions(
+      [
+        {
+          id: "option-a",
+          ownerIds: ["user-123", "user-456"],
+          title: "Movie night",
+        },
+      ],
+      "option-a",
+      "user-456",
+    );
+
+    expect(result).toEqual([
+      {
+        id: "option-a",
+        ownerIds: ["user-123"],
+        title: "Movie night",
+      },
+    ]);
+  });
+
+  it("deletes the option when no owners remain", () => {
+    const result = removeOwnerFromPickOptions(
+      [
+        {
+          id: "option-a",
+          ownerIds: ["user-123"],
+          title: "Movie night",
+        },
+      ],
+      "option-a",
+      "user-123",
+    );
+
+    expect(result).toEqual([]);
   });
 });
