@@ -4,4 +4,6 @@ export interface Group {
   createdAt: Date;
   creatorId: string;
   memberIds: string[];
+  adminIds: string[];
+  picksRestricted: boolean;
 }

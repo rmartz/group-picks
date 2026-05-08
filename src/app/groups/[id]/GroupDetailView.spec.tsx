@@ -20,6 +20,8 @@ function makeGroup() {
     createdAt: new Date("2025-01-15T12:00:00.000Z"),
     creatorId: "user-123",
     memberIds: ["user-123", "user-456"],
+    adminIds: ["user-123"],
+    picksRestricted: false,
   };
 }
 
