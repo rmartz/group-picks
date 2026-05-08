@@ -39,6 +39,8 @@ export async function POST(request: Request) {
     createdAt: new Date(),
     creatorId: uid,
     inviteToken,
+    adminIds: [uid],
+    picksRestricted: false,
   });
 
   const now = Date.now();
@@ -47,6 +49,7 @@ export async function POST(request: Request) {
       public: publicData,
       members: { [uid]: true },
     },
+    [`users/${uid}/groups/${groupId}`]: true,
     [`invites/${inviteToken}`]: {
       groupId,
       createdAt: now,

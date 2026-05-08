@@ -2,23 +2,75 @@ import { redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupInviteByToken } from "@/server/data/invites";
 import { getGroupById } from "@/server/data/groups";
-import { InviteView } from "./InviteView";
-import { INVITE_COPY } from "./copy";
+import { JoinGroupForm } from "@/app/groups/join/JoinGroupForm";
+import { JOIN_GROUP_COPY } from "@/app/groups/join/copy";
 
-export default async function InvitePage({
-  params,
-}: {
+interface InvitePageProps {
   params: Promise<{ token: string }>;
+}
+
+function InviteErrorPage({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
 }) {
-  const [uid, { token }] = await Promise.all([getVerifiedUid(), params]);
-  if (!uid) redirect(`/sign-in?next=/invite/${token}`);
+  return (
+    <main className="mx-auto max-w-lg space-y-4 p-6">
+      <h1 className="text-2xl font-semibold">{title}</h1>
+      <p className="text-sm text-gray-600">{description}</p>
+    </main>
+  );
+}
+
+const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
+
+export default async function InvitePage({ params }: InvitePageProps) {
+  const { token } = await params;
+
+  if (!INVITE_TOKEN_FORMAT.test(token)) {
+    return (
+      <InviteErrorPage
+        title={JOIN_GROUP_COPY.invalidTitle}
+        description={JOIN_GROUP_COPY.invalidDescription}
+      />
+    );
+  }
+
+  const uid = await getVerifiedUid();
+  if (!uid) {
+    const signInUrl = new URLSearchParams({ invite_token: token }).toString();
+    redirect(`/sign-in?${signInUrl}`);
+  }
+
   const invite = await getGroupInviteByToken(token);
 
-  if (!invite?.active) {
+  if (!invite) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <p className="text-muted-foreground">{INVITE_COPY.notFound}</p>
-      </main>
+      <InviteErrorPage
+        title={JOIN_GROUP_COPY.invalidTitle}
+        description={JOIN_GROUP_COPY.invalidDescription}
+      />
+    );
+  }
+
+  if (!invite.active) {
+    return (
+      <InviteErrorPage
+        title={JOIN_GROUP_COPY.revokedTitle}
+        description={JOIN_GROUP_COPY.revokedDescription}
+      />
+    );
+  }
+
+  const now = new Date();
+  if (invite.expiresAt !== undefined && invite.expiresAt < now) {
+    return (
+      <InviteErrorPage
+        title={JOIN_GROUP_COPY.expiredTitle}
+        description={JOIN_GROUP_COPY.expiredDescription}
+      />
     );
   }
 
@@ -26,20 +78,12 @@ export default async function InvitePage({
 
   if (!group) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <p className="text-muted-foreground">{INVITE_COPY.notFound}</p>
-      </main>
+      <InviteErrorPage
+        title={JOIN_GROUP_COPY.invalidTitle}
+        description={JOIN_GROUP_COPY.invalidDescription}
+      />
     );
   }
 
-  const isMember = group.memberIds.includes(uid);
-
-  return (
-    <InviteView
-      groupId={group.id}
-      groupName={group.name}
-      token={token}
-      isMember={isMember}
-    />
-  );
+  return <JoinGroupForm token={token} groupName={group.name} />;
 }
