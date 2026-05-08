@@ -11,9 +11,9 @@ export interface GroupPick {
   topCount: number;
   dueDate?: Date;
   categoryId: string;
+  closedAt?: Date;
+  closedManually?: boolean;
   createdAt: Date;
   creatorId: string;
   options?: PickOption[];
-  closedAt?: Date;
-  closedManually?: boolean;
 }

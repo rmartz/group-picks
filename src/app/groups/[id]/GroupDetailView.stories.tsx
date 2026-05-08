@@ -5,6 +5,7 @@ const meta: Meta<typeof GroupDetailView> = {
   title: "Groups/GroupDetailView",
   component: GroupDetailView,
   args: {
+    currentUserId: "user-123",
     group: {
       id: "group-1",
       name: "Friday Night Picks",
@@ -15,7 +16,6 @@ const meta: Meta<typeof GroupDetailView> = {
       picksRestricted: false,
     },
     categories: [],
-    currentUserId: "user-123",
   },
 };
 

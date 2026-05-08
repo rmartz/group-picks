@@ -12,10 +12,10 @@ export interface FirebasePickPublic {
   topCount?: number;
   dueDate?: number;
   categoryId: string;
-  createdAt: number;
-  creatorId: string;
   closedAt?: number;
   closedManually?: boolean;
+  createdAt: number;
+  creatorId: string;
 }
 
 function pickOptionToFirebase(option: PickOption): FirebasePickOption {
@@ -79,6 +79,12 @@ export function firebaseToPick(
   id: string,
   data: FirebasePickPublic,
 ): GroupPick {
+  const isValidClosedAt =
+    typeof data.closedAt === "number" &&
+    Number.isFinite(data.closedAt) &&
+    data.closedAt > 0 &&
+    data.closedAt <= Date.now();
+
   const options =
     data.options === undefined
       ? undefined
@@ -97,7 +103,10 @@ export function firebaseToPick(
     categoryId: data.categoryId,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
-    closedAt: data.closedAt !== undefined ? new Date(data.closedAt) : undefined,
+    closedAt:
+      isValidClosedAt && data.closedAt !== undefined
+        ? new Date(data.closedAt)
+        : undefined,
     closedManually: data.closedManually,
   };
 }

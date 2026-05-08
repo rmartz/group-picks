@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import {
   pickToFirebase,
   firebaseToPick,
@@ -227,6 +227,32 @@ describe("firebaseToPick", () => {
 
   it("returns undefined closedAt when absent from Firebase data", () => {
     const data = makeFirebasePickPublic({ closedAt: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedAt).toBeUndefined();
+  });
+
+  describe("when system time is fixed", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("returns undefined closedAt when timestamp is in the future", () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(FIXED_DATE);
+
+      const future = FIXED_TIMESTAMP + 5_000;
+      const data = makeFirebasePickPublic({ closedAt: future });
+
+      const result = firebaseToPick("pick-xyz", data);
+
+      expect(result.closedAt).toBeUndefined();
+    });
+  });
+
+  it("returns undefined closedAt when timestamp is invalid", () => {
+    const data = makeFirebasePickPublic({ closedAt: Number.NaN });
 
     const result = firebaseToPick("pick-xyz", data);
 

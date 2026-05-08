@@ -75,9 +75,12 @@ export async function closePick(
   pickId: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
-    closedAt: Date.now(),
-    closedManually: true,
+  const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
+
+  await pickRef.transaction((current: FirebasePickPublic | null) => {
+    if (current === null) return current;
+    if (current.closedAt !== undefined) return current;
+    return { ...current, closedAt: Date.now(), closedManually: true };
   });
 }
 
