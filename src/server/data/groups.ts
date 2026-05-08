@@ -52,14 +52,13 @@ export async function removeMember(
   uid: string,
 ): Promise<{ lastMember: boolean }> {
   const db = getDatabase(getAdminApp());
-  const result = await db
-    .ref(`groups/${groupId}/members`)
-    .transaction((members: Record<string, unknown> | null) => {
-      if (!members) return members;
-      if (Object.keys(members).length <= 1) return undefined;
-      return Object.fromEntries(
-        Object.entries(members).filter(([key]) => key !== uid),
-      );
-    });
-  return { lastMember: !result.committed };
+  const snap = await db.ref(`groups/${groupId}/members`).get();
+  if (!snap.exists()) return { lastMember: true };
+  const members = snap.val() as Record<string, unknown>;
+  if (Object.keys(members).length <= 1) return { lastMember: true };
+  await db.ref("/").update({
+    [`groups/${groupId}/members/${uid}`]: null,
+    [`users/${uid}/groups/${groupId}`]: null,
+  });
+  return { lastMember: false };
 }

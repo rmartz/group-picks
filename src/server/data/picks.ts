@@ -42,11 +42,32 @@ export async function createPick(
   if (!id) throw new Error("Failed to generate pick ID");
 
   const createdAt = new Date();
-  const pickData = pickToFirebase({ ...pick, createdAt });
+  const pickData = pickToFirebase({
+    ...pick,
+    createdAt,
+    topCount: 1,
+    dueDate: undefined,
+    closedAt: undefined,
+    closedManually: undefined,
+  });
 
   await ref.set(pickData);
 
   return { id, createdAt };
+}
+
+export async function updatePick(
+  categoryId: string,
+  pickId: string,
+  updates: Pick<GroupPick, "title" | "description" | "topCount" | "dueDate">,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
+    title: updates.title,
+    description: updates.description !== "" ? updates.description : null,
+    topCount: updates.topCount,
+    dueDate: updates.dueDate?.getTime() ?? null,
+  });
 }
 
 export async function closePick(
