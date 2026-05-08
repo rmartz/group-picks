@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { GROUP_DETAIL_COPY } from "./copy";
 
 interface LeaveGroupButtonViewProps {
@@ -13,14 +14,14 @@ export function LeaveGroupButtonView({
 }: LeaveGroupButtonViewProps) {
   return (
     <div>
-      <button
+      <Button
         type="button"
+        variant="destructive"
         onClick={onLeave}
         disabled={isLeaving}
-        className="rounded border px-4 py-2 text-sm font-medium text-red-600 disabled:opacity-50"
       >
         {GROUP_DETAIL_COPY.leaveButton}
-      </button>
+      </Button>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );
