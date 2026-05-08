@@ -16,7 +16,7 @@ export function GroupDetailView({
   currentUserId,
 }: GroupDetailViewProps) {
   return (
-    <main className="mx-auto max-w-lg space-y-6 p-6">
+    <main className="mx-auto max-w-lg space-y-8 p-6">
       <h1 className="text-2xl font-semibold">{group.name}</h1>
       <dl className="space-y-2 text-sm">
         <div className="flex gap-2">
