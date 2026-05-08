@@ -38,5 +38,6 @@ export const CATEGORY_COPY = {
   },
   errors: {
     default: "Something went wrong. Please try again.",
+    topCountInvalid: "Top N must be a positive whole number.",
   },
 } as const;

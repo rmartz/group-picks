@@ -145,7 +145,7 @@ export function CategoryList({
     setPickError(undefined);
     const topCount = Number.parseInt(createPickTopCount, 10);
     if (!Number.isInteger(topCount) || topCount < 1) {
-      setPickError(CATEGORY_COPY.errors.default);
+      setPickError(CATEGORY_COPY.errors.topCountInvalid);
       return;
     }
 
