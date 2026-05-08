@@ -5,6 +5,7 @@ export interface FirebaseOptionPublic {
   creatorId: string;
   owners: Record<string, true>;
   createdAt: number;
+  interestedCount?: number;
 }
 
 export function optionToFirebase(
@@ -36,5 +37,6 @@ export function firebaseToOption(
     createdAt: new Date(data.createdAt),
     pickId,
     categoryId,
+    interestedCount: data.interestedCount ?? 0,
   };
 }
