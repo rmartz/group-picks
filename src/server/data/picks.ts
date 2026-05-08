@@ -4,7 +4,7 @@ import {
   firebaseToPick,
   type FirebasePickPublic,
 } from "@/lib/firebase/schema/pick";
-import { PickStatus, type GroupPick } from "@/lib/types/pick";
+import type { GroupPick } from "@/lib/types/pick";
 
 export async function getPicksByCategory(
   categoryId: string,
@@ -20,21 +20,39 @@ export async function getPicksByCategory(
   );
 }
 
+export async function getPickById(
+  categoryId: string,
+  pickId: string,
+): Promise<GroupPick | undefined> {
+  const db = getDatabase(getAdminApp());
+  const snap = await db.ref(`categories/${categoryId}/picks/${pickId}`).get();
+
+  if (!snap.exists()) return undefined;
+
+  return firebaseToPick(pickId, snap.val() as FirebasePickPublic);
+}
+
 export async function closePick(
   categoryId: string,
   pickId: string,
-): Promise<boolean> {
+): Promise<void> {
   const db = getDatabase(getAdminApp());
   const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
 
-  let existed = false;
   await pickRef.transaction((current: FirebasePickPublic | null) => {
     if (current === null) return current;
-    existed = true;
-    if ((current.status ?? PickStatus.Open) === PickStatus.Closed)
-      return current;
-    return { ...current, closedAt: Date.now(), status: PickStatus.Closed };
+    if (current.closedAt !== undefined) return current;
+    return { ...current, closedAt: Date.now(), closedManually: true };
   });
+}
 
-  return existed;
+export async function reopenPick(
+  categoryId: string,
+  pickId: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
+    closedAt: null,
+    closedManually: null,
+  });
 }

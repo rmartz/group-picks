@@ -1,13 +1,13 @@
-import { PickStatus, type GroupPick } from "@/lib/types/pick";
+import type { GroupPick } from "@/lib/types/pick";
 
 export interface FirebasePickPublic {
+  title: string;
+  description?: string;
   categoryId: string;
   closedAt?: number;
+  closedManually?: boolean;
   createdAt: number;
   creatorId: string;
-  description?: string;
-  status?: PickStatus;
-  title: string;
 }
 
 export function pickToFirebase(
@@ -18,18 +18,18 @@ export function pickToFirebase(
     | "categoryId"
     | "createdAt"
     | "creatorId"
-    | "status"
     | "closedAt"
+    | "closedManually"
   >,
 ): FirebasePickPublic {
   return {
+    title: pick.title,
+    description: pick.description,
     categoryId: pick.categoryId,
-    closedAt: pick.closedAt?.getTime(),
     createdAt: pick.createdAt.getTime(),
     creatorId: pick.creatorId,
-    description: pick.description,
-    status: pick.status,
-    title: pick.title,
+    closedAt: pick.closedAt?.getTime(),
+    closedManually: pick.closedManually,
   };
 }
 
@@ -45,19 +45,15 @@ export function firebaseToPick(
 
   return {
     id,
+    title: data.title,
+    description: data.description,
     categoryId: data.categoryId,
+    createdAt: new Date(data.createdAt),
+    creatorId: data.creatorId,
     closedAt:
       isValidClosedAt && data.closedAt !== undefined
         ? new Date(data.closedAt)
         : undefined,
-    createdAt: new Date(data.createdAt),
-    creatorId: data.creatorId,
-    description: data.description,
-    status:
-      data.status !== undefined &&
-      (Object.values(PickStatus) as string[]).includes(data.status)
-        ? data.status
-        : PickStatus.Open,
-    title: data.title,
+    closedManually: data.closedManually,
   };
 }

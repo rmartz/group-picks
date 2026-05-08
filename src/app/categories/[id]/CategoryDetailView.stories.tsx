@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { Category } from "@/lib/types/category";
-import { PickStatus, type GroupPick } from "@/lib/types/pick";
+import type { GroupPick } from "@/lib/types/pick";
 import { CategoryDetailView } from "./CategoryDetailView";
 
 const category: Category = {
@@ -21,7 +21,6 @@ const picks: GroupPick[] = [
     closedAt: undefined,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
     creatorId: "user-1",
-    status: PickStatus.Open,
   },
   {
     id: "pick-closed",
@@ -29,9 +28,9 @@ const picks: GroupPick[] = [
     description: "A mind-bending sci-fi thriller",
     categoryId: "cat-1",
     closedAt: new Date("2025-01-21T12:00:00.000Z"),
+    closedManually: true,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
     creatorId: "user-1",
-    status: PickStatus.Closed,
   },
 ];
 

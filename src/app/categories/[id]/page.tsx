@@ -47,8 +47,7 @@ export default async function CategoryDetailPage({
       throw new Error(CATEGORY_DETAIL_COPY.closePickError);
     }
 
-    const wasClosed = await closePick(id, pickId);
-    if (!wasClosed) throw new Error(CATEGORY_DETAIL_COPY.closePickError);
+    await closePick(id, pickId);
 
     revalidatePath(`/categories/${id}`);
   }

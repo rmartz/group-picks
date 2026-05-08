@@ -3,9 +3,18 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { CategoryDetailView } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 import type { Category } from "@/lib/types/category";
-import { PickStatus, type GroupPick } from "@/lib/types/pick";
+import type { GroupPick } from "@/lib/types/pick";
+import { vi } from "vitest";
 
 afterEach(cleanup);
+
+vi.mock("./ReopenPickButton", () => ({
+  ReopenPickButton: ({ pickId }: { pickId: string }) => (
+    <button data-testid={`reopen-${pickId}`}>
+      {CATEGORY_DETAIL_COPY.reopenPickButton}
+    </button>
+  ),
+}));
 
 function makeCategory(overrides?: Partial<Category>): Category {
   return {
@@ -28,7 +37,6 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
     closedAt: undefined,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
     creatorId: "user-123",
-    status: PickStatus.Open,
     ...overrides,
   };
 }
@@ -86,27 +94,6 @@ describe("CategoryDetailView", () => {
     expect(screen.getByText(pick.title)).toBeDefined();
   });
 
-  it("renders closed status for closed picks", () => {
-    const category = makeCategory();
-    const pick = makePick({
-      closedAt: new Date("2025-01-21T12:00:00.000Z"),
-      status: PickStatus.Closed,
-    });
-    render(<CategoryDetailView category={category} picks={[pick]} />);
-
-    expect(
-      screen.getByText(CATEGORY_DETAIL_COPY.closedPickLabel),
-    ).toBeDefined();
-  });
-
-  it("renders open status for open picks", () => {
-    const category = makeCategory();
-    const pick = makePick({ status: PickStatus.Open });
-    render(<CategoryDetailView category={category} picks={[pick]} />);
-
-    expect(screen.getByText(CATEGORY_DETAIL_COPY.pickOpenLabel)).toBeDefined();
-  });
-
   it("renders pick descriptions when provided", () => {
     const category = makeCategory();
     const pick = makePick({ description: "A classic film about hope" });
@@ -153,7 +140,7 @@ describe("CategoryDetailView", () => {
 
   it("renders close pick button for open picks when action is provided", () => {
     const category = makeCategory();
-    const pick = makePick({ status: PickStatus.Open });
+    const pick = makePick({ closedAt: undefined });
     render(
       <CategoryDetailView
         category={category}
@@ -171,7 +158,7 @@ describe("CategoryDetailView", () => {
 
   it("does not render close pick button for closed picks", () => {
     const category = makeCategory();
-    const pick = makePick({ status: PickStatus.Closed });
+    const pick = makePick({ closedAt: new Date("2025-02-01T09:00:00.000Z") });
     render(
       <CategoryDetailView
         category={category}
@@ -185,5 +172,43 @@ describe("CategoryDetailView", () => {
         name: CATEGORY_DETAIL_COPY.closePickButton,
       }),
     ).toBeNull();
+  });
+
+  it("renders the reopen button for a closed pick", () => {
+    const category = makeCategory();
+    const closedPick = makePick({
+      id: "pick-closed",
+      closedAt: new Date("2025-02-01T09:00:00.000Z"),
+      closedManually: true,
+    });
+    render(<CategoryDetailView category={category} picks={[closedPick]} />);
+
+    expect(screen.getByTestId("reopen-pick-closed")).toBeDefined();
+  });
+
+  it("does not render the reopen button for an open pick", () => {
+    const category = makeCategory();
+    const openPick = makePick({ id: "pick-open" });
+    render(<CategoryDetailView category={category} picks={[openPick]} />);
+
+    expect(screen.queryByTestId("reopen-pick-open")).toBeNull();
+  });
+
+  it("renders a closed badge for a closed pick", () => {
+    const category = makeCategory();
+    const closedPick = makePick({
+      closedAt: new Date("2025-02-01T09:00:00.000Z"),
+    });
+    render(<CategoryDetailView category={category} picks={[closedPick]} />);
+
+    expect(screen.getByText(CATEGORY_DETAIL_COPY.closedBadge)).toBeDefined();
+  });
+
+  it("does not render a closed badge for an open pick", () => {
+    const category = makeCategory();
+    const openPick = makePick({ closedAt: undefined });
+    render(<CategoryDetailView category={category} picks={[openPick]} />);
+
+    expect(screen.queryByText(CATEGORY_DETAIL_COPY.closedBadge)).toBeNull();
   });
 });

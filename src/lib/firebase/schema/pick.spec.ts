@@ -1,5 +1,4 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { PickStatus } from "@/lib/types/pick";
 import {
   pickToFirebase,
   firebaseToPick,
@@ -9,17 +8,18 @@ import {
 const FIXED_DATE = new Date("2025-01-15T12:00:00.000Z");
 const FIXED_TIMESTAMP = FIXED_DATE.getTime();
 
+const CLOSED_DATE = new Date("2025-02-01T09:00:00.000Z");
+const CLOSED_TIMESTAMP = CLOSED_DATE.getTime();
+
 function makeFirebasePickPublic(
   overrides?: Partial<FirebasePickPublic>,
 ): FirebasePickPublic {
   return {
+    title: "The Shawshank Redemption",
+    description: "A classic film about hope",
     categoryId: "cat-123",
-    closedAt: undefined,
     createdAt: FIXED_TIMESTAMP,
     creatorId: "user-123",
-    description: "A classic film about hope",
-    status: PickStatus.Open,
-    title: "The Shawshank Redemption",
     ...overrides,
   };
 }
@@ -30,19 +30,15 @@ describe("pickToFirebase", () => {
       title: "The Shawshank Redemption",
       description: "A classic film about hope",
       categoryId: "cat-abc",
-      closedAt: undefined,
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
-      status: PickStatus.Open,
     });
 
     expect(result.title).toBe("The Shawshank Redemption");
     expect(result.description).toBe("A classic film about hope");
     expect(result.categoryId).toBe("cat-abc");
-    expect(result.closedAt).toBeUndefined();
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-abc");
-    expect(result.status).toBe(PickStatus.Open);
   });
 
   it("omits description when it is undefined", () => {
@@ -50,13 +46,59 @@ describe("pickToFirebase", () => {
       title: "The Shawshank Redemption",
       description: undefined,
       categoryId: "cat-abc",
-      closedAt: undefined,
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
-      status: PickStatus.Open,
     });
 
     expect(result.description).toBeUndefined();
+  });
+
+  it("serializes closedAt as a timestamp when provided", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedAt: CLOSED_DATE,
+    });
+
+    expect(result.closedAt).toBe(CLOSED_TIMESTAMP);
+  });
+
+  it("omits closedAt when undefined", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedAt: undefined,
+    });
+
+    expect(result.closedAt).toBeUndefined();
+  });
+
+  it("serializes closedManually when provided", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedManually: true,
+    });
+
+    expect(result.closedManually).toBe(true);
+  });
+
+  it("omits closedManually when undefined", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedManually: undefined,
+    });
+
+    expect(result.closedManually).toBeUndefined();
   });
 });
 
@@ -70,10 +112,8 @@ describe("firebaseToPick", () => {
     expect(result.title).toBe("The Shawshank Redemption");
     expect(result.description).toBe("A classic film about hope");
     expect(result.categoryId).toBe("cat-123");
-    expect(result.closedAt).toBeUndefined();
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
-    expect(result.status).toBe(PickStatus.Open);
   });
 
   it("returns undefined description when absent from Firebase data", () => {
@@ -84,20 +124,20 @@ describe("firebaseToPick", () => {
     expect(result.description).toBeUndefined();
   });
 
-  it("defaults status to open when absent from Firebase data", () => {
-    const data = makeFirebasePickPublic({ status: undefined });
+  it("deserializes closedAt from a timestamp", () => {
+    const data = makeFirebasePickPublic({ closedAt: CLOSED_TIMESTAMP });
 
     const result = firebaseToPick("pick-xyz", data);
 
-    expect(result.status).toBe(PickStatus.Open);
+    expect(result.closedAt).toEqual(CLOSED_DATE);
   });
 
-  it("converts closedAt timestamp when provided", () => {
-    const data = makeFirebasePickPublic({ closedAt: FIXED_TIMESTAMP });
+  it("returns undefined closedAt when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ closedAt: undefined });
 
     const result = firebaseToPick("pick-xyz", data);
 
-    expect(result.closedAt).toEqual(FIXED_DATE);
+    expect(result.closedAt).toBeUndefined();
   });
 
   describe("when system time is fixed", () => {
@@ -124,5 +164,21 @@ describe("firebaseToPick", () => {
     const result = firebaseToPick("pick-xyz", data);
 
     expect(result.closedAt).toBeUndefined();
+  });
+
+  it("deserializes closedManually when present", () => {
+    const data = makeFirebasePickPublic({ closedManually: true });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedManually).toBe(true);
+  });
+
+  it("returns undefined closedManually when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ closedManually: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedManually).toBeUndefined();
   });
 });
