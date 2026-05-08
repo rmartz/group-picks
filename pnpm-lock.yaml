@@ -72,9 +72,6 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.4
-      '@testing-library/dom':
-        specifier: ^10.4.1
-        version: 10.4.1
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -136,8 +133,8 @@ importers:
         specifier: ^52.0.0
         version: 52.0.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(rollup@4.60.2)(typescript@6.0.3)
       vercel-deploy-scripts:
-        specifier: github:rmartz/vercel-deploy-scripts#v1.7.0
-        version: https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/90461fa5b408c4c307cd701123522f475f139a6a
+        specifier: github:rmartz/vercel-deploy-scripts#v3.1.0
+        version: https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/8d0b949e18567992e5c18cd800005f5fde28602f
       vite:
         specifier: ^8.0.10
         version: 8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
@@ -5739,10 +5736,10 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  vercel-deploy-scripts@https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/90461fa5b408c4c307cd701123522f475f139a6a:
-    resolution: {tarball: https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/90461fa5b408c4c307cd701123522f475f139a6a}
+  vercel-deploy-scripts@https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/8d0b949e18567992e5c18cd800005f5fde28602f:
+    resolution: {tarball: https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/8d0b949e18567992e5c18cd800005f5fde28602f}
     version: 0.0.0
-    engines: {node: '>=18'}
+    engines: {node: '>=18', pnpm: '>=9'}
     hasBin: true
 
   vercel@52.0.0:
@@ -11884,7 +11881,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vercel-deploy-scripts@https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/90461fa5b408c4c307cd701123522f475f139a6a:
+  vercel-deploy-scripts@https://codeload.github.com/rmartz/vercel-deploy-scripts/tar.gz/8d0b949e18567992e5c18cd800005f5fde28602f:
     dependencies:
       js-yaml: 4.1.1
 
