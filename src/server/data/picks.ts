@@ -42,7 +42,14 @@ export async function createPick(
   if (!id) throw new Error("Failed to generate pick ID");
 
   const createdAt = new Date();
-  const pickData = pickToFirebase({ ...pick, createdAt });
+  const pickData = pickToFirebase({
+    ...pick,
+    createdAt,
+    topCount: 1,
+    dueDate: undefined,
+    closedAt: undefined,
+    closedManually: undefined,
+  });
 
   await ref.set(pickData);
 
