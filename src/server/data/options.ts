@@ -46,7 +46,6 @@ export async function joinOption(
 }
 
 export async function getOptionsByCategory(
-  categoryId: string,
   pickIds: string[],
 ): Promise<Option[]> {
   if (pickIds.length === 0) return [];

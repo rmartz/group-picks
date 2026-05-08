@@ -10,6 +10,7 @@ interface OptionListProps {
   groupId: string;
   categoryId: string;
   pickId: string;
+  currentUserId: string;
   initialOptions: Option[];
   initialSuggestions: Option[];
 }
@@ -18,6 +19,7 @@ export function OptionList({
   groupId,
   categoryId,
   pickId,
+  currentUserId,
   initialOptions,
   initialSuggestions,
 }: OptionListProps) {
@@ -44,13 +46,15 @@ export function OptionList({
       if (existing) {
         setOptions((prev) =>
           prev.map((o) =>
-            o.id === optionId && !o.ownerIds.includes("me") ? o : o,
+            o.id === optionId && !o.ownerIds.includes(currentUserId)
+              ? { ...o, ownerIds: [...o.ownerIds, currentUserId] }
+              : o,
           ),
         );
       } else {
         setOptions((prev) => [
           ...prev,
-          { id: optionId, title, pickId, ownerIds: [] },
+          { id: optionId, title, pickId, ownerIds: [currentUserId] },
         ]);
       }
       setSuggestions((prev) =>
@@ -68,8 +72,27 @@ export function OptionList({
     setError(undefined);
     setLoading(true);
     try {
-      await adoptOption(groupId, categoryId, pickId, suggestion.title);
-      setOptions((prev) => [...prev, { ...suggestion, pickId }]);
+      const { optionId } = await adoptOption(
+        groupId,
+        categoryId,
+        pickId,
+        suggestion.title,
+      );
+      const existing = options.find((o) => o.id === optionId);
+      if (existing) {
+        setOptions((prev) =>
+          prev.map((o) =>
+            o.id === optionId && !o.ownerIds.includes(currentUserId)
+              ? { ...o, ownerIds: [...o.ownerIds, currentUserId] }
+              : o,
+          ),
+        );
+      } else {
+        setOptions((prev) => [
+          ...prev,
+          { id: optionId, title: suggestion.title, pickId, ownerIds: [currentUserId] },
+        ]);
+      }
       setSuggestions((prev) => prev.filter((s) => s.id !== suggestion.id));
     } catch {
       setError(PICK_DETAIL_COPY.errors.default);

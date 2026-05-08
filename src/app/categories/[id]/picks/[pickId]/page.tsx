@@ -31,7 +31,7 @@ export default async function PickDetailPage({
   ]);
 
   const priorPickIds = allPicks.filter((p) => p.id !== pickId).map((p) => p.id);
-  const priorOptions = await getOptionsByCategory(categoryId, priorPickIds);
+  const priorOptions = await getOptionsByCategory(priorPickIds);
 
   const currentTitlesLower = new Set(
     currentOptions.map((o) => o.title.toLowerCase()),
@@ -62,6 +62,7 @@ export default async function PickDetailPage({
         groupId={group.id}
         categoryId={categoryId}
         pickId={pickId}
+        currentUserId={uid}
         initialOptions={currentOptions}
         initialSuggestions={dedupedSuggestions}
       />
