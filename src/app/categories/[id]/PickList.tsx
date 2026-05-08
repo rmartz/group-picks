@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { GroupPick } from "@/lib/types/pick";
+import { Button } from "@/components/ui/button";
 import { updatePick } from "@/services/picks";
 import { ReopenPickButton } from "./ReopenPickButton";
 import { CATEGORY_DETAIL_COPY } from "./copy";
@@ -187,21 +188,17 @@ export function PickList({ groupId, categoryId, initialPicks }: PickListProps) {
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-                >
+                <Button type="submit" disabled={loading}>
                   {CATEGORY_DETAIL_COPY.editForm.submitButton}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={cancelEdit}
                   disabled={loading}
-                  className="rounded border px-4 py-2 text-sm font-medium disabled:opacity-50"
                 >
                   {CATEGORY_DETAIL_COPY.editForm.cancelButton}
-                </button>
+                </Button>
               </div>
             </form>
           ) : (
