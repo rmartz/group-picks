@@ -21,9 +21,11 @@ const meta = {
     newTitle: "",
     loading: false,
     error: undefined,
+    currentUserId: "user-1",
     onNewTitleChange: () => undefined,
     onAddSubmit: () => undefined,
     onAdoptSuggestion: () => undefined,
+    onToggleOwner: () => undefined,
   },
 } satisfies Meta<typeof OptionListView>;
 
@@ -35,8 +37,16 @@ export const Empty: Story = {};
 export const WithOptions: Story = {
   args: {
     options: [
-      makeOption({ id: "opt-1", title: "The Shawshank Redemption" }),
-      makeOption({ id: "opt-2", title: "Inception" }),
+      makeOption({
+        id: "opt-1",
+        title: "The Shawshank Redemption",
+        ownerIds: ["user-1", "user-2"],
+      }),
+      makeOption({
+        id: "opt-2",
+        title: "Inception",
+        ownerIds: ["user-2"],
+      }),
     ],
   },
 };

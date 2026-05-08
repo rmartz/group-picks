@@ -5,6 +5,10 @@ export const PICK_DETAIL_COPY = {
   addOptionButton: "Add",
   suggestionsHeading: "Suggestions from your prior picks",
   adoptButton: "Use this",
+  heart: {
+    addOwnership: "Add to your options",
+    removeOwnership: "Remove from your options",
+  },
   errors: {
     default: "Something went wrong. Please try again.",
   },
