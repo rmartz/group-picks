@@ -33,6 +33,7 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
     id: "pick-1",
     title: "The Shawshank Redemption",
     description: "A classic film about hope",
+    topCount: 3,
     categoryId: "cat-1",
     closedAt: undefined,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
