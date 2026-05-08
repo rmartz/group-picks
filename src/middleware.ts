@@ -38,9 +38,14 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const signIn = new URL("/sign-in", request.url);
-    signIn.searchParams.set("next", pathname);
-    return NextResponse.redirect(signIn);
+    const signInUrl = new URL("/sign-in", request.url);
+    const [, inviteToken] = /^\/invite\/([A-Za-z0-9_-]+)$/.exec(pathname) ?? [];
+    if (inviteToken) {
+      signInUrl.searchParams.set("invite_token", inviteToken);
+    } else {
+      signInUrl.searchParams.set("next", pathname);
+    }
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();

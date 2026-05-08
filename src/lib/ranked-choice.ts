@@ -5,6 +5,12 @@ export type Ballot = readonly string[];
 // Index 0 = highest-ranked (winner tier), last index = lowest-ranked.
 export type RankedResult = readonly (readonly string[])[];
 
+export interface PriorPickRanking {
+  categoryId: string;
+  createdAt: Date;
+  rankedOptionIds: readonly string[];
+}
+
 // Runs a single instant-runoff election among the given candidates.
 // Returns the winner(s) as an unsorted array; multiple candidates are returned only when all are tied.
 function runSingleElection(
@@ -72,4 +78,39 @@ export function runRankedChoice(
   }
 
   return result;
+}
+
+interface PreseedAdoptedOptionRankParams {
+  adoptedOptionId: string;
+  categoryId: string;
+  currentRanking: readonly string[];
+  priorPickRankings: readonly PriorPickRanking[];
+}
+
+export function preseedAdoptedOptionRank({
+  adoptedOptionId,
+  categoryId,
+  currentRanking,
+  priorPickRankings,
+}: PreseedAdoptedOptionRankParams): readonly string[] {
+  if (currentRanking.includes(adoptedOptionId)) return currentRanking;
+
+  const priorRankingsInCategory = priorPickRankings
+    .filter((ranking) => ranking.categoryId === categoryId)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+  const rankingToSeedFrom = priorRankingsInCategory.find((ranking) =>
+    ranking.rankedOptionIds.includes(adoptedOptionId),
+  );
+  if (rankingToSeedFrom === undefined) return currentRanking;
+
+  const priorRankIndex =
+    rankingToSeedFrom.rankedOptionIds.indexOf(adoptedOptionId);
+  const insertIndex = Math.min(priorRankIndex, currentRanking.length);
+
+  return [
+    ...currentRanking.slice(0, insertIndex),
+    adoptedOptionId,
+    ...currentRanking.slice(insertIndex),
+  ];
 }
