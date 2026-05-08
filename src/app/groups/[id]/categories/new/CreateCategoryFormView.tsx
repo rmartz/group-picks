@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { CREATE_CATEGORY_COPY } from "./copy";
 
 interface CreateCategoryFormViewProps {
@@ -31,7 +34,7 @@ export function CreateCategoryFormView({
           <label htmlFor="name" className="text-sm font-medium">
             {CREATE_CATEGORY_COPY.nameLabel}
           </label>
-          <input
+          <Input
             id="name"
             type="text"
             required
@@ -40,31 +43,25 @@ export function CreateCategoryFormView({
               onNameChange(e.target.value);
             }}
             placeholder={CREATE_CATEGORY_COPY.namePlaceholder}
-            className="w-full rounded border px-3 py-2 text-sm"
           />
         </div>
         <div className="space-y-1">
           <label htmlFor="description" className="text-sm font-medium">
             {CREATE_CATEGORY_COPY.descriptionLabel}
           </label>
-          <textarea
+          <Textarea
             id="description"
             value={description}
             onChange={(e) => {
               onDescriptionChange(e.target.value);
             }}
             placeholder={CREATE_CATEGORY_COPY.descriptionPlaceholder}
-            className="w-full rounded border px-3 py-2 text-sm"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading} className="w-full">
           {CREATE_CATEGORY_COPY.submitButton}
-        </button>
+        </Button>
       </form>
     </div>
   );
