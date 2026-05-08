@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { reopenPick } from "@/services/picks";
 import { ReopenPickButtonView } from "./ReopenPickButtonView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
@@ -18,6 +19,7 @@ export function ReopenPickButton({
   pickId,
   onReopened,
 }: ReopenPickButtonProps) {
+  const router = useRouter();
   const [isReopening, setIsReopening] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -26,6 +28,7 @@ export function ReopenPickButton({
     setError(undefined);
     try {
       await reopenPick(groupId, categoryId, pickId);
+      router.refresh();
       onReopened?.();
     } catch {
       setError(CATEGORY_DETAIL_COPY.errors.reopenFailed);
