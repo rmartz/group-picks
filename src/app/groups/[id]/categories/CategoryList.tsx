@@ -9,11 +9,13 @@ import { CATEGORY_COPY } from "./copy";
 interface CategoryListProps {
   groupId: string;
   initialCategories: Category[];
+  currentUserId: string;
 }
 
 export function CategoryList({
   groupId,
   initialCategories,
+  currentUserId,
 }: CategoryListProps) {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -114,6 +116,7 @@ export function CategoryList({
   return (
     <CategoryListView
       categories={categories}
+      currentUserId={currentUserId}
       showCreateForm={showCreateForm}
       editingId={editingId}
       createName={createName}

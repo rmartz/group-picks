@@ -5,6 +5,7 @@ import { CATEGORY_COPY } from "./copy";
 
 export interface CategoryListViewProps {
   categories: Category[];
+  currentUserId: string;
   showCreateForm: boolean;
   editingId: string | undefined;
   createName: string;
@@ -27,6 +28,7 @@ export interface CategoryListViewProps {
 
 export function CategoryListView({
   categories,
+  currentUserId,
   showCreateForm,
   editingId,
   createName,
@@ -108,15 +110,17 @@ export function CategoryListView({
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={() => {
-                    onStartEdit(category);
-                  }}
-                  disabled={loading}
-                  className="shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
-                >
-                  {CATEGORY_COPY.editButton}
-                </button>
+                {category.creatorId === currentUserId && (
+                  <button
+                    onClick={() => {
+                      onStartEdit(category);
+                    }}
+                    disabled={loading}
+                    className="shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
+                  >
+                    {CATEGORY_COPY.editButton}
+                  </button>
+                )}
               </div>
             )}
           </li>
