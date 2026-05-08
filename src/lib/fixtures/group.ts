@@ -7,6 +7,8 @@ export function makeGroup(overrides?: Partial<Group>): Group {
     createdAt: new Date("2024-01-01"),
     creatorId: "user-1",
     memberIds: ["user-1"],
+    adminIds: ["user-1"],
+    picksRestricted: false,
     ...overrides,
   };
 }

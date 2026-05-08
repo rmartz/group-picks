@@ -51,6 +51,8 @@ describe("PATCH /api/groups/[id]/categories/[categoryId]", () => {
       createdAt: new Date("2025-01-01T00:00:00.000Z"),
       creatorId: "user-1",
       memberIds: ["user-1", "user-2"],
+      adminIds: ["user-1"],
+      picksRestricted: false,
     });
     mockGetCategoryById.mockResolvedValue({
       id: "cat-1",
