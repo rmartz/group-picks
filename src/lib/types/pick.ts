@@ -12,4 +12,6 @@ export interface GroupPick {
   createdAt: Date;
   creatorId: string;
   options?: PickOption[];
+  closedAt?: Date;
+  closedManually?: boolean;
 }

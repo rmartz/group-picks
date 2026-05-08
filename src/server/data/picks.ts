@@ -19,3 +19,37 @@ export async function getPicksByCategory(
     firebaseToPick(id, pickData),
   );
 }
+
+export async function getPickById(
+  categoryId: string,
+  pickId: string,
+): Promise<GroupPick | undefined> {
+  const db = getDatabase(getAdminApp());
+  const snap = await db.ref(`categories/${categoryId}/picks/${pickId}`).get();
+
+  if (!snap.exists()) return undefined;
+
+  return firebaseToPick(pickId, snap.val() as FirebasePickPublic);
+}
+
+export async function closePick(
+  categoryId: string,
+  pickId: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
+    closedAt: Date.now(),
+    closedManually: true,
+  });
+}
+
+export async function reopenPick(
+  categoryId: string,
+  pickId: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
+    closedAt: null,
+    closedManually: null,
+  });
+}

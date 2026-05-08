@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { CREATE_GROUP_COPY } from "./copy";
 
 interface CreateGroupFormViewProps {
@@ -24,10 +27,8 @@ export function CreateGroupFormView({
         className="space-y-4"
       >
         <div className="space-y-1">
-          <label htmlFor="name" className="text-sm font-medium">
-            {CREATE_GROUP_COPY.nameLabel}
-          </label>
-          <input
+          <Label htmlFor="name">{CREATE_GROUP_COPY.nameLabel}</Label>
+          <Input
             id="name"
             type="text"
             required
@@ -36,17 +37,13 @@ export function CreateGroupFormView({
               onNameChange(e.target.value);
             }}
             placeholder={CREATE_GROUP_COPY.namePlaceholder}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className="w-full"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading} className="w-full">
           {CREATE_GROUP_COPY.submitButton}
-        </button>
+        </Button>
       </form>
     </div>
   );

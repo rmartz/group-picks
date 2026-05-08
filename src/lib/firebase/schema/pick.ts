@@ -12,6 +12,8 @@ export interface FirebasePickPublic {
   categoryId: string;
   createdAt: number;
   creatorId: string;
+  closedAt?: number;
+  closedManually?: boolean;
 }
 
 function pickOptionToFirebase(option: PickOption): FirebasePickOption {
@@ -41,6 +43,8 @@ export function pickToFirebase(
     | "createdAt"
     | "creatorId"
     | "options"
+    | "closedAt"
+    | "closedManually"
   >,
 ): FirebasePickPublic {
   const options =
@@ -60,6 +64,8 @@ export function pickToFirebase(
     categoryId: pick.categoryId,
     createdAt: pick.createdAt.getTime(),
     creatorId: pick.creatorId,
+    closedAt: pick.closedAt?.getTime(),
+    closedManually: pick.closedManually,
   };
 }
 
@@ -82,6 +88,8 @@ export function firebaseToPick(
     categoryId: data.categoryId,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
+    closedAt: data.closedAt !== undefined ? new Date(data.closedAt) : undefined,
+    closedManually: data.closedManually,
   };
 }
 

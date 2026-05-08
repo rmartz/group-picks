@@ -9,6 +9,9 @@ import {
 const FIXED_DATE = new Date("2025-01-15T12:00:00.000Z");
 const FIXED_TIMESTAMP = FIXED_DATE.getTime();
 
+const CLOSED_DATE = new Date("2025-02-01T09:00:00.000Z");
+const CLOSED_TIMESTAMP = CLOSED_DATE.getTime();
+
 function makeFirebasePickPublic(
   overrides?: Partial<FirebasePickPublic>,
 ): FirebasePickPublic {
@@ -88,6 +91,54 @@ describe("pickToFirebase", () => {
 
     expect(result.options).toBeUndefined();
   });
+
+  it("serializes closedAt as a timestamp when provided", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedAt: CLOSED_DATE,
+    });
+
+    expect(result.closedAt).toBe(CLOSED_TIMESTAMP);
+  });
+
+  it("omits closedAt when undefined", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedAt: undefined,
+    });
+
+    expect(result.closedAt).toBeUndefined();
+  });
+
+  it("serializes closedManually when provided", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedManually: true,
+    });
+
+    expect(result.closedManually).toBe(true);
+  });
+
+  it("omits closedManually when undefined", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedManually: undefined,
+    });
+
+    expect(result.closedManually).toBeUndefined();
+  });
 });
 
 describe("firebaseToPick", () => {
@@ -139,6 +190,38 @@ describe("firebaseToPick", () => {
         title: "Movie night",
       },
     ]);
+  });
+
+  it("deserializes closedAt from a timestamp", () => {
+    const data = makeFirebasePickPublic({ closedAt: CLOSED_TIMESTAMP });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedAt).toEqual(CLOSED_DATE);
+  });
+
+  it("returns undefined closedAt when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ closedAt: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedAt).toBeUndefined();
+  });
+
+  it("deserializes closedManually when present", () => {
+    const data = makeFirebasePickPublic({ closedManually: true });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedManually).toBe(true);
+  });
+
+  it("returns undefined closedManually when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ closedManually: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedManually).toBeUndefined();
   });
 });
 
