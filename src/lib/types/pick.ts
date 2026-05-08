@@ -5,4 +5,6 @@ export interface GroupPick {
   categoryId: string;
   createdAt: Date;
   creatorId: string;
+  closedAt?: Date;
+  closedManually?: boolean;
 }
