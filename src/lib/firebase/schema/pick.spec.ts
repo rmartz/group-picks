@@ -67,6 +67,30 @@ describe("pickToFirebase", () => {
 
     expect(result.description).toBeUndefined();
   });
+
+  it("serializes closedManually when provided", () => {
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedManually: true,
+    });
+
+    expect(result.closedManually).toBe(true);
+  });
+
+  it("omits closedManually when undefined", () => {
+    const result = pickToFirebase({
+      title: "The Shawshank Redemption",
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      closedManually: undefined,
+    });
+
+    expect(result.closedManually).toBeUndefined();
+  });
 });
 
 describe("firebaseToPick", () => {
@@ -103,5 +127,21 @@ describe("firebaseToPick", () => {
     const result = firebaseToPick("pick-xyz", data);
 
     expect(result.description).toBeUndefined();
+  });
+
+  it("deserializes closedManually when present", () => {
+    const data = makeFirebasePickPublic({ closedManually: true });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedManually).toBe(true);
+  });
+
+  it("returns undefined closedManually when absent from Firebase data", () => {
+    const data = makeFirebasePickPublic({ closedManually: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.closedManually).toBeUndefined();
   });
 });

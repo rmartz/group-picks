@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getDatabase } from "firebase-admin/database";
 import type { FirebasePickPublic } from "@/lib/firebase/schema/pick";
-import { assertPickIsOpenForWrite, PickWriteClosedError } from "./picks";
+import {
+  assertPickIsOpenForWrite,
+  getPickById,
+  PickWriteClosedError,
+} from "./picks";
 
 vi.mock("firebase-admin/database", () => ({
   getDatabase: vi.fn(),
@@ -147,5 +151,78 @@ describe("assertPickIsOpenForWrite", () => {
     );
 
     expect(storedPick.closedAt).toBe(closedAt);
+  });
+
+  it("throws Pick not found when the transaction finds no data", async () => {
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        update(null);
+        return {
+          snapshot: {
+            exists: () => false,
+            val: () => null,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({
+        transaction,
+      }),
+    } as never);
+
+    await expect(
+      assertPickIsOpenForWrite("cat-123", "pick-missing"),
+    ).rejects.toThrow("Pick not found");
+  });
+});
+
+describe("getPickById", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns the pick when it exists", async () => {
+    const pickData = makeFirebasePickPublic({
+      title: "Best Documentary",
+      categoryId: "cat-456",
+      creatorId: "user-456",
+    });
+    const get = vi.fn().mockResolvedValue({
+      exists: () => true,
+      val: () => pickData,
+    });
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ get }),
+    } as never);
+
+    const pick = await getPickById("cat-456", "pick-456");
+
+    expect(pick).toBeDefined();
+    expect(pick?.id).toBe("pick-456");
+    expect(pick?.title).toBe("Best Documentary");
+    expect(pick?.categoryId).toBe("cat-456");
+    expect(pick?.creatorId).toBe("user-456");
+  });
+
+  it("returns undefined when the pick does not exist", async () => {
+    const get = vi.fn().mockResolvedValue({
+      exists: () => false,
+      val: () => null,
+    });
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ get }),
+    } as never);
+
+    const pick = await getPickById("cat-456", "pick-missing");
+
+    expect(pick).toBeUndefined();
   });
 });

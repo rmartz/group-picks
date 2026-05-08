@@ -7,4 +7,5 @@ export interface GroupPick {
   creatorId: string;
   dueDate?: Date;
   closedAt?: Date;
+  closedManually?: boolean;
 }

@@ -8,6 +8,7 @@ export interface FirebasePickPublic {
   creatorId: string;
   dueDate?: number;
   closedAt?: number;
+  closedManually?: boolean;
 }
 
 export function pickToFirebase(
@@ -20,6 +21,7 @@ export function pickToFirebase(
     | "creatorId"
     | "dueDate"
     | "closedAt"
+    | "closedManually"
   >,
 ): FirebasePickPublic {
   return {
@@ -30,6 +32,7 @@ export function pickToFirebase(
     creatorId: pick.creatorId,
     dueDate: pick.dueDate?.getTime(),
     closedAt: pick.closedAt?.getTime(),
+    closedManually: pick.closedManually,
   };
 }
 
@@ -51,5 +54,6 @@ export function firebaseToPick(
     creatorId: data.creatorId,
     dueDate,
     closedAt,
+    closedManually: data.closedManually,
   };
 }
