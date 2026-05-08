@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Option } from "@/lib/types/option";
 import { PICK_DETAIL_COPY } from "./copy";
 
@@ -44,7 +46,7 @@ export function OptionListView({
         )}
 
         <form onSubmit={onAddSubmit} className="flex gap-2">
-          <input
+          <Input
             type="text"
             value={newTitle}
             onChange={(e) => {
@@ -52,15 +54,11 @@ export function OptionListView({
             }}
             placeholder={PICK_DETAIL_COPY.addOptionPlaceholder}
             disabled={loading}
-            className="flex-1 rounded border px-3 py-2 text-sm"
+            className="flex-1"
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-          >
+          <Button type="submit" disabled={loading} variant="default">
             {PICK_DETAIL_COPY.addOptionButton}
-          </button>
+          </Button>
         </form>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -78,16 +76,18 @@ export function OptionListView({
                 className="flex items-center justify-between rounded-md border p-3 text-sm"
               >
                 <span>{suggestion.title}</span>
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     onAdoptSuggestion(suggestion);
                   }}
                   disabled={loading}
-                  className="ml-4 shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
+                  variant="outline"
+                  size="sm"
+                  className="ml-4 shrink-0"
                 >
                   {PICK_DETAIL_COPY.adoptButton}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
