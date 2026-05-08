@@ -2,6 +2,7 @@ import { getDatabase } from "firebase-admin/database";
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
   firebaseToPick,
+  pickToFirebase,
   type FirebasePickPublic,
 } from "@/lib/firebase/schema/pick";
 import type { GroupPick } from "@/lib/types/pick";
@@ -30,6 +31,22 @@ export async function getPickById(
   if (!snap.exists()) return undefined;
 
   return firebaseToPick(pickId, snap.val() as FirebasePickPublic);
+}
+
+export async function createPick(
+  pick: Pick<GroupPick, "title" | "description" | "categoryId" | "creatorId">,
+): Promise<{ id: string; createdAt: Date }> {
+  const db = getDatabase(getAdminApp());
+  const ref = db.ref(`categories/${pick.categoryId}/picks`).push();
+  const id = ref.key;
+  if (!id) throw new Error("Failed to generate pick ID");
+
+  const createdAt = new Date();
+  const pickData = pickToFirebase({ ...pick, createdAt });
+
+  await ref.set(pickData);
+
+  return { id, createdAt };
 }
 
 export async function updatePick(
