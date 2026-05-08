@@ -46,11 +46,18 @@ export function firebaseToPick(
   return {
     id,
     categoryId: data.categoryId,
-    closedAt: isValidClosedAt ? new Date(data.closedAt) : undefined,
+    closedAt:
+      isValidClosedAt && data.closedAt !== undefined
+        ? new Date(data.closedAt)
+        : undefined,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
     description: data.description,
-    status: data.status ?? PickStatus.Open,
+    status:
+      data.status !== undefined &&
+      (Object.values(PickStatus) as string[]).includes(data.status)
+        ? data.status
+        : PickStatus.Open,
     title: data.title,
   };
 }

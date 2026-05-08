@@ -26,17 +26,15 @@ export async function closePick(
 ): Promise<boolean> {
   const db = getDatabase(getAdminApp());
   const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
-  const snap = await pickRef.get();
 
-  if (!snap.exists()) return false;
-
-  const pick = snap.val() as FirebasePickPublic;
-  if ((pick.status ?? PickStatus.Open) === PickStatus.Closed) return true;
-
-  await pickRef.update({
-    closedAt: Date.now(),
-    status: PickStatus.Closed,
+  let existed = false;
+  await pickRef.transaction((current: FirebasePickPublic | null) => {
+    if (current === null) return current;
+    existed = true;
+    if ((current.status ?? PickStatus.Open) === PickStatus.Closed)
+      return current;
+    return { ...current, closedAt: Date.now(), status: PickStatus.Closed };
   });
 
-  return true;
+  return existed;
 }
