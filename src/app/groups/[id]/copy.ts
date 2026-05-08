@@ -1,6 +1,7 @@
 export const GROUP_DETAIL_COPY = {
-  membersLabel: "Members",
+  categoriesLabel: "Categories",
   createdAtLabel: "Created",
+  membersLabel: "Members",
   notFound: "Group not found.",
   leaveButton: "Leave Group",
   errors: {
