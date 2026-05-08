@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 
 interface ReopenPickButtonViewProps {
@@ -15,14 +16,14 @@ export function ReopenPickButtonView({
 }: ReopenPickButtonViewProps) {
   return (
     <div>
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={onReopen}
         disabled={isReopening}
-        className="rounded border px-3 py-1 text-xs font-medium text-blue-600 disabled:opacity-50"
       >
         {CATEGORY_DETAIL_COPY.reopenPickButton}
-      </button>
+      </Button>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
