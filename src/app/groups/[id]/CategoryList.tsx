@@ -50,10 +50,14 @@ export function CategoryList({
     setAddError(undefined);
     const name = newCategoryName.trim();
     try {
-      const categoryId = await createCategoryService(groupId, name);
+      const { categoryId, creatorId, createdAt } = await createCategoryService(
+        groupId,
+        name,
+        "",
+      );
       setCategories((prev) => [
         ...prev,
-        { id: categoryId, groupId, name, createdAt: new Date(), creatorId: "" },
+        { id: categoryId, groupId, name, createdAt, creatorId },
       ]);
       setNewCategoryName("");
     } catch {
