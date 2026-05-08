@@ -29,6 +29,7 @@ const meta: Meta<typeof CategoryListView> = {
   component: CategoryListView,
   args: {
     categories: mockCategories,
+    currentUserId: "user-1",
     showCreateForm: false,
     editingId: undefined,
     createName: "",

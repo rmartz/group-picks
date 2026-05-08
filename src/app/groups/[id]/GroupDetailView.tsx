@@ -7,6 +7,7 @@ import { CategoryList } from "./categories/CategoryList";
 interface GroupDetailViewProps {
   group: Group;
   categories: Category[];
+  currentUserId: string;
   onLeave: () => void;
   isLeaving?: boolean;
   leaveError?: string;
@@ -15,6 +16,7 @@ interface GroupDetailViewProps {
 export function GroupDetailView({
   group,
   categories,
+  currentUserId,
   onLeave,
   isLeaving = false,
   leaveError,
@@ -32,7 +34,11 @@ export function GroupDetailView({
           <dd>{group.memberIds.length}</dd>
         </div>
       </dl>
-      <CategoryList groupId={group.id} initialCategories={categories} />
+      <CategoryList
+        groupId={group.id}
+        initialCategories={categories}
+        currentUserId={currentUserId}
+      />
       <LeaveGroupButtonView
         onLeave={onLeave}
         isLeaving={isLeaving}

@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { runRankedChoice } from "./ranked-choice";
+import {
+  preseedAdoptedOptionRank,
+  runRankedChoice,
+  type PriorPickRanking,
+} from "./ranked-choice";
 
 describe("runRankedChoice", () => {
   it("returns an empty array when there are no ballots and no candidates", () => {
@@ -142,5 +146,111 @@ describe("runRankedChoice", () => {
     it("returns all no-vote candidates in a single tier when no ballots are cast", () => {
       expect(runRankedChoice([], ["X", "Y", "Z"])).toEqual([["X", "Y", "Z"]]);
     });
+  });
+});
+
+function makePriorPickRanking(
+  overrides?: Partial<PriorPickRanking>,
+): PriorPickRanking {
+  return {
+    categoryId: "category-1",
+    createdAt: new Date("2025-01-01T00:00:00.000Z"),
+    rankedOptionIds: ["option-a", "option-b", "option-c"],
+    ...overrides,
+  };
+}
+
+describe("preseedAdoptedOptionRank", () => {
+  it("inserts the adopted option at the same rank from the most recent prior pick in the same category", () => {
+    const seededRanking = preseedAdoptedOptionRank({
+      adoptedOptionId: "option-b",
+      categoryId: "category-1",
+      currentRanking: ["option-x", "option-y", "option-z"],
+      priorPickRankings: [
+        makePriorPickRanking({
+          createdAt: new Date("2025-01-01T00:00:00.000Z"),
+          rankedOptionIds: ["option-a", "option-b", "option-c"],
+        }),
+        makePriorPickRanking({
+          createdAt: new Date("2025-02-01T00:00:00.000Z"),
+          rankedOptionIds: ["option-b", "option-a", "option-c"],
+        }),
+      ],
+    });
+
+    expect(seededRanking).toEqual([
+      "option-b",
+      "option-x",
+      "option-y",
+      "option-z",
+    ]);
+  });
+
+  it("pushes existing options down when the pre-seeded rank collides", () => {
+    const seededRanking = preseedAdoptedOptionRank({
+      adoptedOptionId: "option-b",
+      categoryId: "category-1",
+      currentRanking: ["option-x", "option-y", "option-z"],
+      priorPickRankings: [makePriorPickRanking()],
+    });
+
+    expect(seededRanking).toEqual([
+      "option-x",
+      "option-b",
+      "option-y",
+      "option-z",
+    ]);
+  });
+
+  it("appends the adopted option when the prior rank exceeds the current list length", () => {
+    const seededRanking = preseedAdoptedOptionRank({
+      adoptedOptionId: "option-c",
+      categoryId: "category-1",
+      currentRanking: ["option-x"],
+      priorPickRankings: [makePriorPickRanking()],
+    });
+
+    expect(seededRanking).toEqual(["option-x", "option-c"]);
+  });
+
+  it("does not pre-seed when the option has no prior ranking in the same category", () => {
+    const currentRanking = ["option-x", "option-y"];
+    const seededRanking = preseedAdoptedOptionRank({
+      adoptedOptionId: "option-missing",
+      categoryId: "category-1",
+      currentRanking,
+      priorPickRankings: [makePriorPickRanking()],
+    });
+
+    expect(seededRanking).toEqual(currentRanking);
+  });
+
+  it("does not use prior rankings from other categories", () => {
+    const currentRanking = ["option-x", "option-y"];
+    const seededRanking = preseedAdoptedOptionRank({
+      adoptedOptionId: "option-b",
+      categoryId: "category-1",
+      currentRanking,
+      priorPickRankings: [
+        makePriorPickRanking({
+          categoryId: "category-2",
+          rankedOptionIds: ["option-a", "option-b"],
+        }),
+      ],
+    });
+
+    expect(seededRanking).toEqual(currentRanking);
+  });
+
+  it("does not re-seed options that are already in the current ranking", () => {
+    const currentRanking = ["option-x", "option-b", "option-y"];
+    const seededRanking = preseedAdoptedOptionRank({
+      adoptedOptionId: "option-b",
+      categoryId: "category-1",
+      currentRanking,
+      priorPickRankings: [makePriorPickRanking()],
+    });
+
+    expect(seededRanking).toBe(currentRanking);
   });
 });

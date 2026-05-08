@@ -4,15 +4,22 @@ export interface FirebaseGroupPublic {
   name: string;
   createdAt: number;
   creatorId: string;
+  adminIds?: Record<string, true>;
+  picksRestricted?: boolean;
 }
 
 export function groupToFirebase(
-  group: Pick<Group, "name" | "createdAt" | "creatorId">,
+  group: Pick<
+    Group,
+    "name" | "createdAt" | "creatorId" | "adminIds" | "picksRestricted"
+  >,
 ): FirebaseGroupPublic {
   return {
     name: group.name,
     createdAt: group.createdAt.getTime(),
     creatorId: group.creatorId,
+    adminIds: Object.fromEntries(group.adminIds.map((uid) => [uid, true])),
+    picksRestricted: group.picksRestricted,
   };
 }
 
@@ -21,11 +28,16 @@ export function firebaseToGroup(
   data: FirebaseGroupPublic,
   memberIds: string[],
 ): Group {
+  const adminIds = data.adminIds
+    ? Object.keys(data.adminIds)
+    : [data.creatorId];
   return {
     id,
     name: data.name,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
     memberIds,
+    adminIds,
+    picksRestricted: data.picksRestricted ?? false,
   };
 }

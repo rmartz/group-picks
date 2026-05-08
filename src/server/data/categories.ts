@@ -46,6 +46,12 @@ export async function getCategoryById(
   return firebaseToCategory(id, data);
 }
 
+export async function categoryHasPicks(categoryId: string): Promise<boolean> {
+  const db = getDatabase(getAdminApp());
+  const snap = await db.ref(`categories/${categoryId}/picks`).get();
+  return snap.exists();
+}
+
 export async function createCategory(
   category: Pick<Category, "groupId" | "name" | "description" | "creatorId">,
 ): Promise<{ id: string; createdAt: Date }> {
@@ -74,4 +80,9 @@ export async function updateCategory(
     name: updates.name,
     description: updates.description,
   });
+}
+
+export async function deleteCategory(categoryId: string): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${categoryId}`).remove();
 }

@@ -11,11 +11,13 @@ import { GROUP_DETAIL_COPY } from "./copy";
 interface GroupDetailClientProps {
   group: Group;
   categories: Category[];
+  currentUserId: string;
 }
 
 export function GroupDetailClient({
   group,
   categories,
+  currentUserId,
 }: GroupDetailClientProps) {
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
@@ -42,6 +44,7 @@ export function GroupDetailClient({
     <GroupDetailView
       group={group}
       categories={categories}
+      currentUserId={currentUserId}
       onLeave={() => {
         void handleLeave();
       }}

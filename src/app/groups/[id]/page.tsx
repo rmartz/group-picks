@@ -19,5 +19,11 @@ export default async function GroupDetailPage({
 
   const categories = await getCategoriesByGroupId(id);
 
-  return <GroupDetailClient group={group} categories={categories} />;
+  return (
+    <GroupDetailClient
+      group={group}
+      categories={categories}
+      currentUserId={uid}
+    />
+  );
 }
