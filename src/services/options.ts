@@ -36,3 +36,31 @@ export async function adoptOption(
 
   return response.json() as Promise<{ optionId: string }>;
 }
+
+export async function joinOptionOwner(
+  groupId: string,
+  categoryId: string,
+  pickId: string,
+  optionId: string,
+): Promise<void> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}/picks/${pickId}/options/${optionId}/owners`,
+    { method: "POST" },
+  );
+  if (!response.ok) throw new Error("Failed to join option");
+}
+
+export async function unjoinOptionOwner(
+  groupId: string,
+  categoryId: string,
+  pickId: string,
+  optionId: string,
+): Promise<{ deleted: boolean }> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}/picks/${pickId}/options/${optionId}/owners`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) throw new Error("Failed to unjoin option");
+
+  return response.json() as Promise<{ deleted: boolean }>;
+}

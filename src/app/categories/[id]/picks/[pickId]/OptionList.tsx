@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import type { Option } from "@/lib/types/option";
-import { adoptOption } from "@/services/options";
+import {
+  adoptOption,
+  joinOptionOwner,
+  unjoinOptionOwner,
+} from "@/services/options";
 import { OptionListView } from "./OptionListView";
 import { PICK_DETAIL_COPY } from "./copy";
 
@@ -106,6 +110,54 @@ export function OptionList({
     }
   }
 
+  async function handleToggleOwner(option: Option) {
+    const wasHearted = option.ownerIds.includes(currentUserId);
+    setError(undefined);
+
+    // Optimistic update
+    if (wasHearted) {
+      const willBeEmpty = option.ownerIds.length === 1;
+      setOptions((prev) =>
+        willBeEmpty
+          ? prev.filter((o) => o.id !== option.id)
+          : prev.map((o) =>
+              o.id === option.id
+                ? {
+                    ...o,
+                    ownerIds: o.ownerIds.filter((uid) => uid !== currentUserId),
+                  }
+                : o,
+            ),
+      );
+    } else {
+      setOptions((prev) =>
+        prev.map((o) =>
+          o.id === option.id
+            ? { ...o, ownerIds: [...o.ownerIds, currentUserId] }
+            : o,
+        ),
+      );
+    }
+
+    try {
+      if (wasHearted) {
+        await unjoinOptionOwner(groupId, categoryId, pickId, option.id);
+      } else {
+        await joinOptionOwner(groupId, categoryId, pickId, option.id);
+      }
+    } catch {
+      // Revert on failure
+      setOptions((prev) => {
+        const exists = prev.some((o) => o.id === option.id);
+        if (!exists) {
+          return [...prev, option];
+        }
+        return prev.map((o) => (o.id === option.id ? option : o));
+      });
+      setError(PICK_DETAIL_COPY.errors.default);
+    }
+  }
+
   return (
     <OptionListView
       options={options}
@@ -113,9 +165,11 @@ export function OptionList({
       newTitle={newTitle}
       loading={loading}
       error={error}
+      currentUserId={currentUserId}
       onNewTitleChange={setNewTitle}
       onAddSubmit={(e) => void handleAddSubmit(e)}
       onAdoptSuggestion={(opt) => void handleAdoptSuggestion(opt)}
+      onToggleOwner={(opt) => void handleToggleOwner(opt)}
     />
   );
 }
