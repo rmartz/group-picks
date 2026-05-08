@@ -1,6 +1,7 @@
 import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { LeaveGroupButton } from "./LeaveGroupButton";
 import { CategoryList } from "./categories/CategoryList";
 
 interface GroupDetailViewProps {
@@ -10,7 +11,7 @@ interface GroupDetailViewProps {
 
 export function GroupDetailView({ group, categories }: GroupDetailViewProps) {
   return (
-    <main className="mx-auto max-w-lg space-y-6 p-6">
+    <main className="mx-auto max-w-lg space-y-8 p-6">
       <h1 className="text-2xl font-semibold">{group.name}</h1>
       <dl className="space-y-2 text-sm">
         <div className="flex gap-2">
@@ -23,6 +24,7 @@ export function GroupDetailView({ group, categories }: GroupDetailViewProps) {
         </div>
       </dl>
       <CategoryList groupId={group.id} initialCategories={categories} />
+      <LeaveGroupButton groupId={group.id} />
     </main>
   );
 }

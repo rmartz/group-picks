@@ -17,8 +17,7 @@ export default async function GroupDetailPage({
   const { id } = await params;
   const group = await getGroupById(id);
 
-  if (!group) notFound();
-  if (!group.memberIds.includes(uid)) notFound();
+  if (!group?.memberIds.includes(uid)) notFound();
 
   const categories = await getCategoriesByGroupId(id);
 

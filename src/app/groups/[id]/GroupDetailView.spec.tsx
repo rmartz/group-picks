@@ -3,6 +3,10 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 afterEach(cleanup);
 
 vi.mock("./categories/CategoryList", () => ({
