@@ -29,8 +29,7 @@ export async function getPickById(
 
   if (!snap.exists()) return undefined;
 
-  const data = snap.val() as FirebasePickPublic;
-  return firebaseToPick(pickId, data);
+  return firebaseToPick(pickId, snap.val() as FirebasePickPublic);
 }
 
 export async function updatePick(
@@ -41,8 +40,30 @@ export async function updatePick(
   const db = getDatabase(getAdminApp());
   await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
     title: updates.title,
-    description: updates.description,
+    description: updates.description !== "" ? updates.description : null,
     topCount: updates.topCount,
     dueDate: updates.dueDate?.getTime() ?? null,
+  });
+}
+
+export async function closePick(
+  categoryId: string,
+  pickId: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
+    closedAt: Date.now(),
+    closedManually: true,
+  });
+}
+
+export async function reopenPick(
+  categoryId: string,
+  pickId: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
+    closedAt: null,
+    closedManually: null,
   });
 }

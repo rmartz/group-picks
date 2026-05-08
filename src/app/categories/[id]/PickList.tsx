@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { GroupPick } from "@/lib/types/pick";
 import { updatePick } from "@/services/picks";
+import { ReopenPickButton } from "./ReopenPickButton";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 
 interface PickListProps {
@@ -98,15 +99,11 @@ export function PickList({ groupId, categoryId, initialPicks }: PickListProps) {
     }
   }
 
-  if (picks.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        {CATEGORY_DETAIL_COPY.noPicksMessage}
-      </p>
-    );
-  }
-
-  return (
+  return picks.length === 0 ? (
+    <p className="text-sm text-muted-foreground">
+      {CATEGORY_DETAIL_COPY.noPicksMessage}
+    </p>
+  ) : (
     <ul className="space-y-2">
       {picks.map((pick) => (
         <li key={pick.id} className="rounded-md border p-3 text-sm">
@@ -211,7 +208,14 @@ export function PickList({ groupId, categoryId, initialPicks }: PickListProps) {
             <div className="space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <p className="font-medium">{pick.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{pick.title}</p>
+                    {pick.closedAt !== undefined && (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        {CATEGORY_DETAIL_COPY.closedBadge}
+                      </span>
+                    )}
+                  </div>
                   {pick.description?.trim() && (
                     <p className="text-muted-foreground">{pick.description}</p>
                   )}
@@ -231,6 +235,15 @@ export function PickList({ groupId, categoryId, initialPicks }: PickListProps) {
                 {CATEGORY_DETAIL_COPY.metadata.dueDateLabel}:{" "}
                 {toDisplayDueDate(pick.dueDate)}
               </p>
+              {pick.closedAt !== undefined && (
+                <div className="mt-2">
+                  <ReopenPickButton
+                    groupId={groupId}
+                    categoryId={categoryId}
+                    pickId={pick.id}
+                  />
+                </div>
+              )}
             </div>
           )}
         </li>

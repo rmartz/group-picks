@@ -1,6 +1,8 @@
 export const CATEGORY_DETAIL_COPY = {
   picksLabel: "Picks",
   noPicksMessage: "No picks have been added to this category yet.",
+  closedBadge: "Closed",
+  reopenPickButton: "Reopen",
   editButton: "Edit",
   editForm: {
     title: "Edit Pick",
@@ -20,5 +22,6 @@ export const CATEGORY_DETAIL_COPY = {
   },
   errors: {
     default: "Something went wrong. Please try again.",
+    reopenFailed: "Failed to reopen pick. Please try again.",
   },
 } as const;

@@ -15,6 +15,10 @@ vi.mock("@/services/picks", () => ({
   updatePick: vi.fn(),
 }));
 
+vi.mock("./ReopenPickButton", () => ({
+  ReopenPickButton: () => null,
+}));
+
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
@@ -78,10 +82,11 @@ describe("PickList", () => {
         target: { value: "5" },
       },
     );
+    const dueDateInput = "2025-03-10T18:45";
     fireEvent.change(
       screen.getByLabelText(CATEGORY_DETAIL_COPY.editForm.dueDateLabel),
       {
-        target: { value: "2025-03-10T18:45" },
+        target: { value: dueDateInput },
       },
     );
 
@@ -98,6 +103,6 @@ describe("PickList", () => {
     expect(title).toBe("The Godfather");
     expect(description).toBe("A mafia classic");
     expect(topCount).toBe(5);
-    expect(dueDate!.toISOString()).toBe("2025-03-10T18:45:00.000Z");
+    expect(dueDate?.getTime()).toBe(new Date(dueDateInput).getTime());
   });
 });
