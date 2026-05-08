@@ -1,5 +1,5 @@
 import { getDatabase } from "firebase-admin/database";
-import { getAdminApp } from "@/lib/firebase/admin";
+import { getAdminApp, getAdminAuth } from "@/lib/firebase/admin";
 import {
   firebaseToGroup,
   type FirebaseGroupPublic,
@@ -34,6 +34,17 @@ export async function getGroupsByUserId(uid: string): Promise<Group[]> {
 
   const groups = await Promise.all(groupIds.map((id) => getGroupById(id)));
   return groups.filter((g): g is Group => g !== undefined);
+}
+
+export async function getMemberDisplayNames(
+  uids: string[],
+): Promise<{ uid: string; name: string }[]> {
+  if (uids.length === 0) return [];
+  const { users } = await getAdminAuth().getUsers(uids.map((uid) => ({ uid })));
+  const nameByUid = new Map(
+    users.map((u) => [u.uid, u.displayName ?? u.email ?? u.uid]),
+  );
+  return uids.map((uid) => ({ uid, name: nameByUid.get(uid) ?? uid }));
 }
 
 export async function removeMember(
