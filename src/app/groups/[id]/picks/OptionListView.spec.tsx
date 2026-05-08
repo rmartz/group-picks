@@ -79,7 +79,9 @@ describe("OptionListView", () => {
       />,
     );
 
-    fireEvent.submit(screen.getByRole("form"));
+    fireEvent.submit(
+      screen.getByRole("form", { name: OPTION_LIST_COPY.suggestFormLabel }),
+    );
     expect(submitted).toBe(true);
   });
 
