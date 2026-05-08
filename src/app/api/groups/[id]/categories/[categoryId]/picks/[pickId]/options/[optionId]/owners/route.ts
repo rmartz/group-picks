@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
 import { getCategoryById } from "@/server/data/categories";
+import { getPickById } from "@/server/data/picks";
 import { joinOption, unjoinOption } from "@/server/data/options";
 
 interface RouteParams {
@@ -38,6 +39,15 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
+  const pick = await getPickById(categoryId, pickId);
+  if (!pick) {
+    return NextResponse.json({ error: "Pick not found" }, { status: 404 });
+  }
+
+  if (pick.closedAt !== undefined) {
+    return NextResponse.json({ error: "Pick is closed" }, { status: 409 });
+  }
+
   await joinOption(pickId, optionId, uid);
   return NextResponse.json({ ok: true }, { status: 200 });
 }
@@ -67,6 +77,15 @@ export async function DELETE(
 
   if (category?.groupId !== groupId) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
+  }
+
+  const pick = await getPickById(categoryId, pickId);
+  if (!pick) {
+    return NextResponse.json({ error: "Pick not found" }, { status: 404 });
+  }
+
+  if (pick.closedAt !== undefined) {
+    return NextResponse.json({ error: "Pick is closed" }, { status: 409 });
   }
 
   const { deleted } = await unjoinOption(pickId, optionId, uid);
