@@ -84,6 +84,7 @@ describe("GroupDetailView", () => {
         group={group}
         categories={[]}
         currentUserId="user-123"
+        onLeave={vi.fn()}
       />,
     );
 
