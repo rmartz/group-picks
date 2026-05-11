@@ -1,6 +1,7 @@
 import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { InviteLinkSection } from "./InviteLinkSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
 import { CategoryList } from "./categories/CategoryList";
 
@@ -33,6 +34,7 @@ export function GroupDetailView({
           <dt className="font-medium">{GROUP_DETAIL_COPY.membersLabel}:</dt>
           <dd>{group.memberIds.length}</dd>
         </div>
+        <InviteLinkSection inviteToken={group.inviteToken} />
       </dl>
       <CategoryList
         groupId={group.id}

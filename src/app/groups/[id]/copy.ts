@@ -1,28 +1,31 @@
 export const GROUP_DETAIL_COPY = {
   categoriesLabel: "Categories",
+  copied: "Copied!",
+  copyLink: "Copy",
   createdAtLabel: "Created",
+  errors: {
+    default: "Failed to leave group. Please try again.",
+    lastMember: "You are the only member — groups cannot be left empty.",
+  },
+  inviteLinkLabel: "Invite Link",
+  leaveButton: "Leave Group",
   membersLabel: "Members",
   notFound: "Group not found.",
-  leaveButton: "Leave Group",
-  errors: {
-    lastMember: "You are the only member — groups cannot be left empty.",
-    default: "Failed to leave group. Please try again.",
-  },
 } as const;
 
 export const CATEGORY_LIST_COPY = {
-  title: "Categories",
-  empty: "No categories yet.",
-  deleteButton: "Delete",
-  deletingButton: "Deleting…",
+  addButton: "Add Category",
   addCategoryLabel: "New category name",
   addCategoryPlaceholder: "e.g. Best Movie",
-  addButton: "Add Category",
   addingButton: "Adding…",
+  deleteButton: "Delete",
+  deletingButton: "Deleting…",
+  empty: "No categories yet.",
   errors: {
+    create: "Failed to add category.",
     delete: "Failed to delete category.",
     hasPicks:
       "Cannot delete a category that has picks. Remove all picks first.",
-    create: "Failed to add category.",
   },
+  title: "Categories",
 } as const;
