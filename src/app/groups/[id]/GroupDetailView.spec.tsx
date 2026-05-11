@@ -3,10 +3,6 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
-
 afterEach(cleanup);
 
 // InviteLinkSection reads window.location.origin; stub it for tests
@@ -41,6 +37,7 @@ describe("GroupDetailView", () => {
         group={group}
         categories={[]}
         currentUserId="user-123"
+        onLeave={vi.fn()}
       />,
     );
 
@@ -54,6 +51,7 @@ describe("GroupDetailView", () => {
         group={group}
         categories={[]}
         currentUserId="user-123"
+        onLeave={vi.fn()}
       />,
     );
 
@@ -70,6 +68,7 @@ describe("GroupDetailView", () => {
         group={group}
         categories={[]}
         currentUserId="user-123"
+        onLeave={vi.fn()}
       />,
     );
 

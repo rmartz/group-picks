@@ -2,19 +2,25 @@ import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
 import { GROUP_DETAIL_COPY } from "./copy";
 import { InviteLinkSection } from "./InviteLinkSection";
-import { LeaveGroupButton } from "./LeaveGroupButton";
+import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
 import { CategoryList } from "./categories/CategoryList";
 
 interface GroupDetailViewProps {
   group: Group;
   categories: Category[];
   currentUserId: string;
+  onLeave: () => void;
+  isLeaving?: boolean;
+  leaveError?: string;
 }
 
 export function GroupDetailView({
   group,
   categories,
   currentUserId,
+  onLeave,
+  isLeaving = false,
+  leaveError,
 }: GroupDetailViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-8 p-6">
@@ -35,7 +41,11 @@ export function GroupDetailView({
         initialCategories={categories}
         currentUserId={currentUserId}
       />
-      <LeaveGroupButton groupId={group.id} />
+      <LeaveGroupButtonView
+        onLeave={onLeave}
+        isLeaving={isLeaving}
+        error={leaveError}
+      />
     </main>
   );
 }
