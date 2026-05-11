@@ -1,16 +1,25 @@
 export const GROUP_DETAIL_COPY = {
   categoriesLabel: "Categories",
   copied: "Copied!",
+  copiedButton: "Copied!",
+  copyButton: "Copy",
   copyLink: "Copy",
   createdAtLabel: "Created",
   errors: {
     default: "Failed to leave group. Please try again.",
     lastMember: "You are the only member — groups cannot be left empty.",
   },
+  generateButton: "Generate Invite Link",
+  inviteErrors: {
+    default: "Something went wrong. Please try again.",
+  },
+  inviteLabel: "Invite Link",
   inviteLinkLabel: "Invite Link",
   leaveButton: "Leave Group",
   membersLabel: "Members",
   notFound: "Group not found.",
+  regenerateButton: "Revoke & Regenerate",
+  regeneratingButton: "Regenerating…",
 } as const;
 
 export const CATEGORY_LIST_COPY = {

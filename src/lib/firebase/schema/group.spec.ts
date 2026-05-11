@@ -102,6 +102,14 @@ describe("firebaseToGroup", () => {
     expect(result.memberIds).toEqual([]);
   });
 
+  it("preserves inviteToken from Firebase data", () => {
+    const data = makeFirebaseGroupPublic({ inviteToken: "abc123token" });
+
+    const result = firebaseToGroup("group-3", data, []);
+
+    expect(result.inviteToken).toBe("abc123token");
+  });
+
   it("converts adminIds map to array", () => {
     const data = makeFirebaseGroupPublic({
       adminIds: { "user-123": true, "user-789": true },

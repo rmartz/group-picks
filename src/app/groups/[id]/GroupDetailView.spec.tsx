@@ -5,10 +5,11 @@ import { GROUP_DETAIL_COPY } from "./copy";
 
 afterEach(cleanup);
 
-// InviteLinkSection reads window.location.origin; stub it for tests
-vi.mock("./InviteLinkSection", () => ({
-  InviteLinkSection: ({ inviteToken }: { inviteToken: string }) => (
-    <div data-testid="invite-link-section">{inviteToken}</div>
+// InviteSection reads window.location.origin and calls the regenerate API;
+// stub it for tests.
+vi.mock("./InviteSection", () => ({
+  InviteSection: ({ initialToken }: { initialToken: string }) => (
+    <div data-testid="invite-section">{initialToken}</div>
   ),
 }));
 
@@ -77,7 +78,7 @@ describe("GroupDetailView", () => {
     ).toBeDefined();
   });
 
-  it("renders the invite link section with the invite token", () => {
+  it("renders the invite section with the invite token", () => {
     const group = makeGroup();
     render(
       <GroupDetailView
@@ -88,7 +89,7 @@ describe("GroupDetailView", () => {
       />,
     );
 
-    expect(screen.getByTestId("invite-link-section")).toBeDefined();
+    expect(screen.getByTestId("invite-section")).toBeDefined();
     expect(screen.getByText(group.inviteToken)).toBeDefined();
   });
 });
