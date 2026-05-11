@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
 import { getCategoryById } from "@/server/data/categories";
-import { getPickById } from "@/server/data/picks";
+import { getPickById, PICK_CLOSED_API_ERROR } from "@/server/data/picks";
 import { joinOption, unjoinOption } from "@/server/data/options";
 
 interface RouteParams {
@@ -45,7 +45,7 @@ export async function POST(
   }
 
   if (pick.closedAt !== undefined) {
-    return NextResponse.json({ error: "Pick is closed" }, { status: 409 });
+    return NextResponse.json({ error: PICK_CLOSED_API_ERROR }, { status: 409 });
   }
 
   await joinOption(pickId, optionId, uid);
@@ -85,7 +85,7 @@ export async function DELETE(
   }
 
   if (pick.closedAt !== undefined) {
-    return NextResponse.json({ error: "Pick is closed" }, { status: 409 });
+    return NextResponse.json({ error: PICK_CLOSED_API_ERROR }, { status: 409 });
   }
 
   const { deleted } = await unjoinOption(pickId, optionId, uid);

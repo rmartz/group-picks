@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
 import { getCategoryById } from "@/server/data/categories";
-import { getPickById, closePick } from "@/server/data/picks";
+import {
+  getPickById,
+  closePick,
+  PICK_CLOSED_API_ERROR,
+} from "@/server/data/picks";
 
 export async function POST(
   _request: Request,
@@ -39,10 +43,7 @@ export async function POST(
   }
 
   if (pick.closedAt !== undefined) {
-    return NextResponse.json(
-      { error: "Pick is already closed" },
-      { status: 409 },
-    );
+    return NextResponse.json({ error: PICK_CLOSED_API_ERROR }, { status: 409 });
   }
 
   await closePick(categoryId, pickId);

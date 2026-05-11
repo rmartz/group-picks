@@ -7,6 +7,7 @@ import {
 } from "@/lib/firebase/schema/pick";
 import type { GroupPick } from "@/lib/types/pick";
 
+export const PICK_CLOSED_API_ERROR = "Pick is closed";
 const PICK_CLOSED_ERROR = "Pick is closed and no longer accepts changes.";
 const PICK_DUE_DATE_PASSED_ERROR =
   "Pick due date has passed. The pick has been closed and no longer accepts changes.";
