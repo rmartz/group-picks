@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const inviteToken = randomUUID();
+  const inviteToken = randomUUID().replace(/-/g, "");
   const inviteCreatedAt = new Date();
 
   const publicData = groupToFirebase({

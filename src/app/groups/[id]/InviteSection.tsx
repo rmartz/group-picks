@@ -62,6 +62,7 @@ export function InviteSection({
       clearTimeout(copyTimeoutRef.current);
       copyTimeoutRef.current = setTimeout(() => {
         setCopied(false);
+        copyTimeoutRef.current = undefined;
       }, 2000);
     } catch {
       setError(GROUP_DETAIL_COPY.inviteErrors.default);
