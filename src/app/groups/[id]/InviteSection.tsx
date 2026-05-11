@@ -59,7 +59,9 @@ export function InviteSection({
     try {
       await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
-      clearTimeout(copyTimeoutRef.current);
+      if (copyTimeoutRef.current !== undefined) {
+        clearTimeout(copyTimeoutRef.current);
+      }
       copyTimeoutRef.current = setTimeout(() => {
         setCopied(false);
         copyTimeoutRef.current = undefined;
