@@ -16,6 +16,7 @@ const meta: Meta<typeof GroupDetailView> = {
       memberIds: ["user-123", "user-456", "user-789"],
       adminIds: ["user-123"],
       picksRestricted: false,
+      inviteToken: "invite-token-1",
     },
     categories: [],
     onLeave: noop,

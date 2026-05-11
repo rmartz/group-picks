@@ -5,6 +5,13 @@ import { GROUP_DETAIL_COPY } from "./copy";
 
 afterEach(cleanup);
 
+// InviteLinkSection reads window.location.origin; stub it for tests
+vi.mock("./InviteLinkSection", () => ({
+  InviteLinkSection: ({ inviteToken }: { inviteToken: string }) => (
+    <div data-testid="invite-link-section">{inviteToken}</div>
+  ),
+}));
+
 vi.mock("./categories/CategoryList", () => ({
   CategoryList: () => <div data-testid="category-list" />,
 }));
@@ -18,6 +25,7 @@ function makeGroup() {
     memberIds: ["user-123", "user-456"],
     adminIds: ["user-123"],
     picksRestricted: false,
+    inviteToken: "token-abc",
   };
 }
 
@@ -67,5 +75,20 @@ describe("GroupDetailView", () => {
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
     ).toBeDefined();
+  });
+
+  it("renders the invite link section with the invite token", () => {
+    const group = makeGroup();
+    render(
+      <GroupDetailView
+        group={group}
+        categories={[]}
+        currentUserId="user-123"
+        onLeave={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId("invite-link-section")).toBeDefined();
+    expect(screen.getByText(group.inviteToken)).toBeDefined();
   });
 });

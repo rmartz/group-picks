@@ -6,4 +6,5 @@ export interface Group {
   memberIds: string[];
   adminIds: string[];
   picksRestricted: boolean;
+  inviteToken: string;
 }
