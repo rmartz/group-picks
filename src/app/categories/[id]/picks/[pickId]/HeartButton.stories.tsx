@@ -7,6 +7,7 @@ const meta: Meta<typeof HeartButton> = {
   args: {
     hearted: false,
     disabled: false,
+    pickClosed: false,
     onClick: () => undefined,
   },
 };
@@ -32,5 +33,18 @@ export const DisabledHearted: Story = {
   args: {
     hearted: true,
     disabled: true,
+  },
+};
+
+export const ClosedNotHearted: Story = {
+  args: {
+    pickClosed: true,
+  },
+};
+
+export const ClosedHearted: Story = {
+  args: {
+    hearted: true,
+    pickClosed: true,
   },
 };

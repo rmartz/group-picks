@@ -1,15 +1,17 @@
 export const PICK_DETAIL_COPY = {
-  optionsHeading: "Options",
-  noOptionsMessage: "No options have been added yet.",
-  addOptionPlaceholder: "Add an option...",
   addOptionButton: "Add",
-  suggestionsHeading: "Suggestions from your prior picks",
+  addOptionPlaceholder: "Add an option...",
   adoptButton: "Use this",
-  heart: {
-    addOwnership: "Add to your options",
-    removeOwnership: "Remove from your options",
-  },
+  closedNotice: "This Pick is closed. Preferences can no longer be changed.",
   errors: {
     default: "Something went wrong. Please try again.",
   },
+  heart: {
+    addOwnership: "Add to your options",
+    closed: "This Pick is closed",
+    removeOwnership: "Remove from your options",
+  },
+  noOptionsMessage: "No options have been added yet.",
+  optionsHeading: "Options",
+  suggestionsHeading: "Suggestions from your prior picks",
 } as const;

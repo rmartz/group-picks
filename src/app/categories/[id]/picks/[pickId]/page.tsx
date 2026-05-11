@@ -65,6 +65,7 @@ export default async function PickDetailPage({
         currentUserId={uid}
         initialOptions={currentOptions}
         initialSuggestions={dedupedSuggestions}
+        pickClosed={pick.closedAt !== undefined}
       />
     </main>
   );

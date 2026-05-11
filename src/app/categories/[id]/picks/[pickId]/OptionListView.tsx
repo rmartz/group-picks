@@ -11,6 +11,7 @@ export interface OptionListViewProps {
   loading: boolean;
   error: string | undefined;
   currentUserId: string;
+  pickClosed: boolean;
   onNewTitleChange: (title: string) => void;
   onAddSubmit: (e: React.SyntheticEvent) => void;
   onAdoptSuggestion: (option: Option) => void;
@@ -24,6 +25,7 @@ export function OptionListView({
   loading,
   error,
   currentUserId,
+  pickClosed,
   onNewTitleChange,
   onAddSubmit,
   onAdoptSuggestion,
@@ -35,6 +37,12 @@ export function OptionListView({
         <h2 className="text-lg font-medium">
           {PICK_DETAIL_COPY.optionsHeading}
         </h2>
+
+        {pickClosed && (
+          <p className="text-sm text-muted-foreground">
+            {PICK_DETAIL_COPY.closedNotice}
+          </p>
+        )}
 
         {options.length === 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -51,6 +59,7 @@ export function OptionListView({
                 <HeartButton
                   hearted={option.ownerIds.includes(currentUserId)}
                   disabled={loading}
+                  pickClosed={pickClosed}
                   onClick={() => {
                     onToggleOwner(option);
                   }}
@@ -60,26 +69,28 @@ export function OptionListView({
           </ul>
         )}
 
-        <form onSubmit={onAddSubmit} className="flex gap-2">
-          <Input
-            type="text"
-            value={newTitle}
-            onChange={(e) => {
-              onNewTitleChange(e.target.value);
-            }}
-            placeholder={PICK_DETAIL_COPY.addOptionPlaceholder}
-            disabled={loading}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={loading} variant="default">
-            {PICK_DETAIL_COPY.addOptionButton}
-          </Button>
-        </form>
+        {!pickClosed && (
+          <form onSubmit={onAddSubmit} className="flex gap-2">
+            <Input
+              type="text"
+              value={newTitle}
+              onChange={(e) => {
+                onNewTitleChange(e.target.value);
+              }}
+              placeholder={PICK_DETAIL_COPY.addOptionPlaceholder}
+              disabled={loading}
+              className="flex-1"
+            />
+            <Button type="submit" disabled={loading} variant="default">
+              {PICK_DETAIL_COPY.addOptionButton}
+            </Button>
+          </form>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
       </section>
 
-      {suggestions.length > 0 && (
+      {!pickClosed && suggestions.length > 0 && (
         <section className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground">
             {PICK_DETAIL_COPY.suggestionsHeading}

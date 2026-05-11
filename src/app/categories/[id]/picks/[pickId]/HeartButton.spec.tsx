@@ -71,4 +71,70 @@ describe("HeartButton", () => {
     });
     expect(button.getAttribute("aria-pressed")).toBe("true");
   });
+
+  describe("when the pick is closed", () => {
+    it("is disabled even when the disabled prop is not set", () => {
+      render(
+        <HeartButton
+          hearted={false}
+          pickClosed={true}
+          onClick={() => undefined}
+        />,
+      );
+
+      const button = screen.getByRole("button", {
+        name: new RegExp(PICK_DETAIL_COPY.heart.closed),
+      });
+      expect((button as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it("does not call onClick when clicked", () => {
+      const onClick = vi.fn();
+      render(
+        <HeartButton hearted={false} pickClosed={true} onClick={onClick} />,
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(PICK_DETAIL_COPY.heart.closed),
+        }),
+      );
+
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it("annotates the aria-label with the closed hint", () => {
+      render(
+        <HeartButton
+          hearted={false}
+          pickClosed={true}
+          onClick={() => undefined}
+        />,
+      );
+
+      const button = screen.getByRole("button", {
+        name: new RegExp(PICK_DETAIL_COPY.heart.closed),
+      });
+      expect(
+        button
+          .getAttribute("aria-label")
+          ?.includes(PICK_DETAIL_COPY.heart.closed),
+      ).toBe(true);
+    });
+
+    it("exposes the closed hint via the title attribute", () => {
+      render(
+        <HeartButton
+          hearted={false}
+          pickClosed={true}
+          onClick={() => undefined}
+        />,
+      );
+
+      const button = screen.getByRole("button", {
+        name: new RegExp(PICK_DETAIL_COPY.heart.closed),
+      });
+      expect(button.getAttribute("title")).toBe(PICK_DETAIL_COPY.heart.closed);
+    });
+  });
 });

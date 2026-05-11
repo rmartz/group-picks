@@ -4,12 +4,14 @@ const {
   mockGetVerifiedUid,
   mockGetGroupById,
   mockGetCategoryById,
+  mockGetPickById,
   mockJoinOption,
   mockUnjoinOption,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetCategoryById: vi.fn(),
+  mockGetPickById: vi.fn(),
   mockJoinOption: vi.fn(),
   mockUnjoinOption: vi.fn(),
 }));
@@ -24,6 +26,11 @@ vi.mock("@/server/data/groups", () => ({
 
 vi.mock("@/server/data/categories", () => ({
   getCategoryById: mockGetCategoryById,
+}));
+
+vi.mock("@/server/data/picks", () => ({
+  getPickById: mockGetPickById,
+  PICK_CLOSED_API_ERROR: "Pick is closed",
 }));
 
 vi.mock("@/server/data/options", () => ({
@@ -65,6 +72,15 @@ describe("POST /api/.../options/[optionId]/owners", () => {
       description: "",
       createdAt: new Date(),
       creatorId: "user-1",
+    });
+    mockGetPickById.mockResolvedValue({
+      id: "pick-1",
+      title: "P",
+      categoryId: "cat-1",
+      topCount: 1,
+      createdAt: new Date(),
+      creatorId: "user-1",
+      closedAt: undefined,
     });
     mockJoinOption.mockResolvedValue(undefined);
   });
@@ -117,6 +133,36 @@ describe("POST /api/.../options/[optionId]/owners", () => {
     expect(response.status).toBe(200);
     expect(mockJoinOption).toHaveBeenCalledWith("pick-1", "opt-1", "user-1");
   });
+
+  it("returns 404 when the pick does not exist", async () => {
+    mockGetPickById.mockResolvedValue(undefined);
+
+    const response = await POST(makeRequest("POST"), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(response.status).toBe(404);
+    expect(mockJoinOption).not.toHaveBeenCalled();
+  });
+
+  it("returns 409 when the pick is closed", async () => {
+    mockGetPickById.mockResolvedValue({
+      id: "pick-1",
+      title: "P",
+      categoryId: "cat-1",
+      topCount: 1,
+      createdAt: new Date(),
+      creatorId: "user-1",
+      closedAt: new Date(),
+    });
+
+    const response = await POST(makeRequest("POST"), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(response.status).toBe(409);
+    expect(mockJoinOption).not.toHaveBeenCalled();
+  });
 });
 
 describe("DELETE /api/.../options/[optionId]/owners", () => {
@@ -137,6 +183,15 @@ describe("DELETE /api/.../options/[optionId]/owners", () => {
       description: "",
       createdAt: new Date(),
       creatorId: "user-1",
+    });
+    mockGetPickById.mockResolvedValue({
+      id: "pick-1",
+      title: "P",
+      categoryId: "cat-1",
+      topCount: 1,
+      createdAt: new Date(),
+      creatorId: "user-1",
+      closedAt: undefined,
     });
     mockUnjoinOption.mockResolvedValue({ deleted: false });
   });
@@ -185,5 +240,35 @@ describe("DELETE /api/.../options/[optionId]/owners", () => {
     const body = (await response.json()) as { ok: true; deleted: boolean };
 
     expect(body.deleted).toBe(false);
+  });
+
+  it("returns 404 when the pick does not exist", async () => {
+    mockGetPickById.mockResolvedValue(undefined);
+
+    const response = await DELETE(makeRequest("DELETE"), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(response.status).toBe(404);
+    expect(mockUnjoinOption).not.toHaveBeenCalled();
+  });
+
+  it("returns 409 when the pick is closed", async () => {
+    mockGetPickById.mockResolvedValue({
+      id: "pick-1",
+      title: "P",
+      categoryId: "cat-1",
+      topCount: 1,
+      createdAt: new Date(),
+      creatorId: "user-1",
+      closedAt: new Date(),
+    });
+
+    const response = await DELETE(makeRequest("DELETE"), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(response.status).toBe(409);
+    expect(mockUnjoinOption).not.toHaveBeenCalled();
   });
 });

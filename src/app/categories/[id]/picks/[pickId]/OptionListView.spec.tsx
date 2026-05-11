@@ -25,6 +25,7 @@ const defaultProps: OptionListViewProps = {
   loading: false,
   error: undefined,
   currentUserId: "user-1",
+  pickClosed: false,
   onNewTitleChange: () => undefined,
   onAddSubmit: () => undefined,
   onAdoptSuggestion: () => undefined,
@@ -259,5 +260,90 @@ describe("OptionListView", () => {
       name: PICK_DETAIL_COPY.heart.removeOwnership,
     });
     expect((button as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  describe("when the pick is closed", () => {
+    it("renders the closed-pick notice", () => {
+      render(<OptionListView {...defaultProps} pickClosed={true} />);
+
+      expect(screen.getByText(PICK_DETAIL_COPY.closedNotice)).toBeDefined();
+    });
+
+    it("hides the add-option form", () => {
+      render(<OptionListView {...defaultProps} pickClosed={true} />);
+
+      expect(
+        screen.queryByPlaceholderText(PICK_DETAIL_COPY.addOptionPlaceholder),
+      ).toBeNull();
+      expect(screen.queryByText(PICK_DETAIL_COPY.addOptionButton)).toBeNull();
+    });
+
+    it("hides the suggestions section even when suggestions are provided", () => {
+      const suggestion = makeOption({ id: "sug-1", title: "The Matrix" });
+
+      render(
+        <OptionListView
+          {...defaultProps}
+          pickClosed={true}
+          suggestions={[suggestion]}
+        />,
+      );
+
+      expect(
+        screen.queryByText(PICK_DETAIL_COPY.suggestionsHeading),
+      ).toBeNull();
+      expect(screen.queryByText("The Matrix")).toBeNull();
+      expect(screen.queryByText(PICK_DETAIL_COPY.adoptButton)).toBeNull();
+    });
+
+    it("disables the heart button on each option", () => {
+      const option = makeOption({ ownerIds: ["user-1"] });
+
+      render(
+        <OptionListView
+          {...defaultProps}
+          currentUserId="user-1"
+          options={[option]}
+          pickClosed={true}
+        />,
+      );
+
+      const button = screen.getByRole("button", {
+        name: new RegExp(PICK_DETAIL_COPY.heart.removeOwnership),
+      });
+      expect((button as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it("annotates the heart button aria-label with the closed hint", () => {
+      const option = makeOption({ ownerIds: ["user-2"] });
+
+      render(
+        <OptionListView
+          {...defaultProps}
+          currentUserId="user-1"
+          options={[option]}
+          pickClosed={true}
+        />,
+      );
+
+      const button = screen.getByRole("button", {
+        name: new RegExp(PICK_DETAIL_COPY.heart.closed),
+      });
+      expect(button).toBeDefined();
+    });
+
+    it("still renders option titles", () => {
+      const option = makeOption({ title: "Inception" });
+
+      render(
+        <OptionListView
+          {...defaultProps}
+          options={[option]}
+          pickClosed={true}
+        />,
+      );
+
+      expect(screen.getByText("Inception")).toBeDefined();
+    });
   });
 });
