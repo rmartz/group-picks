@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { GroupDetailView } from "./GroupDetailView";
 
+const noop = () => undefined;
+
 const meta: Meta<typeof GroupDetailView> = {
   title: "Groups/GroupDetailView",
   component: GroupDetailView,
@@ -16,6 +18,7 @@ const meta: Meta<typeof GroupDetailView> = {
       picksRestricted: false,
     },
     categories: [],
+    onLeave: noop,
   },
 };
 

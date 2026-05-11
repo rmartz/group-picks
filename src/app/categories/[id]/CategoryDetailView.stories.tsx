@@ -39,6 +39,9 @@ const picks: GroupPick[] = [
 const meta: Meta<typeof CategoryDetailView> = {
   title: "Categories/CategoryDetailView",
   component: CategoryDetailView,
+  parameters: {
+    nextjs: { appDirectory: true },
+  },
   args: {
     category,
     picks,
