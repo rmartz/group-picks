@@ -1,32 +1,21 @@
+// Superseded by InviteSectionView.stories.tsx (this PR). File retained as
+// a placeholder because the agent could not delete it; clean up in a
+// follow-up.
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { InviteLinkSectionView } from "./InviteLinkSectionView";
 
-const noop = () => undefined;
+function PlaceholderInviteLinkSectionView() {
+  return null;
+}
 
-const meta: Meta<typeof InviteLinkSectionView> = {
-  title: "Groups/InviteLinkSectionView",
-  component: InviteLinkSectionView,
-  args: {
-    inviteUrl: "https://group-picks.example.com/invite/tok-mock-abc123",
-    copied: false,
-    onCopy: noop,
+const meta: Meta<typeof PlaceholderInviteLinkSectionView> = {
+  title: "Groups/InviteLinkSectionView (superseded)",
+  component: PlaceholderInviteLinkSectionView,
+  parameters: {
+    docs: { disable: true },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof InviteLinkSectionView>;
+type Story = StoryObj<typeof PlaceholderInviteLinkSectionView>;
 
-export const Default: Story = {};
-
-export const Copied: Story = {
-  args: {
-    copied: true,
-  },
-};
-
-export const LongUrl: Story = {
-  args: {
-    inviteUrl:
-      "https://group-picks.example.com/invite/tok-00000000-0000-0000-0000-000000000000",
-  },
-};
+export const Placeholder: Story = {};
