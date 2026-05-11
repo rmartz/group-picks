@@ -30,6 +30,7 @@ vi.mock("@/server/data/categories", () => ({
 
 vi.mock("@/server/data/picks", () => ({
   getPickById: mockGetPickById,
+  PICK_CLOSED_API_ERROR: "Pick is closed",
 }));
 
 vi.mock("@/server/data/options", () => ({
