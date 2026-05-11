@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { getDatabase } from "firebase-admin/database";
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
@@ -39,7 +40,7 @@ export async function createGroupInvite(
 ): Promise<CreatedGroupInvite> {
   const db = getDatabase(getAdminApp());
 
-  const token = crypto.randomUUID().replace(/-/g, "");
+  const token = randomUUID().replace(/-/g, "");
   const createdAt = new Date();
   const expiresAt = new Date(createdAt.getTime() + INVITE_TTL);
 

@@ -1,16 +1,26 @@
 "use client";
 
+import type { Group } from "@/lib/types/group";
+import type { Category } from "@/lib/types/category";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { leaveGroup, LeaveGroupLastMemberError } from "@/services/groups";
-import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
+import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
-interface LeaveGroupButtonProps {
-  groupId: string;
+interface GroupDetailClientProps {
+  group: Group;
+  categories: Category[];
+  currentUserId: string;
+  initialInviteExpiresAt?: string;
 }
 
-export function LeaveGroupButton({ groupId }: LeaveGroupButtonProps) {
+export function GroupDetailClient({
+  group,
+  categories,
+  currentUserId,
+  initialInviteExpiresAt,
+}: GroupDetailClientProps) {
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -19,7 +29,7 @@ export function LeaveGroupButton({ groupId }: LeaveGroupButtonProps) {
     setError(undefined);
     setIsLeaving(true);
     try {
-      await leaveGroup(groupId);
+      await leaveGroup(group.id);
       router.push("/");
     } catch (e) {
       setError(
@@ -33,12 +43,16 @@ export function LeaveGroupButton({ groupId }: LeaveGroupButtonProps) {
   }
 
   return (
-    <LeaveGroupButtonView
+    <GroupDetailView
+      group={group}
+      categories={categories}
+      currentUserId={currentUserId}
       onLeave={() => {
         void handleLeave();
       }}
       isLeaving={isLeaving}
-      error={error}
+      leaveError={error}
+      initialInviteExpiresAt={initialInviteExpiresAt}
     />
   );
 }

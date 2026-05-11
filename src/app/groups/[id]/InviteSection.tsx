@@ -1,24 +1,23 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { regenerateInvite } from "@/services/groups";
 import { InviteSectionView } from "./InviteSectionView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
 interface InviteSectionProps {
   groupId: string;
-  initialToken: string | undefined;
-  initialExpiresAt: string | undefined;
-  origin: string;
+  initialToken: string;
+  initialExpiresAt?: string;
 }
 
 export function InviteSection({
   groupId,
   initialToken,
   initialExpiresAt,
-  origin,
 }: InviteSectionProps) {
   const [token, setToken] = useState(initialToken);
+  const [origin, setOrigin] = useState("");
   const [expiresAt, setExpiresAt] = useState(
     initialExpiresAt ? new Date(initialExpiresAt) : undefined,
   );
@@ -30,6 +29,7 @@ export function InviteSection({
   );
 
   useEffect(() => {
+    setOrigin(window.location.origin);
     return () => {
       if (copyTimeoutRef.current !== undefined) {
         clearTimeout(copyTimeoutRef.current);
@@ -37,7 +37,7 @@ export function InviteSection({
     };
   }, []);
 
-  const inviteUrl = token ? `${origin}/groups/join?token=${token}` : undefined;
+  const inviteUrl = origin ? `${origin}/invite/${token}` : undefined;
 
   async function handleRegenerate() {
     setError(undefined);
@@ -59,9 +59,9 @@ export function InviteSection({
     try {
       await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
+      clearTimeout(copyTimeoutRef.current);
       copyTimeoutRef.current = setTimeout(() => {
         setCopied(false);
-        copyTimeoutRef.current = undefined;
       }, 2000);
     } catch {
       setError(GROUP_DETAIL_COPY.inviteErrors.default);

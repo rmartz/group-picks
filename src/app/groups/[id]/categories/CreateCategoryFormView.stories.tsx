@@ -3,7 +3,7 @@ import { CreateCategoryFormView } from "./CreateCategoryFormView";
 import { CATEGORY_COPY } from "./copy";
 
 const meta: Meta<typeof CreateCategoryFormView> = {
-  title: "Categories/CreateCategoryFormView",
+  title: "Categories/CreateCategoryFormView (Inline)",
   component: CreateCategoryFormView,
   args: {
     name: "",

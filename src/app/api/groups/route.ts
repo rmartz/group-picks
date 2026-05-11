@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "firebase-admin/database";
+import { randomUUID } from "crypto";
 import { getAdminApp } from "@/lib/firebase/admin";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { groupToFirebase } from "@/lib/firebase/schema/group";
@@ -33,20 +34,24 @@ export async function POST(request: Request) {
     );
   }
 
-  const inviteToken = crypto.randomUUID().replace(/-/g, "");
+  const inviteToken = randomUUID();
   const inviteCreatedAt = new Date();
 
   const publicData = groupToFirebase({
     name,
     createdAt: new Date(),
     creatorId: uid,
+    inviteToken,
+    adminIds: [uid],
+    picksRestricted: false,
   });
 
   await db.ref().update({
     [`groups/${groupId}`]: {
-      public: { ...publicData, inviteToken },
+      public: publicData,
       members: { [uid]: true },
     },
+    [`users/${uid}/groups/${groupId}`]: true,
     [`invites/${inviteToken}`]: groupInviteToFirebase({
       groupId,
       createdAt: inviteCreatedAt,
