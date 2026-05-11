@@ -134,9 +134,7 @@ describe("HeartButton", () => {
       const button = screen.getByRole("button", {
         name: new RegExp(PICK_DETAIL_COPY.heart.closed),
       });
-      expect(button.getAttribute("title")).toBe(
-        PICK_DETAIL_COPY.heart.closed,
-      );
+      expect(button.getAttribute("title")).toBe(PICK_DETAIL_COPY.heart.closed);
     });
   });
 });

@@ -143,11 +143,7 @@ describe("OptionList heart toggle", () => {
     const option = makeOption({ ownerIds: ["user-2"] });
 
     render(
-      <OptionList
-        {...baseProps}
-        initialOptions={[option]}
-        pickClosed={true}
-      />,
+      <OptionList {...baseProps} initialOptions={[option]} pickClosed={true} />,
     );
 
     const button = screen.getByRole("button", {
@@ -160,9 +156,7 @@ describe("OptionList heart toggle", () => {
   });
 
   it("hides the add-option form when the pick is closed", () => {
-    render(
-      <OptionList {...baseProps} initialOptions={[]} pickClosed={true} />,
-    );
+    render(<OptionList {...baseProps} initialOptions={[]} pickClosed={true} />);
 
     expect(
       screen.queryByPlaceholderText(PICK_DETAIL_COPY.addOptionPlaceholder),
