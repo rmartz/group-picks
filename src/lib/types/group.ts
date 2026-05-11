@@ -4,5 +4,7 @@ export interface Group {
   createdAt: Date;
   creatorId: string;
   memberIds: string[];
-  inviteToken: string | undefined;
+  adminIds: string[];
+  picksRestricted: boolean;
+  inviteToken: string;
 }

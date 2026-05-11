@@ -15,6 +15,9 @@ function makeFirebaseGroupPublic(
     name: "Test Group",
     createdAt: FIXED_TIMESTAMP,
     creatorId: "user-123",
+    inviteToken: "token-abc",
+    adminIds: { "user-123": true },
+    picksRestricted: false,
     ...overrides,
   };
 }
@@ -25,11 +28,54 @@ describe("groupToFirebase", () => {
       name: "My Group",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
+      inviteToken: "tok-xyz",
+      adminIds: ["user-abc"],
+      picksRestricted: false,
     });
 
     expect(result.name).toBe("My Group");
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-abc");
+    expect(result.inviteToken).toBe("tok-xyz");
+  });
+
+  it("converts adminIds array to Firebase map", () => {
+    const result = groupToFirebase({
+      name: "My Group",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      inviteToken: "tok-xyz",
+      adminIds: ["user-abc", "user-def"],
+      picksRestricted: false,
+    });
+
+    expect(result.adminIds).toEqual({ "user-abc": true, "user-def": true });
+  });
+
+  it("preserves picksRestricted=true", () => {
+    const result = groupToFirebase({
+      name: "My Group",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      inviteToken: "tok-xyz",
+      adminIds: ["user-abc"],
+      picksRestricted: true,
+    });
+
+    expect(result.picksRestricted).toBe(true);
+  });
+
+  it("preserves picksRestricted=false", () => {
+    const result = groupToFirebase({
+      name: "My Group",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      inviteToken: "tok-xyz",
+      adminIds: ["user-abc"],
+      picksRestricted: false,
+    });
+
+    expect(result.picksRestricted).toBe(false);
   });
 });
 
@@ -45,6 +91,7 @@ describe("firebaseToGroup", () => {
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.creatorId).toBe("user-123");
     expect(result.memberIds).toEqual(["user-123", "user-456"]);
+    expect(result.inviteToken).toBe("token-abc");
   });
 
   it("handles empty member list", () => {
@@ -55,7 +102,7 @@ describe("firebaseToGroup", () => {
     expect(result.memberIds).toEqual([]);
   });
 
-  it("includes inviteToken when present", () => {
+  it("preserves inviteToken from Firebase data", () => {
     const data = makeFirebaseGroupPublic({ inviteToken: "abc123token" });
 
     const result = firebaseToGroup("group-3", data, []);
@@ -63,11 +110,40 @@ describe("firebaseToGroup", () => {
     expect(result.inviteToken).toBe("abc123token");
   });
 
-  it("sets inviteToken to undefined when absent", () => {
-    const data = makeFirebaseGroupPublic();
+  it("converts adminIds map to array", () => {
+    const data = makeFirebaseGroupPublic({
+      adminIds: { "user-123": true, "user-789": true },
+    });
 
-    const result = firebaseToGroup("group-4", data, []);
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
 
-    expect(result.inviteToken).toBeUndefined();
+    expect(result.adminIds).toEqual(["user-123", "user-789"]);
+  });
+
+  it("falls back to [creatorId] when adminIds is absent", () => {
+    const data = makeFirebaseGroupPublic({
+      creatorId: "user-creator",
+      adminIds: undefined,
+    });
+
+    const result = firebaseToGroup("group-1", data, ["user-creator"]);
+
+    expect(result.adminIds).toEqual(["user-creator"]);
+  });
+
+  it("preserves picksRestricted=true", () => {
+    const data = makeFirebaseGroupPublic({ picksRestricted: true });
+
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
+
+    expect(result.picksRestricted).toBe(true);
+  });
+
+  it("falls back to picksRestricted=false when absent", () => {
+    const data = makeFirebaseGroupPublic({ picksRestricted: undefined });
+
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
+
+    expect(result.picksRestricted).toBe(false);
   });
 });

@@ -1,4 +1,6 @@
 import { defineConfig } from "vitest/config";
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import { playwright } from "@vitest/browser-playwright";
 import path from "path";
 
 export default defineConfig({
@@ -33,6 +35,19 @@ export default defineConfig({
         },
         resolve: {
           alias: { "@": path.resolve(import.meta.dirname, "./src") },
+        },
+      },
+      {
+        plugins: [storybookTest()],
+        test: {
+          name: "storybook",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright(),
+            instances: [{ browser: "chromium" }],
+          },
+          setupFiles: ["@storybook/addon-vitest/internal/setup-file"],
         },
       },
     ],
