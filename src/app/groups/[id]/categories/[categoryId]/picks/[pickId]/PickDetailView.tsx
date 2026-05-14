@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
-
+import { EmptyPickView } from "./EmptyPickView";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 
 interface PickDetailViewProps {
@@ -64,15 +64,19 @@ export function PickDetailView({
         </TabsList>
 
         <TabsContent value="options" className="mt-4">
-          <OptionList
-            groupId={groupId}
-            categoryId={categoryId}
-            pickId={pick.id}
-            currentUserId={currentUserId}
-            initialOptions={initialOptions}
-            initialSuggestions={initialSuggestions}
-            pickClosed={!isOpen}
-          />
+          {initialOptions.length === 0 ? (
+            <EmptyPickView onSuggestOption={() => undefined} />
+          ) : (
+            <OptionList
+              groupId={groupId}
+              categoryId={categoryId}
+              pickId={pick.id}
+              currentUserId={currentUserId}
+              initialOptions={initialOptions}
+              initialSuggestions={initialSuggestions}
+              pickClosed={!isOpen}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="ranking" className="mt-4">
