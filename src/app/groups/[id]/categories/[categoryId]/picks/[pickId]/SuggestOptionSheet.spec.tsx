@@ -186,7 +186,7 @@ describe("cancel behaviour", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it("does not call onOpenChange while loading", () => {
+  it("does not call onOpenChange while loading", async () => {
     let resolveAdopt!: (value: { optionId: string }) => void;
     mockAdoptOption.mockReturnValue(
       new Promise<{ optionId: string }>((resolve) => {
@@ -216,5 +216,8 @@ describe("cancel behaviour", () => {
     expect(onOpenChange).not.toHaveBeenCalled();
 
     resolveAdopt({ optionId: "opt-1" });
+    await waitFor(() => {
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
   });
 });
