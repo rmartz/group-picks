@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { JoinGroupFormView } from "./JoinGroupFormView";
+
 import { JOIN_GROUP_COPY } from "./copy";
+import { JoinGroupFormView } from "./JoinGroupFormView";
 
 const meta: Meta<typeof JoinGroupFormView> = {
   title: "Groups/JoinGroupFormView",

@@ -43,7 +43,9 @@ export function JoinGroupFormView({
           disabled={isJoining || isSigningIn}
           className="w-full"
         >
-          {isJoining ? JOIN_GROUP_COPY.joiningButton : JOIN_GROUP_COPY.joinButton}
+          {isJoining
+            ? JOIN_GROUP_COPY.joiningButton
+            : JOIN_GROUP_COPY.joinButton}
         </Button>
         <p className="text-center text-sm text-muted-foreground">
           <button

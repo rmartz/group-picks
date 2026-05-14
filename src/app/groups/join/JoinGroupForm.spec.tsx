@@ -1,8 +1,16 @@
-import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
-import { JoinGroupForm } from "./JoinGroupForm";
-import { JOIN_GROUP_COPY } from "./copy";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { deleteSession, signOut } from "@/services/auth";
+
+import { JOIN_GROUP_COPY } from "./copy";
+import { JoinGroupForm } from "./JoinGroupForm";
 
 const mockPush = vi.fn();
 
