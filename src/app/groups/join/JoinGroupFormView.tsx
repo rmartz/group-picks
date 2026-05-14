@@ -6,7 +6,8 @@ interface JoinGroupFormViewProps {
   groupName: string;
   memberCount?: number;
   onJoin: () => void;
-  loading: boolean;
+  isJoining: boolean;
+  isSigningIn: boolean;
   error: string | undefined;
   onSignInDifferentAccount: () => void;
 }
@@ -15,7 +16,8 @@ export function JoinGroupFormView({
   groupName,
   memberCount,
   onJoin,
-  loading,
+  isJoining,
+  isSigningIn,
   error,
   onSignInDifferentAccount,
 }: JoinGroupFormViewProps) {
@@ -38,15 +40,16 @@ export function JoinGroupFormView({
         <Button
           type="button"
           onClick={onJoin}
-          disabled={loading}
+          disabled={isJoining || isSigningIn}
           className="w-full"
         >
-          {loading ? JOIN_GROUP_COPY.joiningButton : JOIN_GROUP_COPY.joinButton}
+          {isJoining ? JOIN_GROUP_COPY.joiningButton : JOIN_GROUP_COPY.joinButton}
         </Button>
         <p className="text-center text-sm text-muted-foreground">
           <button
             type="button"
             onClick={onSignInDifferentAccount}
+            disabled={isJoining || isSigningIn}
             className="underline underline-offset-4 hover:text-foreground"
           >
             {JOIN_GROUP_COPY.signInDifferentAccount}

@@ -23,25 +23,26 @@ export function JoinGroupForm({
   signInHref,
 }: JoinGroupFormProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   async function handleJoin() {
     setError(undefined);
-    setLoading(true);
+    setIsJoining(true);
     try {
       const joinedGroupId = await joinGroup(token);
       router.push(`/groups/${joinedGroupId}`);
     } catch {
       setError(JOIN_GROUP_COPY.errors.default);
     } finally {
-      setLoading(false);
+      setIsJoining(false);
     }
   }
 
   async function handleSignInDifferentAccount() {
     setError(undefined);
-    setLoading(true);
+    setIsSigningIn(true);
     try {
       const results = await Promise.allSettled([deleteSession(), signOut()]);
       const failed = results.some((r) => r.status === "rejected");
@@ -51,7 +52,7 @@ export function JoinGroupForm({
       }
       router.push(signInHref);
     } finally {
-      setLoading(false);
+      setIsSigningIn(false);
     }
   }
 
@@ -60,7 +61,8 @@ export function JoinGroupForm({
       groupName={groupName}
       memberCount={memberCount}
       onJoin={() => void handleJoin()}
-      loading={loading}
+      isJoining={isJoining}
+      isSigningIn={isSigningIn}
       error={error}
       onSignInDifferentAccount={() => void handleSignInDifferentAccount()}
     />

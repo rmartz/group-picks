@@ -8,7 +8,8 @@ const meta: Meta<typeof JoinGroupFormView> = {
   args: {
     groupName: "Book Club",
     onJoin: () => undefined,
-    loading: false,
+    isJoining: false,
+    isSigningIn: false,
     error: undefined,
     onSignInDifferentAccount: () => undefined,
   },
@@ -31,9 +32,15 @@ export const SingleMember: Story = {
   },
 };
 
-export const Loading: Story = {
+export const Joining: Story = {
   args: {
-    loading: true,
+    isJoining: true,
+  },
+};
+
+export const SigningIn: Story = {
+  args: {
+    isSigningIn: true,
   },
 };
 

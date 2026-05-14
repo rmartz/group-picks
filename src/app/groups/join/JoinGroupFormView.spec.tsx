@@ -12,7 +12,8 @@ function renderView(
   const defaults = {
     groupName: "Book Club",
     onJoin: vi.fn(),
-    loading: false,
+    isJoining: false,
+    isSigningIn: false,
     error: undefined,
     onSignInDifferentAccount: vi.fn(),
   };
@@ -58,16 +59,16 @@ describe("join button", () => {
     ).toBeDefined();
   });
 
-  it("shows loading text when loading", () => {
-    renderView({ loading: true });
+  it("shows loading text when joining", () => {
+    renderView({ isJoining: true });
     expect(
       screen.getByRole("button", { name: JOIN_GROUP_COPY.joiningButton })
         .textContent,
     ).toBe(JOIN_GROUP_COPY.joiningButton);
   });
 
-  it("disables the button when loading", () => {
-    renderView({ loading: true });
+  it("disables the join button when isJoining", () => {
+    renderView({ isJoining: true });
     const button = screen.getByRole<HTMLButtonElement>("button", {
       name: JOIN_GROUP_COPY.joiningButton,
     });
@@ -109,5 +110,21 @@ describe("sign in link", () => {
     renderView({ onSignInDifferentAccount });
     fireEvent.click(screen.getByText(JOIN_GROUP_COPY.signInDifferentAccount));
     expect(onSignInDifferentAccount).toHaveBeenCalledOnce();
+  });
+
+  it("disables the sign in button when isJoining", () => {
+    renderView({ isJoining: true });
+    const button = screen.getByRole<HTMLButtonElement>("button", {
+      name: JOIN_GROUP_COPY.signInDifferentAccount,
+    });
+    expect(button.disabled).toBe(true);
+  });
+
+  it("disables the sign in button when isSigningIn", () => {
+    renderView({ isSigningIn: true });
+    const button = screen.getByRole<HTMLButtonElement>("button", {
+      name: JOIN_GROUP_COPY.signInDifferentAccount,
+    });
+    expect(button.disabled).toBe(true);
   });
 });
