@@ -99,6 +99,7 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - Next.js with App Router (not Pages Router).
 - UI components: ShadCN UI. Do not install other component libraries.
 - Styling: Tailwind CSS (comes with ShadCN). No CSS modules or styled-components.
+- **ShadCN files are upstream-managed**: `src/components/ui/` is excluded from Prettier via `.prettierignore`. Do not format these files — they are installed by `shadcn add` and must stay in their original form. If they appear modified in a worktree (`git status` shows changes), discard the modifications with `git checkout HEAD -- src/components/ui/`.
 
 ### Client Components
 
