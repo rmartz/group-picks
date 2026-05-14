@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockWithSentryConfig = vi
   .fn()
@@ -7,6 +7,11 @@ const mockWithSentryConfig = vi
 vi.mock("@sentry/nextjs", () => ({
   withSentryConfig: mockWithSentryConfig,
 }));
+
+beforeEach(() => {
+  mockWithSentryConfig.mockClear();
+  vi.resetModules();
+});
 
 async function loadNextConfig() {
   await import("../next.config");
