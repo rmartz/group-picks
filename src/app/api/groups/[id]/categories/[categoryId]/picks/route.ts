@@ -115,11 +115,17 @@ export async function POST(
       parts[1] === undefined ||
       parts[2] === undefined
     ) {
-      return NextResponse.json({ error: "dueDate is invalid" }, { status: 400 });
+      return NextResponse.json(
+        { error: "dueDate is invalid" },
+        { status: 400 },
+      );
     }
     dueDate = new Date(parts[0], parts[1] - 1, parts[2]);
     if (Number.isNaN(dueDate.getTime())) {
-      return NextResponse.json({ error: "dueDate is invalid" }, { status: 400 });
+      return NextResponse.json(
+        { error: "dueDate is invalid" },
+        { status: 400 },
+      );
     }
   }
 
