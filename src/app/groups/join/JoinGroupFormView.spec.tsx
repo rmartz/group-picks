@@ -14,7 +14,7 @@ function renderView(
     onJoin: vi.fn(),
     loading: false,
     error: undefined,
-    signInHref: "/sign-in?invite_token=abc123",
+    onSignInDifferentAccount: vi.fn(),
   };
   return render(<JoinGroupFormView {...defaults} {...overrides} />);
 }
@@ -60,14 +60,17 @@ describe("join button", () => {
 
   it("shows loading text when loading", () => {
     renderView({ loading: true });
-    expect(screen.getByRole("button").textContent).toBe(
-      JOIN_GROUP_COPY.joiningButton,
-    );
+    expect(
+      screen.getByRole("button", { name: JOIN_GROUP_COPY.joiningButton })
+        .textContent,
+    ).toBe(JOIN_GROUP_COPY.joiningButton);
   });
 
   it("disables the button when loading", () => {
     renderView({ loading: true });
-    const button = screen.getByRole<HTMLButtonElement>("button");
+    const button = screen.getByRole<HTMLButtonElement>("button", {
+      name: JOIN_GROUP_COPY.joiningButton,
+    });
     expect(button.disabled).toBe(true);
   });
 
@@ -94,18 +97,17 @@ describe("error display", () => {
 });
 
 describe("sign in link", () => {
-  it("renders the sign in to different account link", () => {
+  it("renders the sign in to different account button", () => {
     renderView();
     expect(
       screen.getByText(JOIN_GROUP_COPY.signInDifferentAccount),
     ).toBeDefined();
   });
 
-  it("uses signInHref for the link href", () => {
-    renderView({ signInHref: "/sign-in?invite_token=xyz" });
-    const link = screen
-      .getByText(JOIN_GROUP_COPY.signInDifferentAccount)
-      .closest("a");
-    expect(link?.getAttribute("href")).toBe("/sign-in?invite_token=xyz");
+  it("calls onSignInDifferentAccount when clicked", () => {
+    const onSignInDifferentAccount = vi.fn();
+    renderView({ onSignInDifferentAccount });
+    fireEvent.click(screen.getByText(JOIN_GROUP_COPY.signInDifferentAccount));
+    expect(onSignInDifferentAccount).toHaveBeenCalledOnce();
   });
 });

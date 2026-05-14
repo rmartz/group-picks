@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 import { JOIN_GROUP_COPY } from "./copy";
@@ -9,7 +8,7 @@ interface JoinGroupFormViewProps {
   onJoin: () => void;
   loading: boolean;
   error: string | undefined;
-  signInHref: string;
+  onSignInDifferentAccount: () => void;
 }
 
 export function JoinGroupFormView({
@@ -18,7 +17,7 @@ export function JoinGroupFormView({
   onJoin,
   loading,
   error,
-  signInHref,
+  onSignInDifferentAccount,
 }: JoinGroupFormViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
@@ -45,12 +44,13 @@ export function JoinGroupFormView({
           {loading ? JOIN_GROUP_COPY.joiningButton : JOIN_GROUP_COPY.joinButton}
         </Button>
         <p className="text-center text-sm text-muted-foreground">
-          <Link
-            href={signInHref}
+          <button
+            type="button"
+            onClick={onSignInDifferentAccount}
             className="underline underline-offset-4 hover:text-foreground"
           >
             {JOIN_GROUP_COPY.signInDifferentAccount}
-          </Link>
+          </button>
         </p>
       </div>
     </main>

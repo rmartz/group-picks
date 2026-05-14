@@ -10,7 +10,7 @@ const meta: Meta<typeof JoinGroupFormView> = {
     onJoin: () => undefined,
     loading: false,
     error: undefined,
-    signInHref: "/sign-in?invite_token=abc123",
+    onSignInDifferentAccount: () => undefined,
   },
 };
 

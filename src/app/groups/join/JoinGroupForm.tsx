@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { deleteSession, signOut } from "@/services/auth";
 import { joinGroup } from "@/services/groups";
 
 import { JOIN_GROUP_COPY } from "./copy";
@@ -36,13 +37,18 @@ export function JoinGroupForm({
     }
   }
 
+  async function handleSignInDifferentAccount() {
+    await Promise.allSettled([deleteSession(), signOut()]);
+    router.push(signInHref);
+  }
+
   return (
     <JoinGroupFormView
       groupName={groupName}
       onJoin={() => void handleJoin()}
       loading={loading}
       error={error}
-      signInHref={signInHref}
+      onSignInDifferentAccount={() => void handleSignInDifferentAccount()}
     />
   );
 }
