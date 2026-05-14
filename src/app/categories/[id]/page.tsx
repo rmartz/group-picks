@@ -1,9 +1,11 @@
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
+
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { closePick, getPicksByCategory } from "@/server/data/picks";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { CategoryDetailView } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 

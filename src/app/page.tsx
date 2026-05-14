@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { Button } from "@/components/ui/button";
+
 import { HOME_PAGE_COPY } from "./copy";
 
 export default function Home() {

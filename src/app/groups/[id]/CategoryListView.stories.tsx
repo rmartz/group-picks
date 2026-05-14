@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CategoryListView } from "./CategoryListView";
+
 import type { Category } from "@/lib/types/category";
+
+import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_LIST_COPY } from "./copy";
 
 const mockCategories: Category[] = [

@@ -1,9 +1,10 @@
 import { getDatabase } from "firebase-admin/database";
+
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
+  type FirebasePickPublic,
   firebaseToPick,
   pickToFirebase,
-  type FirebasePickPublic,
 } from "@/lib/firebase/schema/pick";
 import type { GroupPick } from "@/lib/types/pick";
 

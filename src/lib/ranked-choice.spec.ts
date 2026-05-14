@@ -1,8 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import {
   preseedAdoptedOptionRank,
-  runRankedChoice,
   type PriorPickRanking,
+  runRankedChoice,
 } from "./ranked-choice";
 
 describe("runRankedChoice", () => {

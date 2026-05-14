@@ -1,9 +1,11 @@
 import Link from "next/link";
+
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+
+import { CATEGORY_COPY } from "./copy";
 import { CreateCategoryFormView } from "./CreateCategoryFormView";
 import { EditCategoryFormView } from "./EditCategoryFormView";
-import { CATEGORY_COPY } from "./copy";
 
 export interface CategoryListViewProps {
   categories: Category[];

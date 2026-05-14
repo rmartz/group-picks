@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
 import { GLOBAL_ERROR_COPY } from "./global-error.copy";
 
 interface GlobalErrorProps {

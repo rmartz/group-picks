@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+
 import type { Option } from "@/lib/types/option";
 import {
   adoptOption,
   joinOptionOwner,
   unjoinOptionOwner,
 } from "@/services/options";
-import { OptionListView } from "./OptionListView";
+
 import { PICK_DETAIL_COPY } from "./copy";
+import { OptionListView } from "./OptionListView";
 
 interface OptionListProps {
   groupId: string;

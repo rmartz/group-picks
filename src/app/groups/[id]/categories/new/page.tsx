@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
+
 import { getGroupById } from "@/server/data/groups";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { CreateCategoryForm } from "./CreateCategoryForm";
 
 export default async function CreateCategoryPage({

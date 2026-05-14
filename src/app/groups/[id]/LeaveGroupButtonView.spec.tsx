@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { GROUP_DETAIL_COPY } from "./copy";
+import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
 
 afterEach(cleanup);
 

@@ -1,11 +1,12 @@
 "use client";
 
-import type { GroupPick } from "@/lib/types/pick";
-import type { Option } from "@/lib/types/option";
+import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
+import type { Option } from "@/lib/types/option";
+import type { GroupPick } from "@/lib/types/pick";
+
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 
 interface PickDetailViewProps {

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupInviteByToken, addGroupMember } from "@/server/data/invites";
+
 import { getGroupById } from "@/server/data/groups";
+import { addGroupMember, getGroupInviteByToken } from "@/server/data/invites";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 const TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
 

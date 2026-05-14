@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
 

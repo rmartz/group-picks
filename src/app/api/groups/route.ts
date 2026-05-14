@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
-import { getDatabase } from "firebase-admin/database";
 import { randomUUID } from "crypto";
+import { getDatabase } from "firebase-admin/database";
+import { NextResponse } from "next/server";
+
 import { getAdminApp } from "@/lib/firebase/admin";
-import { getVerifiedUid } from "@/server/utils/auth";
 import { groupToFirebase } from "@/lib/firebase/schema/group";
 import { groupInviteToFirebase } from "@/lib/firebase/schema/invite";
 import { INVITE_TTL } from "@/server/data/invites";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function POST(request: Request) {
   const uid = await getVerifiedUid();

@@ -1,10 +1,11 @@
 import { randomUUID } from "crypto";
 import { getDatabase } from "firebase-admin/database";
+
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
+  type FirebaseGroupInvite,
   firebaseToGroupInvite,
   groupInviteToFirebase,
-  type FirebaseGroupInvite,
 } from "@/lib/firebase/schema/invite";
 import type { GroupInvite } from "@/lib/types/invite";
 

@@ -1,10 +1,11 @@
-import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
+import type { Group } from "@/lib/types/group";
 import type { GroupPick } from "@/lib/types/pick";
+
+import { CategoryList } from "./categories/CategoryList";
 import { GROUP_DETAIL_COPY } from "./copy";
 import { InviteSection } from "./InviteSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
-import { CategoryList } from "./categories/CategoryList";
 
 interface MemberName {
   uid: string;

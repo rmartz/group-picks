@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+
 import { getCategoryById } from "@/server/data/categories";
+import { getGroupById } from "@/server/data/groups";
 import { getPickById, updatePick } from "@/server/data/picks";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 interface UpdatePickRequestBody {
   title: unknown;

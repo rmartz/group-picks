@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+
 import { getCategoryById } from "@/server/data/categories";
+import { getGroupById } from "@/server/data/groups";
+import {
+  addOption,
+  getOptionsByCategory,
+  getOptionsByPick,
+  joinOption,
+} from "@/server/data/options";
 import {
   getPickById,
   getPicksByCategory,
   PICK_CLOSED_API_ERROR,
 } from "@/server/data/picks";
-import {
-  getOptionsByPick,
-  addOption,
-  joinOption,
-  getOptionsByCategory,
-} from "@/server/data/options";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function GET(
   _request: Request,

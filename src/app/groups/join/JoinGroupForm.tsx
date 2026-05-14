@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { joinGroup } from "@/services/groups";
-import { JoinGroupFormView } from "./JoinGroupFormView";
+
 import { JOIN_GROUP_COPY } from "./copy";
+import { JoinGroupFormView } from "./JoinGroupFormView";
 
 interface JoinGroupFormProps {
   token: string;
