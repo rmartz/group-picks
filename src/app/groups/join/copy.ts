@@ -1,6 +1,5 @@
 export const JOIN_GROUP_COPY = {
   joinTitle: "You're invited",
-  joinPrompt: "You have been invited to join",
   joinButton: "Join group",
   joiningButton: "Joining…",
   memberSingular: "member",
