@@ -12,7 +12,7 @@ interface ErrorViewProps {
 export function ErrorView({ onReset }: ErrorViewProps) {
   return (
     <main className="flex min-h-[60vh] flex-col items-center justify-center gap-6 p-6 text-center">
-      <AlertCircle className="h-12 w-12 text-destructive" />
+      <AlertCircle aria-hidden="true" className="h-12 w-12 text-destructive" />
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{ERROR_VIEW_COPY.headline}</h1>
         <p className="text-sm text-muted-foreground">{ERROR_VIEW_COPY.body}</p>
