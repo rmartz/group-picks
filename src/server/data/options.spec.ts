@@ -94,6 +94,22 @@ describe("unjoinOption atomic transaction", () => {
       expect(capturedUpdate?.(null)).toBeUndefined();
     });
 
+    it("returns undefined when ownerIds snapshot is an empty object", async () => {
+      let capturedUpdate:
+        | ((owners: Record<string, true> | null) => unknown)
+        | undefined;
+      mockTransaction.mockImplementation(
+        (update: (owners: Record<string, true> | null) => unknown) => {
+          capturedUpdate = update;
+          return Promise.resolve({ committed: false });
+        },
+      );
+
+      await unjoinOption("pick-1", "option-1", "user-1");
+
+      expect(capturedUpdate?.({})).toBeUndefined();
+    });
+
     it("returns owners unchanged when calling uid is not in ownerIds", async () => {
       let capturedUpdate:
         | ((owners: Record<string, true> | null) => unknown)

@@ -61,6 +61,7 @@ export async function unjoinOption(
     .ref(`picks/${pickId}/options/${optionId}/ownerIds`)
     .transaction((owners: Record<string, true> | null) => {
       if (!owners) return undefined;
+      if (Object.keys(owners).length === 0) return undefined;
       if (!(ownerUid in owners)) return owners;
       if (Object.keys(owners).length <= 1) return undefined;
       return Object.fromEntries(
