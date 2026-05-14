@@ -73,22 +73,23 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
     vi.restoreAllMocks();
   });
 
-  it("creates a pick with required fields only", async () => {
-    const response = await POST(makeRequest({ title: "Best Pizza" }), {
-      params: Promise.resolve(baseParams),
-    });
+  it("creates a pick with required fields", async () => {
+    const response = await POST(
+      makeRequest({ title: "Best Pizza", topCount: 3 }),
+      { params: Promise.resolve(baseParams) },
+    );
 
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.pickId).toBe("pick-new");
     expect(mockCreatePick).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Best Pizza", topCount: 1 }),
+      expect.objectContaining({ title: "Best Pizza", topCount: 3 }),
     );
   });
 
   it("creates a pick with dueDate set", async () => {
     const response = await POST(
-      makeRequest({ title: "Top Albums", dueDate: "2025-06-30" }),
+      makeRequest({ title: "Top Albums", topCount: 5, dueDate: "2025-06-30" }),
       { params: Promise.resolve(baseParams) },
     );
 
@@ -96,9 +97,19 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
     expect(mockCreatePick).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Top Albums",
+        topCount: 5,
         dueDate: new Date("2025-06-30"),
       }),
     );
+  });
+
+  it("rejects a missing topCount", async () => {
+    const response = await POST(makeRequest({ title: "Best Pizza" }), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(response.status).toBe(400);
+    expect(mockCreatePick).not.toHaveBeenCalled();
   });
 
   it("rejects a non-integer topCount", async () => {
@@ -143,7 +154,7 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
 
   it("rejects a dueDate with an invalid format", async () => {
     const response = await POST(
-      makeRequest({ title: "Best Pizza", dueDate: "not-a-date" }),
+      makeRequest({ title: "Best Pizza", topCount: 1, dueDate: "not-a-date" }),
       { params: Promise.resolve(baseParams) },
     );
 
@@ -153,7 +164,7 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
 
   it("rejects a dueDate with an impossible calendar date", async () => {
     const response = await POST(
-      makeRequest({ title: "Best Pizza", dueDate: "2025-02-31" }),
+      makeRequest({ title: "Best Pizza", topCount: 1, dueDate: "2025-02-31" }),
       { params: Promise.resolve(baseParams) },
     );
 
@@ -162,9 +173,10 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
   });
 
   it("omits dueDate when not provided", async () => {
-    const response = await POST(makeRequest({ title: "Best Pizza" }), {
-      params: Promise.resolve(baseParams),
-    });
+    const response = await POST(
+      makeRequest({ title: "Best Pizza", topCount: 2 }),
+      { params: Promise.resolve(baseParams) },
+    );
 
     expect(response.status).toBe(201);
     expect(mockCreatePick).toHaveBeenCalledWith(

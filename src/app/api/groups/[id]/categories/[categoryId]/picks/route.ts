@@ -93,17 +93,16 @@ export async function POST(
   const description =
     typeof body.description === "string" ? body.description.trim() : undefined;
   if (
-    body.topCount !== undefined &&
-    (typeof body.topCount !== "number" ||
-      !Number.isInteger(body.topCount) ||
-      body.topCount < 1)
+    typeof body.topCount !== "number" ||
+    !Number.isInteger(body.topCount) ||
+    body.topCount < 1
   ) {
     return NextResponse.json(
       { error: "topCount must be a positive integer" },
       { status: 400 },
     );
   }
-  const topCount = typeof body.topCount === "number" ? body.topCount : 1;
+  const topCount = body.topCount;
 
   let dueDate: Date | undefined;
   if (typeof body.dueDate === "string" && body.dueDate) {
