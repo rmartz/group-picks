@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import type { Option } from "@/lib/types/option";
+
 import { RankingTier } from "./TierRanking.copy";
 import { TierRankingView } from "./TierRankingView";
 

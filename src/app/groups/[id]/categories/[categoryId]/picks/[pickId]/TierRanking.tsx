@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import type { Option } from "@/lib/types/option";
+
 import { RankingTier, TIER_ORDER } from "./TierRanking.copy";
 import { TierRankingView } from "./TierRankingView";
 

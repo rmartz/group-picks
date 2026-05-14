@@ -1,8 +1,10 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { TierRankingView } from "./TierRankingView";
-import { RankingTier, TIER_RANKING_COPY } from "./TierRanking.copy";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import type { Option } from "@/lib/types/option";
+
+import { RankingTier, TIER_RANKING_COPY } from "./TierRanking.copy";
+import { TierRankingView } from "./TierRankingView";
 
 afterEach(cleanup);
 

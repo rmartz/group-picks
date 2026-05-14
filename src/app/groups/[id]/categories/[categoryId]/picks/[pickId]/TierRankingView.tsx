@@ -1,6 +1,7 @@
 "use client";
 
 import type { Option } from "@/lib/types/option";
+
 import { RankingTier, TIER_ORDER, TIER_RANKING_COPY } from "./TierRanking.copy";
 
 interface TierRankingViewProps {
