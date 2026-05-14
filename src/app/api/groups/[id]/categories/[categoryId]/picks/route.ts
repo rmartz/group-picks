@@ -92,14 +92,26 @@ export async function POST(
   const title = body.title.trim();
   const description =
     typeof body.description === "string" ? body.description.trim() : undefined;
-  const topCount =
-    typeof body.topCount === "number" && body.topCount >= 1
-      ? Math.floor(body.topCount)
-      : 1;
+  if (
+    body.topCount !== undefined &&
+    (typeof body.topCount !== "number" ||
+      !Number.isInteger(body.topCount) ||
+      body.topCount < 1)
+  ) {
+    return NextResponse.json(
+      { error: "topCount must be a positive integer" },
+      { status: 400 },
+    );
+  }
+  const topCount = typeof body.topCount === "number" ? body.topCount : 1;
+
   const dueDate =
     typeof body.dueDate === "string" && body.dueDate
       ? new Date(body.dueDate)
       : undefined;
+  if (dueDate !== undefined && Number.isNaN(dueDate.getTime())) {
+    return NextResponse.json({ error: "dueDate is invalid" }, { status: 400 });
+  }
 
   const { id: pickId, createdAt } = await createPick({
     title,

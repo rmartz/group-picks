@@ -136,7 +136,7 @@ describe("CreatePickFormView", () => {
   describe("loading state", () => {
     it("disables the submit button when loading", () => {
       render(<CreatePickFormView {...defaultProps} loading={true} />);
-      const button = screen.getByRole("button", {
+      const button = screen.getByRole<HTMLButtonElement>("button", {
         name: CREATE_PICK_COPY.submitButton,
       });
       expect(button.disabled).toBe(true);

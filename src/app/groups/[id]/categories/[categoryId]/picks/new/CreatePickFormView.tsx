@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { CREATE_PICK_COPY } from "./copy";
 
 interface CreatePickFormViewProps {
@@ -50,10 +53,8 @@ export function CreatePickFormView({
         className="space-y-4"
       >
         <div className="space-y-1">
-          <label htmlFor="pick-title" className="block text-sm font-medium">
-            {CREATE_PICK_COPY.titleLabel}
-          </label>
-          <input
+          <Label htmlFor="pick-title">{CREATE_PICK_COPY.titleLabel}</Label>
+          <Input
             id="pick-title"
             type="text"
             value={title}
@@ -62,33 +63,29 @@ export function CreatePickFormView({
             }}
             placeholder={CREATE_PICK_COPY.titlePlaceholder}
             disabled={loading}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+            required
           />
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="pick-top-count" className="block text-sm font-medium">
-            {CREATE_PICK_COPY.topCountLabel}
-          </label>
-          <input
+          <Label htmlFor="pick-top-count">{CREATE_PICK_COPY.topCountLabel}</Label>
+          <Input
             id="pick-top-count"
             type="number"
             min={1}
+            step={1}
             value={topCount}
             onChange={(e) => {
               onTopCountChange(Number(e.target.value));
             }}
             placeholder={CREATE_PICK_COPY.topCountPlaceholder}
             disabled={loading}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50"
           />
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="pick-due-date" className="block text-sm font-medium">
-            {CREATE_PICK_COPY.dueDateLabel}
-          </label>
-          <input
+          <Label htmlFor="pick-due-date">{CREATE_PICK_COPY.dueDateLabel}</Label>
+          <Input
             id="pick-due-date"
             type="date"
             value={dueDate}
@@ -96,28 +93,18 @@ export function CreatePickFormView({
               onDueDateChange(e.target.value);
             }}
             disabled={loading}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50"
           />
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-          >
+          <Button type="submit" disabled={loading}>
             {CREATE_PICK_COPY.submitButton}
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={loading}
-            className="rounded-md border px-4 py-2 text-sm font-medium disabled:opacity-50"
-          >
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
             {CREATE_PICK_COPY.cancelButton}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

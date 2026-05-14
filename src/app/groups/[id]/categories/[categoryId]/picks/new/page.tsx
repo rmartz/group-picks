@@ -14,15 +14,16 @@ export default async function CreatePickPage({
   if (!uid) redirect("/sign-in");
 
   const { id: groupId, categoryId } = await params;
-  const [group, category, picks] = await Promise.all([
+  const [group, category] = await Promise.all([
     getGroupById(groupId),
     getCategoryById(categoryId),
-    getPicksByCategory(categoryId),
   ]);
 
   if (!group) notFound();
   if (!group.memberIds.includes(uid)) notFound();
   if (category?.groupId !== groupId) notFound();
+
+  const picks = await getPicksByCategory(categoryId);
 
   return (
     <main className="mx-auto max-w-lg p-6">
