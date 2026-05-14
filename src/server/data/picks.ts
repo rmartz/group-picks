@@ -92,7 +92,10 @@ export async function assertPickIsOpenForWrite(
 }
 
 export async function createPick(
-  pick: Pick<GroupPick, "title" | "description" | "categoryId" | "creatorId">,
+  pick: Pick<GroupPick, "title" | "categoryId" | "creatorId" | "topCount"> & {
+    description?: string;
+    dueDate?: Date;
+  },
 ): Promise<{ id: string; createdAt: Date }> {
   const db = getDatabase(getAdminApp());
   const ref = db.ref(`categories/${pick.categoryId}/picks`).push();
@@ -103,8 +106,6 @@ export async function createPick(
   const pickData = pickToFirebase({
     ...pick,
     createdAt,
-    topCount: 1,
-    dueDate: undefined,
     closedAt: undefined,
     closedManually: undefined,
   });
