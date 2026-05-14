@@ -68,7 +68,9 @@ export function CreatePickFormView({
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="pick-top-count">{CREATE_PICK_COPY.topCountLabel}</Label>
+          <Label htmlFor="pick-top-count">
+            {CREATE_PICK_COPY.topCountLabel}
+          </Label>
           <Input
             id="pick-top-count"
             type="number"
@@ -102,7 +104,12 @@ export function CreatePickFormView({
           <Button type="submit" disabled={loading}>
             {CREATE_PICK_COPY.submitButton}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={loading}
+          >
             {CREATE_PICK_COPY.cancelButton}
           </Button>
         </div>
