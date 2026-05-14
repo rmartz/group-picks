@@ -1,13 +1,9 @@
-import { vi } from "vitest";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { GroupPick } from "@/lib/types/pick";
+import type { Option } from "@/lib/types/option";
 import { PickDetailView } from "./PickDetailView";
 
-vi.mock("@/app/categories/[id]/picks/[pickId]/OptionList", () => ({
-  OptionList: () => <div data-testid="option-list" />,
-}));
-
-const mockOpenPick: GroupPick = {
+const mockPick: GroupPick = {
   id: "pick-1",
   title: "Best Movie of 2025",
   topCount: 3,
@@ -17,38 +13,85 @@ const mockOpenPick: GroupPick = {
 };
 
 const mockClosedPick: GroupPick = {
-  ...mockOpenPick,
+  ...mockPick,
   closedAt: new Date("2025-06-01T00:00:00.000Z"),
 };
 
-const meta = {
+const mockOptions: Option[] = [
+  {
+    id: "opt-1",
+    title: "The Shawshank Redemption",
+    pickId: "pick-1",
+    ownerIds: ["user-1"],
+  },
+  { id: "opt-2", title: "Inception", pickId: "pick-1", ownerIds: ["user-2"] },
+  {
+    id: "opt-3",
+    title: "Interstellar",
+    pickId: "pick-1",
+    ownerIds: ["user-1"],
+  },
+];
+
+const meta: Meta<typeof PickDetailView> = {
   title: "Picks/PickDetailView",
   component: PickDetailView,
   args: {
-    pick: mockOpenPick,
+    pick: mockPick,
     groupId: "group-1",
     categoryId: "cat-1",
     currentUserId: "user-1",
-    initialOptions: [],
+    initialOptions: mockOptions,
     initialSuggestions: [],
   },
-} satisfies Meta<typeof PickDetailView>;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof PickDetailView>;
 
-export const OpenState: Story = {};
+export const OpenPick: Story = {};
 
-export const ClosedStateNonCreator: Story = {
+export const ClosedPickNonCreator: Story = {
   args: {
     pick: mockClosedPick,
     currentUserId: "user-2",
   },
 };
 
-export const ClosedStateCreator: Story = {
+export const ClosedPickCreator: Story = {
   args: {
     pick: mockClosedPick,
     currentUserId: "user-1",
+  },
+};
+
+export const TopOne: Story = {
+  args: {
+    pick: { ...mockPick, topCount: 1 },
+  },
+};
+
+export const EmptyOptions: Story = {
+  args: {
+    initialOptions: [],
+  },
+};
+
+export const WithSuggestions: Story = {
+  args: {
+    initialSuggestions: [
+      {
+        id: "sug-1",
+        title: "The Matrix",
+        pickId: "pick-0",
+        ownerIds: ["user-1"],
+      },
+      {
+        id: "sug-2",
+        title: "Parasite",
+        pickId: "pick-0",
+        ownerIds: ["user-1"],
+      },
+    ],
   },
 };

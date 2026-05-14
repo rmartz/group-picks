@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { Category } from "@/lib/types/category";
+import type { GroupPick } from "@/lib/types/pick";
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
 
@@ -22,6 +23,25 @@ const mockCategories: Category[] = [
   },
 ];
 
+const mockPicks: GroupPick[] = [
+  {
+    id: "pick-1",
+    title: "The Godfather",
+    topCount: 3,
+    categoryId: "cat-1",
+    createdAt: new Date("2024-01-10"),
+    creatorId: "user-1",
+  },
+  {
+    id: "pick-2",
+    title: "Inception",
+    topCount: 2,
+    categoryId: "cat-1",
+    createdAt: new Date("2024-01-11"),
+    creatorId: "user-2",
+  },
+];
+
 const noopCategory = () => undefined;
 
 const meta: Meta<typeof CategoryListView> = {
@@ -29,6 +49,7 @@ const meta: Meta<typeof CategoryListView> = {
   component: CategoryListView,
   args: {
     categories: mockCategories,
+    groupId: "group-1",
     currentUserId: "user-1",
     showCreateForm: false,
     editingId: undefined,
@@ -38,6 +59,7 @@ const meta: Meta<typeof CategoryListView> = {
     editDescription: "",
     loading: false,
     error: undefined,
+    picksByCategory: {},
     onStartCreate: () => undefined,
     onCancelCreate: () => undefined,
     onStartEdit: noopCategory,
@@ -109,5 +131,11 @@ export const EditError: Story = {
     editName: "Best Movies",
     editDescription: "",
     error: CATEGORY_COPY.errors.default,
+  },
+};
+
+export const WithPicks: Story = {
+  args: {
+    picksByCategory: { "cat-1": mockPicks },
   },
 };

@@ -36,6 +36,62 @@ function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
   );
 }
 
+describe("pick metadata", () => {
+  it("renders the pick title", () => {
+    const pick = makePick({ title: "Best Movie of 2025" });
+    renderView({ pick });
+
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
+      "Best Movie of 2025",
+    );
+  });
+
+  it("renders the top-N indicator", () => {
+    renderView({ pick: makePick({ topCount: 3 }) });
+
+    expect(
+      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.topCountLabel),
+    ).toBeDefined();
+    expect(screen.getByText("3")).toBeDefined();
+  });
+});
+
+describe("tabs structure", () => {
+  it("renders the Options tab", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.options }),
+    ).toBeDefined();
+  });
+
+  it("renders OptionList in the Options tab panel", () => {
+    renderView();
+
+    expect(screen.getByTestId("option-list")).toBeDefined();
+  });
+
+  it("renders the Your ranking tab", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking,
+      }),
+    ).toBeDefined();
+  });
+
+  it("renders the Top picks tab", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
+      }),
+    ).toBeDefined();
+  });
+});
+
 describe("open state", () => {
   it("renders the open status chip when pick is not closed", () => {
     renderView({ pick: makePick({ closedAt: undefined }) });
