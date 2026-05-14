@@ -12,6 +12,11 @@ const mockPick: GroupPick = {
   creatorId: "user-1",
 };
 
+const mockClosedPick: GroupPick = {
+  ...mockPick,
+  closedAt: new Date("2025-06-01T00:00:00.000Z"),
+};
+
 const mockOptions: Option[] = [
   {
     id: "opt-1",
@@ -46,12 +51,17 @@ type Story = StoryObj<typeof PickDetailView>;
 
 export const OpenPick: Story = {};
 
-export const ClosedPick: Story = {
+export const ClosedPickNonCreator: Story = {
   args: {
-    pick: {
-      ...mockPick,
-      closedAt: new Date("2025-06-01T00:00:00.000Z"),
-    },
+    pick: mockClosedPick,
+    currentUserId: "user-2",
+  },
+};
+
+export const ClosedPickCreator: Story = {
+  args: {
+    pick: mockClosedPick,
+    currentUserId: "user-1",
   },
 };
 
