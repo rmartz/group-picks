@@ -33,6 +33,9 @@ export function CreateGroupForm() {
       name={name}
       onNameChange={setName}
       onSubmit={(e) => void handleSubmit(e)}
+      onCancel={() => {
+        router.back();
+      }}
       loading={loading}
       error={error}
     />

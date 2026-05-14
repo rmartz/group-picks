@@ -6,87 +6,110 @@ import { CreateGroupFormView } from "./CreateGroupFormView";
 
 afterEach(cleanup);
 
-describe("CreateGroupFormView", () => {
-  it("renders the title and form fields", () => {
-    render(
-      <CreateGroupFormView
-        name=""
-        onNameChange={vi.fn()}
-        onSubmit={vi.fn()}
-        loading={false}
-        error={undefined}
-      />,
-    );
+function renderView(
+  overrides?: Partial<Parameters<typeof CreateGroupFormView>[0]>,
+) {
+  const defaults = {
+    name: "",
+    onNameChange: vi.fn(),
+    onSubmit: vi.fn(),
+    onCancel: vi.fn(),
+    loading: false,
+    error: undefined,
+  };
+  return render(<CreateGroupFormView {...defaults} {...overrides} />);
+}
 
-    expect(screen.getByText(CREATE_GROUP_COPY.title)).toBeDefined();
+describe("page structure", () => {
+  it("renders the title", () => {
+    renderView();
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
+      CREATE_GROUP_COPY.title,
+    );
+  });
+
+  it("renders the emoji picker placeholder", () => {
+    renderView();
+    expect(
+      screen.getByRole("button", { name: CREATE_GROUP_COPY.emojiPickerLabel }),
+    ).toBeDefined();
+  });
+});
+
+describe("name field", () => {
+  it("renders the group name input", () => {
+    renderView();
     expect(screen.getByLabelText(CREATE_GROUP_COPY.nameLabel)).toBeDefined();
+  });
+
+  it("reflects the name prop in the input", () => {
+    renderView({ name: "Friday Night" });
+    const input = screen.getByLabelText<HTMLInputElement>(
+      CREATE_GROUP_COPY.nameLabel,
+    );
+    expect(input.value).toBe("Friday Night");
+  });
+
+  it("calls onNameChange when the input value changes", () => {
+    const onNameChange = vi.fn();
+    renderView({ onNameChange });
+    fireEvent.change(screen.getByLabelText(CREATE_GROUP_COPY.nameLabel), {
+      target: { value: "My Group" },
+    });
+    expect(onNameChange).toHaveBeenCalledWith("My Group");
+  });
+});
+
+describe("submit button", () => {
+  it("renders the submit button", () => {
+    renderView();
     expect(
       screen.getByRole("button", { name: CREATE_GROUP_COPY.submitButton }),
     ).toBeDefined();
   });
 
-  it("displays an error message when error is provided", () => {
-    const errorMessage = "Something went wrong.";
-    render(
-      <CreateGroupFormView
-        name=""
-        onNameChange={vi.fn()}
-        onSubmit={vi.fn()}
-        loading={false}
-        error={errorMessage}
-      />,
-    );
-
-    expect(screen.getByText(errorMessage)).toBeDefined();
-  });
-
   it("disables the submit button when loading", () => {
-    render(
-      <CreateGroupFormView
-        name=""
-        onNameChange={vi.fn()}
-        onSubmit={vi.fn()}
-        loading={true}
-        error={undefined}
-      />,
-    );
-
-    const button = screen.getByRole("button", {
+    renderView({ loading: true });
+    const button = screen.getByRole<HTMLButtonElement>("button", {
       name: CREATE_GROUP_COPY.submitButton,
     });
-    expect((button as HTMLButtonElement).disabled).toBe(true);
-  });
-
-  it("calls onNameChange when the input value changes", () => {
-    const onNameChange = vi.fn();
-    render(
-      <CreateGroupFormView
-        name=""
-        onNameChange={onNameChange}
-        onSubmit={vi.fn()}
-        loading={false}
-        error={undefined}
-      />,
-    );
-
-    const input = screen.getByLabelText(CREATE_GROUP_COPY.nameLabel);
-    fireEvent.change(input, { target: { value: "My Group" } });
-    expect(onNameChange).toHaveBeenCalledWith("My Group");
+    expect(button.disabled).toBe(true);
   });
 
   it("calls onSubmit when the form is submitted", () => {
     const onSubmit = vi.fn();
-    render(
-      <CreateGroupFormView
-        name="My Group"
-        onNameChange={vi.fn()}
-        onSubmit={onSubmit}
-        loading={false}
-        error={undefined}
-      />,
-    );
-
+    renderView({ onSubmit, name: "My Group" });
     fireEvent.submit(screen.getByRole("form"));
     expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("cancel button", () => {
+  it("renders the cancel button", () => {
+    renderView();
+    expect(
+      screen.getByRole("button", { name: CREATE_GROUP_COPY.cancelButton }),
+    ).toBeDefined();
+  });
+
+  it("calls onCancel when the cancel button is clicked", () => {
+    const onCancel = vi.fn();
+    renderView({ onCancel });
+    fireEvent.click(
+      screen.getByRole("button", { name: CREATE_GROUP_COPY.cancelButton }),
+    );
+    expect(onCancel).toHaveBeenCalledOnce();
+  });
+});
+
+describe("error display", () => {
+  it("displays an error message when error is provided", () => {
+    renderView({ error: CREATE_GROUP_COPY.errors.default });
+    expect(screen.getByText(CREATE_GROUP_COPY.errors.default)).toBeDefined();
+  });
+
+  it("does not display an error message when error is undefined", () => {
+    renderView({ error: undefined });
+    expect(screen.queryByText(CREATE_GROUP_COPY.errors.default)).toBeNull();
   });
 });
