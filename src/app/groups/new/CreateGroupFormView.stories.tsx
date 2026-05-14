@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CreateGroupFormView } from "./CreateGroupFormView";
+
 import { CREATE_GROUP_COPY } from "./copy";
+import { CreateGroupFormView } from "./CreateGroupFormView";
 
 const meta: Meta<typeof CreateGroupFormView> = {
   title: "Groups/CreateGroupFormView",
