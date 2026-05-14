@@ -1,8 +1,10 @@
 export const JOIN_GROUP_COPY = {
-  joinTitle: "Join Group",
-  joinPrompt: "You have been invited to join",
-  joinButton: "Join Group",
+  joinTitle: "You're invited",
+  joinButton: "Join group",
   joiningButton: "Joining…",
+  memberSingular: "member",
+  memberPlural: "members",
+  signInDifferentAccount: "Sign in to a different account",
   invalidTitle: "Invalid Invite Link",
   invalidDescription: "This invite link is not valid.",
   revokedTitle: "Invite Link Revoked",

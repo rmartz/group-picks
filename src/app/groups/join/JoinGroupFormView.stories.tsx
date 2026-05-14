@@ -1,0 +1,52 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+import { JOIN_GROUP_COPY } from "./copy";
+import { JoinGroupFormView } from "./JoinGroupFormView";
+
+const meta: Meta<typeof JoinGroupFormView> = {
+  title: "Groups/JoinGroupFormView",
+  component: JoinGroupFormView,
+  args: {
+    groupName: "Book Club",
+    onJoin: () => undefined,
+    isJoining: false,
+    isSigningIn: false,
+    error: undefined,
+    onSignInDifferentAccount: () => undefined,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof JoinGroupFormView>;
+
+export const Default: Story = {};
+
+export const WithMemberCount: Story = {
+  args: {
+    memberCount: 7,
+  },
+};
+
+export const SingleMember: Story = {
+  args: {
+    memberCount: 1,
+  },
+};
+
+export const Joining: Story = {
+  args: {
+    isJoining: true,
+  },
+};
+
+export const SigningIn: Story = {
+  args: {
+    isSigningIn: true,
+  },
+};
+
+export const WithError: Story = {
+  args: {
+    error: JOIN_GROUP_COPY.errors.default,
+  },
+};
