@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
-import { getPickById, updatePick } from "@/server/data/picks";
+import {
+  assertPickIsOpenForWrite,
+  PICK_CLOSED_API_ERROR,
+  PickWriteClosedError,
+  updatePick,
+} from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 interface UpdatePickRequestBody {
@@ -59,12 +64,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  const pick = await getPickById(categoryId, pickId);
-
-  if (!pick) {
-    return NextResponse.json({ error: "Pick not found" }, { status: 404 });
-  }
-
   let body: UpdatePickRequestBody;
   try {
     body = (await request.json()) as UpdatePickRequestBody;
@@ -98,6 +97,21 @@ export async function PATCH(
       { error: "dueDate must be a valid date" },
       { status: 400 },
     );
+  }
+
+  try {
+    await assertPickIsOpenForWrite(categoryId, pickId);
+  } catch (err) {
+    if (err instanceof PickWriteClosedError) {
+      return NextResponse.json(
+        { error: PICK_CLOSED_API_ERROR },
+        { status: 409 },
+      );
+    }
+    if (err instanceof Error && err.message === "Pick not found") {
+      return NextResponse.json({ error: "Pick not found" }, { status: 404 });
+    }
+    throw err;
   }
 
   const title = body.title.trim();
