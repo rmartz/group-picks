@@ -48,6 +48,7 @@ function renderView(
       currentUserId="user-123"
       onLeave={vi.fn()}
       memberNames={memberNames}
+      picksByCategory={{}}
       {...overrides}
     />,
   );
