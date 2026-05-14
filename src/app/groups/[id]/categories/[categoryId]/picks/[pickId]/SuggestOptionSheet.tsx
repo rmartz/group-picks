@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import type { Option } from "@/lib/types/option";
 import { adoptOption } from "@/services/options";
 import {
   Sheet,
@@ -18,8 +17,7 @@ export interface SuggestOptionSheetProps {
   groupId: string;
   categoryId: string;
   pickId: string;
-  currentUserId: string;
-  onOptionAdded: (option: Option) => void;
+  onOptionAdded: (option: { optionId: string; title: string }) => void;
 }
 
 export function SuggestOptionSheet({
@@ -28,7 +26,6 @@ export function SuggestOptionSheet({
   groupId,
   categoryId,
   pickId,
-  currentUserId,
   onOptionAdded,
 }: SuggestOptionSheetProps) {
   const [title, setTitle] = useState("");
@@ -39,7 +36,10 @@ export function SuggestOptionSheet({
     e.preventDefault();
     if (loading) return;
     const trimmed = title.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      setError(SUGGEST_OPTION_SHEET_COPY.errors.titleRequired);
+      return;
+    }
     setError(undefined);
     setLoading(true);
     try {
@@ -49,14 +49,8 @@ export function SuggestOptionSheet({
         pickId,
         trimmed,
       );
-      onOptionAdded({
-        id: optionId,
-        title: trimmed,
-        pickId,
-        ownerIds: [currentUserId],
-      });
-      setTitle("");
-      onOpenChange(false);
+      onOptionAdded({ optionId, title: trimmed });
+      handleOpenChange(false);
     } catch {
       setError(SUGGEST_OPTION_SHEET_COPY.errors.default);
     } finally {
@@ -66,6 +60,10 @@ export function SuggestOptionSheet({
 
   function handleOpenChange(nextOpen: boolean) {
     if (loading && !nextOpen) return;
+    if (!nextOpen) {
+      setTitle("");
+      setError(undefined);
+    }
     onOpenChange(nextOpen);
   }
 
@@ -80,7 +78,7 @@ export function SuggestOptionSheet({
           onTitleChange={setTitle}
           onSubmit={(e) => void handleSubmit(e)}
           onCancel={() => {
-            onOpenChange(false);
+            handleOpenChange(false);
           }}
           loading={loading}
           error={error}

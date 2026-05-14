@@ -43,7 +43,7 @@ export function SuggestOptionSheetView({
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || !title.trim()}>
           {SUGGEST_OPTION_SHEET_COPY.suggestButton}
         </Button>
         <Button

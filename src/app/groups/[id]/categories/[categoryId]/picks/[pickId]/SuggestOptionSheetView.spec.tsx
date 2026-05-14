@@ -73,7 +73,7 @@ describe("title input interaction", () => {
 describe("form submission", () => {
   it("calls onSubmit when the suggest button is clicked", () => {
     const onSubmit = vi.fn();
-    renderView({ onSubmit });
+    renderView({ onSubmit, title: "Inception" });
 
     const button = screen.getByRole("button", {
       name: SUGGEST_OPTION_SHEET_COPY.suggestButton,
