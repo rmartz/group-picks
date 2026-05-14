@@ -9,6 +9,7 @@ import type { GroupPick } from "@/lib/types/pick";
 
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EmptyPickView } from "./EmptyPickView";
+import { TierRanking } from "./TierRanking";
 
 interface PickDetailViewProps {
   pick: GroupPick;
@@ -101,9 +102,11 @@ export function PickDetailView({
         </TabsContent>
 
         <TabsContent value="ranking" className="mt-4">
-          <p className="text-sm text-muted-foreground">
-            {PICK_DETAIL_SCAFFOLD_COPY.rankingTabPlaceholder}
-          </p>
+          <TierRanking
+            options={initialOptions.filter((opt) =>
+              opt.ownerIds.includes(currentUserId),
+            )}
+          />
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>
