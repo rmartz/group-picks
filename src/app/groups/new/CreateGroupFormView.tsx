@@ -28,7 +28,7 @@ export function CreateGroupFormView({
           type="button"
           aria-label={CREATE_GROUP_COPY.emojiPickerLabel}
           disabled={loading}
-          className="flex h-24 w-24 items-center justify-center rounded-2xl bg-muted text-4xl"
+          className="flex h-24 w-24 items-center justify-center rounded-2xl bg-muted text-4xl disabled:pointer-events-none disabled:opacity-50"
         >
           🏷️
         </button>
