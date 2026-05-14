@@ -11,9 +11,14 @@ import { JoinGroupFormView } from "./JoinGroupFormView";
 interface JoinGroupFormProps {
   token: string;
   groupName: string;
+  signInHref: string;
 }
 
-export function JoinGroupForm({ token, groupName }: JoinGroupFormProps) {
+export function JoinGroupForm({
+  token,
+  groupName,
+  signInHref,
+}: JoinGroupFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -37,6 +42,7 @@ export function JoinGroupForm({ token, groupName }: JoinGroupFormProps) {
       onJoin={() => void handleJoin()}
       loading={loading}
       error={error}
+      signInHref={signInHref}
     />
   );
 }

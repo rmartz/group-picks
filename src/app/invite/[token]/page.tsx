@@ -86,5 +86,12 @@ export default async function InvitePage({ params }: InvitePageProps) {
     );
   }
 
-  return <JoinGroupForm token={token} groupName={group.name} />;
+  const signInHref = `/sign-in?${new URLSearchParams({ invite_token: token }).toString()}`;
+  return (
+    <JoinGroupForm
+      token={token}
+      groupName={group.name}
+      signInHref={signInHref}
+    />
+  );
 }

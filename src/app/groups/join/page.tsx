@@ -83,5 +83,12 @@ export default async function JoinGroupPage({
     );
   }
 
-  return <JoinGroupForm token={token} groupName={group.name} />;
+  const signInHref = `/sign-in?${new URLSearchParams({ token }).toString()}`;
+  return (
+    <JoinGroupForm
+      token={token}
+      groupName={group.name}
+      signInHref={signInHref}
+    />
+  );
 }
