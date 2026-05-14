@@ -23,7 +23,7 @@ describe("GroupListView", () => {
 
   it("renders empty state when no groups", () => {
     render(<GroupListView groups={[]} />);
-    expect(screen.getByText(GROUP_LIST_COPY.emptyState)).toBeDefined();
+    expect(screen.getByText(GROUP_LIST_COPY.emptyHeadline)).toBeDefined();
   });
 
   it("renders a list of groups", () => {
@@ -38,7 +38,7 @@ describe("GroupListView", () => {
 
   it("does not render the empty state when there are groups", () => {
     render(<GroupListView groups={[makeGroup()]} />);
-    expect(screen.queryByText(GROUP_LIST_COPY.emptyState)).toBeNull();
+    expect(screen.queryByText(GROUP_LIST_COPY.emptyHeadline)).toBeNull();
   });
 
   it("renders group names as links", () => {
