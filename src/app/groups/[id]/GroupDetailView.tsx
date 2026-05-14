@@ -1,5 +1,6 @@
 import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
+import type { GroupPick } from "@/lib/types/pick";
 import { GROUP_DETAIL_COPY } from "./copy";
 import { InviteSection } from "./InviteSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
@@ -19,6 +20,7 @@ interface GroupDetailViewProps {
   leaveError?: string;
   initialInviteExpiresAt?: string;
   memberNames: MemberName[];
+  picksByCategory: Record<string, GroupPick[]>;
 }
 
 export function GroupDetailView({
@@ -30,6 +32,7 @@ export function GroupDetailView({
   leaveError,
   initialInviteExpiresAt,
   memberNames,
+  picksByCategory,
 }: GroupDetailViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-8 p-6">
@@ -59,6 +62,7 @@ export function GroupDetailView({
         groupId={group.id}
         initialCategories={categories}
         currentUserId={currentUserId}
+        initialPicksByCategory={picksByCategory}
       />
       <LeaveGroupButtonView
         onLeave={onLeave}

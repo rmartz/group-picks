@@ -1,10 +1,13 @@
+import Link from "next/link";
 import type { Category } from "@/lib/types/category";
+import type { GroupPick } from "@/lib/types/pick";
 import { CreateCategoryFormView } from "./CreateCategoryFormView";
 import { EditCategoryFormView } from "./EditCategoryFormView";
 import { CATEGORY_COPY } from "./copy";
 
 export interface CategoryListViewProps {
   categories: Category[];
+  groupId: string;
   currentUserId: string;
   showCreateForm: boolean;
   editingId: string | undefined;
@@ -14,6 +17,7 @@ export interface CategoryListViewProps {
   editDescription: string;
   loading: boolean;
   error: string | undefined;
+  picksByCategory: Record<string, GroupPick[]>;
   onStartCreate: () => void;
   onCancelCreate: () => void;
   onStartEdit: (category: Category) => void;
@@ -28,6 +32,7 @@ export interface CategoryListViewProps {
 
 export function CategoryListView({
   categories,
+  groupId,
   currentUserId,
   showCreateForm,
   editingId,
@@ -37,6 +42,7 @@ export function CategoryListView({
   editDescription,
   loading,
   error,
+  picksByCategory,
   onStartCreate,
   onCancelCreate,
   onStartEdit,
@@ -87,44 +93,79 @@ export function CategoryListView({
       )}
 
       <ul className="space-y-3">
-        {categories.map((category) => (
-          <li key={category.id} className="rounded border p-4">
-            {editingId === category.id ? (
-              <EditCategoryFormView
-                name={editName}
-                description={editDescription}
-                onNameChange={onEditNameChange}
-                onDescriptionChange={onEditDescriptionChange}
-                onSubmit={onEditSubmit}
-                onCancel={onCancelEdit}
-                loading={loading}
-                error={error}
-              />
-            ) : (
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <p className="font-medium">{category.name}</p>
-                  {category.description && (
-                    <p className="text-sm text-gray-600">
-                      {category.description}
+        {categories.map((category) => {
+          const picks = picksByCategory[category.id] ?? [];
+          const categoryHref = `/groups/${groupId}/categories/${category.id}`;
+          return (
+            <li key={category.id} className="rounded border p-4">
+              {editingId === category.id ? (
+                <EditCategoryFormView
+                  name={editName}
+                  description={editDescription}
+                  onNameChange={onEditNameChange}
+                  onDescriptionChange={onEditDescriptionChange}
+                  onSubmit={onEditSubmit}
+                  onCancel={onCancelEdit}
+                  loading={loading}
+                  error={error}
+                />
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <Link
+                        href={categoryHref}
+                        className="font-medium hover:underline"
+                      >
+                        {category.name}
+                      </Link>
+                      {category.description && (
+                        <p className="text-sm text-gray-600">
+                          {category.description}
+                        </p>
+                      )}
+                    </div>
+                    {category.creatorId === currentUserId && (
+                      <button
+                        onClick={() => {
+                          onStartEdit(category);
+                        }}
+                        disabled={loading}
+                        className="shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
+                      >
+                        {CATEGORY_COPY.editButton}
+                      </button>
+                    )}
+                  </div>
+                  {picks.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      {CATEGORY_COPY.noPicksMessage}
                     </p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {picks.map((pick) => (
+                        <li key={pick.id}>
+                          <Link
+                            href={`/groups/${groupId}/categories/${category.id}/picks/${pick.id}`}
+                            className="block rounded px-3 py-2 text-sm hover:bg-gray-50"
+                          >
+                            {pick.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   )}
-                </div>
-                {category.creatorId === currentUserId && (
-                  <button
-                    onClick={() => {
-                      onStartEdit(category);
-                    }}
-                    disabled={loading}
-                    className="shrink-0 rounded border px-3 py-1 text-sm font-medium disabled:opacity-50"
+                  <Link
+                    href={`/groups/${groupId}/categories/${category.id}/picks/new`}
+                    className="inline-block rounded bg-black px-3 py-1.5 text-xs font-medium text-white"
                   >
-                    {CATEGORY_COPY.editButton}
-                  </button>
-                )}
-              </div>
-            )}
-          </li>
-        ))}
+                    {CATEGORY_COPY.createPickButton}
+                  </Link>
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
