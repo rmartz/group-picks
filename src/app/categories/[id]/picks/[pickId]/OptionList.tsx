@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Option } from "@/lib/types/option";
 import {
@@ -35,17 +35,22 @@ export function OptionList({
 }: OptionListProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [suggestions, setSuggestions] = useState<Option[]>(initialSuggestions);
-
-  function updateOptions(updater: (prev: Option[]) => Option[]) {
-    setOptions((prev) => {
-      const next = updater(prev);
-      onOptionsChange?.(next);
-      return next;
-    });
-  }
   const [newTitle, setNewTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+    onOptionsChange?.(options);
+  }, [options, onOptionsChange]);
+
+  function updateOptions(updater: (prev: Option[]) => Option[]) {
+    setOptions(updater);
+  }
 
   async function handleAddSubmit(e: React.SyntheticEvent) {
     e.preventDefault();

@@ -1,4 +1,10 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Option } from "@/lib/types/option";
@@ -8,12 +14,19 @@ import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
 
-afterEach(cleanup);
-
 let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
 
+afterEach(() => {
+  cleanup();
+  capturedOnOptionsChange = undefined;
+});
+
 vi.mock("@/app/categories/[id]/picks/[pickId]/OptionList", () => ({
-  OptionList: ({ onOptionsChange }: { onOptionsChange?: (options: Option[]) => void }) => {
+  OptionList: ({
+    onOptionsChange,
+  }: {
+    onOptionsChange?: (options: Option[]) => void;
+  }) => {
     capturedOnOptionsChange = onOptionsChange;
     return <div data-testid="option-list" />;
   },
