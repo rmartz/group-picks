@@ -51,20 +51,27 @@ export async function unjoinOption(
   ownerUid: string,
 ): Promise<{ deleted: boolean }> {
   const db = getDatabase(getAdminApp());
-  const ownersRef = db.ref(`picks/${pickId}/options/${optionId}/ownerIds`);
-  const snap = await ownersRef.get();
-  const remaining = snap.exists()
-    ? Object.keys(snap.val() as Record<string, true>).filter(
-        (uid) => uid !== ownerUid,
-      )
-    : [];
+  // Atomically remove the calling uid from ownerIds. If they are the last
+  // owner, abort the transaction (returning undefined) so we can delete the
+  // whole option node instead. Without this transaction, two concurrent
+  // unjoin calls on a two-owner option can both see the other owner still
+  // present, both decide NOT to delete, and both remove only their own uid
+  // — leaving the option alive with an empty ownerIds map.
+  const result = await db
+    .ref(`picks/${pickId}/options/${optionId}/ownerIds`)
+    .transaction((owners: Record<string, true> | null) => {
+      if (!owners) return owners;
+      if (Object.keys(owners).length <= 1) return undefined;
+      return Object.fromEntries(
+        Object.entries(owners).filter(([uid]) => uid !== ownerUid),
+      );
+    });
 
-  if (remaining.length === 0) {
+  if (!result.committed) {
     await db.ref(`picks/${pickId}/options/${optionId}`).remove();
     return { deleted: true };
   }
 
-  await ownersRef.child(ownerUid).remove();
   return { deleted: false };
 }
 
