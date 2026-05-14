@@ -3,7 +3,12 @@
 import { useState } from "react";
 import type { Option } from "@/lib/types/option";
 import { adoptOption } from "@/services/options";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { SUGGEST_OPTION_SHEET_COPY } from "./SuggestOptionSheet.copy";
 import { SuggestOptionSheetView } from "./SuggestOptionSheetView";
 
@@ -32,6 +37,7 @@ export function SuggestOptionSheet({
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    if (loading) return;
     const trimmed = title.trim();
     if (!trimmed) return;
     setError(undefined);
@@ -58,10 +64,17 @@ export function SuggestOptionSheet({
     }
   }
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (loading && !nextOpen) return;
+    onOpenChange(nextOpen);
+  }
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="bottom" showCloseButton={false}>
-        <SheetTitle>{SUGGEST_OPTION_SHEET_COPY.sheetTitle}</SheetTitle>
+        <SheetHeader>
+          <SheetTitle>{SUGGEST_OPTION_SHEET_COPY.sheetTitle}</SheetTitle>
+        </SheetHeader>
         <SuggestOptionSheetView
           title={title}
           onTitleChange={setTitle}
