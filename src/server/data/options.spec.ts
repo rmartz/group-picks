@@ -78,7 +78,7 @@ describe("unjoinOption atomic transaction", () => {
       expect(capturedUpdate?.({ "user-1": true })).toBeUndefined();
     });
 
-    it("returns null as-is when ownerIds snapshot is null", async () => {
+    it("returns undefined when ownerIds snapshot is null", async () => {
       let capturedUpdate:
         | ((owners: Record<string, true> | null) => unknown)
         | undefined;
@@ -91,7 +91,24 @@ describe("unjoinOption atomic transaction", () => {
 
       await unjoinOption("pick-1", "option-1", "user-1");
 
-      expect(capturedUpdate?.(null)).toBeNull();
+      expect(capturedUpdate?.(null)).toBeUndefined();
+    });
+
+    it("returns owners unchanged when calling uid is not in ownerIds", async () => {
+      let capturedUpdate:
+        | ((owners: Record<string, true> | null) => unknown)
+        | undefined;
+      mockTransaction.mockImplementation(
+        (update: (owners: Record<string, true> | null) => unknown) => {
+          capturedUpdate = update;
+          return Promise.resolve({ committed: true });
+        },
+      );
+
+      await unjoinOption("pick-1", "option-1", "user-1");
+
+      const owners = { "user-2": true as const };
+      expect(capturedUpdate?.(owners)).toBe(owners);
     });
   });
 

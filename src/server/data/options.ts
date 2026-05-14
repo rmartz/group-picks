@@ -60,7 +60,8 @@ export async function unjoinOption(
   const result = await db
     .ref(`picks/${pickId}/options/${optionId}/ownerIds`)
     .transaction((owners: Record<string, true> | null) => {
-      if (!owners) return owners;
+      if (!owners) return undefined;
+      if (!(ownerUid in owners)) return owners;
       if (Object.keys(owners).length <= 1) return undefined;
       return Object.fromEntries(
         Object.entries(owners).filter(([uid]) => uid !== ownerUid),
