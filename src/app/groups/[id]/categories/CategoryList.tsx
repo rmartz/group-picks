@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Category } from "@/lib/types/category";
+import type { GroupPick } from "@/lib/types/pick";
 import { createCategory, updateCategory } from "@/services/categories";
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
@@ -10,12 +11,14 @@ interface CategoryListProps {
   groupId: string;
   initialCategories: Category[];
   currentUserId: string;
+  initialPicksByCategory: Record<string, GroupPick[]>;
 }
 
 export function CategoryList({
   groupId,
   initialCategories,
   currentUserId,
+  initialPicksByCategory,
 }: CategoryListProps) {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -116,6 +119,7 @@ export function CategoryList({
   return (
     <CategoryListView
       categories={categories}
+      groupId={groupId}
       currentUserId={currentUserId}
       showCreateForm={showCreateForm}
       editingId={editingId}
@@ -125,6 +129,7 @@ export function CategoryList({
       editDescription={editDescription}
       loading={loading}
       error={error}
+      picksByCategory={initialPicksByCategory}
       onStartCreate={startCreate}
       onCancelCreate={cancelCreate}
       onStartEdit={startEdit}
