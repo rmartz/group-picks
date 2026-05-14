@@ -4,9 +4,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 
+import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
-import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 
 afterEach(cleanup);
 

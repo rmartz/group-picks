@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
-import { EmptyPickView } from "./EmptyPickView";
+
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
+import { EmptyPickView } from "./EmptyPickView";
 
 interface PickDetailViewProps {
   pick: GroupPick;

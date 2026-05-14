@@ -1,6 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
-import { vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
