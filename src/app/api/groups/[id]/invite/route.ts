@@ -23,7 +23,10 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const token = await createGroupInvite(id, group.inviteToken);
+  const invite = await createGroupInvite(id, group.inviteToken);
 
-  return NextResponse.json({ token }, { status: 201 });
+  return NextResponse.json(
+    { token: invite.token, expiresAt: invite.expiresAt.toISOString() },
+    { status: 201 },
+  );
 }

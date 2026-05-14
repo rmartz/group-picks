@@ -1,12 +1,10 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
 import { GroupDetailView } from "./GroupDetailView";
 import { GROUP_DETAIL_COPY } from "./copy";
 
 afterEach(cleanup);
 
-// InviteSection reads window.location.origin and calls the regenerate API;
-// stub it for tests.
 vi.mock("./InviteSection", () => ({
   InviteSection: ({ initialToken }: { initialToken: string }) => (
     <div data-testid="invite-section">{initialToken}</div>

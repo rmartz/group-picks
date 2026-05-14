@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { getDatabase } from "firebase-admin/database";
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
@@ -6,6 +7,10 @@ import {
   type FirebaseGroupInvite,
 } from "@/lib/firebase/schema/invite";
 import type { GroupInvite } from "@/lib/types/invite";
+
+export const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
+
+export type CreatedGroupInvite = GroupInvite & { expiresAt: Date };
 
 function isFirebaseGroupInvite(data: unknown): data is FirebaseGroupInvite {
   if (typeof data !== "object" || data === null) return false;
@@ -32,18 +37,23 @@ export async function getGroupInviteByToken(
 export async function createGroupInvite(
   groupId: string,
   oldToken: string | undefined,
-): Promise<string> {
+): Promise<CreatedGroupInvite> {
   const db = getDatabase(getAdminApp());
 
-  const token = crypto.randomUUID().replace(/-/g, "");
+  const token = randomUUID().replace(/-/g, "");
+  const createdAt = new Date();
+  const expiresAt = new Date(createdAt.getTime() + INVITE_TTL);
+
+  const invite: CreatedGroupInvite = {
+    token,
+    groupId,
+    createdAt,
+    expiresAt,
+    active: true,
+  };
 
   const updates: Record<string, unknown> = {
-    [`invites/${token}`]: groupInviteToFirebase({
-      groupId,
-      createdAt: new Date(),
-      expiresAt: undefined,
-      active: true,
-    }),
+    [`invites/${token}`]: groupInviteToFirebase(invite),
     [`groups/${groupId}/public/inviteToken`]: token,
   };
   if (oldToken) {
@@ -52,7 +62,7 @@ export async function createGroupInvite(
 
   await db.ref().update(updates);
 
-  return token;
+  return invite;
 }
 
 export async function addGroupMember(

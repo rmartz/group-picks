@@ -2,6 +2,7 @@ import { GROUP_DETAIL_COPY } from "./copy";
 
 interface InviteSectionViewProps {
   inviteUrl: string | undefined;
+  expiresAt: Date | undefined;
   onRegenerate: () => void;
   onCopy: () => void;
   regenerating: boolean;
@@ -11,6 +12,7 @@ interface InviteSectionViewProps {
 
 export function InviteSectionView({
   inviteUrl,
+  expiresAt,
   onRegenerate,
   onCopy,
   regenerating,
@@ -38,6 +40,17 @@ export function InviteSectionView({
               : GROUP_DETAIL_COPY.copyButton}
           </button>
         </div>
+      )}
+      {expiresAt && (
+        <p className="text-xs text-gray-500">
+          <span className="font-medium">
+            {GROUP_DETAIL_COPY.expiresAtLabel}
+          </span>
+          {": "}
+          <time dateTime={expiresAt.toISOString()}>
+            {expiresAt.toLocaleDateString()}
+          </time>
+        </p>
       )}
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button

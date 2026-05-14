@@ -9,6 +9,7 @@ export const GROUP_DETAIL_COPY = {
     default: "Failed to leave group. Please try again.",
     lastMember: "You are the only member — groups cannot be left empty.",
   },
+  expiresAtLabel: "Expires",
   generateButton: "Generate Invite Link",
   inviteErrors: {
     default: "Something went wrong. Please try again.",

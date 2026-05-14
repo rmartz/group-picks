@@ -40,7 +40,9 @@ export async function createGroup(name: string): Promise<string> {
   return data.groupId;
 }
 
-export async function regenerateInvite(groupId: string): Promise<string> {
+export async function regenerateInvite(
+  groupId: string,
+): Promise<{ token: string; expiresAt: string }> {
   const response = await fetch(`/api/groups/${groupId}/invite`, {
     method: "POST",
   });
@@ -51,6 +53,5 @@ export async function regenerateInvite(groupId: string): Promise<string> {
     throw new Error("Failed to regenerate invite");
   }
 
-  const data = (await response.json()) as { token: string };
-  return data.token;
+  return (await response.json()) as { token: string; expiresAt: string };
 }

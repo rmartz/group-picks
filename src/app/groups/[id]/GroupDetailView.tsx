@@ -12,6 +12,7 @@ interface GroupDetailViewProps {
   onLeave: () => void;
   isLeaving?: boolean;
   leaveError?: string;
+  initialInviteExpiresAt?: string;
 }
 
 export function GroupDetailView({
@@ -21,6 +22,7 @@ export function GroupDetailView({
   onLeave,
   isLeaving = false,
   leaveError,
+  initialInviteExpiresAt,
 }: GroupDetailViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-8 p-6">
@@ -35,7 +37,11 @@ export function GroupDetailView({
           <dd>{group.memberIds.length}</dd>
         </div>
       </dl>
-      <InviteSection groupId={group.id} initialToken={group.inviteToken} />
+      <InviteSection
+        groupId={group.id}
+        initialToken={group.inviteToken}
+        initialExpiresAt={initialInviteExpiresAt}
+      />
       <CategoryList
         groupId={group.id}
         initialCategories={categories}
