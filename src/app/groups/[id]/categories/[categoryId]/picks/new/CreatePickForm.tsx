@@ -26,6 +26,10 @@ export function CreatePickForm({
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    if (!title.trim()) {
+      setError(CREATE_PICK_COPY.errors.titleRequired);
+      return;
+    }
     setError(undefined);
     setLoading(true);
     try {

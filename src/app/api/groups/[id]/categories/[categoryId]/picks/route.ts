@@ -105,12 +105,22 @@ export async function POST(
   }
   const topCount = typeof body.topCount === "number" ? body.topCount : 1;
 
-  const dueDate =
-    typeof body.dueDate === "string" && body.dueDate
-      ? new Date(body.dueDate)
-      : undefined;
-  if (dueDate !== undefined && Number.isNaN(dueDate.getTime())) {
-    return NextResponse.json({ error: "dueDate is invalid" }, { status: 400 });
+  let dueDate: Date | undefined;
+  if (typeof body.dueDate === "string" && body.dueDate) {
+    const parts = body.dueDate.split("-").map(Number);
+    if (
+      parts.length !== 3 ||
+      parts.some((p) => Number.isNaN(p)) ||
+      parts[0] === undefined ||
+      parts[1] === undefined ||
+      parts[2] === undefined
+    ) {
+      return NextResponse.json({ error: "dueDate is invalid" }, { status: 400 });
+    }
+    dueDate = new Date(parts[0], parts[1] - 1, parts[2]);
+    if (Number.isNaN(dueDate.getTime())) {
+      return NextResponse.json({ error: "dueDate is invalid" }, { status: 400 });
+    }
   }
 
   const { id: pickId, createdAt } = await createPick({

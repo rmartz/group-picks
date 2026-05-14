@@ -78,7 +78,10 @@ export function CreatePickFormView({
             step={1}
             value={topCount}
             onChange={(e) => {
-              onTopCountChange(Number(e.target.value));
+              const parsed = parseInt(e.target.value, 10);
+              if (!Number.isNaN(parsed) && parsed >= 1) {
+                onTopCountChange(parsed);
+              }
             }}
             placeholder={CREATE_PICK_COPY.topCountPlaceholder}
             disabled={loading}

@@ -102,6 +102,20 @@ describe("CreatePickFormView", () => {
       expect(onTopCountChange).toHaveBeenCalledWith(5);
     });
 
+    it("does not call onTopCountChange when topCount input is cleared", () => {
+      const onTopCountChange = vi.fn();
+      render(
+        <CreatePickFormView
+          {...defaultProps}
+          onTopCountChange={onTopCountChange}
+        />,
+      );
+      fireEvent.change(screen.getByLabelText(CREATE_PICK_COPY.topCountLabel), {
+        target: { value: "" },
+      });
+      expect(onTopCountChange).not.toHaveBeenCalled();
+    });
+
     it("calls onDueDateChange when due date input changes", () => {
       const onDueDateChange = vi.fn();
       render(
