@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Option } from "@/lib/types/option";
@@ -26,10 +26,10 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
   };
 }
 
-function makeOption(overrides?: Partial<Option>): Option {
+function makeOption(overrides: Partial<Option> = {}): Option {
   return {
     id: "opt-1",
-    title: "Option title",
+    title: "Option A",
     pickId: "pick-1",
     ownerIds: ["user-1"],
     ...overrides,
@@ -250,5 +250,32 @@ describe("empty state when no options", () => {
     renderView({ initialOptions: [makeOption()] });
 
     expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
+  });
+});
+
+describe("ranking tab owner filtering", () => {
+  it("shows only the current user's options in the ranking tab", () => {
+    const ownedOption = makeOption({
+      id: "opt-owned",
+      title: "My Option",
+      ownerIds: ["user-1"],
+    });
+    const otherOption = makeOption({
+      id: "opt-other",
+      title: "Other Option",
+      ownerIds: ["user-2"],
+    });
+
+    renderView({
+      currentUserId: "user-1",
+      initialOptions: [ownedOption, otherOption],
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    expect(screen.getByText("My Option")).toBeDefined();
+    expect(screen.queryByText("Other Option")).toBeNull();
   });
 });

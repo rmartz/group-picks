@@ -1,21 +1,13 @@
 "use client";
 
 import type { Option } from "@/lib/types/option";
-import { RankingTier, TIER_RANKING_COPY } from "./TierRanking.copy";
+import { RankingTier, TIER_ORDER, TIER_RANKING_COPY } from "./TierRanking.copy";
 
 interface TierRankingViewProps {
   options: Option[];
   tierAssignments: Record<string, RankingTier>;
   onOptionClick: (optionId: string) => void;
 }
-
-const TIER_ORDER = [
-  RankingTier.LoveIt,
-  RankingTier.Yes,
-  RankingTier.Maybe,
-  RankingTier.NotReally,
-  RankingTier.Unranked,
-] as const;
 
 export function TierRankingView({
   options,

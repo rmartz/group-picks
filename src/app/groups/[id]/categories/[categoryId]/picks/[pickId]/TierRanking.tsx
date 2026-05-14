@@ -2,20 +2,12 @@
 
 import { useState } from "react";
 import type { Option } from "@/lib/types/option";
-import { RankingTier } from "./TierRanking.copy";
+import { RankingTier, TIER_ORDER } from "./TierRanking.copy";
 import { TierRankingView } from "./TierRankingView";
 
 interface TierRankingProps {
   options: Option[];
 }
-
-const TIER_CYCLE = [
-  RankingTier.LoveIt,
-  RankingTier.Yes,
-  RankingTier.Maybe,
-  RankingTier.NotReally,
-  RankingTier.Unranked,
-] as const;
 
 export function TierRanking({ options }: TierRankingProps) {
   const [tierAssignments, setTierAssignments] = useState<
@@ -23,13 +15,14 @@ export function TierRanking({ options }: TierRankingProps) {
   >({});
 
   function handleOptionClick(optionId: string) {
-    const current = tierAssignments[optionId] ?? RankingTier.Unranked;
-    const currentIndex = TIER_CYCLE.indexOf(current);
-    const nextTier =
-      TIER_CYCLE[(currentIndex + 1) % TIER_CYCLE.length] ?? RankingTier.LoveIt;
-    const next = { ...tierAssignments };
-    next[optionId] = nextTier;
-    setTierAssignments(next);
+    setTierAssignments((prev) => {
+      const current = prev[optionId] ?? RankingTier.Unranked;
+      const currentIndex = TIER_ORDER.indexOf(current);
+      const nextTier =
+        TIER_ORDER[(currentIndex + 1) % TIER_ORDER.length] ??
+        RankingTier.LoveIt;
+      return { ...prev, [optionId]: nextTier };
+    });
   }
 
   return (

@@ -6,6 +6,14 @@ export enum RankingTier {
   Yes = "yes",
 }
 
+export const TIER_ORDER = [
+  RankingTier.LoveIt,
+  RankingTier.Yes,
+  RankingTier.Maybe,
+  RankingTier.NotReally,
+  RankingTier.Unranked,
+] as const;
+
 export const TIER_RANKING_COPY = {
   tiers: {
     [RankingTier.LoveIt]: "Love it",

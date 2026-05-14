@@ -149,14 +149,46 @@ describe("TierRanking", () => {
     it("cycles through all tiers and back to Unranked", () => {
       const option = makeOption({ id: "opt-1", title: "Inception" });
       render(<TierRanking options={[option]} />);
-      const chip = screen.getByText("Inception");
-      // Unranked → LoveIt → Yes → Maybe → NotReally → Unranked
-      fireEvent.click(chip);
-      fireEvent.click(chip);
-      fireEvent.click(chip);
-      fireEvent.click(chip);
-      fireEvent.click(chip);
-      expect(screen.getByText("Inception")).toBeDefined();
+
+      const getChip = () => screen.getByText("Inception");
+      const getTierSectionFor = (chip: HTMLElement) => {
+        // Walk up to the tier bucket div (the one with the h3 sibling)
+        let el: HTMLElement | null = chip;
+        while (el && el.previousElementSibling?.tagName !== "H3") {
+          el = el.parentElement;
+        }
+        return el?.previousElementSibling?.textContent ?? null;
+      };
+
+      // Unranked → LoveIt
+      fireEvent.click(getChip());
+      expect(getTierSectionFor(getChip())).toBe(
+        TIER_RANKING_COPY.tiers[RankingTier.LoveIt],
+      );
+
+      // LoveIt → Yes
+      fireEvent.click(getChip());
+      expect(getTierSectionFor(getChip())).toBe(
+        TIER_RANKING_COPY.tiers[RankingTier.Yes],
+      );
+
+      // Yes → Maybe
+      fireEvent.click(getChip());
+      expect(getTierSectionFor(getChip())).toBe(
+        TIER_RANKING_COPY.tiers[RankingTier.Maybe],
+      );
+
+      // Maybe → NotReally
+      fireEvent.click(getChip());
+      expect(getTierSectionFor(getChip())).toBe(
+        TIER_RANKING_COPY.tiers[RankingTier.NotReally],
+      );
+
+      // NotReally → Unranked
+      fireEvent.click(getChip());
+      expect(getTierSectionFor(getChip())).toBe(
+        TIER_RANKING_COPY.tiers[RankingTier.Unranked],
+      );
     });
   });
 });
