@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { InviteSectionView } from "./InviteSectionView";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { GROUP_DETAIL_COPY } from "./copy";
+import { InviteSectionView } from "./InviteSectionView";
 
 afterEach(cleanup);
 

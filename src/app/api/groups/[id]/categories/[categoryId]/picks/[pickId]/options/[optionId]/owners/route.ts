@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+
 import { getCategoryById } from "@/server/data/categories";
-import { getPickById, PICK_CLOSED_API_ERROR } from "@/server/data/picks";
+import { getGroupById } from "@/server/data/groups";
 import { joinOption, unjoinOption } from "@/server/data/options";
+import { getPickById, PICK_CLOSED_API_ERROR } from "@/server/data/picks";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 interface RouteParams {
   id: string;

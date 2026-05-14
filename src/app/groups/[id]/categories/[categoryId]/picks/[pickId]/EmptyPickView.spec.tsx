@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { EmptyPickView } from "./EmptyPickView";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 

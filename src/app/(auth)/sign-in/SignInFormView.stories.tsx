@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SignInFormView } from "./SignInFormView";
+
 import { SIGN_IN_COPY } from "./copy";
+import { SignInFormView } from "./SignInFormView";
 
 const meta: Meta<typeof SignInFormView> = {
   title: "Auth/SignInFormView",

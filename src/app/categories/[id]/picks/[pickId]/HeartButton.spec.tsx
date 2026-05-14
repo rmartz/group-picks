@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { HeartButton } from "./HeartButton";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { PICK_DETAIL_COPY } from "./copy";
+import { HeartButton } from "./HeartButton";
 
 afterEach(cleanup);
 

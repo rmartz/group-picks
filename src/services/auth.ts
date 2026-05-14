@@ -1,13 +1,14 @@
 import {
+  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   OAuthProvider,
-  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
   updateProfile,
 } from "firebase/auth";
+
 import { getClientAuth } from "@/lib/firebase/client";
 
 export async function signIn(email: string, password: string) {

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { InviteSectionView } from "./InviteSectionView";
+
 import { GROUP_DETAIL_COPY } from "./copy";
+import { InviteSectionView } from "./InviteSectionView";
 
 const INVITE_URL = "https://example.com/groups/join?token=abc123token";
 

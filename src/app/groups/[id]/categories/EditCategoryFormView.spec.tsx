@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { EditCategoryFormView } from "./EditCategoryFormView";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import { CATEGORY_COPY } from "./copy";
+import { EditCategoryFormView } from "./EditCategoryFormView";
 
 afterEach(cleanup);
 

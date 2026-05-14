@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { GroupPick } from "@/lib/types/pick";
+
 import type { Option } from "@/lib/types/option";
+import type { GroupPick } from "@/lib/types/pick";
+
 import { PickDetailView } from "./PickDetailView";
 
 const mockPick: GroupPick = {
@@ -10,6 +12,11 @@ const mockPick: GroupPick = {
   categoryId: "cat-1",
   createdAt: new Date("2025-01-01T00:00:00.000Z"),
   creatorId: "user-1",
+};
+
+const mockClosedPick: GroupPick = {
+  ...mockPick,
+  closedAt: new Date("2025-06-01T00:00:00.000Z"),
 };
 
 const mockOptions: Option[] = [
@@ -46,12 +53,17 @@ type Story = StoryObj<typeof PickDetailView>;
 
 export const OpenPick: Story = {};
 
-export const ClosedPick: Story = {
+export const ClosedPickNonCreator: Story = {
   args: {
-    pick: {
-      ...mockPick,
-      closedAt: new Date("2025-06-01T00:00:00.000Z"),
-    },
+    pick: mockClosedPick,
+    currentUserId: "user-2",
+  },
+};
+
+export const ClosedPickCreator: Story = {
+  args: {
+    pick: mockClosedPick,
+    currentUserId: "user-1",
   },
 };
 

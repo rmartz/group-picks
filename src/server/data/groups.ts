@@ -1,8 +1,9 @@
 import { getDatabase } from "firebase-admin/database";
+
 import { getAdminApp, getAdminAuth } from "@/lib/firebase/admin";
 import {
-  firebaseToGroup,
   type FirebaseGroupPublic,
+  firebaseToGroup,
 } from "@/lib/firebase/schema/group";
 import type { Group } from "@/lib/types/group";
 

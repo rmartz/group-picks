@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+
 import { JOIN_GROUP_COPY } from "./copy";
 
 interface JoinGroupFormViewProps {

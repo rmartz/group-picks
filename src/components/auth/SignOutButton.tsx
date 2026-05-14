@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteSession, signOut } from "@/services/auth";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { deleteSession, signOut } from "@/services/auth";
+
 import { SIGN_OUT_BUTTON_COPY } from "./SignOutButton.copy";
 
 export function SignOutButton() {

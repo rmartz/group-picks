@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
+
 import { getGroupById } from "@/server/data/groups";
 import { createGroupInvite } from "@/server/data/invites";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function POST(
   _request: Request,

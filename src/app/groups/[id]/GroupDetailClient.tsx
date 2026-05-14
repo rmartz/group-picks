@@ -1,13 +1,15 @@
 "use client";
 
-import type { Group } from "@/lib/types/group";
-import type { Category } from "@/lib/types/category";
-import type { GroupPick } from "@/lib/types/pick";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import type { Category } from "@/lib/types/category";
+import type { Group } from "@/lib/types/group";
+import type { GroupPick } from "@/lib/types/pick";
 import { leaveGroup, LeaveGroupLastMemberError } from "@/services/groups";
-import { GroupDetailView } from "./GroupDetailView";
+
 import { GROUP_DETAIL_COPY } from "./copy";
+import { GroupDetailView } from "./GroupDetailView";
 
 interface GroupDetailClientProps {
   group: Group;

@@ -1,5 +1,6 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import { CategoryDetailView } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 

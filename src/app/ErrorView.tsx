@@ -2,7 +2,9 @@
 
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
+
 import { Button, buttonVariants } from "@/components/ui/button";
+
 import { ERROR_VIEW_COPY } from "./ErrorView.copy";
 
 interface ErrorViewProps {
