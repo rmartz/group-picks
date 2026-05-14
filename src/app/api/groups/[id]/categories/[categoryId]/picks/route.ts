@@ -68,9 +68,19 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  let body: { title: unknown; description: unknown };
+  let body: {
+    title: unknown;
+    description: unknown;
+    topCount: unknown;
+    dueDate: unknown;
+  };
   try {
-    body = (await request.json()) as { title: unknown; description: unknown };
+    body = (await request.json()) as {
+      title: unknown;
+      description: unknown;
+      topCount: unknown;
+      dueDate: unknown;
+    };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -82,12 +92,22 @@ export async function POST(
   const title = body.title.trim();
   const description =
     typeof body.description === "string" ? body.description.trim() : undefined;
+  const topCount =
+    typeof body.topCount === "number" && body.topCount >= 1
+      ? Math.floor(body.topCount)
+      : 1;
+  const dueDate =
+    typeof body.dueDate === "string" && body.dueDate
+      ? new Date(body.dueDate)
+      : undefined;
 
   const { id: pickId, createdAt } = await createPick({
     title,
     description,
     categoryId,
     creatorId: uid,
+    topCount,
+    dueDate,
   });
 
   return NextResponse.json(
