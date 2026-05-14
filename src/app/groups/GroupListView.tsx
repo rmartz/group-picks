@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Group } from "@/lib/types/group";
 import { Button } from "@/components/ui/button";
 import { GROUP_LIST_COPY } from "./copy";
+import { NoGroupsView } from "./NoGroupsView";
 
 interface GroupListViewProps {
   groups: Group[];
@@ -17,7 +18,7 @@ export function GroupListView({ groups }: GroupListViewProps) {
         </Button>
       </div>
       {groups.length === 0 ? (
-        <p className="text-sm text-zinc-500">{GROUP_LIST_COPY.emptyState}</p>
+        <NoGroupsView />
       ) : (
         <ul className="space-y-2">
           {groups.map((group) => (
