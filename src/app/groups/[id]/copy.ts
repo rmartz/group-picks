@@ -1,9 +1,7 @@
 export const GROUP_DETAIL_COPY = {
   categoriesLabel: "Categories",
-  copied: "Copied!",
   copiedButton: "Copied!",
   copyButton: "Copy",
-  copyLink: "Copy",
   createdAtLabel: "Created",
   errors: {
     default: "Failed to leave group. Please try again.",
@@ -15,7 +13,6 @@ export const GROUP_DETAIL_COPY = {
     default: "Something went wrong. Please try again.",
   },
   inviteLabel: "Invite Link",
-  inviteLinkLabel: "Invite Link",
   leaveButton: "Leave Group",
   membersLabel: "Members",
   notFound: "Group not found.",
