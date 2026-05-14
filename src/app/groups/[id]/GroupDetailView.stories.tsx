@@ -30,6 +30,7 @@ const meta: Meta<typeof GroupDetailView> = {
     currentUserId: "user-123",
     onLeave: noop,
     memberNames: mockMemberNames,
+    picksByCategory: {},
   },
 };
 
