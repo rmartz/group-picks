@@ -113,7 +113,9 @@ describe("CategoryDetailView — picks list", () => {
     const pick = makePick({ description: "   " });
     render(<CategoryDetailView category={makeCategory()} picks={[pick]} />);
 
-    expect(screen.queryByText("   ")).toBeNull();
+    expect(
+      screen.queryAllByText((_, element) => element?.textContent === "   "),
+    ).toHaveLength(0);
   });
 
   it("renders multiple picks", () => {
