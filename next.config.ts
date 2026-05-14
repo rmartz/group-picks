@@ -13,6 +13,16 @@ export default withSentryConfig(nextConfig, {
   // Upload wider set of client source files for better stack trace resolution
   widenClientFileUpload: true,
 
+  // Delete source maps from the build output after upload to prevent end-user exposure
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
+  // Strip debug logging statements from the production bundle
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+  },
+
   // Create a proxy API route to bypass ad-blockers
   tunnelRoute: "/monitoring",
 
