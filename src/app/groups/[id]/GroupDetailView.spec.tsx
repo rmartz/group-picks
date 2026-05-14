@@ -15,6 +15,10 @@ vi.mock("./categories/CategoryList", () => ({
   CategoryList: () => <div data-testid="category-list" />,
 }));
 
+vi.mock("./LeaveGroupButtonView", () => ({
+  LeaveGroupButtonView: () => <div data-testid="leave-group-button" />,
+}));
+
 function makeGroup() {
   return {
     id: "group-1",
@@ -28,48 +32,58 @@ function makeGroup() {
   };
 }
 
+const memberNames = [
+  { uid: "user-123", name: "Alice" },
+  { uid: "user-456", name: "Bob" },
+];
+
+function renderView(
+  overrides?: Partial<Parameters<typeof GroupDetailView>[0]>,
+) {
+  const group = makeGroup();
+  return render(
+    <GroupDetailView
+      group={group}
+      categories={[]}
+      currentUserId="user-123"
+      onLeave={vi.fn()}
+      memberNames={memberNames}
+      {...overrides}
+    />,
+  );
+}
+
 describe("GroupDetailView", () => {
   it("renders the group name", () => {
     const group = makeGroup();
-    render(
-      <GroupDetailView
-        group={group}
-        categories={[]}
-        currentUserId="user-123"
-        onLeave={vi.fn()}
-      />,
-    );
+    renderView({ group });
 
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
-  it("renders the member count", () => {
-    const group = makeGroup();
-    render(
-      <GroupDetailView
-        group={group}
-        categories={[]}
-        currentUserId="user-123"
-        onLeave={vi.fn()}
-      />,
-    );
+  it("renders the members label", () => {
+    renderView();
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
     ).toBeDefined();
-    expect(screen.getByText(String(group.memberIds.length))).toBeDefined();
+  });
+
+  it("renders each member name", () => {
+    renderView();
+
+    expect(screen.getByText("Alice")).toBeDefined();
+    expect(screen.getByText("Bob")).toBeDefined();
+  });
+
+  it("does not render a raw member count", () => {
+    renderView();
+
+    expect(screen.queryByText("2")).toBeNull();
   });
 
   it("renders the created at label", () => {
-    const group = makeGroup();
-    render(
-      <GroupDetailView
-        group={group}
-        categories={[]}
-        currentUserId="user-123"
-        onLeave={vi.fn()}
-      />,
-    );
+    renderView();
 
     expect(
       screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
@@ -78,14 +92,7 @@ describe("GroupDetailView", () => {
 
   it("renders the invite section with the invite token", () => {
     const group = makeGroup();
-    render(
-      <GroupDetailView
-        group={group}
-        categories={[]}
-        currentUserId="user-123"
-        onLeave={vi.fn()}
-      />,
-    );
+    renderView({ group });
 
     expect(screen.getByTestId("invite-section")).toBeDefined();
     expect(screen.getByText(group.inviteToken)).toBeDefined();
