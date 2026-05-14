@@ -28,6 +28,8 @@ export function PickDetailView({
   initialSuggestions,
 }: PickDetailViewProps) {
   const isOpen = pick.closedAt === undefined;
+  const isCreator = pick.creatorId === currentUserId;
+
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
       <div className="space-y-2">
@@ -47,9 +49,27 @@ export function PickDetailView({
         </div>
       </div>
 
-      <Button type="button" variant="outline" size="sm" disabled>
-        {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
-      </Button>
+      {isOpen && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => undefined}
+        >
+          {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
+        </Button>
+      )}
+
+      {!isOpen && isCreator && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => undefined}
+        >
+          {PICK_DETAIL_SCAFFOLD_COPY.reopenButton}
+        </Button>
+      )}
 
       <Tabs defaultValue="options">
         <TabsList>
@@ -59,7 +79,7 @@ export function PickDetailView({
           <TabsTrigger value="ranking">
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking}
           </TabsTrigger>
-          <TabsTrigger value="top-picks">
+          <TabsTrigger value="top-picks" disabled={isOpen}>
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks}
           </TabsTrigger>
         </TabsList>
@@ -86,9 +106,11 @@ export function PickDetailView({
           </p>
         </TabsContent>
 
-        <TabsContent value="top-picks" className="mt-4">
+        <TabsContent value="top-picks" className="mt-4" keepMounted>
           <p className="text-sm text-muted-foreground">
-            {PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder}
+            {isOpen
+              ? PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder
+              : PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder}
           </p>
         </TabsContent>
       </Tabs>
