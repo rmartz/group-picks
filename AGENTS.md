@@ -62,6 +62,7 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - **No function-style imports.** Do not use inline `import("…").Type` syntax in type annotations. Use module-level `import type { … } from "…"` statements at the top of the file. Dynamic `await import("…")` for services that require conditional loading (e.g., Sentry instrumentation) is acceptable.
 - **No unnecessary helpers.** Do not extract logic into a helper function unless it separates significant logic or belongs in a different module. Three similar lines is better than a premature abstraction.
 - **Enums and constant objects** should be kept in alphabetical order to minimize merge conflicts.
+- **Import statements** must be sorted alphabetically within each group. This is enforced by ESLint (`simple-import-sort`); run `pnpm lint --fix` to auto-sort.
 - **Prefer enums over string literal unions** for any domain concept with two or more named states (e.g., use `enum Status { Active = "active", Inactive = "inactive" }` rather than `"active" | "inactive"`). String enum values must match the current serialized schema. Export new enums from the module barrel (the directory-level `index.ts` when one exists or is required by the barrel rule above).
 
 ## Naming Conventions

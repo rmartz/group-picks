@@ -1,4 +1,5 @@
 import type { Category } from "@/lib/types/category";
+
 import { CATEGORY_DETAIL_COPY } from "./copy";
 
 interface CategoryDetailViewProps {

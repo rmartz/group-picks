@@ -1,6 +1,8 @@
 import Link from "next/link";
-import type { Group } from "@/lib/types/group";
+
 import { Button } from "@/components/ui/button";
+import type { Group } from "@/lib/types/group";
+
 import { GROUP_LIST_COPY } from "./copy";
 import { NoGroupsView } from "./NoGroupsView";
 

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { GroupPick } from "@/lib/types/pick";
+
 import type { Option } from "@/lib/types/option";
+import type { GroupPick } from "@/lib/types/pick";
+
 import { PickDetailView } from "./PickDetailView";
 
 const mockPick: GroupPick = {

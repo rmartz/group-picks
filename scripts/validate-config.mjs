@@ -12,8 +12,8 @@
  * Accepts optional --env=<name> to validate a single environment.
  */
 
-import { readFileSync, existsSync } from "fs";
-import { join, dirname } from "path";
+import { existsSync, readFileSync } from "fs";
+import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");

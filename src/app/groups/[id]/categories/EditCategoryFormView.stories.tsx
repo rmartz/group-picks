@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { EditCategoryFormView } from "./EditCategoryFormView";
+
 import { CATEGORY_COPY } from "./copy";
+import { EditCategoryFormView } from "./EditCategoryFormView";
 
 const meta: Meta<typeof EditCategoryFormView> = {
   title: "Categories/EditCategoryFormView",

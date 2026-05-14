@@ -1,8 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import {
   categoryToFirebase,
-  firebaseToCategory,
   type FirebaseCategoryPublic,
+  firebaseToCategory,
 } from "./category";
 
 const FIXED_DATE = new Date("2025-03-10T09:00:00.000Z");

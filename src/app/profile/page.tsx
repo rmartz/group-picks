@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { updateDisplayName } from "@/services/auth";
+
 import { UserProfileView } from "./UserProfileView";
 
 export default function ProfilePage() {

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
+
 import { GROUP_DETAIL_COPY } from "./copy";
+import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
 
 const noop = () => undefined;
 

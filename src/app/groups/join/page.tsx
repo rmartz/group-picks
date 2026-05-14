@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupInviteByToken } from "@/server/data/invites";
+
 import { getGroupById } from "@/server/data/groups";
-import { JoinGroupForm } from "./JoinGroupForm";
+import { getGroupInviteByToken } from "@/server/data/invites";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { JOIN_GROUP_COPY } from "./copy";
+import { JoinGroupForm } from "./JoinGroupForm";
 
 interface JoinGroupPageProps {
   searchParams: Promise<{ token?: string }>;

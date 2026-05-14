@@ -1,15 +1,17 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
 import {
-  render,
-  screen,
   cleanup,
   fireEvent,
+  render,
+  screen,
   waitFor,
 } from "@testing-library/react";
-import SignInForm from "./SignInForm";
-import { SIGN_IN_COPY } from "./copy";
-import { signIn, signInWithApple, createSession } from "@/services/auth";
 import type { UserCredential } from "firebase/auth";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { createSession, signIn, signInWithApple } from "@/services/auth";
+
+import { SIGN_IN_COPY } from "./copy";
+import SignInForm from "./SignInForm";
 
 const mockPush = vi.fn();
 let mockInviteToken: string | null = null;

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+
 import type { Category } from "@/lib/types/category";
 import {
-  deleteCategory as deleteCategoryService,
-  createCategory as createCategoryService,
   CategoryHasPicksError,
+  createCategory as createCategoryService,
+  deleteCategory as deleteCategoryService,
 } from "@/services/categories";
+
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_LIST_COPY } from "./copy";
 

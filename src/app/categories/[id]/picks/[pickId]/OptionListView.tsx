@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Option } from "@/lib/types/option";
-import { HeartButton } from "./HeartButton";
+
 import { PICK_DETAIL_COPY } from "./copy";
+import { HeartButton } from "./HeartButton";
 
 export interface OptionListViewProps {
   options: Option[];

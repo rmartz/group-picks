@@ -1,8 +1,10 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
-import { GroupListView } from "./GroupListView";
-import { GROUP_LIST_COPY } from "./copy";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import { makeGroup } from "@/lib/fixtures/group";
+
+import { GROUP_LIST_COPY } from "./copy";
+import { GroupListView } from "./GroupListView";
 
 afterEach(cleanup);
 

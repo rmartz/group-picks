@@ -1,10 +1,12 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import type { GroupPick } from "@/lib/types/pick";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import type { Option } from "@/lib/types/option";
-import { PickDetailView } from "./PickDetailView";
+import type { GroupPick } from "@/lib/types/pick";
+
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
+import { PickDetailView } from "./PickDetailView";
 
 afterEach(cleanup);
 

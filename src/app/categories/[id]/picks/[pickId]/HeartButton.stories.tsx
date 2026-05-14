@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import { HeartButton } from "./HeartButton";
 
 const meta: Meta<typeof HeartButton> = {

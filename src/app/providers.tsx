@@ -1,10 +1,11 @@
 "use client";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { Provider } from "react-redux";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { store } from "@/store";
+
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { store } from "@/store";
 
 interface ProvidersProps {
   children: React.ReactNode;

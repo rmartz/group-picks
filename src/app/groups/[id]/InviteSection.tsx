@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { regenerateInvite } from "@/services/groups";
-import { InviteSectionView } from "./InviteSectionView";
+
 import { GROUP_DETAIL_COPY } from "./copy";
+import { InviteSectionView } from "./InviteSectionView";
 
 interface InviteSectionProps {
   groupId: string;

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import type { Group } from "@/lib/types/group";
+
 import { GroupDetailView } from "./GroupDetailView";
 
 const noop = () => undefined;

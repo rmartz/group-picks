@@ -1,9 +1,11 @@
 import { notFound, redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
+
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
-import { getPicksByCategory, getPickById } from "@/server/data/picks";
-import { getOptionsByPick, getOptionsByCategory } from "@/server/data/options";
+import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
+import { getPickById, getPicksByCategory } from "@/server/data/picks";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { OptionList } from "./OptionList";
 
 export default async function PickDetailPage({

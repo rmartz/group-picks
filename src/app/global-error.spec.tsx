@@ -1,5 +1,5 @@
-import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // TODO: upgrade to userEvent when @testing-library/user-event is available
 
 const mockCaptureException = vi.fn();

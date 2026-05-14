@@ -1,8 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import {
-  groupToFirebase,
-  firebaseToGroup,
   type FirebaseGroupPublic,
+  firebaseToGroup,
+  groupToFirebase,
 } from "./group";
 
 const FIXED_DATE = new Date("2025-01-15T12:00:00.000Z");

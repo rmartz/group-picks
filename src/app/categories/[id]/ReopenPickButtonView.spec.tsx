@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { ReopenPickButtonView } from "./ReopenPickButtonView";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { CATEGORY_DETAIL_COPY } from "./copy";
+import { ReopenPickButtonView } from "./ReopenPickButtonView";
 
 afterEach(cleanup);
 

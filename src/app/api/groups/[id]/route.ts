@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
+
 import { getGroupById, removeMember } from "@/server/data/groups";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function GET(
   _request: Request,
