@@ -23,8 +23,8 @@ vi.mock("./SuggestOptionSheet", () => ({
         <button
           type="button"
           onClick={() => {
-              onOptionAdded({ optionId: "opt-new", title: "New Option" });
-            }}
+            onOptionAdded({ optionId: "opt-new", title: "New Option" });
+          }}
         >
           mock-add-option
         </button>
