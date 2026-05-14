@@ -107,26 +107,17 @@ export async function POST(
 
   let dueDate: Date | undefined;
   if (typeof body.dueDate === "string" && body.dueDate) {
-    const parts = body.dueDate.split("-").map(Number);
+    const parsed = new Date(body.dueDate);
     if (
-      parts.length !== 3 ||
-      parts.some((p) => Number.isNaN(p)) ||
-      parts[0] === undefined ||
-      parts[1] === undefined ||
-      parts[2] === undefined
+      Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== body.dueDate
     ) {
       return NextResponse.json(
         { error: "dueDate is invalid" },
         { status: 400 },
       );
     }
-    dueDate = new Date(parts[0], parts[1] - 1, parts[2]);
-    if (Number.isNaN(dueDate.getTime())) {
-      return NextResponse.json(
-        { error: "dueDate is invalid" },
-        { status: 400 },
-      );
-    }
+    dueDate = parsed;
   }
 
   const { id: pickId, createdAt } = await createPick({
