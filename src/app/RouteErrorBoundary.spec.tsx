@@ -1,5 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { RouteErrorBoundary } from "./RouteErrorBoundary";
 
 const mockCaptureException = vi.hoisted(() => vi.fn());

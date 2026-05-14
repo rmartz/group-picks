@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import { ErrorView } from "./ErrorView";
 
 const meta: Meta<typeof ErrorView> = {
