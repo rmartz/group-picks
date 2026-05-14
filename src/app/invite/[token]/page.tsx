@@ -91,6 +91,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
     <JoinGroupForm
       token={token}
       groupName={group.name}
+      memberCount={group.memberIds.length}
       signInHref={signInHref}
     />
   );

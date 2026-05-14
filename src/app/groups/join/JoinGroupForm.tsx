@@ -12,12 +12,14 @@ import { JoinGroupFormView } from "./JoinGroupFormView";
 interface JoinGroupFormProps {
   token: string;
   groupName: string;
+  memberCount?: number;
   signInHref: string;
 }
 
 export function JoinGroupForm({
   token,
   groupName,
+  memberCount,
   signInHref,
 }: JoinGroupFormProps) {
   const router = useRouter();
@@ -38,13 +40,25 @@ export function JoinGroupForm({
   }
 
   async function handleSignInDifferentAccount() {
-    await Promise.allSettled([deleteSession(), signOut()]);
-    router.push(signInHref);
+    setError(undefined);
+    setLoading(true);
+    try {
+      const results = await Promise.allSettled([deleteSession(), signOut()]);
+      const failed = results.some((r) => r.status === "rejected");
+      if (failed) {
+        setError(JOIN_GROUP_COPY.errors.default);
+        return;
+      }
+      router.push(signInHref);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <JoinGroupFormView
       groupName={groupName}
+      memberCount={memberCount}
       onJoin={() => void handleJoin()}
       loading={loading}
       error={error}
