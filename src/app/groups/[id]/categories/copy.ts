@@ -1,9 +1,11 @@
 export const CATEGORY_COPY = {
-  categoriesHeading: "Categories",
-  noCategoriesMessage: "No categories yet.",
   addCategoryButton: "Add Category",
-  editButton: "Edit",
   cancelButton: "Cancel",
+  categoriesHeading: "Categories",
+  createPickButton: "Create Pick",
+  editButton: "Edit",
+  noCategoriesMessage: "No categories yet.",
+  noPicksMessage: "No picks yet.",
   saveButton: "Save",
   createForm: {
     title: "Add Category",

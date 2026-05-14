@@ -2,6 +2,7 @@
 
 import type { Group } from "@/lib/types/group";
 import type { Category } from "@/lib/types/category";
+import type { GroupPick } from "@/lib/types/pick";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { leaveGroup, LeaveGroupLastMemberError } from "@/services/groups";
@@ -14,6 +15,7 @@ interface GroupDetailClientProps {
   currentUserId: string;
   initialInviteExpiresAt?: string;
   memberNames: { uid: string; name: string }[];
+  picksByCategory: Record<string, GroupPick[]>;
 }
 
 export function GroupDetailClient({
@@ -22,6 +24,7 @@ export function GroupDetailClient({
   currentUserId,
   initialInviteExpiresAt,
   memberNames,
+  picksByCategory,
 }: GroupDetailClientProps) {
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
@@ -56,6 +59,7 @@ export function GroupDetailClient({
       leaveError={error}
       initialInviteExpiresAt={initialInviteExpiresAt}
       memberNames={memberNames}
+      picksByCategory={picksByCategory}
     />
   );
 }
