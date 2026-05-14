@@ -45,12 +45,7 @@ export function PickDetailView({
         </div>
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => undefined}
-      >
+      <Button type="button" variant="outline" size="sm" disabled>
         {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
       </Button>
 
@@ -62,7 +57,7 @@ export function PickDetailView({
           <TabsTrigger value="ranking">
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking}
           </TabsTrigger>
-          <TabsTrigger value="top-picks" disabled>
+          <TabsTrigger value="top-picks">
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks}
           </TabsTrigger>
         </TabsList>

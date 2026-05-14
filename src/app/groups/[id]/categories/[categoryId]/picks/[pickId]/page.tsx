@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { getGroupById } from "@/server/data/groups";
-import { getPickById } from "@/server/data/picks";
+import { getCategoryById } from "@/server/data/categories";
+import { getPickById, getPicksByCategory } from "@/server/data/picks";
 import { getOptionsByPick, getOptionsByCategory } from "@/server/data/options";
-import { getPicksByCategory } from "@/server/data/picks";
 import { PickDetailView } from "./PickDetailView";
 
 export default async function PickDetailPage({
@@ -19,9 +19,11 @@ export default async function PickDetailPage({
   const group = await getGroupById(groupId);
   if (!group?.memberIds.includes(uid)) notFound();
 
+  const category = await getCategoryById(categoryId);
+  if (category?.groupId !== groupId) notFound();
+
   const pick = await getPickById(categoryId, pickId);
   if (!pick) notFound();
-  if (pick.categoryId !== categoryId) notFound();
 
   const [currentOptions, allPicks] = await Promise.all([
     getOptionsByPick(pickId),

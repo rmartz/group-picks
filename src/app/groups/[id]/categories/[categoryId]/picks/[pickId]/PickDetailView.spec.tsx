@@ -73,6 +73,12 @@ describe("tabs structure", () => {
     ).toBeDefined();
   });
 
+  it("renders OptionList in the Options tab panel", () => {
+    renderView();
+
+    expect(screen.getByTestId("option-list")).toBeDefined();
+  });
+
   it("renders the Your ranking tab", () => {
     renderView();
 
