@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import { GroupDetailView } from "./GroupDetailView";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { GROUP_DETAIL_COPY } from "./copy";
+import { GroupDetailView } from "./GroupDetailView";
 
 afterEach(cleanup);
 

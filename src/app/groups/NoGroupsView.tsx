@@ -1,5 +1,7 @@
 import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
+
 import { GROUP_LIST_COPY } from "./copy";
 
 export function NoGroupsView() {

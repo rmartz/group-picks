@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { JoinGroupFormView } from "./JoinGroupFormView";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import { JOIN_GROUP_COPY } from "./copy";
+import { JoinGroupFormView } from "./JoinGroupFormView";
 
 afterEach(cleanup);
 

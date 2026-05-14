@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
+
+import type { GroupPick } from "@/lib/types/pick";
+import { getCategoriesByGroupId } from "@/server/data/categories";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
-import { getCategoriesByGroupId } from "@/server/data/categories";
 import { getPicksByCategory } from "@/server/data/picks";
-import type { GroupPick } from "@/lib/types/pick";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { GroupDetailClient } from "./GroupDetailClient";
 
 export default async function GroupDetailPage({

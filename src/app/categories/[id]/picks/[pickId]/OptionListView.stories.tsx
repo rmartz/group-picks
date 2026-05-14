@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { OptionListView } from "./OptionListView";
+
 import type { Option } from "@/lib/types/option";
+
+import { OptionListView } from "./OptionListView";
 
 function makeOption(overrides?: Partial<Option>): Option {
   return {

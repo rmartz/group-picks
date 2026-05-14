@@ -1,8 +1,10 @@
-import { afterEach, describe, expect, it } from "vitest";
-import type { ComponentProps } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
 

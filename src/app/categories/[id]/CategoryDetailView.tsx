@@ -1,5 +1,6 @@
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+
 import { CATEGORY_DETAIL_COPY } from "./copy";
 import { ReopenPickButton } from "./ReopenPickButton";
 

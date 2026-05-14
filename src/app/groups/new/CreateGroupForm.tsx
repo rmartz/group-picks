@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { createGroup } from "@/services/groups";
-import { CreateGroupFormView } from "./CreateGroupFormView";
+
 import { CREATE_GROUP_COPY } from "./copy";
+import { CreateGroupFormView } from "./CreateGroupFormView";
 
 export function CreateGroupForm() {
   const router = useRouter();

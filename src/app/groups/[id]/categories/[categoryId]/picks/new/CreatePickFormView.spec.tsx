@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { CreatePickFormView } from "./CreatePickFormView";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { CREATE_PICK_COPY } from "./copy";
+import { CreatePickFormView } from "./CreatePickFormView";
 
 afterEach(cleanup);
 

@@ -1,9 +1,10 @@
 import { getDatabase } from "firebase-admin/database";
+
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
+  type FirebaseOption,
   firebaseToOption,
   optionToFirebase,
-  type FirebaseOption,
 } from "@/lib/firebase/schema/option";
 import type { Option } from "@/lib/types/option";
 

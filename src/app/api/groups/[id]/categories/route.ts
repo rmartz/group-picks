@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+
 import {
-  getCategoriesByGroupId,
   createCategory,
+  getCategoriesByGroupId,
 } from "@/server/data/categories";
+import { getGroupById } from "@/server/data/groups";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function GET(
   _request: Request,

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { GroupListView } from "./GroupListView";
+
 import { makeGroup } from "@/lib/fixtures/group";
+
+import { GroupListView } from "./GroupListView";
 
 const meta: Meta<typeof GroupListView> = {
   title: "Groups/GroupListView",
