@@ -20,6 +20,7 @@ interface OptionListProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   pickClosed: boolean;
+  onOptionsChange?: (options: Option[]) => void;
 }
 
 export function OptionList({
@@ -30,9 +31,18 @@ export function OptionList({
   initialOptions,
   initialSuggestions,
   pickClosed,
+  onOptionsChange,
 }: OptionListProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [suggestions, setSuggestions] = useState<Option[]>(initialSuggestions);
+
+  function updateOptions(updater: (prev: Option[]) => Option[]) {
+    setOptions((prev) => {
+      const next = updater(prev);
+      onOptionsChange?.(next);
+      return next;
+    });
+  }
   const [newTitle, setNewTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -52,7 +62,7 @@ export function OptionList({
       );
       const existing = options.find((o) => o.id === optionId);
       if (existing) {
-        setOptions((prev) =>
+        updateOptions((prev) =>
           prev.map((o) =>
             o.id === optionId && !o.ownerIds.includes(currentUserId)
               ? { ...o, ownerIds: [...o.ownerIds, currentUserId] }
@@ -60,7 +70,7 @@ export function OptionList({
           ),
         );
       } else {
-        setOptions((prev) => [
+        updateOptions((prev) => [
           ...prev,
           { id: optionId, title, pickId, ownerIds: [currentUserId] },
         ]);
@@ -88,7 +98,7 @@ export function OptionList({
       );
       const existing = options.find((o) => o.id === optionId);
       if (existing) {
-        setOptions((prev) =>
+        updateOptions((prev) =>
           prev.map((o) =>
             o.id === optionId && !o.ownerIds.includes(currentUserId)
               ? { ...o, ownerIds: [...o.ownerIds, currentUserId] }
@@ -96,7 +106,7 @@ export function OptionList({
           ),
         );
       } else {
-        setOptions((prev) => [
+        updateOptions((prev) => [
           ...prev,
           {
             id: optionId,
@@ -121,7 +131,7 @@ export function OptionList({
     // Optimistic update
     if (wasHearted) {
       const willBeEmpty = option.ownerIds.length === 1;
-      setOptions((prev) =>
+      updateOptions((prev) =>
         willBeEmpty
           ? prev.filter((o) => o.id !== option.id)
           : prev.map((o) =>
@@ -134,7 +144,7 @@ export function OptionList({
             ),
       );
     } else {
-      setOptions((prev) =>
+      updateOptions((prev) =>
         prev.map((o) =>
           o.id === option.id
             ? { ...o, ownerIds: [...o.ownerIds, currentUserId] }
@@ -151,7 +161,7 @@ export function OptionList({
       }
     } catch {
       // Revert on failure
-      setOptions((prev) => {
+      updateOptions((prev) => {
         const exists = prev.some((o) => o.id === option.id);
         if (!exists) {
           return [...prev, option];

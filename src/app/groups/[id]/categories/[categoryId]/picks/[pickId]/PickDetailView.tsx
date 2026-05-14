@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ export function PickDetailView({
   initialOptions,
   initialSuggestions,
 }: PickDetailViewProps) {
+  const [options, setOptions] = useState<Option[]>(initialOptions);
   const isOpen = pick.closedAt === undefined;
   const isCreator = pick.creatorId === currentUserId;
 
@@ -86,7 +89,7 @@ export function PickDetailView({
         </TabsList>
 
         <TabsContent value="options" className="mt-4">
-          {initialOptions.length === 0 ? (
+          {options.length === 0 ? (
             <EmptyPickView onSuggestOption={() => undefined} />
           ) : (
             <OptionList
@@ -94,16 +97,17 @@ export function PickDetailView({
               categoryId={categoryId}
               pickId={pick.id}
               currentUserId={currentUserId}
-              initialOptions={initialOptions}
+              initialOptions={options}
               initialSuggestions={initialSuggestions}
               pickClosed={!isOpen}
+              onOptionsChange={setOptions}
             />
           )}
         </TabsContent>
 
         <TabsContent value="ranking" className="mt-4">
           <TierRanking
-            options={initialOptions.filter((opt) =>
+            options={options.filter((opt) =>
               opt.ownerIds.includes(currentUserId),
             )}
           />
