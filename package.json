@@ -27,7 +27,7 @@
       "eslint --fix --max-warnings 0 --no-warn-ignored"
     ],
     "*.{js,mjs,cjs,ts,tsx,jsx,json,md,yml,yaml}": [
-      "prettier --write"
+      "prettier --write --ignore-path .prettierignore"
     ]
   },
   "pnpm": {
