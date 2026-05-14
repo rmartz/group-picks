@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { GroupPick } from "@/lib/types/pick";
 import type { Option } from "@/lib/types/option";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
 import { EmptyPickView } from "./EmptyPickView";
+import { SuggestOptionSheet } from "./SuggestOptionSheet";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 
 interface PickDetailViewProps {
@@ -27,6 +29,22 @@ export function PickDetailView({
   initialSuggestions,
 }: PickDetailViewProps) {
   const isOpen = pick.closedAt === undefined;
+  const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
+  const [options, setOptions] = useState(initialOptions);
+
+  function handleOptionAdded({
+    optionId,
+    title,
+  }: {
+    optionId: string;
+    title: string;
+  }) {
+    setOptions((prev) => [
+      ...prev,
+      { id: optionId, title, pickId: pick.id, ownerIds: [currentUserId] },
+    ]);
+  }
+
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
       <div className="space-y-2">
@@ -46,7 +64,14 @@ export function PickDetailView({
         </div>
       </div>
 
-      <Button type="button" variant="outline" size="sm" disabled>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          setIsSuggestSheetOpen(true);
+        }}
+      >
         {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
       </Button>
 
@@ -64,15 +89,19 @@ export function PickDetailView({
         </TabsList>
 
         <TabsContent value="options" className="mt-4">
-          {initialOptions.length === 0 ? (
-            <EmptyPickView onSuggestOption={() => undefined} />
+          {options.length === 0 ? (
+            <EmptyPickView
+              onSuggestOption={() => {
+                setIsSuggestSheetOpen(true);
+              }}
+            />
           ) : (
             <OptionList
               groupId={groupId}
               categoryId={categoryId}
               pickId={pick.id}
               currentUserId={currentUserId}
-              initialOptions={initialOptions}
+              initialOptions={options}
               initialSuggestions={initialSuggestions}
               pickClosed={!isOpen}
             />
@@ -91,6 +120,15 @@ export function PickDetailView({
           </p>
         </TabsContent>
       </Tabs>
+
+      <SuggestOptionSheet
+        open={isSuggestSheetOpen}
+        onOpenChange={setIsSuggestSheetOpen}
+        groupId={groupId}
+        categoryId={categoryId}
+        pickId={pick.id}
+        onOptionAdded={handleOptionAdded}
+      />
     </main>
   );
 }

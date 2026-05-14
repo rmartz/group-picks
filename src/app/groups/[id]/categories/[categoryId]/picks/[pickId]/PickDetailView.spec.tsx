@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { GroupPick } from "@/lib/types/pick";
 import type { Option } from "@/lib/types/option";
+import type { SuggestOptionSheetProps } from "./SuggestOptionSheet";
 import { PickDetailView } from "./PickDetailView";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
@@ -10,6 +11,25 @@ afterEach(cleanup);
 
 vi.mock("@/app/categories/[id]/picks/[pickId]/OptionList", () => ({
   OptionList: () => <div data-testid="option-list" />,
+}));
+
+vi.mock("./SuggestOptionSheet", () => ({
+  SuggestOptionSheet: ({
+    open,
+    onOptionAdded,
+  }: SuggestOptionSheetProps) =>
+    open ? (
+      <div data-testid="suggest-option-sheet">
+        <button
+          type="button"
+          onClick={() => {
+              onOptionAdded({ optionId: "opt-new", title: "New Option" });
+            }}
+        >
+          mock-add-option
+        </button>
+      </div>
+    ) : null,
 }));
 
 function makePick(overrides?: Partial<GroupPick>): GroupPick {
@@ -122,6 +142,18 @@ describe('"+ Suggest option" button', () => {
       }),
     ).toBeDefined();
   });
+
+  it("opens the suggest sheet when the header button is clicked", () => {
+    renderView();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    );
+
+    expect(screen.getByTestId("suggest-option-sheet")).toBeDefined();
+  });
 });
 
 describe("empty state when no options", () => {
@@ -154,6 +186,32 @@ describe("empty state when no options", () => {
   it("does not show the empty state when initialOptions is non-empty", () => {
     renderView({ initialOptions: [makeOption()] });
 
+    expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
+  });
+
+  it("opens the suggest sheet when the empty-state CTA is clicked", () => {
+    renderView({ initialOptions: [] });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: EMPTY_PICK_COPY.ctaButton }),
+    );
+
+    expect(screen.getByTestId("suggest-option-sheet")).toBeDefined();
+  });
+});
+
+describe("suggest option sheet wiring", () => {
+  it("adds the new option to the list when onOptionAdded fires", () => {
+    renderView({ initialOptions: [] });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "mock-add-option" }));
+
+    expect(screen.getByTestId("option-list")).toBeDefined();
     expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
   });
 });
