@@ -8,7 +8,9 @@ const meta: Meta<typeof CreateGroupFormView> = {
   args: {
     name: "",
     onNameChange: () => undefined,
-    onSubmit: (e) => e.preventDefault(),
+    onSubmit: (e) => {
+      e.preventDefault();
+    },
     onCancel: () => undefined,
     loading: false,
     error: undefined,
