@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,7 @@ import type { GroupPick } from "@/lib/types/pick";
 
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EmptyPickView } from "./EmptyPickView";
+import { TierRanking } from "./TierRanking";
 
 interface PickDetailViewProps {
   pick: GroupPick;
@@ -27,6 +30,7 @@ export function PickDetailView({
   initialOptions,
   initialSuggestions,
 }: PickDetailViewProps) {
+  const [options, setOptions] = useState<Option[]>(initialOptions);
   const isOpen = pick.closedAt === undefined;
   const isCreator = pick.creatorId === currentUserId;
 
@@ -85,7 +89,7 @@ export function PickDetailView({
         </TabsList>
 
         <TabsContent value="options" className="mt-4">
-          {initialOptions.length === 0 ? (
+          {options.length === 0 ? (
             <EmptyPickView onSuggestOption={() => undefined} />
           ) : (
             <OptionList
@@ -93,17 +97,20 @@ export function PickDetailView({
               categoryId={categoryId}
               pickId={pick.id}
               currentUserId={currentUserId}
-              initialOptions={initialOptions}
+              initialOptions={options}
               initialSuggestions={initialSuggestions}
               pickClosed={!isOpen}
+              onOptionsChange={setOptions}
             />
           )}
         </TabsContent>
 
         <TabsContent value="ranking" className="mt-4">
-          <p className="text-sm text-muted-foreground">
-            {PICK_DETAIL_SCAFFOLD_COPY.rankingTabPlaceholder}
-          </p>
+          <TierRanking
+            options={options.filter((opt) =>
+              opt.ownerIds.includes(currentUserId),
+            )}
+          />
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>

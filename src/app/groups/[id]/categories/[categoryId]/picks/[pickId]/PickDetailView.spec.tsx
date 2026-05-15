@@ -1,4 +1,10 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Option } from "@/lib/types/option";
@@ -8,10 +14,22 @@ import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
 
-afterEach(cleanup);
+let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
+
+afterEach(() => {
+  cleanup();
+  capturedOnOptionsChange = undefined;
+});
 
 vi.mock("@/app/categories/[id]/picks/[pickId]/OptionList", () => ({
-  OptionList: () => <div data-testid="option-list" />,
+  OptionList: ({
+    onOptionsChange,
+  }: {
+    onOptionsChange?: (options: Option[]) => void;
+  }) => {
+    capturedOnOptionsChange = onOptionsChange;
+    return <div data-testid="option-list" />;
+  },
 }));
 
 function makePick(overrides?: Partial<GroupPick>): GroupPick {
@@ -26,10 +44,10 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
   };
 }
 
-function makeOption(overrides?: Partial<Option>): Option {
+function makeOption(overrides: Partial<Option> = {}): Option {
   return {
     id: "opt-1",
-    title: "Option title",
+    title: "Option A",
     pickId: "pick-1",
     ownerIds: ["user-1"],
     ...overrides,
@@ -219,6 +237,61 @@ describe("closed state: reopen button for creator only", () => {
   });
 });
 
+describe("ranking tab live options sync", () => {
+  it("reflects in-session options changes in the ranking tab", () => {
+    const initialOption = makeOption({
+      id: "opt-initial",
+      title: "Initial Option",
+      ownerIds: ["user-1"],
+    });
+
+    renderView({
+      currentUserId: "user-1",
+      initialOptions: [initialOption],
+    });
+
+    const newOption: Option = {
+      id: "opt-new",
+      title: "Newly Adopted Option",
+      pickId: "pick-1",
+      ownerIds: ["user-1"],
+    };
+
+    act(() => {
+      capturedOnOptionsChange?.([initialOption, newOption]);
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    expect(screen.getByText("Newly Adopted Option")).toBeDefined();
+  });
+
+  it("removes a dehearted option from the ranking tab", () => {
+    const option = makeOption({
+      id: "opt-1",
+      title: "Option To Remove",
+      ownerIds: ["user-1"],
+    });
+
+    renderView({
+      currentUserId: "user-1",
+      initialOptions: [option],
+    });
+
+    act(() => {
+      capturedOnOptionsChange?.([]);
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    expect(screen.queryByText("Option To Remove")).toBeNull();
+  });
+});
+
 describe("empty state when no options", () => {
   it("shows the empty-state headline when initialOptions is empty", () => {
     renderView({ initialOptions: [] });
@@ -250,5 +323,32 @@ describe("empty state when no options", () => {
     renderView({ initialOptions: [makeOption()] });
 
     expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
+  });
+});
+
+describe("ranking tab owner filtering", () => {
+  it("shows only the current user's options in the ranking tab", () => {
+    const ownedOption = makeOption({
+      id: "opt-owned",
+      title: "My Option",
+      ownerIds: ["user-1"],
+    });
+    const otherOption = makeOption({
+      id: "opt-other",
+      title: "Other Option",
+      ownerIds: ["user-2"],
+    });
+
+    renderView({
+      currentUserId: "user-1",
+      initialOptions: [ownedOption, otherOption],
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    expect(screen.getByText("My Option")).toBeDefined();
+    expect(screen.queryByText("Other Option")).toBeNull();
   });
 });
