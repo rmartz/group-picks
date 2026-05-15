@@ -22,13 +22,12 @@ export default async function CategoryDetailPage({
 
   if (!group?.memberIds.includes(uid)) notFound();
 
-  const [category, picks] = await Promise.all([
-    getCategoryById(categoryId),
-    getPicksByCategory(categoryId),
-  ]);
+  const category = await getCategoryById(categoryId);
 
   if (!category) notFound();
   if (category.groupId !== id) notFound();
+
+  const picks = await getPicksByCategory(categoryId);
 
   async function closePickAction(formData: FormData) {
     "use server";
