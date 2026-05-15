@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 
+import { CATEGORY_DETAIL_COPY } from "../../copy";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { PickDetailView } from "./PickDetailView";
 
@@ -33,7 +34,7 @@ vi.mock("./OptionList", () => ({
 
 vi.mock("../../ReopenPickButton", () => ({
   ReopenPickButton: () => (
-    <button>{PICK_DETAIL_SCAFFOLD_COPY.reopenButton}</button>
+    <button>{CATEGORY_DETAIL_COPY.reopenPickButton}</button>
   ),
 }));
 
@@ -151,7 +152,7 @@ describe("open state", () => {
 
     expect(
       screen.queryByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.reopenButton,
+        name: CATEGORY_DETAIL_COPY.reopenPickButton,
       }),
     ).toBeNull();
   });
@@ -193,7 +194,7 @@ describe("closed state: reopen button for group members", () => {
 
     expect(
       screen.getByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.reopenButton,
+        name: CATEGORY_DETAIL_COPY.reopenPickButton,
       }),
     ).toBeDefined();
   });
@@ -206,7 +207,7 @@ describe("closed state: reopen button for group members", () => {
 
     expect(
       screen.getByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.reopenButton,
+        name: CATEGORY_DETAIL_COPY.reopenPickButton,
       }),
     ).toBeDefined();
   });

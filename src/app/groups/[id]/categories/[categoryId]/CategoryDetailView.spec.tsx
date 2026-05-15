@@ -144,7 +144,7 @@ describe("CategoryDetailView — close pick action", () => {
 
     expect(
       screen.getByRole("button", {
-        name: CATEGORY_DETAIL_COPY.closePickButton,
+        name: `${CATEGORY_DETAIL_COPY.closePickButton} ${pick.title}`,
       }),
     ).toBeDefined();
   });
@@ -161,7 +161,7 @@ describe("CategoryDetailView — close pick action", () => {
 
     expect(
       screen.queryByRole("button", {
-        name: CATEGORY_DETAIL_COPY.closePickButton,
+        name: `${CATEGORY_DETAIL_COPY.closePickButton} ${pick.title}`,
       }),
     ).toBeNull();
   });
@@ -172,7 +172,7 @@ describe("CategoryDetailView — close pick action", () => {
 
     expect(
       screen.queryByRole("button", {
-        name: CATEGORY_DETAIL_COPY.closePickButton,
+        name: `${CATEGORY_DETAIL_COPY.closePickButton} ${pick.title}`,
       }),
     ).toBeNull();
   });

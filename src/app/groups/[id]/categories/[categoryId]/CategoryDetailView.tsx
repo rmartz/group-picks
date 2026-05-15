@@ -50,7 +50,10 @@ export function CategoryDetailView({
                   {pick.closedAt === undefined && closePickAction && (
                     <form action={closePickAction}>
                       <input type="hidden" name="pickId" value={pick.id} />
-                      <button className="rounded border px-2.5 py-1 text-xs font-medium">
+                      <button
+                        aria-label={`${CATEGORY_DETAIL_COPY.closePickButton} ${pick.title}`}
+                        className="rounded border px-2.5 py-1 text-xs font-medium"
+                      >
                         {CATEGORY_DETAIL_COPY.closePickButton}
                       </button>
                     </form>
@@ -65,6 +68,7 @@ export function CategoryDetailView({
                       groupId={category.groupId}
                       categoryId={category.id}
                       pickId={pick.id}
+                      pickTitle={pick.title}
                     />
                   </div>
                 )}

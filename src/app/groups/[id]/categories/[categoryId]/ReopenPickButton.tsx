@@ -12,6 +12,7 @@ interface ReopenPickButtonProps {
   groupId: string;
   categoryId: string;
   pickId: string;
+  pickTitle?: string;
   onReopened?: () => void;
 }
 
@@ -19,6 +20,7 @@ export function ReopenPickButton({
   groupId,
   categoryId,
   pickId,
+  pickTitle,
   onReopened,
 }: ReopenPickButtonProps) {
   const router = useRouter();
@@ -44,6 +46,7 @@ export function ReopenPickButton({
       onReopen={() => void handleReopen()}
       isReopening={isReopening}
       error={error}
+      pickTitle={pickTitle}
     />
   );
 }
