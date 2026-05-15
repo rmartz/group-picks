@@ -31,7 +31,6 @@ export function PickDetailView({
 }: PickDetailViewProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const isOpen = pick.closedAt === undefined;
-  const isCreator = pick.creatorId === currentUserId;
 
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
@@ -52,7 +51,7 @@ export function PickDetailView({
         </div>
       </div>
 
-      {!isOpen && isCreator && (
+      {!isOpen && (
         <ReopenPickButton
           groupId={groupId}
           categoryId={categoryId}

@@ -184,13 +184,10 @@ describe("closed state: top picks shows results placeholder", () => {
   });
 });
 
-describe("closed state: reopen button for creator only", () => {
+describe("closed state: reopen button for group members", () => {
   it("shows reopen button for the pick creator", () => {
     renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        creatorId: "user-1",
-      }),
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
       currentUserId: "user-1",
     });
 
@@ -201,20 +198,17 @@ describe("closed state: reopen button for creator only", () => {
     ).toBeDefined();
   });
 
-  it("hides reopen button for non-creator members", () => {
+  it("shows reopen button for non-creator members", () => {
     renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        creatorId: "user-1",
-      }),
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
       currentUserId: "user-2",
     });
 
     expect(
-      screen.queryByRole("button", {
+      screen.getByRole("button", {
         name: PICK_DETAIL_SCAFFOLD_COPY.reopenButton,
       }),
-    ).toBeNull();
+    ).toBeDefined();
   });
 });
 
