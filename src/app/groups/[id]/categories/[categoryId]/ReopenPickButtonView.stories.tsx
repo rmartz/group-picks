@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ReopenPickButtonView } from "./ReopenPickButtonView";
+
 import { CATEGORY_DETAIL_COPY } from "./copy";
+import { ReopenPickButtonView } from "./ReopenPickButtonView";
 
 const meta: Meta<typeof ReopenPickButtonView> = {
   title: "Groups/Categories/ReopenPickButtonView",

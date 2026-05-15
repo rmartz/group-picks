@@ -21,7 +21,7 @@ afterEach(() => {
   capturedOnOptionsChange = undefined;
 });
 
-vi.mock("@/app/categories/[id]/picks/[pickId]/OptionList", () => ({
+vi.mock("./OptionList", () => ({
   OptionList: ({
     onOptionsChange,
   }: {

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +10,7 @@ import type { GroupPick } from "@/lib/types/pick";
 
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EmptyPickView } from "./EmptyPickView";
+import { OptionList } from "./OptionList";
 import { TierRanking } from "./TierRanking";
 
 interface PickDetailViewProps {

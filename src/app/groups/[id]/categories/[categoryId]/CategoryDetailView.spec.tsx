@@ -1,10 +1,11 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CategoryDetailView } from "./CategoryDetailView";
-import { CATEGORY_DETAIL_COPY } from "./copy";
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+
+import { CategoryDetailView } from "./CategoryDetailView";
+import { CATEGORY_DETAIL_COPY } from "./copy";
 
 afterEach(cleanup);
 
