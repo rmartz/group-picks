@@ -3,7 +3,11 @@ import { notFound, redirect } from "next/navigation";
 
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
-import { closePick, getPicksByCategory } from "@/server/data/picks";
+import {
+  closePick,
+  getPickById,
+  getPicksByCategory,
+} from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { CategoryDetailView } from "./CategoryDetailView";
@@ -47,6 +51,11 @@ export default async function CategoryDetailPage({
 
     const pickId = formData.get("pickId");
     if (typeof pickId !== "string" || !pickId.trim()) {
+      throw new Error(CATEGORY_DETAIL_COPY.closePickError);
+    }
+
+    const pick = await getPickById(categoryId, pickId);
+    if (!pick) {
       throw new Error(CATEGORY_DETAIL_COPY.closePickError);
     }
 
