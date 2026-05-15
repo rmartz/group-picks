@@ -3,13 +3,12 @@
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 
+import { ReopenPickButton } from "../../ReopenPickButton";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
-import { EmptyPickView } from "./EmptyPickView";
 import { OptionList } from "./OptionList";
 import { TierRanking } from "./TierRanking";
 
@@ -53,26 +52,12 @@ export function PickDetailView({
         </div>
       </div>
 
-      {isOpen && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => undefined}
-        >
-          {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
-        </Button>
-      )}
-
       {!isOpen && isCreator && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => undefined}
-        >
-          {PICK_DETAIL_SCAFFOLD_COPY.reopenButton}
-        </Button>
+        <ReopenPickButton
+          groupId={groupId}
+          categoryId={categoryId}
+          pickId={pick.id}
+        />
       )}
 
       <Tabs defaultValue="options">
@@ -89,20 +74,16 @@ export function PickDetailView({
         </TabsList>
 
         <TabsContent value="options" className="mt-4">
-          {options.length === 0 ? (
-            <EmptyPickView onSuggestOption={() => undefined} />
-          ) : (
-            <OptionList
-              groupId={groupId}
-              categoryId={categoryId}
-              pickId={pick.id}
-              currentUserId={currentUserId}
-              initialOptions={options}
-              initialSuggestions={initialSuggestions}
-              pickClosed={!isOpen}
-              onOptionsChange={setOptions}
-            />
-          )}
+          <OptionList
+            groupId={groupId}
+            categoryId={categoryId}
+            pickId={pick.id}
+            currentUserId={currentUserId}
+            initialOptions={options}
+            initialSuggestions={initialSuggestions}
+            pickClosed={!isOpen}
+            onOptionsChange={setOptions}
+          />
         </TabsContent>
 
         <TabsContent value="ranking" className="mt-4">
