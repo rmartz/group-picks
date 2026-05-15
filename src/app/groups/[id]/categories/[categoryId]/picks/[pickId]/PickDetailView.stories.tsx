@@ -38,6 +38,9 @@ const mockOptions: Option[] = [
 const meta: Meta<typeof PickDetailView> = {
   title: "Picks/PickDetailView",
   component: PickDetailView,
+  parameters: {
+    nextjs: { appDirectory: true },
+  },
   args: {
     pick: mockPick,
     groupId: "group-1",
