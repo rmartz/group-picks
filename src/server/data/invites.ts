@@ -66,6 +66,16 @@ export async function createGroupInvite(
   return invite;
 }
 
+export async function updateGroupInviteExpiry(
+  token: string,
+  expiresAt: Date | null,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db
+    .ref(`invites/${token}/expiresAt`)
+    .set(expiresAt !== null ? expiresAt.getTime() : null);
+}
+
 export async function addGroupMember(
   groupId: string,
   uid: string,

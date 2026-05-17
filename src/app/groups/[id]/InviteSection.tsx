@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { regenerateInvite } from "@/services/groups";
+import { regenerateInvite, updateInviteExpiry } from "@/services/groups";
 
 import { GROUP_DETAIL_COPY } from "./copy";
 import { InviteSectionView } from "./InviteSectionView";
@@ -24,6 +24,7 @@ export function InviteSection({
     initialExpiresAt ? new Date(initialExpiresAt) : undefined,
   );
   const [regenerating, setRegenerating] = useState(false);
+  const [settingExpiry, setSettingExpiry] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -56,6 +57,24 @@ export function InviteSection({
     }
   }
 
+  async function handleSetExpiry(date: Date | null) {
+    setError(undefined);
+    setSettingExpiry(true);
+    try {
+      const result = await updateInviteExpiry(
+        groupId,
+        date !== null ? date.toISOString().slice(0, 10) : null,
+      );
+      setExpiresAt(
+        result.expiresAt !== null ? new Date(result.expiresAt) : undefined,
+      );
+    } catch {
+      setError(GROUP_DETAIL_COPY.inviteErrors.default);
+    } finally {
+      setSettingExpiry(false);
+    }
+  }
+
   async function handleCopy() {
     if (!inviteUrl) return;
     try {
@@ -79,7 +98,9 @@ export function InviteSection({
       expiresAt={expiresAt}
       onRegenerate={() => void handleRegenerate()}
       onCopy={() => void handleCopy()}
+      onSetExpiry={(date) => void handleSetExpiry(date)}
       regenerating={regenerating}
+      settingExpiry={settingExpiry}
       copied={copied}
       error={error}
     />

@@ -13,7 +13,9 @@ const meta: Meta<typeof InviteSectionView> = {
     expiresAt: new Date("2026-05-13T12:00:00.000Z"),
     onRegenerate: () => undefined,
     onCopy: () => undefined,
+    onSetExpiry: () => undefined,
     regenerating: false,
+    settingExpiry: false,
     copied: false,
     error: undefined,
   },
@@ -46,5 +48,17 @@ export const Regenerating: Story = {
 export const WithError: Story = {
   args: {
     error: GROUP_DETAIL_COPY.inviteErrors.default,
+  },
+};
+
+export const SettingExpiry: Story = {
+  args: {
+    settingExpiry: true,
+  },
+};
+
+export const NoExpiry: Story = {
+  args: {
+    expiresAt: undefined,
   },
 };
