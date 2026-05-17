@@ -335,6 +335,16 @@ describe("options tab", () => {
     expect(screen.getByText(EMPTY_PICK_COPY.headline)).toBeDefined();
   });
 
+  it("renders OptionList (not EmptyPickView) when suggestions exist and options are empty", () => {
+    renderView({
+      initialOptions: [],
+      initialSuggestions: [makeOption({ id: "suggest-1", title: "Suggested" })],
+    });
+
+    expect(screen.getByTestId("option-list")).toBeDefined();
+    expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
+  });
+
   it("opens the suggest sheet when the empty-state CTA is clicked", () => {
     renderView({ initialOptions: [] });
 

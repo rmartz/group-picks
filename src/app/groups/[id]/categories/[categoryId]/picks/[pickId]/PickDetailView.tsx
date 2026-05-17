@@ -123,7 +123,7 @@ export function PickDetailView({
         </TabsList>
 
         <TabsContent value="options" className="mt-4">
-          {options.length === 0 ? (
+          {options.length === 0 && initialSuggestions.length === 0 ? (
             <EmptyPickView
               onSuggestOption={
                 isOpen
