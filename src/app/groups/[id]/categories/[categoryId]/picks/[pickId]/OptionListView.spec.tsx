@@ -85,6 +85,24 @@ describe("OptionListView", () => {
     expect(screen.getByText("The Matrix")).toBeDefined();
   });
 
+  it("hides add controls and suggestions when hideAddControls is true", () => {
+    const suggestion = makeOption({ id: "sug-1", title: "The Matrix" });
+
+    render(
+      <OptionListView
+        {...defaultProps}
+        suggestions={[suggestion]}
+        hideAddControls={true}
+      />,
+    );
+
+    expect(
+      screen.queryByPlaceholderText(PICK_DETAIL_COPY.addOptionPlaceholder),
+    ).toBeNull();
+    expect(screen.queryByText(PICK_DETAIL_COPY.addOptionButton)).toBeNull();
+    expect(screen.queryByText(PICK_DETAIL_COPY.suggestionsHeading)).toBeNull();
+  });
+
   it("calls onAdoptSuggestion with the suggestion when adopt button is clicked", () => {
     const suggestion = makeOption({ id: "sug-1", title: "The Matrix" });
     let adopted: Option | undefined;

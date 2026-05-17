@@ -17,10 +17,12 @@ import { PickDetailView } from "./PickDetailView";
 import type { SuggestOptionSheetProps } from "./SuggestOptionSheet";
 
 let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
+let mockSuggestedOption = { optionId: "opt-new", title: "New Option" };
 
 afterEach(() => {
   cleanup();
   capturedOnOptionsChange = undefined;
+  mockSuggestedOption = { optionId: "opt-new", title: "New Option" };
 });
 
 vi.mock("./OptionList", () => ({
@@ -41,7 +43,7 @@ vi.mock("./SuggestOptionSheet", () => ({
         <button
           type="button"
           onClick={() => {
-            onOptionAdded({ optionId: "opt-new", title: "New Option" });
+            onOptionAdded(mockSuggestedOption);
           }}
         >
           mock-add-option
@@ -368,6 +370,34 @@ describe("suggest option sheet wiring", () => {
     );
 
     expect(screen.getByText("New Option")).toBeDefined();
+  });
+
+  it("merges ownership when onOptionAdded fires with an existing option id", () => {
+    const existing = makeOption({
+      id: "opt-existing",
+      title: "Existing Option",
+      ownerIds: ["user-1"],
+    });
+
+    mockSuggestedOption = {
+      optionId: "opt-existing",
+      title: "Existing Option",
+    };
+
+    renderView({ initialOptions: [existing], currentUserId: "user-2" });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "mock-add-option" }));
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    expect(screen.getByText("Existing Option")).toBeDefined();
   });
 });
 

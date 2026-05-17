@@ -20,7 +20,7 @@ interface OptionListProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   pickClosed: boolean;
-  hideAddForm?: boolean;
+  hideAddControls?: boolean;
   onOptionsChange?: (options: Option[]) => void;
 }
 
@@ -32,7 +32,7 @@ export function OptionList({
   initialOptions,
   initialSuggestions,
   pickClosed,
-  hideAddForm,
+  hideAddControls,
   onOptionsChange,
 }: OptionListProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
@@ -49,6 +49,10 @@ export function OptionList({
     }
     onOptionsChange?.(options);
   }, [options, onOptionsChange]);
+
+  useEffect(() => {
+    setOptions(initialOptions);
+  }, [initialOptions]);
 
   function updateOptions(updater: (prev: Option[]) => Option[]) {
     setOptions(updater);
@@ -188,7 +192,7 @@ export function OptionList({
       error={error}
       currentUserId={currentUserId}
       pickClosed={pickClosed}
-      hideAddForm={hideAddForm}
+      hideAddControls={hideAddControls}
       onNewTitleChange={setNewTitle}
       onAddSubmit={(e) => void handleAddSubmit(e)}
       onAdoptSuggestion={(opt) => void handleAdoptSuggestion(opt)}

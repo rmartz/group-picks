@@ -13,7 +13,7 @@ export interface OptionListViewProps {
   error: string | undefined;
   currentUserId: string;
   pickClosed: boolean;
-  hideAddForm?: boolean;
+  hideAddControls?: boolean;
   onNewTitleChange: (title: string) => void;
   onAddSubmit: (e: React.SyntheticEvent) => void;
   onAdoptSuggestion: (option: Option) => void;
@@ -28,7 +28,7 @@ export function OptionListView({
   error,
   currentUserId,
   pickClosed,
-  hideAddForm = false,
+  hideAddControls = false,
   onNewTitleChange,
   onAddSubmit,
   onAdoptSuggestion,
@@ -72,7 +72,7 @@ export function OptionListView({
           </ul>
         )}
 
-        {!pickClosed && !hideAddForm && (
+        {!pickClosed && !hideAddControls && (
           <form onSubmit={onAddSubmit} className="flex gap-2">
             <Input
               type="text"
@@ -93,7 +93,7 @@ export function OptionListView({
         {error && <p className="text-sm text-red-600">{error}</p>}
       </section>
 
-      {!pickClosed && !hideAddForm && suggestions.length > 0 && (
+      {!pickClosed && !hideAddControls && suggestions.length > 0 && (
         <section className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground">
             {PICK_DETAIL_COPY.suggestionsHeading}

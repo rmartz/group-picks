@@ -43,10 +43,21 @@ export function PickDetailView({
     optionId: string;
     title: string;
   }) {
-    setOptions((prev) => [
-      ...prev,
-      { id: optionId, title, pickId: pick.id, ownerIds: [currentUserId] },
-    ]);
+    setOptions((prev) => {
+      const existing = prev.find((option) => option.id === optionId);
+      if (existing) {
+        return prev.map((option) =>
+          option.id === optionId && !option.ownerIds.includes(currentUserId)
+            ? { ...option, ownerIds: [...option.ownerIds, currentUserId] }
+            : option,
+        );
+      }
+
+      return [
+        ...prev,
+        { id: optionId, title, pickId: pick.id, ownerIds: [currentUserId] },
+      ];
+    });
   }
 
   return (
@@ -115,7 +126,6 @@ export function PickDetailView({
             />
           ) : (
             <OptionList
-              key={options.length}
               groupId={groupId}
               categoryId={categoryId}
               pickId={pick.id}
@@ -123,7 +133,7 @@ export function PickDetailView({
               initialOptions={options}
               initialSuggestions={initialSuggestions}
               pickClosed={!isOpen}
-              hideAddForm
+              hideAddControls
               onOptionsChange={setOptions}
             />
           )}
