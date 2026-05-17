@@ -44,13 +44,22 @@ export function PickDetailView({
     title: string;
   }) {
     setOptions((prev) => {
-      const existing = prev.find((option) => option.id === optionId);
-      if (existing) {
-        return prev.map((option) =>
-          option.id === optionId && !option.ownerIds.includes(currentUserId)
-            ? { ...option, ownerIds: [...option.ownerIds, currentUserId] }
-            : option,
-        );
+      const existingIndex = prev.findIndex((option) => option.id === optionId);
+      if (existingIndex >= 0) {
+        const existingOption = prev[existingIndex];
+        if (
+          !existingOption ||
+          existingOption.ownerIds.includes(currentUserId)
+        ) {
+          return prev;
+        }
+
+        const updatedOptions = [...prev];
+        updatedOptions[existingIndex] = {
+          ...existingOption,
+          ownerIds: [...existingOption.ownerIds, currentUserId],
+        };
+        return updatedOptions;
       }
 
       return [

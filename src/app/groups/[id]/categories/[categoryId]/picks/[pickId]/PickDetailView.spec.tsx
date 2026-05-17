@@ -17,12 +17,24 @@ import { PickDetailView } from "./PickDetailView";
 import type { SuggestOptionSheetProps } from "./SuggestOptionSheet";
 
 let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
-let mockSuggestedOption = { optionId: "opt-new", title: "New Option" };
+
+function makeSuggestedOptionPayload(overrides?: {
+  optionId?: string;
+  title?: string;
+}) {
+  return {
+    optionId: "opt-new",
+    title: "New Option",
+    ...overrides,
+  };
+}
+
+let mockSuggestedOption = makeSuggestedOptionPayload();
 
 afterEach(() => {
   cleanup();
   capturedOnOptionsChange = undefined;
-  mockSuggestedOption = { optionId: "opt-new", title: "New Option" };
+  mockSuggestedOption = makeSuggestedOptionPayload();
 });
 
 vi.mock("./OptionList", () => ({
@@ -379,10 +391,10 @@ describe("suggest option sheet wiring", () => {
       ownerIds: ["user-1"],
     });
 
-    mockSuggestedOption = {
+    mockSuggestedOption = makeSuggestedOptionPayload({
       optionId: "opt-existing",
       title: "Existing Option",
-    };
+    });
 
     renderView({ initialOptions: [existing], currentUserId: "user-2" });
 

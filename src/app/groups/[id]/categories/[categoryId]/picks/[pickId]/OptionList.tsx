@@ -12,6 +12,10 @@ import {
 import { PICK_DETAIL_COPY } from "./copy";
 import { OptionListView } from "./OptionListView";
 
+function getOptionsSyncKey(options: Option[]): string {
+  return JSON.stringify(options);
+}
+
 interface OptionListProps {
   groupId: string;
   categoryId: string;
@@ -41,17 +45,30 @@ export function OptionList({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const isMounted = useRef(false);
+  const skipNextOptionsChangeEffect = useRef(false);
+  const previousInitialOptionsKeyRef = useRef(
+    getOptionsSyncKey(initialOptions),
+  );
 
   useEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true;
       return;
     }
+    if (skipNextOptionsChangeEffect.current) {
+      skipNextOptionsChangeEffect.current = false;
+      return;
+    }
     onOptionsChange?.(options);
   }, [options, onOptionsChange]);
 
   useEffect(() => {
-    setOptions(initialOptions);
+    const nextInitialOptionsKey = getOptionsSyncKey(initialOptions);
+    if (previousInitialOptionsKeyRef.current !== nextInitialOptionsKey) {
+      previousInitialOptionsKeyRef.current = nextInitialOptionsKey;
+      skipNextOptionsChangeEffect.current = true;
+      setOptions(initialOptions);
+    }
   }, [initialOptions]);
 
   function updateOptions(updater: (prev: Option[]) => Option[]) {

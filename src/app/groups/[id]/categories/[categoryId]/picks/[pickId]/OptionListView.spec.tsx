@@ -92,7 +92,7 @@ describe("OptionListView", () => {
       <OptionListView
         {...defaultProps}
         suggestions={[suggestion]}
-        hideAddControls={true}
+        hideAddControls
       />,
     );
 
