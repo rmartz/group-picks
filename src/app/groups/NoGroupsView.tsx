@@ -8,7 +8,7 @@ export function NoGroupsView() {
   return (
     <div className="flex flex-col items-center gap-4 py-12 text-center">
       <div className="flex w-full flex-col items-center gap-3 rounded-lg border border-dashed p-8">
-        <span className="text-4xl" role="img" aria-hidden="true">
+        <span className="text-4xl" aria-hidden="true">
           🙌
         </span>
         <div className="space-y-1">

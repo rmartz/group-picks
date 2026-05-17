@@ -172,8 +172,9 @@ export function GroupDetailView({
           />
         </TabsContent>
 
-        {/* keepMounted ensures member names and invite section are always
-            present in the DOM, even when this tab is not active */}
+        {/* keepMounted ensures member names and invite section remain in the
+            DOM when the Members tab is inactive, so server-rendered content
+            is accessible without requiring a tab interaction */}
         <TabsContent value="members" className="mt-4 space-y-6" keepMounted>
           <section className="space-y-3">
             <h2 className="text-sm font-semibold">
