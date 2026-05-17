@@ -3,12 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import { CREATE_PICK_COPY } from "./copy";
 
 interface CreatePickFormViewProps {
   title: string;
   onTitleChange: (title: string) => void;
+  description: string;
+  onDescriptionChange: (description: string) => void;
   topCount: number;
   onTopCountChange: (topCount: number) => void;
   dueDate: string;
@@ -23,6 +26,8 @@ interface CreatePickFormViewProps {
 export function CreatePickFormView({
   title,
   onTitleChange,
+  description,
+  onDescriptionChange,
   topCount,
   onTopCountChange,
   dueDate,
@@ -65,6 +70,21 @@ export function CreatePickFormView({
             placeholder={CREATE_PICK_COPY.titlePlaceholder}
             disabled={loading}
             required
+          />
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="pick-description">
+            {CREATE_PICK_COPY.descriptionLabel}
+          </Label>
+          <Textarea
+            id="pick-description"
+            value={description}
+            onChange={(e) => {
+              onDescriptionChange(e.target.value);
+            }}
+            placeholder={CREATE_PICK_COPY.descriptionPlaceholder}
+            disabled={loading}
           />
         </div>
 

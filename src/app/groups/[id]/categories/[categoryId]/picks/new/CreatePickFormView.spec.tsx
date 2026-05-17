@@ -10,6 +10,8 @@ describe("CreatePickFormView", () => {
   const defaultProps = {
     title: "",
     onTitleChange: vi.fn(),
+    description: "",
+    onDescriptionChange: vi.fn(),
     topCount: 3,
     onTopCountChange: vi.fn(),
     dueDate: "",
@@ -30,6 +32,13 @@ describe("CreatePickFormView", () => {
     it("renders the pick title input", () => {
       render(<CreatePickFormView {...defaultProps} />);
       expect(screen.getByLabelText(CREATE_PICK_COPY.titleLabel)).toBeDefined();
+    });
+
+    it("renders the description textarea", () => {
+      render(<CreatePickFormView {...defaultProps} />);
+      expect(
+        screen.getByLabelText(CREATE_PICK_COPY.descriptionLabel),
+      ).toBeDefined();
     });
 
     it("renders the top-N count input", () => {
@@ -87,6 +96,21 @@ describe("CreatePickFormView", () => {
         target: { value: "Best Movies" },
       });
       expect(onTitleChange).toHaveBeenCalledWith("Best Movies");
+    });
+
+    it("calls onDescriptionChange when description textarea changes", () => {
+      const onDescriptionChange = vi.fn();
+      render(
+        <CreatePickFormView
+          {...defaultProps}
+          onDescriptionChange={onDescriptionChange}
+        />,
+      );
+      fireEvent.change(
+        screen.getByLabelText(CREATE_PICK_COPY.descriptionLabel),
+        { target: { value: "A great pick" } },
+      );
+      expect(onDescriptionChange).toHaveBeenCalledWith("A great pick");
     });
 
     it("calls onTopCountChange with a number when topCount input changes", () => {
