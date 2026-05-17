@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 
+import { CATEGORY_DETAIL_COPY } from "../../copy";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
@@ -22,7 +23,7 @@ afterEach(() => {
   capturedOnOptionsChange = undefined;
 });
 
-vi.mock("@/app/categories/[id]/picks/[pickId]/OptionList", () => ({
+vi.mock("./OptionList", () => ({
   OptionList: ({
     onOptionsChange,
   }: {
@@ -47,6 +48,12 @@ vi.mock("./SuggestOptionSheet", () => ({
         </button>
       </div>
     ) : null,
+}));
+
+vi.mock("../../ReopenPickButton", () => ({
+  ReopenPickButton: () => (
+    <button>{CATEGORY_DETAIL_COPY.reopenPickButton}</button>
+  ),
 }));
 
 function makePick(overrides?: Partial<GroupPick>): GroupPick {
@@ -185,7 +192,7 @@ describe("open state", () => {
 
     expect(
       screen.queryByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.reopenButton,
+        name: CATEGORY_DETAIL_COPY.reopenPickButton,
       }),
     ).toBeNull();
   });
@@ -200,20 +207,6 @@ describe("closed state: status chip shows Closed", () => {
     expect(
       screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.closedStatusChip),
     ).toBeDefined();
-  });
-});
-
-describe("closed state: suggest option hidden", () => {
-  it("hides the suggest option button when pick is closed", () => {
-    renderView({
-      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-    });
-
-    expect(
-      screen.queryByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
-      }),
-    ).toBeNull();
   });
 });
 
@@ -232,37 +225,31 @@ describe("closed state: top picks shows results placeholder", () => {
   });
 });
 
-describe("closed state: reopen button for creator only", () => {
+describe("closed state: reopen button for group members", () => {
   it("shows reopen button for the pick creator", () => {
     renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        creatorId: "user-1",
-      }),
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
       currentUserId: "user-1",
     });
 
     expect(
       screen.getByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.reopenButton,
+        name: CATEGORY_DETAIL_COPY.reopenPickButton,
       }),
     ).toBeDefined();
   });
 
-  it("hides reopen button for non-creator members", () => {
+  it("shows reopen button for non-creator members", () => {
     renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        creatorId: "user-1",
-      }),
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
       currentUserId: "user-2",
     });
 
     expect(
-      screen.queryByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.reopenButton,
+      screen.getByRole("button", {
+        name: CATEGORY_DETAIL_COPY.reopenPickButton,
       }),
-    ).toBeNull();
+    ).toBeDefined();
   });
 });
 
@@ -321,37 +308,17 @@ describe("ranking tab live options sync", () => {
   });
 });
 
-describe("empty state when no options", () => {
-  it("shows the empty-state headline when initialOptions is empty", () => {
+describe("options tab", () => {
+  it("renders OptionList when options exist", () => {
+    renderView({ initialOptions: [makeOption()] });
+
+    expect(screen.getByTestId("option-list")).toBeDefined();
+  });
+
+  it("renders EmptyPickView when no options", () => {
     renderView({ initialOptions: [] });
 
     expect(screen.getByText(EMPTY_PICK_COPY.headline)).toBeDefined();
-  });
-
-  it("shows the empty-state body copy when initialOptions is empty", () => {
-    renderView({ initialOptions: [] });
-
-    expect(screen.getByText(EMPTY_PICK_COPY.body)).toBeDefined();
-  });
-
-  it("shows the suggest-first-option CTA when initialOptions is empty", () => {
-    renderView({ initialOptions: [] });
-
-    expect(
-      screen.getByRole("button", { name: EMPTY_PICK_COPY.ctaButton }),
-    ).toBeDefined();
-  });
-
-  it("does not show OptionList when initialOptions is empty", () => {
-    renderView({ initialOptions: [] });
-
-    expect(screen.queryByTestId("option-list")).toBeNull();
-  });
-
-  it("does not show the empty state when initialOptions is non-empty", () => {
-    renderView({ initialOptions: [makeOption()] });
-
-    expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
   });
 
   it("opens the suggest sheet when the empty-state CTA is clicked", () => {

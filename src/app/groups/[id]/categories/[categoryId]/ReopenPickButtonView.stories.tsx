@@ -3,19 +3,18 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 import { ReopenPickButtonView } from "./ReopenPickButtonView";
 
-const noop = () => undefined;
-
 const meta: Meta<typeof ReopenPickButtonView> = {
-  title: "Categories/ReopenPickButtonView",
+  title: "Groups/Categories/ReopenPickButtonView",
   component: ReopenPickButtonView,
   args: {
-    onReopen: noop,
+    onReopen: () => undefined,
     isReopening: false,
     error: undefined,
   },
 };
 
 export default meta;
+
 type Story = StoryObj<typeof ReopenPickButtonView>;
 
 export const Default: Story = {};

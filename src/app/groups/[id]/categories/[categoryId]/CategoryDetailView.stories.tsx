@@ -39,7 +39,7 @@ const picks: GroupPick[] = [
 ];
 
 const meta: Meta<typeof CategoryDetailView> = {
-  title: "Categories/CategoryDetailView",
+  title: "Groups/Categories/CategoryDetailView",
   component: CategoryDetailView,
   parameters: {
     nextjs: { appDirectory: true },
@@ -59,5 +59,11 @@ export const Default: Story = {};
 export const CanCloseOpenPick: Story = {
   args: {
     closePickAction: () => Promise.resolve(),
+  },
+};
+
+export const NoPicks: Story = {
+  args: {
+    picks: [],
   },
 };
