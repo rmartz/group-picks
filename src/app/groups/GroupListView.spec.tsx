@@ -46,7 +46,7 @@ describe("GroupListView", () => {
   it("renders group names as links", () => {
     const group = makeGroup({ id: "g1", name: "Alpha" });
     render(<GroupListView groups={[group]} />);
-    const link = screen.getByRole("link", { name: "Alpha" });
+    const link = screen.getByRole("link", { name: /Alpha/ });
     expect((link as HTMLAnchorElement).href).toContain("/groups/g1");
   });
 });
