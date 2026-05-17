@@ -36,4 +36,12 @@ describe("suggest CTA", () => {
     );
     expect(onSuggestOption).toHaveBeenCalledOnce();
   });
+
+  it("does not render the CTA when onSuggestOption is undefined", () => {
+    render(<EmptyPickView />);
+
+    expect(
+      screen.queryByRole("button", { name: EMPTY_PICK_COPY.ctaButton }),
+    ).toBeNull();
+  });
 });

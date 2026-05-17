@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 
 interface EmptyPickViewProps {
-  onSuggestOption: () => void;
+  onSuggestOption?: () => void;
 }
 
 export function EmptyPickView({ onSuggestOption }: EmptyPickViewProps) {
@@ -19,14 +19,16 @@ export function EmptyPickView({ onSuggestOption }: EmptyPickViewProps) {
             {EMPTY_PICK_COPY.body}
           </p>
         </div>
-        <Button
-          type="button"
-          onClick={() => {
-            onSuggestOption();
-          }}
-        >
-          {EMPTY_PICK_COPY.ctaButton}
-        </Button>
+        {onSuggestOption && (
+          <Button
+            type="button"
+            onClick={() => {
+              onSuggestOption();
+            }}
+          >
+            {EMPTY_PICK_COPY.ctaButton}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

@@ -21,6 +21,7 @@ export const PICK_DETAIL_SCAFFOLD_COPY = {
   openStatusChip: "Open",
   rankingTabPlaceholder: "Ranking coming soon.",
   resultsPlaceholder: "Results will appear here once scoring is complete.",
+  suggestOptionButton: "Suggest option",
   tabs: {
     options: "Options",
     ranking: "Your ranking",

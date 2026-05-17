@@ -13,6 +13,7 @@ export interface OptionListViewProps {
   error: string | undefined;
   currentUserId: string;
   pickClosed: boolean;
+  hideAddForm?: boolean;
   onNewTitleChange: (title: string) => void;
   onAddSubmit: (e: React.SyntheticEvent) => void;
   onAdoptSuggestion: (option: Option) => void;
@@ -27,6 +28,7 @@ export function OptionListView({
   error,
   currentUserId,
   pickClosed,
+  hideAddForm = false,
   onNewTitleChange,
   onAddSubmit,
   onAdoptSuggestion,
@@ -70,7 +72,7 @@ export function OptionListView({
           </ul>
         )}
 
-        {!pickClosed && (
+        {!pickClosed && !hideAddForm && (
           <form onSubmit={onAddSubmit} className="flex gap-2">
             <Input
               type="text"

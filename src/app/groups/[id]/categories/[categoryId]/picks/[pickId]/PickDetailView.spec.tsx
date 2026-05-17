@@ -12,13 +12,29 @@ import type { GroupPick } from "@/lib/types/pick";
 
 import { CATEGORY_DETAIL_COPY } from "../../copy";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
+import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
+import type { SuggestOptionSheetProps } from "./SuggestOptionSheet";
 
 let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
+
+function makeSuggestedOptionPayload(overrides?: {
+  optionId?: string;
+  title?: string;
+}) {
+  return {
+    optionId: "opt-new",
+    title: "New Option",
+    ...overrides,
+  };
+}
+
+let mockSuggestedOption = makeSuggestedOptionPayload();
 
 afterEach(() => {
   cleanup();
   capturedOnOptionsChange = undefined;
+  mockSuggestedOption = makeSuggestedOptionPayload();
 });
 
 vi.mock("./OptionList", () => ({
@@ -30,6 +46,22 @@ vi.mock("./OptionList", () => ({
     capturedOnOptionsChange = onOptionsChange;
     return <div data-testid="option-list" />;
   },
+}));
+
+vi.mock("./SuggestOptionSheet", () => ({
+  SuggestOptionSheet: ({ open, onOptionAdded }: SuggestOptionSheetProps) =>
+    open ? (
+      <div data-testid="suggest-option-sheet">
+        <button
+          type="button"
+          onClick={() => {
+            onOptionAdded(mockSuggestedOption);
+          }}
+        >
+          mock-add-option
+        </button>
+      </div>
+    ) : null,
 }));
 
 vi.mock("../../ReopenPickButton", () => ({
@@ -137,6 +169,28 @@ describe("open state", () => {
     expect(
       screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.openStatusChip),
     ).toBeDefined();
+  });
+
+  it("renders the suggest option button when open", () => {
+    renderView({ pick: makePick({ closedAt: undefined }) });
+
+    expect(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    ).toBeDefined();
+  });
+
+  it("opens the suggest sheet when the header button is clicked", () => {
+    renderView();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    );
+
+    expect(screen.getByTestId("suggest-option-sheet")).toBeDefined();
   });
 
   it("renders top picks tab as locked placeholder when open", () => {
@@ -269,10 +323,114 @@ describe("ranking tab live options sync", () => {
 });
 
 describe("options tab", () => {
-  it("renders OptionList regardless of option count", () => {
-    renderView({ initialOptions: [] });
+  it("renders OptionList when options exist", () => {
+    renderView({ initialOptions: [makeOption()] });
 
     expect(screen.getByTestId("option-list")).toBeDefined();
+  });
+
+  it("renders EmptyPickView when no options", () => {
+    renderView({ initialOptions: [] });
+
+    expect(screen.getByText(EMPTY_PICK_COPY.headline)).toBeDefined();
+  });
+
+  it("renders OptionList (not EmptyPickView) when suggestions exist and options are empty", () => {
+    renderView({
+      initialOptions: [],
+      initialSuggestions: [makeOption({ id: "suggest-1", title: "Suggested" })],
+    });
+
+    expect(screen.getByTestId("option-list")).toBeDefined();
+    expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
+  });
+
+  it("opens the suggest sheet when the empty-state CTA is clicked", () => {
+    renderView({ initialOptions: [] });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: EMPTY_PICK_COPY.ctaButton }),
+    );
+
+    expect(screen.getByTestId("suggest-option-sheet")).toBeDefined();
+  });
+
+  it("does not render the empty-state CTA when the pick is closed", () => {
+    renderView({
+      initialOptions: [],
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
+
+    expect(
+      screen.queryByRole("button", { name: EMPTY_PICK_COPY.ctaButton }),
+    ).toBeNull();
+  });
+});
+
+describe("suggest option sheet wiring", () => {
+  it("adds the new option to the list when onOptionAdded fires (empty initial state)", () => {
+    renderView({ initialOptions: [] });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "mock-add-option" }));
+
+    expect(screen.getByTestId("option-list")).toBeDefined();
+    expect(screen.queryByText(EMPTY_PICK_COPY.headline)).toBeNull();
+  });
+
+  it("adds the new option to the ranking tab when onOptionAdded fires (non-empty initial state)", () => {
+    const existing = makeOption({
+      id: "opt-existing",
+      title: "Existing Option",
+      ownerIds: ["user-1"],
+    });
+
+    renderView({ initialOptions: [existing], currentUserId: "user-1" });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "mock-add-option" }));
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    expect(screen.getByText("New Option")).toBeDefined();
+  });
+
+  it("merges ownership when onOptionAdded fires with an existing option id", () => {
+    const existing = makeOption({
+      id: "opt-existing",
+      title: "Existing Option",
+      ownerIds: ["user-1"],
+    });
+
+    mockSuggestedOption = makeSuggestedOptionPayload({
+      optionId: "opt-existing",
+      title: "Existing Option",
+    });
+
+    renderView({ initialOptions: [existing], currentUserId: "user-2" });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "mock-add-option" }));
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    expect(screen.getByText("Existing Option")).toBeDefined();
   });
 });
 

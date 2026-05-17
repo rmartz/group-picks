@@ -12,6 +12,10 @@ import {
 import { PICK_DETAIL_COPY } from "./copy";
 import { OptionListView } from "./OptionListView";
 
+function getOptionsSyncKey(options: Option[]): string {
+  return JSON.stringify(options);
+}
+
 interface OptionListProps {
   groupId: string;
   categoryId: string;
@@ -20,6 +24,7 @@ interface OptionListProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   pickClosed: boolean;
+  hideAddForm?: boolean;
   onOptionsChange?: (options: Option[]) => void;
 }
 
@@ -31,6 +36,7 @@ export function OptionList({
   initialOptions,
   initialSuggestions,
   pickClosed,
+  hideAddForm,
   onOptionsChange,
 }: OptionListProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
@@ -39,14 +45,34 @@ export function OptionList({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const isMounted = useRef(false);
+  const skipNextOptionsChangeEffect = useRef(false);
+  const previousInitialOptionsKeyRef = useRef(
+    getOptionsSyncKey(initialOptions),
+  );
 
   useEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true;
       return;
     }
+    if (skipNextOptionsChangeEffect.current) {
+      skipNextOptionsChangeEffect.current = false;
+      return;
+    }
     onOptionsChange?.(options);
   }, [options, onOptionsChange]);
+
+  useEffect(() => {
+    const nextInitialOptionsKey = getOptionsSyncKey(initialOptions);
+    const currentOptionsKey = getOptionsSyncKey(options);
+    if (previousInitialOptionsKeyRef.current !== nextInitialOptionsKey) {
+      previousInitialOptionsKeyRef.current = nextInitialOptionsKey;
+      if (currentOptionsKey !== nextInitialOptionsKey) {
+        skipNextOptionsChangeEffect.current = true;
+        setOptions(initialOptions);
+      }
+    }
+  }, [initialOptions, options]);
 
   function updateOptions(updater: (prev: Option[]) => Option[]) {
     setOptions(updater);
@@ -186,6 +212,7 @@ export function OptionList({
       error={error}
       currentUserId={currentUserId}
       pickClosed={pickClosed}
+      hideAddForm={hideAddForm}
       onNewTitleChange={setNewTitle}
       onAddSubmit={(e) => void handleAddSubmit(e)}
       onAdoptSuggestion={(opt) => void handleAdoptSuggestion(opt)}

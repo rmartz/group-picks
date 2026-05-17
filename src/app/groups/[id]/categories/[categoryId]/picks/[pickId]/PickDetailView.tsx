@@ -3,13 +3,16 @@
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 
 import { ReopenPickButton } from "../../ReopenPickButton";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
+import { EmptyPickView } from "./EmptyPickView";
 import { OptionList } from "./OptionList";
+import { SuggestOptionSheet } from "./SuggestOptionSheet";
 import { TierRanking } from "./TierRanking";
 
 interface PickDetailViewProps {
@@ -30,7 +33,41 @@ export function PickDetailView({
   initialSuggestions,
 }: PickDetailViewProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
+  const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
   const isOpen = pick.closedAt === undefined;
+
+  function handleOptionAdded({
+    optionId,
+    title,
+  }: {
+    optionId: string;
+    title: string;
+  }) {
+    setOptions((prev) => {
+      const existingIndex = prev.findIndex((option) => option.id === optionId);
+      if (existingIndex >= 0) {
+        const existingOption = prev[existingIndex];
+        if (
+          !existingOption ||
+          existingOption.ownerIds.includes(currentUserId)
+        ) {
+          return prev;
+        }
+
+        const updatedOptions = [...prev];
+        updatedOptions[existingIndex] = {
+          ...existingOption,
+          ownerIds: [...existingOption.ownerIds, currentUserId],
+        };
+        return updatedOptions;
+      }
+
+      return [
+        ...prev,
+        { id: optionId, title, pickId: pick.id, ownerIds: [currentUserId] },
+      ];
+    });
+  }
 
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
@@ -50,6 +87,19 @@ export function PickDetailView({
           </span>
         </div>
       </div>
+
+      {isOpen && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setIsSuggestSheetOpen(true);
+          }}
+        >
+          {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
+        </Button>
+      )}
 
       {!isOpen && (
         <ReopenPickButton
@@ -73,16 +123,29 @@ export function PickDetailView({
         </TabsList>
 
         <TabsContent value="options" className="mt-4">
-          <OptionList
-            groupId={groupId}
-            categoryId={categoryId}
-            pickId={pick.id}
-            currentUserId={currentUserId}
-            initialOptions={options}
-            initialSuggestions={initialSuggestions}
-            pickClosed={!isOpen}
-            onOptionsChange={setOptions}
-          />
+          {options.length === 0 && initialSuggestions.length === 0 ? (
+            <EmptyPickView
+              onSuggestOption={
+                isOpen
+                  ? () => {
+                      setIsSuggestSheetOpen(true);
+                    }
+                  : undefined
+              }
+            />
+          ) : (
+            <OptionList
+              groupId={groupId}
+              categoryId={categoryId}
+              pickId={pick.id}
+              currentUserId={currentUserId}
+              initialOptions={options}
+              initialSuggestions={initialSuggestions}
+              pickClosed={!isOpen}
+              hideAddForm
+              onOptionsChange={setOptions}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="ranking" className="mt-4">
@@ -101,6 +164,15 @@ export function PickDetailView({
           </p>
         </TabsContent>
       </Tabs>
+
+      <SuggestOptionSheet
+        open={isSuggestSheetOpen}
+        onOpenChange={setIsSuggestSheetOpen}
+        groupId={groupId}
+        categoryId={categoryId}
+        pickId={pick.id}
+        onOptionAdded={handleOptionAdded}
+      />
     </main>
   );
 }
