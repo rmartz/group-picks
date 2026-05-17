@@ -24,7 +24,7 @@ interface OptionListProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   pickClosed: boolean;
-  hideAddControls?: boolean;
+  hideAddForm?: boolean;
   onOptionsChange?: (options: Option[]) => void;
 }
 
@@ -36,7 +36,7 @@ export function OptionList({
   initialOptions,
   initialSuggestions,
   pickClosed,
-  hideAddControls,
+  hideAddForm,
   onOptionsChange,
 }: OptionListProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
@@ -64,12 +64,15 @@ export function OptionList({
 
   useEffect(() => {
     const nextInitialOptionsKey = getOptionsSyncKey(initialOptions);
+    const currentOptionsKey = getOptionsSyncKey(options);
     if (previousInitialOptionsKeyRef.current !== nextInitialOptionsKey) {
       previousInitialOptionsKeyRef.current = nextInitialOptionsKey;
-      skipNextOptionsChangeEffect.current = true;
-      setOptions(initialOptions);
+      if (currentOptionsKey !== nextInitialOptionsKey) {
+        skipNextOptionsChangeEffect.current = true;
+        setOptions(initialOptions);
+      }
     }
-  }, [initialOptions]);
+  }, [initialOptions, options]);
 
   function updateOptions(updater: (prev: Option[]) => Option[]) {
     setOptions(updater);
@@ -209,7 +212,7 @@ export function OptionList({
       error={error}
       currentUserId={currentUserId}
       pickClosed={pickClosed}
-      hideAddControls={hideAddControls}
+      hideAddForm={hideAddForm}
       onNewTitleChange={setNewTitle}
       onAddSubmit={(e) => void handleAddSubmit(e)}
       onAdoptSuggestion={(opt) => void handleAdoptSuggestion(opt)}

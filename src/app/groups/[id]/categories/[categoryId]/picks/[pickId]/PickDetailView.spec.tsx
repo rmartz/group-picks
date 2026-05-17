@@ -344,6 +344,17 @@ describe("options tab", () => {
 
     expect(screen.getByTestId("suggest-option-sheet")).toBeDefined();
   });
+
+  it("does not render the empty-state CTA when the pick is closed", () => {
+    renderView({
+      initialOptions: [],
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
+
+    expect(
+      screen.queryByRole("button", { name: EMPTY_PICK_COPY.ctaButton }),
+    ).toBeNull();
+  });
 });
 
 describe("suggest option sheet wiring", () => {

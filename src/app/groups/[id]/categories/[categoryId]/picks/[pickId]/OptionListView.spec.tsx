@@ -85,14 +85,14 @@ describe("OptionListView", () => {
     expect(screen.getByText("The Matrix")).toBeDefined();
   });
 
-  it("hides add controls and suggestions when hideAddControls is true", () => {
+  it("hides only the add form when hideAddForm is true", () => {
     const suggestion = makeOption({ id: "sug-1", title: "The Matrix" });
 
     render(
       <OptionListView
         {...defaultProps}
         suggestions={[suggestion]}
-        hideAddControls
+        hideAddForm
       />,
     );
 
@@ -100,7 +100,8 @@ describe("OptionListView", () => {
       screen.queryByPlaceholderText(PICK_DETAIL_COPY.addOptionPlaceholder),
     ).toBeNull();
     expect(screen.queryByText(PICK_DETAIL_COPY.addOptionButton)).toBeNull();
-    expect(screen.queryByText(PICK_DETAIL_COPY.suggestionsHeading)).toBeNull();
+    expect(screen.getByText(PICK_DETAIL_COPY.suggestionsHeading)).toBeDefined();
+    expect(screen.getByText("The Matrix")).toBeDefined();
   });
 
   it("calls onAdoptSuggestion with the suggestion when adopt button is clicked", () => {

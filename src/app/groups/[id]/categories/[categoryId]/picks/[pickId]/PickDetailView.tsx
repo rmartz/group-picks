@@ -130,7 +130,7 @@ export function PickDetailView({
                   ? () => {
                       setIsSuggestSheetOpen(true);
                     }
-                  : () => undefined
+                  : undefined
               }
             />
           ) : (
@@ -142,7 +142,7 @@ export function PickDetailView({
               initialOptions={options}
               initialSuggestions={initialSuggestions}
               pickClosed={!isOpen}
-              hideAddControls
+              hideAddForm
               onOptionsChange={setOptions}
             />
           )}
