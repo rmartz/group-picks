@@ -63,33 +63,43 @@ describe("GroupDetailView", () => {
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
-  it("renders the members label", () => {
+  it("renders the member count in the header", () => {
     renderView();
 
     expect(
-      screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
+      screen.getByText(`2 ${GROUP_DETAIL_COPY.membersLabel}`),
     ).toBeDefined();
   });
 
-  it("renders each member name", () => {
+  it("renders the Picks tab trigger", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", { name: GROUP_DETAIL_COPY.tabs.picks }),
+    ).toBeDefined();
+  });
+
+  it("renders the Categories tab trigger", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", { name: GROUP_DETAIL_COPY.tabs.categories }),
+    ).toBeDefined();
+  });
+
+  it("renders the Members tab trigger", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", { name: GROUP_DETAIL_COPY.tabs.members }),
+    ).toBeDefined();
+  });
+
+  it("renders each member name (Members tab is keepMounted)", () => {
     renderView();
 
     expect(screen.getByText("Alice")).toBeDefined();
     expect(screen.getByText("Bob")).toBeDefined();
-  });
-
-  it("does not render a raw member count", () => {
-    renderView();
-
-    expect(screen.queryByText("2")).toBeNull();
-  });
-
-  it("renders the created at label", () => {
-    renderView();
-
-    expect(
-      screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
-    ).toBeDefined();
   });
 
   it("renders the invite section with the invite token", () => {
@@ -98,5 +108,11 @@ describe("GroupDetailView", () => {
 
     expect(screen.getByTestId("invite-section")).toBeDefined();
     expect(screen.getByText(group.inviteToken)).toBeDefined();
+  });
+
+  it("renders the no-picks message when there are no picks", () => {
+    renderView({ picksByCategory: {} });
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.noPicksMessage)).toBeDefined();
   });
 });
