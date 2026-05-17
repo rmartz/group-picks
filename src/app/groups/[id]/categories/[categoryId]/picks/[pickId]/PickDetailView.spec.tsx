@@ -14,10 +14,7 @@ vi.mock("@/app/categories/[id]/picks/[pickId]/OptionList", () => ({
 }));
 
 vi.mock("./SuggestOptionSheet", () => ({
-  SuggestOptionSheet: ({
-    open,
-    onOptionAdded,
-  }: SuggestOptionSheetProps) =>
+  SuggestOptionSheet: ({ open, onOptionAdded }: SuggestOptionSheetProps) =>
     open ? (
       <div data-testid="suggest-option-sheet">
         <button

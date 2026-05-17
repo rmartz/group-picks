@@ -11,11 +11,7 @@ import {
   SheetTrigger,
 } from "./sheet";
 
-function SheetDemo({
-  side,
-}: {
-  side: "top" | "right" | "bottom" | "left";
-}) {
+function SheetDemo({ side }: { side: "top" | "right" | "bottom" | "left" }) {
   const [open, setOpen] = useState(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
