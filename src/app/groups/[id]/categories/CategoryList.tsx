@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
 import { createCategory, updateCategory } from "@/services/categories";
+
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
 

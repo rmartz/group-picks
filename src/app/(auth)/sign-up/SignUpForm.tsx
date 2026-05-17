@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import type { FirebaseError } from "firebase/app";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { FirebaseError } from "firebase/app";
-import { createSession, signUp } from "@/services/auth";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createSession, signUp } from "@/services/auth";
+
 import { SIGN_UP_COPY } from "./copy";
 
 const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;

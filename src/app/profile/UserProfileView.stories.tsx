@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { userEvent, within, expect } from "storybook/test";
-import { UserProfileView } from "./UserProfileView";
+import { expect, userEvent, within } from "storybook/test";
+
 import { USER_PROFILE_COPY } from "./copy";
+import { UserProfileView } from "./UserProfileView";
 
 const meta: Meta<typeof UserProfileView> = {
   title: "Profile/UserProfileView",

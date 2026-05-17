@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import type { GroupPick } from "@/lib/types/pick";
-import type { Option } from "@/lib/types/option";
+
+import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { OptionList } from "@/app/categories/[id]/picks/[pickId]/OptionList";
+import type { Option } from "@/lib/types/option";
+import type { GroupPick } from "@/lib/types/pick";
+
+import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EmptyPickView } from "./EmptyPickView";
 import { SuggestOptionSheet } from "./SuggestOptionSheet";
-import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
+import { TierRanking } from "./TierRanking";
 
 interface PickDetailViewProps {
   pick: GroupPick;
@@ -28,9 +31,10 @@ export function PickDetailView({
   initialOptions,
   initialSuggestions,
 }: PickDetailViewProps) {
-  const isOpen = pick.closedAt === undefined;
+  const [options, setOptions] = useState<Option[]>(initialOptions);
   const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
-  const [options, setOptions] = useState(initialOptions);
+  const isOpen = pick.closedAt === undefined;
+  const isCreator = pick.creatorId === currentUserId;
 
   function handleOptionAdded({
     optionId,
@@ -64,16 +68,29 @@ export function PickDetailView({
         </div>
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          setIsSuggestSheetOpen(true);
-        }}
-      >
-        {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
-      </Button>
+      {isOpen && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setIsSuggestSheetOpen(true);
+          }}
+        >
+          {PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton}
+        </Button>
+      )}
+
+      {!isOpen && isCreator && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => undefined}
+        >
+          {PICK_DETAIL_SCAFFOLD_COPY.reopenButton}
+        </Button>
+      )}
 
       <Tabs defaultValue="options">
         <TabsList>
@@ -83,7 +100,7 @@ export function PickDetailView({
           <TabsTrigger value="ranking">
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking}
           </TabsTrigger>
-          <TabsTrigger value="top-picks">
+          <TabsTrigger value="top-picks" disabled={isOpen}>
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks}
           </TabsTrigger>
         </TabsList>
@@ -91,12 +108,17 @@ export function PickDetailView({
         <TabsContent value="options" className="mt-4">
           {options.length === 0 ? (
             <EmptyPickView
-              onSuggestOption={() => {
-                setIsSuggestSheetOpen(true);
-              }}
+              onSuggestOption={
+                isOpen
+                  ? () => {
+                      setIsSuggestSheetOpen(true);
+                    }
+                  : () => undefined
+              }
             />
           ) : (
             <OptionList
+              key={options.length}
               groupId={groupId}
               categoryId={categoryId}
               pickId={pick.id}
@@ -104,19 +126,25 @@ export function PickDetailView({
               initialOptions={options}
               initialSuggestions={initialSuggestions}
               pickClosed={!isOpen}
+              hideAddForm
+              onOptionsChange={setOptions}
             />
           )}
         </TabsContent>
 
         <TabsContent value="ranking" className="mt-4">
-          <p className="text-sm text-muted-foreground">
-            {PICK_DETAIL_SCAFFOLD_COPY.rankingTabPlaceholder}
-          </p>
+          <TierRanking
+            options={options.filter((opt) =>
+              opt.ownerIds.includes(currentUserId),
+            )}
+          />
         </TabsContent>
 
-        <TabsContent value="top-picks" className="mt-4">
+        <TabsContent value="top-picks" className="mt-4" keepMounted>
           <p className="text-sm text-muted-foreground">
-            {PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder}
+            {isOpen
+              ? PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder
+              : PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder}
           </p>
         </TabsContent>
       </Tabs>

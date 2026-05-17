@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+
 import { getCategoryById, updateCategory } from "@/server/data/categories";
+import { getGroupById } from "@/server/data/groups";
 import { getPicksByCategory } from "@/server/data/picks";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function PATCH(
   request: Request,

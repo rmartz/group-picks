@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
+
 import { getGroupsByUserId } from "@/server/data/groups";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { GroupListView } from "./GroupListView";
 
 export default async function GroupListPage() {

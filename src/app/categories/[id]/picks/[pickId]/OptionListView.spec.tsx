@@ -1,8 +1,10 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { OptionListView, type OptionListViewProps } from "./OptionListView";
-import { PICK_DETAIL_COPY } from "./copy";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import type { Option } from "@/lib/types/option";
+
+import { PICK_DETAIL_COPY } from "./copy";
+import { OptionListView, type OptionListViewProps } from "./OptionListView";
 
 // TODO: upgrade to userEvent when @testing-library/user-event is available
 

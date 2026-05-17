@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { SuggestOptionSheetView } from "./SuggestOptionSheetView";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { SUGGEST_OPTION_SHEET_COPY } from "./SuggestOptionSheet.copy";
+import { SuggestOptionSheetView } from "./SuggestOptionSheetView";
 
 afterEach(cleanup);
 

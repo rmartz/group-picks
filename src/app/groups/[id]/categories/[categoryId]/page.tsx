@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+
 import { getCategoryById } from "@/server/data/categories";
+import { getGroupById } from "@/server/data/groups";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { CategoryDetailView } from "./CategoryDetailView";
 
 export default async function CategoryDetailPage({

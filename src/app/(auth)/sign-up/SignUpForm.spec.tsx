@@ -1,15 +1,17 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
 import {
-  render,
-  screen,
   cleanup,
   fireEvent,
+  render,
+  screen,
   waitFor,
 } from "@testing-library/react";
-import SignUpForm from "./SignUpForm";
-import { SIGN_UP_COPY } from "./copy";
-import { signUp, createSession } from "@/services/auth";
 import type { UserCredential } from "firebase/auth";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { createSession, signUp } from "@/services/auth";
+
+import { SIGN_UP_COPY } from "./copy";
+import SignUpForm from "./SignUpForm";
 
 const mockPush = vi.fn();
 let mockInviteToken: string | null = null;

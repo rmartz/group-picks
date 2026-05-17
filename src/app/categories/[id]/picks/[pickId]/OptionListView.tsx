@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Option } from "@/lib/types/option";
-import { HeartButton } from "./HeartButton";
+
 import { PICK_DETAIL_COPY } from "./copy";
+import { HeartButton } from "./HeartButton";
 
 export interface OptionListViewProps {
   options: Option[];
@@ -12,6 +13,7 @@ export interface OptionListViewProps {
   error: string | undefined;
   currentUserId: string;
   pickClosed: boolean;
+  hideAddForm?: boolean;
   onNewTitleChange: (title: string) => void;
   onAddSubmit: (e: React.SyntheticEvent) => void;
   onAdoptSuggestion: (option: Option) => void;
@@ -26,6 +28,7 @@ export function OptionListView({
   error,
   currentUserId,
   pickClosed,
+  hideAddForm = false,
   onNewTitleChange,
   onAddSubmit,
   onAdoptSuggestion,
@@ -69,7 +72,7 @@ export function OptionListView({
           </ul>
         )}
 
-        {!pickClosed && (
+        {!pickClosed && !hideAddForm && (
           <form onSubmit={onAddSubmit} className="flex gap-2">
             <Input
               type="text"
@@ -90,7 +93,7 @@ export function OptionListView({
         {error && <p className="text-sm text-red-600">{error}</p>}
       </section>
 
-      {!pickClosed && suggestions.length > 0 && (
+      {!pickClosed && !hideAddForm && suggestions.length > 0 && (
         <section className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground">
             {PICK_DETAIL_COPY.suggestionsHeading}

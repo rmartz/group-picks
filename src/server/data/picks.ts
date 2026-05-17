@@ -1,9 +1,10 @@
 import { getDatabase } from "firebase-admin/database";
+
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
+  type FirebasePickPublic,
   firebaseToPick,
   pickToFirebase,
-  type FirebasePickPublic,
 } from "@/lib/firebase/schema/pick";
 import type { GroupPick } from "@/lib/types/pick";
 
@@ -92,7 +93,10 @@ export async function assertPickIsOpenForWrite(
 }
 
 export async function createPick(
-  pick: Pick<GroupPick, "title" | "description" | "categoryId" | "creatorId">,
+  pick: Pick<GroupPick, "title" | "categoryId" | "creatorId" | "topCount"> & {
+    description?: string;
+    dueDate?: Date;
+  },
 ): Promise<{ id: string; createdAt: Date }> {
   const db = getDatabase(getAdminApp());
   const ref = db.ref(`categories/${pick.categoryId}/picks`).push();
@@ -103,8 +107,6 @@ export async function createPick(
   const pickData = pickToFirebase({
     ...pick,
     createdAt,
-    topCount: 1,
-    dueDate: undefined,
     closedAt: undefined,
     closedManually: undefined,
   });

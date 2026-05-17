@@ -1,4 +1,5 @@
 import type { Category } from "@/lib/types/category";
+
 import { CATEGORY_LIST_COPY } from "./copy";
 
 interface CategoryListViewProps {

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import type { FirebaseError } from "firebase/app";
-import { sendPasswordReset } from "@/services/auth";
+import Link from "next/link";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { sendPasswordReset } from "@/services/auth";
+
 import { FORGOT_PASSWORD_COPY } from "./copy";
 
 export default function ForgotPasswordPage() {

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupById } from "@/server/data/groups";
+
 import { getCategoryById } from "@/server/data/categories";
+import { getGroupById } from "@/server/data/groups";
 import { createPick, getPicksByCategory } from "@/server/data/picks";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function GET(
   _request: Request,
@@ -68,9 +69,19 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  let body: { title: unknown; description: unknown };
+  let body: {
+    title: unknown;
+    description: unknown;
+    topCount: unknown;
+    dueDate: unknown;
+  };
   try {
-    body = (await request.json()) as { title: unknown; description: unknown };
+    body = (await request.json()) as {
+      title: unknown;
+      description: unknown;
+      topCount: unknown;
+      dueDate: unknown;
+    };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -82,12 +93,40 @@ export async function POST(
   const title = body.title.trim();
   const description =
     typeof body.description === "string" ? body.description.trim() : undefined;
+  if (
+    typeof body.topCount !== "number" ||
+    !Number.isInteger(body.topCount) ||
+    body.topCount < 1
+  ) {
+    return NextResponse.json(
+      { error: "topCount must be a positive integer" },
+      { status: 400 },
+    );
+  }
+  const topCount = body.topCount;
+
+  let dueDate: Date | undefined;
+  if (typeof body.dueDate === "string" && body.dueDate) {
+    const parsed = new Date(body.dueDate);
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== body.dueDate
+    ) {
+      return NextResponse.json(
+        { error: "dueDate is invalid" },
+        { status: 400 },
+      );
+    }
+    dueDate = parsed;
+  }
 
   const { id: pickId, createdAt } = await createPick({
     title,
     description,
     categoryId,
     creatorId: uid,
+    topCount,
+    dueDate,
   });
 
   return NextResponse.json(

@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type { FirebaseError } from "firebase/app";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+
 import {
   createSession,
   signIn,
   signInWithApple,
   signInWithGoogle,
 } from "@/services/auth";
+
 import { SIGN_IN_COPY } from "./copy";
 import { SignInFormView } from "./SignInFormView";
 

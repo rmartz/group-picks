@@ -1,9 +1,10 @@
 import { getDatabase } from "firebase-admin/database";
+
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
   categoryToFirebase,
-  firebaseToCategory,
   type FirebaseCategoryPublic,
+  firebaseToCategory,
 } from "@/lib/firebase/schema/category";
 import type { Category } from "@/lib/types/category";
 

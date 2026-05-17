@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupInviteByToken } from "@/server/data/invites";
+
 import { getGroupById } from "@/server/data/groups";
-import { JoinGroupForm } from "./JoinGroupForm";
+import { getGroupInviteByToken } from "@/server/data/invites";
+import { getVerifiedUid } from "@/server/utils/auth";
+
 import { JOIN_GROUP_COPY } from "./copy";
+import { JoinGroupForm } from "./JoinGroupForm";
 
 interface JoinGroupPageProps {
   searchParams: Promise<{ token?: string }>;
@@ -27,10 +29,15 @@ function InviteErrorPage({
 export default async function JoinGroupPage({
   searchParams,
 }: JoinGroupPageProps) {
-  const uid = await getVerifiedUid();
-  if (!uid) redirect("/sign-in");
-
   const { token } = await searchParams;
+
+  const uid = await getVerifiedUid();
+  if (!uid) {
+    const signInUrl = new URLSearchParams(
+      token ? { invite_token: token } : {},
+    ).toString();
+    redirect(`/sign-in${signInUrl ? `?${signInUrl}` : ""}`);
+  }
 
   if (!token) {
     return (
@@ -81,5 +88,13 @@ export default async function JoinGroupPage({
     );
   }
 
-  return <JoinGroupForm token={token} groupName={group.name} />;
+  const signInHref = `/sign-in?${new URLSearchParams({ invite_token: token }).toString()}`;
+  return (
+    <JoinGroupForm
+      token={token}
+      groupName={group.name}
+      memberCount={group.memberIds.length}
+      signInHref={signInHref}
+    />
+  );
 }

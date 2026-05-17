@@ -1,14 +1,16 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
 import {
-  render,
-  screen,
   cleanup,
   fireEvent,
+  render,
+  screen,
   waitFor,
 } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import type { Option } from "@/lib/types/option";
-import { OptionList } from "./OptionList";
+
 import { PICK_DETAIL_COPY } from "./copy";
+import { OptionList } from "./OptionList";
 
 const { mockJoinOptionOwner, mockUnjoinOptionOwner, mockAdoptOption } =
   vi.hoisted(() => ({

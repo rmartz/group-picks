@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { adoptOption } from "@/services/options";
+
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { adoptOption } from "@/services/options";
+
 import { SUGGEST_OPTION_SHEET_COPY } from "./SuggestOptionSheet.copy";
 import { SuggestOptionSheetView } from "./SuggestOptionSheetView";
 

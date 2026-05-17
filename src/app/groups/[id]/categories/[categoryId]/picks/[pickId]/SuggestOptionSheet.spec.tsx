@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   cleanup,
   fireEvent,
@@ -6,6 +5,8 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { SuggestOptionSheet } from "./SuggestOptionSheet";
 import { SUGGEST_OPTION_SHEET_COPY } from "./SuggestOptionSheet.copy";
 

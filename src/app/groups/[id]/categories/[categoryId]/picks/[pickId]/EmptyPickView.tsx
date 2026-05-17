@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 
 interface EmptyPickViewProps {

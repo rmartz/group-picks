@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
-import { NoGroupsView } from "./NoGroupsView";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import { GROUP_LIST_COPY } from "./copy";
+import { NoGroupsView } from "./NoGroupsView";
 
 afterEach(cleanup);
 

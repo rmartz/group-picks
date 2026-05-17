@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+
 import { GROUP_DETAIL_COPY } from "./copy";
 
 interface LeaveGroupButtonViewProps {

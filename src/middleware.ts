@@ -2,6 +2,7 @@
 export const runtime = "nodejs";
 
 import { type NextRequest, NextResponse } from "next/server";
+
 import { getAdminAuth } from "@/lib/firebase/admin";
 
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/forgot-password"];

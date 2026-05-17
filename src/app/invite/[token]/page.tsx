@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
-import { getVerifiedUid } from "@/server/utils/auth";
-import { getGroupInviteByToken } from "@/server/data/invites";
-import { getGroupById } from "@/server/data/groups";
-import { JoinGroupForm } from "@/app/groups/join/JoinGroupForm";
+
 import { JOIN_GROUP_COPY } from "@/app/groups/join/copy";
+import { JoinGroupForm } from "@/app/groups/join/JoinGroupForm";
+import { getGroupById } from "@/server/data/groups";
+import { getGroupInviteByToken } from "@/server/data/invites";
+import { getVerifiedUid } from "@/server/utils/auth";
 
 interface InvitePageProps {
   params: Promise<{ token: string }>;
@@ -85,5 +86,13 @@ export default async function InvitePage({ params }: InvitePageProps) {
     );
   }
 
-  return <JoinGroupForm token={token} groupName={group.name} />;
+  const signInHref = `/sign-in?${new URLSearchParams({ invite_token: token }).toString()}`;
+  return (
+    <JoinGroupForm
+      token={token}
+      groupName={group.name}
+      memberCount={group.memberIds.length}
+      signInHref={signInHref}
+    />
+  );
 }

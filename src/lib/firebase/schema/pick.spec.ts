@@ -1,9 +1,10 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import {
-  pickToFirebase,
-  firebaseToPick,
-  removeOwnerFromPickOptions,
   type FirebasePickPublic,
+  firebaseToPick,
+  pickToFirebase,
+  removeOwnerFromPickOptions,
 } from "./pick";
 
 const FIXED_DATE = new Date("2025-01-15T12:00:00.000Z");
