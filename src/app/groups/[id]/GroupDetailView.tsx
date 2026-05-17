@@ -28,6 +28,43 @@ interface GroupDetailViewProps {
   picksByCategory: Record<string, GroupPick[]>;
 }
 
+interface PickListItemProps {
+  pick: GroupPick;
+  category: Category | undefined;
+  groupId: string;
+  variant: "open" | "closed";
+}
+
+function PickListItem({ pick, category, groupId, variant }: PickListItemProps) {
+  return (
+    <li>
+      <Link
+        href={`/groups/${groupId}/categories/${pick.categoryId}/picks/${pick.id}`}
+        className="block rounded-md border p-3 hover:bg-zinc-50"
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-0.5">
+            <p className="font-medium">{pick.title}</p>
+            <p className="text-xs text-muted-foreground">
+              {category?.name}
+              {variant === "open" && pick.dueDate
+                ? ` · ${pick.dueDate.toLocaleDateString()}`
+                : variant === "closed" && pick.closedAt
+                  ? ` · closed ${pick.closedAt.toLocaleDateString()}`
+                  : null}
+            </p>
+          </div>
+          <Badge variant={variant === "open" ? "default" : "secondary"}>
+            {variant === "open"
+              ? GROUP_DETAIL_COPY.openBadge
+              : GROUP_DETAIL_COPY.closedBadge}
+          </Badge>
+        </div>
+      </Link>
+    </li>
+  );
+}
+
 export function GroupDetailView({
   group,
   categories,
@@ -79,31 +116,15 @@ export function GroupDetailView({
                     {GROUP_DETAIL_COPY.openSection}
                   </p>
                   <ul className="space-y-2">
-                    {openPicks.map((pick) => {
-                      const category = categoryById[pick.categoryId];
-                      return (
-                        <li key={pick.id}>
-                          <Link
-                            href={`/groups/${group.id}/categories/${pick.categoryId}/picks/${pick.id}`}
-                            className="block rounded-md border p-3 hover:bg-zinc-50"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="space-y-0.5">
-                                <p className="font-medium">{pick.title}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {category?.name}
-                                  {pick.dueDate &&
-                                    ` · ${pick.dueDate.toLocaleDateString()}`}
-                                </p>
-                              </div>
-                              <Badge variant="default">
-                                {GROUP_DETAIL_COPY.openBadge}
-                              </Badge>
-                            </div>
-                          </Link>
-                        </li>
-                      );
-                    })}
+                    {openPicks.map((pick) => (
+                      <PickListItem
+                        key={pick.id}
+                        pick={pick}
+                        category={categoryById[pick.categoryId]}
+                        groupId={group.id}
+                        variant="open"
+                      />
+                    ))}
                   </ul>
                 </section>
               )}
@@ -113,31 +134,15 @@ export function GroupDetailView({
                     {GROUP_DETAIL_COPY.closedSection}
                   </p>
                   <ul className="space-y-2">
-                    {closedPicks.map((pick) => {
-                      const category = categoryById[pick.categoryId];
-                      return (
-                        <li key={pick.id}>
-                          <Link
-                            href={`/groups/${group.id}/categories/${pick.categoryId}/picks/${pick.id}`}
-                            className="block rounded-md border p-3 hover:bg-zinc-50"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="space-y-0.5">
-                                <p className="font-medium">{pick.title}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {category?.name}
-                                  {pick.closedAt &&
-                                    ` · closed ${pick.closedAt.toLocaleDateString()}`}
-                                </p>
-                              </div>
-                              <Badge variant="secondary">
-                                {GROUP_DETAIL_COPY.closedBadge}
-                              </Badge>
-                            </div>
-                          </Link>
-                        </li>
-                      );
-                    })}
+                    {closedPicks.map((pick) => (
+                      <PickListItem
+                        key={pick.id}
+                        pick={pick}
+                        category={categoryById[pick.categoryId]}
+                        groupId={group.id}
+                        variant="closed"
+                      />
+                    ))}
                   </ul>
                 </section>
               )}
