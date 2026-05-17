@@ -86,7 +86,10 @@ export function GroupDetailView({
       <div className="space-y-0.5">
         <h1 className="text-2xl font-semibold">{group.name}</h1>
         <p className="text-sm text-muted-foreground">
-          {group.memberIds.length} {GROUP_DETAIL_COPY.membersLabel}
+          {group.memberIds.length}{" "}
+          {group.memberIds.length === 1
+            ? GROUP_DETAIL_COPY.memberSingularLabel
+            : GROUP_DETAIL_COPY.membersLabel}
         </p>
       </div>
 

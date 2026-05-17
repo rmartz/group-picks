@@ -16,6 +16,7 @@ export const GROUP_DETAIL_COPY = {
   leaveButton: "Leave Group",
   membersHeading: "Members",
   membersLabel: "members",
+  memberSingularLabel: "member",
   noPicksMessage: "No picks yet. Start one from the Categories tab.",
   notFound: "Group not found.",
   openBadge: "open",

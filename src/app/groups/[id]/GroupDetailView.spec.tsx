@@ -71,6 +71,15 @@ describe("GroupDetailView", () => {
     ).toBeDefined();
   });
 
+  it("renders singular member label when there is one member", () => {
+    const group = { ...makeGroup(), memberIds: ["user-123"] };
+    renderView({ group, memberNames: [{ uid: "user-123", name: "Alice" }] });
+
+    expect(
+      screen.getByText(`1 ${GROUP_DETAIL_COPY.memberSingularLabel}`),
+    ).toBeDefined();
+  });
+
   it("renders the Picks tab trigger", () => {
     renderView();
 
