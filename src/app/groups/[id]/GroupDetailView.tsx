@@ -35,6 +35,21 @@ interface PickListItemProps {
   variant: "open" | "closed";
 }
 
+function formatPickSubtitle(
+  pick: GroupPick,
+  category: Category | undefined,
+  variant: "open" | "closed",
+): string {
+  const parts: string[] = [];
+  if (category?.name) parts.push(category.name);
+  if (variant === "open" && pick.dueDate) {
+    parts.push(pick.dueDate.toLocaleDateString());
+  } else if (variant === "closed" && pick.closedAt) {
+    parts.push(`closed ${pick.closedAt.toLocaleDateString()}`);
+  }
+  return parts.join(" · ");
+}
+
 function PickListItem({ pick, category, groupId, variant }: PickListItemProps) {
   return (
     <li>
@@ -46,12 +61,7 @@ function PickListItem({ pick, category, groupId, variant }: PickListItemProps) {
           <div className="space-y-0.5">
             <p className="font-medium">{pick.title}</p>
             <p className="text-xs text-muted-foreground">
-              {category?.name}
-              {variant === "open" && pick.dueDate
-                ? ` · ${pick.dueDate.toLocaleDateString()}`
-                : variant === "closed" && pick.closedAt
-                  ? ` · closed ${pick.closedAt.toLocaleDateString()}`
-                  : null}
+              {formatPickSubtitle(pick, category, variant)}
             </p>
           </div>
           <Badge variant={variant === "open" ? "default" : "secondary"}>
@@ -162,6 +172,8 @@ export function GroupDetailView({
           />
         </TabsContent>
 
+        {/* keepMounted ensures member names and invite section are always
+            present in the DOM, even when this tab is not active */}
         <TabsContent value="members" className="mt-4 space-y-6" keepMounted>
           <section className="space-y-3">
             <h2 className="text-sm font-semibold">
