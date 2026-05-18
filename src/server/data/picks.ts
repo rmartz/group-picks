@@ -31,6 +31,15 @@ export class PickWriteClosedError extends Error {
   }
 }
 
+export async function hasPicks(categoryId: string): Promise<boolean> {
+  const db = getDatabase(getAdminApp());
+  const snap = await db
+    .ref(`categories/${categoryId}/picks`)
+    .limitToFirst(1)
+    .get();
+  return snap.exists();
+}
+
 export async function getPicksByCategory(
   categoryId: string,
 ): Promise<GroupPick[]> {

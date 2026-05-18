@@ -64,15 +64,14 @@ export function OptionList({
 
   useEffect(() => {
     const nextInitialOptionsKey = getOptionsSyncKey(initialOptions);
-    const currentOptionsKey = getOptionsSyncKey(options);
-    if (previousInitialOptionsKeyRef.current !== nextInitialOptionsKey) {
-      previousInitialOptionsKeyRef.current = nextInitialOptionsKey;
-      if (currentOptionsKey !== nextInitialOptionsKey) {
-        skipNextOptionsChangeEffect.current = true;
-        setOptions(initialOptions);
-      }
-    }
-  }, [initialOptions, options]);
+    if (previousInitialOptionsKeyRef.current === nextInitialOptionsKey) return;
+    previousInitialOptionsKeyRef.current = nextInitialOptionsKey;
+    setOptions((prev) => {
+      if (getOptionsSyncKey(prev) === nextInitialOptionsKey) return prev;
+      skipNextOptionsChangeEffect.current = true;
+      return initialOptions;
+    });
+  }, [initialOptions]);
 
   function updateOptions(updater: (prev: Option[]) => Option[]) {
     setOptions(updater);

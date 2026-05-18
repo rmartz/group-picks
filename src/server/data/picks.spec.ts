@@ -6,6 +6,7 @@ import type { FirebasePickPublic } from "@/lib/firebase/schema/pick";
 import {
   assertPickIsOpenForWrite,
   getPickById,
+  hasPicks,
   PickNotFoundError,
   PickWriteClosedError,
 } from "./picks";
@@ -182,6 +183,40 @@ describe("assertPickIsOpenForWrite", () => {
     await expect(
       assertPickIsOpenForWrite("cat-123", "pick-missing"),
     ).rejects.toBeInstanceOf(PickNotFoundError);
+  });
+});
+
+describe("hasPicks", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns true when at least one pick exists", async () => {
+    const get = vi.fn().mockResolvedValue({ exists: () => true });
+    const limitToFirst = vi.fn().mockReturnValue({ get });
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ limitToFirst }),
+    } as never);
+
+    const result = await hasPicks("cat-123");
+
+    expect(result).toBe(true);
+    expect(limitToFirst).toHaveBeenCalledWith(1);
+  });
+
+  it("returns false when no picks exist", async () => {
+    const get = vi.fn().mockResolvedValue({ exists: () => false });
+    const limitToFirst = vi.fn().mockReturnValue({ get });
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ limitToFirst }),
+    } as never);
+
+    const result = await hasPicks("cat-123");
+
+    expect(result).toBe(false);
+    expect(limitToFirst).toHaveBeenCalledWith(1);
   });
 });
 
