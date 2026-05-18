@@ -42,25 +42,37 @@ export function CategoryDetailView({
               <li key={pick.id} className="rounded-md border p-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium">{pick.title}</p>
-                  {pick.closedAt !== undefined && (
+                  {pick.closedAt !== undefined ? (
                     <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                       {CATEGORY_DETAIL_COPY.closedBadge}
                     </span>
-                  )}
-                  {pick.closedAt === undefined && closePickAction && (
-                    <form action={closePickAction}>
-                      <input type="hidden" name="pickId" value={pick.id} />
-                      <button
-                        aria-label={`${CATEGORY_DETAIL_COPY.closePickButton} ${pick.title}`}
-                        className="rounded border px-2.5 py-1 text-xs font-medium"
-                      >
-                        {CATEGORY_DETAIL_COPY.closePickButton}
-                      </button>
-                    </form>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        {CATEGORY_DETAIL_COPY.openBadge}
+                      </span>
+                      {closePickAction && (
+                        <form action={closePickAction}>
+                          <input type="hidden" name="pickId" value={pick.id} />
+                          <button
+                            aria-label={`${CATEGORY_DETAIL_COPY.closePickButton} ${pick.title}`}
+                            className="rounded border px-2.5 py-1 text-xs font-medium"
+                          >
+                            {CATEGORY_DETAIL_COPY.closePickButton}
+                          </button>
+                        </form>
+                      )}
+                    </div>
                   )}
                 </div>
                 {pick.description?.trim() && (
                   <p className="text-muted-foreground">{pick.description}</p>
+                )}
+                {pick.dueDate && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {CATEGORY_DETAIL_COPY.dueDateLabel}{" "}
+                    <span>{pick.dueDate.toLocaleDateString()}</span>
+                  </p>
                 )}
                 {pick.closedAt !== undefined && (
                   <div className="mt-2">
