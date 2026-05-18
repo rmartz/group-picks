@@ -11,16 +11,21 @@ export const PICK_DETAIL_COPY = {
     closed: "This Pick is closed",
     removeOwnership: "Remove from your options",
   },
+  heartCaption: "Tap a heart to mark interest",
+  interestedSuffix: "interested",
   noOptionsMessage: "No options have been added yet.",
   optionsHeading: "Options",
   suggestionsHeading: "Suggestions from your prior picks",
 } as const;
 
 export const PICK_DETAIL_SCAFFOLD_COPY = {
+  categoryLabel: "Category",
   closedStatusChip: "Closed",
+  dueDateLabel: "Due:",
   openStatusChip: "Open",
+  participantsLabel: "Participants",
   rankingTabPlaceholder: "Ranking coming soon.",
-  resultsPlaceholder: "Results will appear here once scoring is complete.",
+  resultsPlaceholder: "No options were added to this pick.",
   suggestOptionButton: "Suggest option",
   tabs: {
     options: "Options",

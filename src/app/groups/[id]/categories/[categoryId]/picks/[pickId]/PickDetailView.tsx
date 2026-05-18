@@ -19,6 +19,7 @@ interface PickDetailViewProps {
   pick: GroupPick;
   groupId: string;
   categoryId: string;
+  categoryName?: string;
   currentUserId: string;
   initialOptions: Option[];
   initialSuggestions: Option[];
@@ -28,6 +29,7 @@ export function PickDetailView({
   pick,
   groupId,
   categoryId,
+  categoryName,
   currentUserId,
   initialOptions,
   initialSuggestions,
@@ -35,6 +37,10 @@ export function PickDetailView({
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
   const isOpen = pick.closedAt === undefined;
+  const uniqueOwnerCount = new Set(options.flatMap((opt) => opt.ownerIds)).size;
+  const topPicksOptions = [...options]
+    .sort((a, b) => b.ownerIds.length - a.ownerIds.length)
+    .slice(0, pick.topCount);
 
   function handleOptionAdded({
     optionId,
@@ -73,6 +79,14 @@ export function PickDetailView({
     <main className="mx-auto max-w-lg space-y-6 p-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{pick.title}</h1>
+        {categoryName && (
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium">
+              {PICK_DETAIL_SCAFFOLD_COPY.categoryLabel}
+            </span>{" "}
+            {categoryName}
+          </p>
+        )}
         <div className="flex items-center gap-3">
           <Badge variant={isOpen ? "default" : "secondary"}>
             {isOpen
@@ -86,6 +100,20 @@ export function PickDetailView({
             {pick.topCount}
           </span>
         </div>
+        {pick.dueDate && (
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium">
+              {PICK_DETAIL_SCAFFOLD_COPY.dueDateLabel}
+            </span>{" "}
+            <span>{pick.dueDate.toLocaleDateString()}</span>
+          </p>
+        )}
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium">
+            {PICK_DETAIL_SCAFFOLD_COPY.participantsLabel}
+          </span>{" "}
+          {uniqueOwnerCount}
+        </p>
       </div>
 
       {isOpen && (
@@ -157,11 +185,21 @@ export function PickDetailView({
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>
-          <p className="text-sm text-muted-foreground">
-            {isOpen
-              ? PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder
-              : PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder}
-          </p>
+          {isOpen || topPicksOptions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {isOpen
+                ? PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder
+                : PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder}
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {topPicksOptions.map((opt) => (
+                <li key={opt.id} className="text-sm">
+                  {opt.title}
+                </li>
+              ))}
+            </ul>
+          )}
         </TabsContent>
       </Tabs>
 
