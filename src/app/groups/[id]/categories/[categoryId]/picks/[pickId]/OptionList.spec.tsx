@@ -165,3 +165,45 @@ describe("OptionList heart toggle", () => {
     ).toBeNull();
   });
 });
+
+describe("OptionList initialOptions sync", () => {
+  it("replaces local options when initialOptions changes from the parent", () => {
+    const optA = makeOption({ id: "opt-a", title: "Option A" });
+    const optB = makeOption({ id: "opt-b", title: "Option B" });
+
+    const { rerender } = render(
+      <OptionList {...baseProps} initialOptions={[optA]} />,
+    );
+
+    expect(screen.getByText("Option A")).toBeDefined();
+
+    rerender(<OptionList {...baseProps} initialOptions={[optB]} />);
+
+    expect(screen.queryByText("Option A")).toBeNull();
+    expect(screen.getByText("Option B")).toBeDefined();
+  });
+
+  it("preserves local options when initialOptions is unchanged after a mutation", async () => {
+    mockJoinOptionOwner.mockResolvedValue(undefined);
+    const option = makeOption({ ownerIds: ["user-2"] });
+
+    render(<OptionList {...baseProps} initialOptions={[option]} />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_COPY.heart.addOwnership,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(mockJoinOptionOwner).toHaveBeenCalled();
+    });
+
+    // Local state should reflect the heart — NOT reset to initial by the effect
+    expect(
+      screen.getByRole("button", {
+        name: PICK_DETAIL_COPY.heart.removeOwnership,
+      }),
+    ).toBeDefined();
+  });
+});
