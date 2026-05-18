@@ -124,4 +124,84 @@ describe("GroupDetailView", () => {
 
     expect(screen.getByText(GROUP_DETAIL_COPY.noPicksMessage)).toBeDefined();
   });
+
+  it("renders open picks in the Open section with the open badge", () => {
+    const category = {
+      id: "cat-1",
+      name: "Movies",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const openPick = {
+      id: "pick-1",
+      title: "Best Picture",
+      categoryId: "cat-1",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-1": [openPick] },
+    });
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.openSection)).toBeDefined();
+    expect(screen.getByText(GROUP_DETAIL_COPY.openBadge)).toBeDefined();
+    expect(screen.getByText(openPick.title)).toBeDefined();
+  });
+
+  it("renders closed picks in the Closed section with the closed badge", () => {
+    const category = {
+      id: "cat-2",
+      name: "TV Shows",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const closedPick = {
+      id: "pick-2",
+      title: "Best Series",
+      categoryId: "cat-2",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+      closedAt: new Date("2025-06-01"),
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-2": [closedPick] },
+    });
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.closedSection)).toBeDefined();
+    expect(screen.getByText(GROUP_DETAIL_COPY.closedBadge)).toBeDefined();
+    expect(screen.getByText(closedPick.title)).toBeDefined();
+  });
+
+  it("renders a pick detail link pointing to the correct pick URL", () => {
+    const category = {
+      id: "cat-3",
+      name: "Games",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const pick = {
+      id: "pick-3",
+      title: "Best Game",
+      categoryId: "cat-3",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-3": [pick] },
+    });
+
+    const link = screen.getByRole("link", { name: /Best Game/ });
+    expect((link as HTMLAnchorElement).href).toContain(
+      "/groups/group-1/categories/cat-3/picks/pick-3",
+    );
+  });
 });
