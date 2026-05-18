@@ -185,6 +185,20 @@ describe("PUT /rankings", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 when assignments contain an invalid tier value", async () => {
+    const response = await PUT(
+      new Request("http://localhost", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignments: { "opt-1": "invalid-tier" } }),
+      }),
+      { params: Promise.resolve(baseParams) },
+    );
+
+    expect(response.status).toBe(400);
+    expect(mockSaveRanking).not.toHaveBeenCalled();
+  });
+
   it("returns 200 and saves the rankings", async () => {
     const assignments = {
       "opt-1": RankingTier.LoveIt,

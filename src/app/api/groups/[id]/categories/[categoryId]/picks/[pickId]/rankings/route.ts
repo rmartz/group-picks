@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
 
-import type { RankingTier } from "@/lib/types/ranking";
+import { RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { getPickById } from "@/server/data/picks";
 import { getRankingByUser, saveRanking } from "@/server/data/rankings";
 import { getVerifiedUid } from "@/server/utils/auth";
+
+const VALID_RANKING_TIERS = new Set(Object.values(RankingTier));
+
+function isRankingAssignments(
+  value: unknown,
+): value is Record<string, RankingTier> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  return Object.values(value).every(
+    (tier) =>
+      typeof tier === "string" && VALID_RANKING_TIERS.has(tier as RankingTier),
+  );
+}
 
 export async function GET(
   _request: Request,
@@ -80,13 +95,15 @@ export async function PUT(
     return NextResponse.json({ error: "Pick not found" }, { status: 404 });
   }
 
-  let body: { assignments: Record<string, RankingTier> };
+  let body: { assignments: unknown };
   try {
-    body = (await request.json()) as {
-      assignments: Record<string, RankingTier>;
-    };
+    body = (await request.json()) as { assignments: unknown };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  if (!isRankingAssignments(body.assignments)) {
+    return NextResponse.json({ error: "Invalid tier value" }, { status: 400 });
   }
 
   await saveRanking(pickId, uid, body.assignments);
