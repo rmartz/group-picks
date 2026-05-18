@@ -63,33 +63,52 @@ describe("GroupDetailView", () => {
     expect(screen.getByText(group.name)).toBeDefined();
   });
 
-  it("renders the members label", () => {
+  it("renders the member count in the header", () => {
     renderView();
 
     expect(
-      screen.getByText(GROUP_DETAIL_COPY.membersLabel + ":"),
+      screen.getByText(`2 ${GROUP_DETAIL_COPY.membersLabel}`),
     ).toBeDefined();
   });
 
-  it("renders each member name", () => {
+  it("renders singular member label when there is one member", () => {
+    const group = { ...makeGroup(), memberIds: ["user-123"] };
+    renderView({ group, memberNames: [{ uid: "user-123", name: "Alice" }] });
+
+    expect(
+      screen.getByText(`1 ${GROUP_DETAIL_COPY.memberSingularLabel}`),
+    ).toBeDefined();
+  });
+
+  it("renders the Picks tab trigger", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", { name: GROUP_DETAIL_COPY.tabs.picks }),
+    ).toBeDefined();
+  });
+
+  it("renders the Categories tab trigger", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", { name: GROUP_DETAIL_COPY.tabs.categories }),
+    ).toBeDefined();
+  });
+
+  it("renders the Members tab trigger", () => {
+    renderView();
+
+    expect(
+      screen.getByRole("tab", { name: GROUP_DETAIL_COPY.tabs.members }),
+    ).toBeDefined();
+  });
+
+  it("renders each member name (Members tab is keepMounted)", () => {
     renderView();
 
     expect(screen.getByText("Alice")).toBeDefined();
     expect(screen.getByText("Bob")).toBeDefined();
-  });
-
-  it("does not render a raw member count", () => {
-    renderView();
-
-    expect(screen.queryByText("2")).toBeNull();
-  });
-
-  it("renders the created at label", () => {
-    renderView();
-
-    expect(
-      screen.getByText(GROUP_DETAIL_COPY.createdAtLabel + ":"),
-    ).toBeDefined();
   });
 
   it("renders the invite section with the invite token", () => {
@@ -98,5 +117,119 @@ describe("GroupDetailView", () => {
 
     expect(screen.getByTestId("invite-section")).toBeDefined();
     expect(screen.getByText(group.inviteToken)).toBeDefined();
+  });
+
+  it("renders the no-picks message when there are no picks", () => {
+    renderView({ picksByCategory: {} });
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.noPicksMessage)).toBeDefined();
+  });
+
+  it("renders open picks in the Open section with the open badge", () => {
+    const category = {
+      id: "cat-1",
+      name: "Movies",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const openPick = {
+      id: "pick-1",
+      title: "Best Picture",
+      categoryId: "cat-1",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-1": [openPick] },
+    });
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.openSection)).toBeDefined();
+    expect(screen.getByText(GROUP_DETAIL_COPY.openBadge)).toBeDefined();
+    expect(screen.getByText(openPick.title)).toBeDefined();
+  });
+
+  it("renders closed picks in the Closed section with the closed badge", () => {
+    const category = {
+      id: "cat-2",
+      name: "TV Shows",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const closedPick = {
+      id: "pick-2",
+      title: "Best Series",
+      categoryId: "cat-2",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+      closedAt: new Date("2025-06-01"),
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-2": [closedPick] },
+    });
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.closedSection)).toBeDefined();
+    expect(screen.getByText(GROUP_DETAIL_COPY.closedBadge)).toBeDefined();
+    expect(screen.getByText(closedPick.title)).toBeDefined();
+  });
+
+  it("renders a pick detail link pointing to the correct pick URL", () => {
+    const category = {
+      id: "cat-3",
+      name: "Games",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const pick = {
+      id: "pick-3",
+      title: "Best Game",
+      categoryId: "cat-3",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-3": [pick] },
+    });
+
+    const link = screen.getByRole("link", { name: /Best Game/ });
+    expect((link as HTMLAnchorElement).href).toContain(
+      "/groups/group-1/categories/cat-3/picks/pick-3",
+    );
+  });
+
+  it("does not render an empty subtitle paragraph when subtitle content is missing", () => {
+    const category = {
+      id: "cat-4",
+      name: "",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const pick = {
+      id: "pick-4",
+      title: "No Subtitle Pick",
+      categoryId: "cat-4",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-4": [pick] },
+    });
+
+    const link = screen.getByRole("link", { name: /No Subtitle Pick/ });
+    const subtitleParagraph = link.querySelector(
+      "p.text-xs.text-muted-foreground",
+    );
+    expect(subtitleParagraph).toBeNull();
   });
 });
