@@ -4,6 +4,7 @@ import { getCategoryById, updateCategory } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { canModifyResource } from "@/server/utils/permissions";
 
 export async function PATCH(
   request: Request,
@@ -35,7 +36,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  if (category.creatorId !== uid) {
+  if (!canModifyResource(uid, category.creatorId, group)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -56,7 +57,9 @@ export async function PATCH(
 
   if (name !== category.name) {
     const picks = await getPicksByCategory(categoryId);
-    const hasOtherMemberPicks = picks.some((pick) => pick.creatorId !== uid);
+    const hasOtherMemberPicks = picks.some(
+      (pick) => pick.creatorId !== category.creatorId,
+    );
     if (hasOtherMemberPicks) {
       return NextResponse.json(
         { error: "Category name cannot be changed after others pick it" },

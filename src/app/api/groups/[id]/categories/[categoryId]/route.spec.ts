@@ -64,7 +64,7 @@ describe("PATCH /api/groups/[id]/categories/[categoryId]", () => {
     });
   });
 
-  it("returns 403 when the requester is not the category creator", async () => {
+  it("returns 403 when the requester is not the category creator or an admin", async () => {
     mockGetVerifiedUid.mockResolvedValue("user-2");
 
     const response = await PATCH(
@@ -76,6 +76,68 @@ describe("PATCH /api/groups/[id]/categories/[categoryId]", () => {
 
     expect(response.status).toBe(403);
     expect(mockUpdateCategory).not.toHaveBeenCalled();
+  });
+
+  it("allows a group admin to edit a category they did not create", async () => {
+    mockGetVerifiedUid.mockResolvedValue("user-2");
+    mockGetGroupById.mockResolvedValue({
+      id: "group-1",
+      name: "Weekend Plans",
+      createdAt: new Date("2025-01-01T00:00:00.000Z"),
+      creatorId: "user-1",
+      memberIds: ["user-1", "user-2"],
+      adminIds: ["user-2"],
+      picksRestricted: false,
+    });
+    mockGetPicksByCategory.mockResolvedValue([]);
+
+    const response = await PATCH(
+      makeRequest({ name: "Admin Updated", description: "" }),
+      {
+        params: Promise.resolve({ id: "group-1", categoryId: "cat-1" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockUpdateCategory).toHaveBeenCalledWith("cat-1", {
+      name: "Admin Updated",
+      description: "",
+    });
+  });
+
+  it("allows an admin to rename a category when only the creator has picks", async () => {
+    mockGetVerifiedUid.mockResolvedValue("user-2");
+    mockGetGroupById.mockResolvedValue({
+      id: "group-1",
+      name: "Weekend Plans",
+      createdAt: new Date("2025-01-01T00:00:00.000Z"),
+      creatorId: "user-1",
+      memberIds: ["user-1", "user-2"],
+      adminIds: ["user-2"],
+      picksRestricted: false,
+    });
+    mockGetPicksByCategory.mockResolvedValue([
+      {
+        id: "pick-1",
+        title: "A",
+        categoryId: "cat-1",
+        createdAt: new Date("2025-01-02T00:00:00.000Z"),
+        creatorId: "user-1",
+      },
+    ]);
+
+    const response = await PATCH(
+      makeRequest({ name: "Admin Rename", description: "" }),
+      {
+        params: Promise.resolve({ id: "group-1", categoryId: "cat-1" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockUpdateCategory).toHaveBeenCalledWith("cat-1", {
+      name: "Admin Rename",
+      description: "",
+    });
   });
 
   it("returns 409 when renaming and another member has picks in the category", async () => {
