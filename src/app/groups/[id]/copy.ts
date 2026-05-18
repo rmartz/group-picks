@@ -23,6 +23,9 @@ export const GROUP_DETAIL_COPY = {
   openSection: "Open",
   regenerateButton: "Revoke & Regenerate",
   regeneratingButton: "Regenerating…",
+  saveExpiryButton: "Save Expiry",
+  setExpiryLabel: "Set expiry date",
+  settingExpiryButton: "Saving…",
   tabs: {
     categories: "Categories",
     members: "Members",

@@ -19,7 +19,7 @@ function isFirebaseGroupInvite(data: unknown): data is FirebaseGroupInvite {
   return (
     typeof d["groupId"] === "string" &&
     typeof d["createdAt"] === "number" &&
-    (d["expiresAt"] === null || typeof d["expiresAt"] === "number") &&
+    (d["expiresAt"] == null || typeof d["expiresAt"] === "number") &&
     typeof d["active"] === "boolean"
   );
 }
@@ -64,6 +64,16 @@ export async function createGroupInvite(
   await db.ref().update(updates);
 
   return invite;
+}
+
+export async function updateGroupInviteExpiry(
+  token: string,
+  expiresAt: Date | null,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db
+    .ref(`invites/${token}/expiresAt`)
+    .set(expiresAt !== null ? expiresAt.getTime() : null);
 }
 
 export async function addGroupMember(
