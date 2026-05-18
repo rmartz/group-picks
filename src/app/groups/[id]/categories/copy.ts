@@ -2,10 +2,13 @@ export const CATEGORY_COPY = {
   addCategoryButton: "Add Category",
   cancelButton: "Cancel",
   categoriesHeading: "Categories",
+  closedBadge: "Closed",
   createPickButton: "Create Pick",
+  dueDateLabel: "Due:",
   editButton: "Edit",
   noCategoriesMessage: "No categories yet.",
   noPicksMessage: "No picks yet.",
+  openBadge: "Open",
   saveButton: "Save",
   createForm: {
     title: "Add Category",
