@@ -146,13 +146,33 @@ export function CategoryListView({
                   ) : (
                     <ul className="space-y-1">
                       {picks.map((pick) => (
-                        <li key={pick.id}>
+                        <li
+                          key={pick.id}
+                          className="flex items-center gap-3 rounded px-3 py-2 text-sm"
+                        >
                           <Link
                             href={`/groups/${groupId}/categories/${category.id}/picks/${pick.id}`}
-                            className="block rounded px-3 py-2 text-sm hover:bg-gray-50"
+                            className="flex-1 hover:underline"
                           >
                             {pick.title}
                           </Link>
+                          <div className="flex shrink-0 items-center gap-2">
+                            {pick.closedAt !== undefined ? (
+                              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                {CATEGORY_COPY.closedBadge}
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                {CATEGORY_COPY.openBadge}
+                              </span>
+                            )}
+                            {pick.dueDate && (
+                              <span className="text-xs text-muted-foreground">
+                                {CATEGORY_COPY.dueDateLabel}{" "}
+                                <span>{pick.dueDate.toLocaleDateString()}</span>
+                              </span>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>
