@@ -13,6 +13,15 @@ const PICK_CLOSED_ERROR = "Pick is closed and no longer accepts changes.";
 const PICK_DUE_DATE_PASSED_ERROR =
   "Pick due date has passed. The pick has been closed and no longer accepts changes.";
 
+export class PickNotFoundError extends Error {
+  readonly code = "pick_not_found";
+
+  constructor() {
+    super("Pick not found");
+    this.name = "PickNotFoundError";
+  }
+}
+
 export class PickWriteClosedError extends Error {
   readonly code = "pick_closed";
 
@@ -73,7 +82,7 @@ export async function assertPickIsOpenForWrite(
   );
 
   if (!result.snapshot.exists()) {
-    throw new Error("Pick not found");
+    throw new PickNotFoundError();
   }
 
   const pick = firebaseToPick(
