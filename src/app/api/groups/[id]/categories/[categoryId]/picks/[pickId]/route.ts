@@ -5,6 +5,7 @@ import { getGroupById } from "@/server/data/groups";
 import {
   assertPickIsOpenForWrite,
   PICK_CLOSED_API_ERROR,
+  PickNotFoundError,
   PickWriteClosedError,
   updatePick,
 } from "@/server/data/picks";
@@ -108,7 +109,7 @@ export async function PATCH(
         { status: 409 },
       );
     }
-    if (err instanceof Error && err.message === "Pick not found") {
+    if (err instanceof PickNotFoundError) {
       return NextResponse.json({ error: "Pick not found" }, { status: 404 });
     }
     throw err;

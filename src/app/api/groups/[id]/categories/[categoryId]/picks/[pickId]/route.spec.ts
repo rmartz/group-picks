@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PickWriteClosedError } from "@/server/data/picks";
+import { PickNotFoundError, PickWriteClosedError } from "@/server/data/picks";
 
 const {
   mockGetVerifiedUid,
@@ -32,6 +32,13 @@ vi.mock("@/server/data/picks", () => ({
   assertPickIsOpenForWrite: mockAssertPickIsOpenForWrite,
   updatePick: mockUpdatePick,
   PICK_CLOSED_API_ERROR: "Pick is closed",
+  PickNotFoundError: class PickNotFoundError extends Error {
+    readonly code = "pick_not_found";
+    constructor() {
+      super("Pick not found");
+      this.name = "PickNotFoundError";
+    }
+  },
   PickWriteClosedError: class PickWriteClosedError extends Error {
     readonly code = "pick_closed";
     constructor(message = "Pick is closed and no longer accepts changes.") {
@@ -173,9 +180,7 @@ describe("PATCH /api/.../picks/[pickId]", () => {
 
   describe("Existing pick-not-found path still returns 404", () => {
     it("returns 404 when pick not found is thrown from assertPickIsOpenForWrite", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
-        new Error("Pick not found"),
-      );
+      mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
 
       const response = await PATCH(
         makeRequest({ title: "New Title", description: "", topCount: 1 }),
