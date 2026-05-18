@@ -29,15 +29,17 @@ export function TierRanking({
   >(initialTierAssignments);
 
   function handleOptionClick(optionId: string) {
-    const current = tierAssignments[optionId] ?? RankingTier.Unranked;
-    const currentIndex = TIER_ORDER.indexOf(current);
-    const nextTier =
-      TIER_ORDER[(currentIndex + 1) % TIER_ORDER.length] ?? RankingTier.LoveIt;
-    const next = { ...tierAssignments, [optionId]: nextTier };
-
-    setTierAssignments(next);
-    saveRankings(groupId, categoryId, pickId, next).catch(() => {
-      // fire-and-forget: ranking save failures are non-fatal
+    setTierAssignments((prev) => {
+      const current = prev[optionId] ?? RankingTier.Unranked;
+      const currentIndex = TIER_ORDER.indexOf(current);
+      const nextTier =
+        TIER_ORDER[(currentIndex + 1) % TIER_ORDER.length] ??
+        RankingTier.LoveIt;
+      const next = { ...prev, [optionId]: nextTier };
+      saveRankings(groupId, categoryId, pickId, next).catch(() => {
+        // fire-and-forget: ranking save failures are non-fatal
+      });
+      return next;
     });
   }
 
