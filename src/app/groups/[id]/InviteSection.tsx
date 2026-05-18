@@ -24,7 +24,9 @@ export function InviteSection({
     initialExpiresAt ? new Date(initialExpiresAt) : undefined,
   );
   const [dateInput, setDateInput] = useState(
-    initialExpiresAt ? new Date(initialExpiresAt).toISOString().slice(0, 10) : "",
+    initialExpiresAt
+      ? new Date(initialExpiresAt).toISOString().slice(0, 10)
+      : "",
   );
   const [regenerating, setRegenerating] = useState(false);
   const [settingExpiry, setSettingExpiry] = useState(false);
