@@ -55,7 +55,12 @@ export async function PATCH(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = (await request.json()) as Record<string, unknown>;
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
   if (!("expiresAt" in body)) {
     return NextResponse.json({ error: "Missing expiresAt" }, { status: 400 });
   }
@@ -64,20 +69,21 @@ export async function PATCH(
 
   let expiresAt: Date | null = null;
   if (rawExpiresAt !== null) {
-    if (typeof rawExpiresAt !== "string") {
+    if (
+      typeof rawExpiresAt !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(rawExpiresAt) ||
+      isNaN(new Date(rawExpiresAt).getTime()) ||
+      new Date(rawExpiresAt).toISOString().slice(0, 10) !== rawExpiresAt
+    ) {
       return NextResponse.json({ error: "Invalid expiresAt" }, { status: 400 });
     }
-    const parsed = new Date(rawExpiresAt);
-    if (isNaN(parsed.getTime())) {
-      return NextResponse.json({ error: "Invalid expiresAt" }, { status: 400 });
-    }
-    if (parsed <= new Date()) {
+    expiresAt = new Date(`${rawExpiresAt}T23:59:59.999Z`);
+    if (expiresAt <= new Date()) {
       return NextResponse.json(
         { error: "expiresAt must be in the future" },
         { status: 400 },
       );
     }
-    expiresAt = parsed;
   }
 
   await updateGroupInviteExpiry(group.inviteToken, expiresAt);

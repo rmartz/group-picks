@@ -11,6 +11,8 @@ const meta: Meta<typeof InviteSectionView> = {
   args: {
     inviteUrl: INVITE_URL,
     expiresAt: new Date("2026-05-13T12:00:00.000Z"),
+    dateInput: "2026-05-13",
+    onDateChange: () => undefined,
     onRegenerate: () => undefined,
     onCopy: () => undefined,
     onSetExpiry: () => undefined,
@@ -30,6 +32,7 @@ export const NoToken: Story = {
   args: {
     inviteUrl: undefined,
     expiresAt: undefined,
+    dateInput: "",
   },
 };
 

@@ -23,6 +23,9 @@ export function InviteSection({
   const [expiresAt, setExpiresAt] = useState(
     initialExpiresAt ? new Date(initialExpiresAt) : undefined,
   );
+  const [dateInput, setDateInput] = useState(
+    initialExpiresAt ? new Date(initialExpiresAt).toISOString().slice(0, 10) : "",
+  );
   const [regenerating, setRegenerating] = useState(false);
   const [settingExpiry, setSettingExpiry] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -48,7 +51,9 @@ export function InviteSection({
     try {
       const result = await regenerateInvite(groupId);
       setToken(result.token);
-      setExpiresAt(new Date(result.expiresAt));
+      const newExpiresAt = new Date(result.expiresAt);
+      setExpiresAt(newExpiresAt);
+      setDateInput(newExpiresAt.toISOString().slice(0, 10));
       setCopied(false);
     } catch {
       setError(GROUP_DETAIL_COPY.inviteErrors.default);
@@ -57,14 +62,11 @@ export function InviteSection({
     }
   }
 
-  async function handleSetExpiry(date: Date | null) {
+  async function handleSetExpiry(date: string | null) {
     setError(undefined);
     setSettingExpiry(true);
     try {
-      const result = await updateInviteExpiry(
-        groupId,
-        date !== null ? date.toISOString().slice(0, 10) : null,
-      );
+      const result = await updateInviteExpiry(groupId, date);
       setExpiresAt(
         result.expiresAt !== null ? new Date(result.expiresAt) : undefined,
       );
@@ -96,6 +98,8 @@ export function InviteSection({
     <InviteSectionView
       inviteUrl={inviteUrl}
       expiresAt={expiresAt}
+      dateInput={dateInput}
+      onDateChange={setDateInput}
       onRegenerate={() => void handleRegenerate()}
       onCopy={() => void handleCopy()}
       onSetExpiry={(date) => void handleSetExpiry(date)}

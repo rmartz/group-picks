@@ -91,6 +91,18 @@ describe("PATCH /api/groups/[id]/invite", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 when body is invalid JSON", async () => {
+    const request = new Request("http://localhost/api/groups/group-1/invite", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: "not-valid-json",
+    });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ id: "group-1" }),
+    });
+    expect(response.status).toBe(400);
+  });
+
   it("returns 400 when expiresAt is a past date", async () => {
     const response = await PATCH(makePatchRequest({ expiresAt: PAST_DATE }), {
       params: Promise.resolve({ id: "group-1" }),
@@ -101,6 +113,14 @@ describe("PATCH /api/groups/[id]/invite", () => {
   it("returns 400 when expiresAt is not a valid date string", async () => {
     const response = await PATCH(
       makePatchRequest({ expiresAt: "not-a-date" }),
+      { params: Promise.resolve({ id: "group-1" }) },
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 400 when expiresAt is a datetime string rather than YYYY-MM-DD", async () => {
+    const response = await PATCH(
+      makePatchRequest({ expiresAt: "2099-12-31T00:00:00.000Z" }),
       { params: Promise.resolve({ id: "group-1" }) },
     );
     expect(response.status).toBe(400);

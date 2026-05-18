@@ -15,6 +15,8 @@ function makeProps(
   return {
     inviteUrl: INVITE_URL,
     expiresAt: EXPIRES_AT,
+    dateInput: EXPIRES_AT.toISOString().slice(0, 10),
+    onDateChange: () => undefined,
     onRegenerate: () => undefined,
     onCopy: () => undefined,
     onSetExpiry: () => undefined,
@@ -145,7 +147,7 @@ describe("InviteSectionView", () => {
   });
 
   it("pre-fills the date input with the current expiry in YYYY-MM-DD format", () => {
-    render(<InviteSectionView {...makeProps({ expiresAt: EXPIRES_AT })} />);
+    render(<InviteSectionView {...makeProps({ dateInput: "2026-05-13" })} />);
 
     const input = screen.getByLabelText(GROUP_DETAIL_COPY.setExpiryLabel);
     expect((input as HTMLInputElement).value).toBe("2026-05-13");
@@ -159,25 +161,27 @@ describe("InviteSectionView", () => {
     ).toBeDefined();
   });
 
-  it("calls onSetExpiry with a Date when save is clicked with a valid date", () => {
+  it("calls onSetExpiry with a string when save is clicked with a valid date", () => {
     const onSetExpiry = vi.fn();
-    render(<InviteSectionView {...makeProps({ onSetExpiry })} />);
+    render(
+      <InviteSectionView
+        {...makeProps({ onSetExpiry, dateInput: "2099-06-15" })}
+      />,
+    );
 
-    const input = screen.getByLabelText(GROUP_DETAIL_COPY.setExpiryLabel);
-    fireEvent.change(input, { target: { value: "2099-06-15" } });
     fireEvent.click(
       screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
     );
 
-    expect(onSetExpiry).toHaveBeenCalledWith(new Date("2099-06-15"));
+    expect(onSetExpiry).toHaveBeenCalledWith("2099-06-15");
   });
 
   it("calls onSetExpiry with null when save is clicked with an empty date input", () => {
     const onSetExpiry = vi.fn();
-    render(<InviteSectionView {...makeProps({ onSetExpiry })} />);
+    render(
+      <InviteSectionView {...makeProps({ onSetExpiry, dateInput: "" })} />,
+    );
 
-    const input = screen.getByLabelText(GROUP_DETAIL_COPY.setExpiryLabel);
-    fireEvent.change(input, { target: { value: "" } });
     fireEvent.click(
       screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
     );

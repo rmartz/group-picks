@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
-
 import { GROUP_DETAIL_COPY } from "./copy";
 
 interface InviteSectionViewProps {
   inviteUrl: string | undefined;
   expiresAt: Date | undefined;
+  dateInput: string;
+  onDateChange: (value: string) => void;
   onRegenerate: () => void;
   onCopy: () => void;
-  onSetExpiry: (date: Date | null) => void;
+  onSetExpiry: (date: string | null) => void;
   regenerating: boolean;
   copied: boolean;
   settingExpiry: boolean;
@@ -19,6 +19,8 @@ interface InviteSectionViewProps {
 export function InviteSectionView({
   inviteUrl,
   expiresAt,
+  dateInput,
+  onDateChange,
   onRegenerate,
   onCopy,
   onSetExpiry,
@@ -27,12 +29,8 @@ export function InviteSectionView({
   settingExpiry,
   error,
 }: InviteSectionViewProps) {
-  const [dateInput, setDateInput] = useState(
-    expiresAt ? expiresAt.toISOString().slice(0, 10) : "",
-  );
-
   function handleSaveExpiry() {
-    onSetExpiry(dateInput ? new Date(dateInput) : null);
+    onSetExpiry(dateInput || null);
   }
 
   return (
@@ -73,7 +71,7 @@ export function InviteSectionView({
           type="date"
           value={dateInput}
           onChange={(e) => {
-            setDateInput(e.target.value);
+            onDateChange(e.target.value);
           }}
           aria-label={GROUP_DETAIL_COPY.setExpiryLabel}
           className="rounded border px-2 py-1 text-sm"

@@ -13,14 +13,14 @@ export const GROUP_DETAIL_COPY = {
     default: "Something went wrong. Please try again.",
   },
   inviteLabel: "Invite Link",
-  saveExpiryButton: "Save Expiry",
-  setExpiryLabel: "Set expiry date",
-  settingExpiryButton: "Saving…",
   leaveButton: "Leave Group",
   membersLabel: "Members",
   notFound: "Group not found.",
   regenerateButton: "Revoke & Regenerate",
   regeneratingButton: "Regenerating…",
+  saveExpiryButton: "Save Expiry",
+  setExpiryLabel: "Set expiry date",
+  settingExpiryButton: "Saving…",
 } as const;
 
 export const CATEGORY_LIST_COPY = {
