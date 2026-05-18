@@ -185,4 +185,92 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       expect(response.status).toBe(404);
     });
   });
+
+  describe("PATCH rejects non-YYYY-MM-DD date strings for dueDate", () => {
+    it("returns 400 for a human-readable date string", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "May 14, 2026",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+    });
+
+    it("returns 400 for an ISO datetime string", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-05-14T12:00:00Z",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("PATCH accepts YYYY-MM-DD dueDate and passes a Date to updatePick", () => {
+    it("passes the parsed Date to updatePick for a valid YYYY-MM-DD dueDate", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-01-15",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockUpdatePick).toHaveBeenCalledWith(
+        "cat-1",
+        "pick-1",
+        expect.objectContaining({
+          dueDate: new Date("2026-01-15"),
+        }),
+      );
+    });
+  });
+
+  describe("PATCH clears dueDate when null or absent", () => {
+    it("passes dueDate: undefined to updatePick when dueDate is null", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: null,
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockUpdatePick).toHaveBeenCalledWith(
+        "cat-1",
+        "pick-1",
+        expect.objectContaining({ dueDate: undefined }),
+      );
+    });
+
+    it("passes dueDate: undefined to updatePick when dueDate is absent", async () => {
+      const response = await PATCH(
+        makeRequest({ title: "T", description: "", topCount: 1 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockUpdatePick).toHaveBeenCalledWith(
+        "cat-1",
+        "pick-1",
+        expect.objectContaining({ dueDate: undefined }),
+      );
+    });
+  });
 });

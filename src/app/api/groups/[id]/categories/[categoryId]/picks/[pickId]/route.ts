@@ -17,23 +17,6 @@ interface UpdatePickRequestBody {
   dueDate?: unknown;
 }
 
-function parseDueDate(value: unknown): Date | undefined {
-  if (value === undefined || value === null || value === "") {
-    return undefined;
-  }
-
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const parsedDate = new Date(value);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return undefined;
-  }
-
-  return parsedDate;
-}
-
 export async function PATCH(
   request: Request,
   {
@@ -86,17 +69,17 @@ export async function PATCH(
     );
   }
 
-  if (
-    body.dueDate !== undefined &&
-    body.dueDate !== null &&
-    body.dueDate !== "" &&
-    (typeof body.dueDate !== "string" ||
-      Number.isNaN(new Date(body.dueDate).getTime()))
-  ) {
-    return NextResponse.json(
-      { error: "dueDate must be a valid date" },
-      { status: 400 },
-    );
+  if (typeof body.dueDate === "string" && body.dueDate !== "") {
+    const parsed = new Date(body.dueDate);
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== body.dueDate
+    ) {
+      return NextResponse.json(
+        { error: "dueDate is invalid" },
+        { status: 400 },
+      );
+    }
   }
 
   try {
@@ -118,7 +101,10 @@ export async function PATCH(
   const description =
     typeof body.description === "string" ? body.description.trim() : "";
   const topCount = body.topCount;
-  const dueDate = parseDueDate(body.dueDate);
+  const dueDate =
+    typeof body.dueDate === "string" && body.dueDate !== ""
+      ? new Date(body.dueDate)
+      : undefined;
 
   await updatePick(categoryId, pickId, {
     title,
