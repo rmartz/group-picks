@@ -72,6 +72,84 @@ function getNamedStringProperty(objectLiteral, propertyName) {
   return undefined;
 }
 
+function getNamedPropertyInitializer(objectLiteral, propertyName) {
+  for (const property of objectLiteral.properties) {
+    if (!ts.isPropertyAssignment(property)) {
+      continue;
+    }
+
+    if (
+      !ts.isIdentifier(property.name) ||
+      property.name.text !== propertyName
+    ) {
+      continue;
+    }
+
+    return property.initializer;
+  }
+
+  return undefined;
+}
+
+function getNamedStoryFilter(objectLiteral, propertyName) {
+  const initializer = getNamedPropertyInitializer(objectLiteral, propertyName);
+  if (!initializer) {
+    return undefined;
+  }
+
+  if (
+    ts.isStringLiteral(initializer) ||
+    ts.isNoSubstitutionTemplateLiteral(initializer)
+  ) {
+    return {
+      type: "names",
+      values: new Set([initializer.text]),
+    };
+  }
+
+  if (ts.isArrayLiteralExpression(initializer)) {
+    const names = initializer.elements
+      .filter(
+        (element) =>
+          ts.isStringLiteral(element) ||
+          ts.isNoSubstitutionTemplateLiteral(element),
+      )
+      .map((element) => element.text);
+
+    return {
+      type: "names",
+      values: new Set(names),
+    };
+  }
+
+  if (ts.isRegularExpressionLiteral(initializer)) {
+    const match = initializer.text.match(/^\/(.+)\/([a-z]*)$/i);
+    if (!match) {
+      return undefined;
+    }
+
+    const [, pattern, flags] = match;
+    return {
+      type: "pattern",
+      value: new RegExp(pattern, flags),
+    };
+  }
+
+  return undefined;
+}
+
+function matchesStoryFilter(storyName, filter) {
+  if (!filter) {
+    return true;
+  }
+
+  if (filter.type === "names") {
+    return filter.values.has(storyName);
+  }
+
+  return filter.value.test(storyName);
+}
+
 function hasModifier(node, kind) {
   return node.modifiers?.some((modifier) => modifier.kind === kind) ?? false;
 }
@@ -177,17 +255,38 @@ function parseStoryFile(storyFilePath) {
 
   const componentName = metaTitle?.split("/").filter(Boolean).at(-1) || metaId;
   const titleBase = metaId ?? metaTitle;
-  const storyExports = extractStoryExports(sourceFile);
+  const includeStories = getNamedStoryFilter(
+    defaultExportObjectLiteral,
+    "includeStories",
+  );
+  const excludeStories = getNamedStoryFilter(
+    defaultExportObjectLiteral,
+    "excludeStories",
+  );
+  const storyExports = extractStoryExports(sourceFile).filter(
+    (storyExportName) => {
+      if (!matchesStoryFilter(storyExportName, includeStories)) {
+        return false;
+      }
+
+      if (!excludeStories) {
+        return true;
+      }
+
+      return !matchesStoryFilter(storyExportName, excludeStories);
+    },
+  );
 
   return storyExports.map((storyExportName) => {
     const titlePart = toKebabCase(titleBase);
     const storyPart = toKebabCase(storyExportName);
+    const storyId = `${titlePart}--${storyPart}`;
 
     return {
       componentName,
-      name: `${toKebabCase(componentName)}-${storyPart}`,
+      name: storyId.replace(/--/g, "-"),
       storyExportName,
-      storyId: `${titlePart}--${storyPart}`,
+      storyId,
     };
   });
 }

@@ -67,7 +67,7 @@ jobs:
             --github-output="$GITHUB_OUTPUT"
       - name: Install Playwright Chromium
         if: steps.screenshot-config.outputs.has_stories == 'true'
-        run: pnpm exec playwright install chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Start Storybook
         if: steps.screenshot-config.outputs.has_stories == 'true'
         run: pnpm storybook --ci --port 6006 &

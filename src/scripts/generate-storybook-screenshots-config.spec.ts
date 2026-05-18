@@ -18,6 +18,7 @@ const SCRIPT_PATH = join(
 );
 
 interface GenerateScreenshotsConfigResult {
+  githubOutput: string;
   output: string;
   status: number | null;
 }
@@ -25,9 +26,11 @@ interface GenerateScreenshotsConfigResult {
 function runGenerateScreenshotsConfig(options: {
   changedFiles: string[];
   files: Record<string, string>;
+  withGithubOutput?: boolean;
 }): GenerateScreenshotsConfigResult {
   const tempRoot = mkdtempSync(join(tmpdir(), "storybook-screenshots-"));
   const changedFilesPath = join(tempRoot, "changed-files.txt");
+  const githubOutputPath = join(tempRoot, "github-output.txt");
 
   try {
     for (const [relativePath, content] of Object.entries(options.files)) {
@@ -44,6 +47,9 @@ function runGenerateScreenshotsConfig(options: {
         SCRIPT_PATH,
         "--changed-files=changed-files.txt",
         "--output=.github/screenshots.dynamic.yml",
+        ...(options.withGithubOutput
+          ? [`--github-output=${githubOutputPath}`]
+          : []),
       ],
       {
         cwd: tempRoot,
@@ -57,6 +63,9 @@ function runGenerateScreenshotsConfig(options: {
     );
 
     return {
+      githubOutput: options.withGithubOutput
+        ? readFileSync(githubOutputPath, "utf8")
+        : "",
       output,
       status: result.status,
     };
@@ -89,6 +98,8 @@ export const WithLabel: Story = {};
     });
 
     expect(result.status).toBe(0);
+    expect(result.output).toContain('name: "components-ui-bar-default"');
+    expect(result.output).toContain('name: "components-ui-bar-with-label"');
     expect(result.output).toContain(
       "http://127.0.0.1:6006/?path=/story/components-ui-bar--default",
     );
@@ -120,7 +131,47 @@ export const Populated: Story = {};
 
     expect(result.status).toBe(0);
     expect(result.output).toContain(
+      'name: "profile-user-profile-view-populated"',
+    );
+    expect(result.output).toContain(
       "http://127.0.0.1:6006/?path=/story/profile-user-profile-view--populated",
+    );
+  });
+
+  it("respects includeStories and excludeStories when collecting story exports", () => {
+    const result = runGenerateScreenshotsConfig({
+      changedFiles: ["src/components/ui/bar.tsx"],
+      files: {
+        "src/components/ui/bar.stories.tsx": `
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+const meta = {
+  title: "Components/UI/Bar",
+  includeStories: ["Default", "WithLabel"],
+  excludeStories: ["WithLabel"],
+} satisfies Meta;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+export const WithLabel: Story = {};
+export const helper = () => {};
+`,
+        "src/components/ui/bar.tsx": "export const Bar = () => null;\n",
+      },
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.output).toContain(
+      "http://127.0.0.1:6006/?path=/story/components-ui-bar--default",
+    );
+    expect(result.output).not.toContain(
+      "http://127.0.0.1:6006/?path=/story/components-ui-bar--with-label",
+    );
+    expect(result.output).not.toContain(
+      "http://127.0.0.1:6006/?path=/story/components-ui-bar--helper",
     );
   });
 
@@ -132,5 +183,45 @@ export const Populated: Story = {};
 
     expect(result.status).toBe(0);
     expect(result.output.trim()).toBe("version: 1\nscreenshots: []");
+  });
+
+  it("writes GitHub outputs when no stories are mapped", () => {
+    const result = runGenerateScreenshotsConfig({
+      changedFiles: ["README.md"],
+      files: {},
+      withGithubOutput: true,
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.githubOutput).toContain("story_count=0");
+    expect(result.githubOutput).toContain("has_stories=false");
+  });
+
+  it("writes GitHub outputs when stories are mapped", () => {
+    const result = runGenerateScreenshotsConfig({
+      changedFiles: ["src/components/ui/bar.tsx"],
+      files: {
+        "src/components/ui/bar.stories.tsx": `
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+const meta = {
+  title: "Components/UI/Bar",
+} satisfies Meta;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+export const WithLabel: Story = {};
+`,
+        "src/components/ui/bar.tsx": "export const Bar = () => null;\n",
+      },
+      withGithubOutput: true,
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.githubOutput).toContain("story_count=2");
+    expect(result.githubOutput).toContain("has_stories=true");
   });
 });
