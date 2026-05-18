@@ -7,13 +7,11 @@ const {
   mockGetGroupById,
   mockGetGroupInviteByToken,
   mockAddGroupMember,
-  mockRevokeGroupInvite,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetGroupInviteByToken: vi.fn(),
   mockAddGroupMember: vi.fn(),
-  mockRevokeGroupInvite: vi.fn(),
 }));
 
 vi.mock("@/server/utils/auth", () => ({
@@ -27,7 +25,6 @@ vi.mock("@/server/data/groups", () => ({
 vi.mock("@/server/data/invites", () => ({
   getGroupInviteByToken: mockGetGroupInviteByToken,
   addGroupMember: mockAddGroupMember,
-  revokeGroupInvite: mockRevokeGroupInvite,
 }));
 
 const { POST } = await import("./route");
@@ -71,13 +68,16 @@ describe("POST /api/groups/join — single-use enforcement", () => {
     mockGetGroupInviteByToken.mockResolvedValue(makeInvite());
     mockGetGroupById.mockResolvedValue(makeGroup());
     mockAddGroupMember.mockResolvedValue(undefined);
-    mockRevokeGroupInvite.mockResolvedValue(undefined);
   });
 
   it("revokes the invite after a successful join via a Personal link", async () => {
     const response = await POST(makeRequest({ token: "valid-token" }));
     expect(response.status).toBe(200);
-    expect(mockRevokeGroupInvite).toHaveBeenCalledWith("valid-token");
+    expect(mockAddGroupMember).toHaveBeenCalledWith(
+      "group-1",
+      "user-2",
+      "valid-token",
+    );
   });
 
   it("does not revoke the invite after a successful join via a Group link", async () => {
@@ -86,7 +86,7 @@ describe("POST /api/groups/join — single-use enforcement", () => {
     );
     const response = await POST(makeRequest({ token: "valid-token" }));
     expect(response.status).toBe(200);
-    expect(mockRevokeGroupInvite).not.toHaveBeenCalled();
+    expect(mockAddGroupMember).toHaveBeenCalledWith("group-1", "user-2", undefined);
   });
 
   it("returns 401 when not authenticated", async () => {

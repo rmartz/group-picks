@@ -8,6 +8,10 @@ export interface FirebaseGroupInvite {
   mode?: InviteMode;
 }
 
+function isInviteMode(value: InviteMode | undefined): value is InviteMode {
+  return value !== undefined && Object.values(InviteMode).includes(value);
+}
+
 export function groupInviteToFirebase(
   invite: Pick<
     GroupInvite,
@@ -33,6 +37,6 @@ export function firebaseToGroupInvite(
     createdAt: new Date(data.createdAt),
     expiresAt: data.expiresAt !== null ? new Date(data.expiresAt) : undefined,
     active: data.active,
-    mode: data.mode ?? InviteMode.Group,
+    mode: isInviteMode(data.mode) ? data.mode : InviteMode.Group,
   };
 }

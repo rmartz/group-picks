@@ -1,3 +1,5 @@
+import { InviteMode } from "@/lib/types/invite";
+
 export class LeaveGroupLastMemberError extends Error {}
 
 export async function leaveGroup(groupId: string): Promise<void> {
@@ -42,8 +44,8 @@ export async function createGroup(name: string): Promise<string> {
 
 export async function regenerateInvite(
   groupId: string,
-  mode: string,
-): Promise<{ token: string; expiresAt: string; mode: string }> {
+  mode: InviteMode,
+): Promise<{ token: string; expiresAt: string; mode: InviteMode }> {
   const response = await fetch(`/api/groups/${groupId}/invite`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -59,7 +61,7 @@ export async function regenerateInvite(
   return (await response.json()) as {
     token: string;
     expiresAt: string;
-    mode: string;
+    mode: InviteMode;
   };
 }
 

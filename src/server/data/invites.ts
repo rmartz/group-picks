@@ -79,7 +79,15 @@ export async function revokeGroupInvite(token: string): Promise<void> {
 export async function addGroupMember(
   groupId: string,
   uid: string,
+  revokeToken?: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db.ref(`groups/${groupId}/members/${uid}`).set(true);
+  if (revokeToken) {
+    await db.ref().update({
+      [`groups/${groupId}/members/${uid}`]: true,
+      [`invites/${revokeToken}/active`]: false,
+    });
+  } else {
+    await db.ref(`groups/${groupId}/members/${uid}`).set(true);
+  }
 }

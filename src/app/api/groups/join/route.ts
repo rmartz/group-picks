@@ -5,7 +5,6 @@ import { getGroupById } from "@/server/data/groups";
 import {
   addGroupMember,
   getGroupInviteByToken,
-  revokeGroupInvite,
 } from "@/server/data/invites";
 import { getVerifiedUid } from "@/server/utils/auth";
 
@@ -68,11 +67,9 @@ export async function POST(request: Request) {
     );
   }
 
-  await addGroupMember(invite.groupId, uid);
-
-  if (invite.mode === InviteMode.Personal) {
-    await revokeGroupInvite(token);
-  }
+  const revokeToken =
+    invite.mode === InviteMode.Personal ? token : undefined;
+  await addGroupMember(invite.groupId, uid, revokeToken);
 
   return NextResponse.json({ groupId: invite.groupId });
 }
