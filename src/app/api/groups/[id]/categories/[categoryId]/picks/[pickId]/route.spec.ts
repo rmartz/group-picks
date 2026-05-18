@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PickWriteClosedError } from "@/server/data/picks";
+import { PickNotFoundError, PickWriteClosedError } from "@/server/data/picks";
 
 const {
   mockGetVerifiedUid,
@@ -32,6 +32,13 @@ vi.mock("@/server/data/picks", () => ({
   assertPickIsOpenForWrite: mockAssertPickIsOpenForWrite,
   updatePick: mockUpdatePick,
   PICK_CLOSED_API_ERROR: "Pick is closed",
+  PickNotFoundError: class PickNotFoundError extends Error {
+    readonly code = "pick_not_found";
+    constructor() {
+      super("Pick not found");
+      this.name = "PickNotFoundError";
+    }
+  },
   PickWriteClosedError: class PickWriteClosedError extends Error {
     readonly code = "pick_closed";
     constructor(message = "Pick is closed and no longer accepts changes.") {
@@ -173,9 +180,7 @@ describe("PATCH /api/.../picks/[pickId]", () => {
 
   describe("Existing pick-not-found path still returns 404", () => {
     it("returns 404 when pick not found is thrown from assertPickIsOpenForWrite", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
-        new Error("Pick not found"),
-      );
+      mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
 
       const response = await PATCH(
         makeRequest({ title: "New Title", description: "", topCount: 1 }),
@@ -183,6 +188,94 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       );
 
       expect(response.status).toBe(404);
+    });
+  });
+
+  describe("PATCH rejects non-YYYY-MM-DD date strings for dueDate", () => {
+    it("returns 400 for a human-readable date string", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "May 14, 2026",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+    });
+
+    it("returns 400 for an ISO datetime string", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-05-14T12:00:00Z",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("PATCH accepts YYYY-MM-DD dueDate and passes a Date to updatePick", () => {
+    it("passes the parsed Date to updatePick for a valid YYYY-MM-DD dueDate", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-01-15",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockUpdatePick).toHaveBeenCalledWith(
+        "cat-1",
+        "pick-1",
+        expect.objectContaining({
+          dueDate: new Date("2026-01-15"),
+        }),
+      );
+    });
+  });
+
+  describe("PATCH clears dueDate when null or absent", () => {
+    it("passes dueDate: undefined to updatePick when dueDate is null", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: null,
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockUpdatePick).toHaveBeenCalledWith(
+        "cat-1",
+        "pick-1",
+        expect.objectContaining({ dueDate: undefined }),
+      );
+    });
+
+    it("passes dueDate: undefined to updatePick when dueDate is absent", async () => {
+      const response = await PATCH(
+        makeRequest({ title: "T", description: "", topCount: 1 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockUpdatePick).toHaveBeenCalledWith(
+        "cat-1",
+        "pick-1",
+        expect.objectContaining({ dueDate: undefined }),
+      );
     });
   });
 });

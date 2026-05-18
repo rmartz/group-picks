@@ -1,8 +1,8 @@
 export const GROUP_DETAIL_COPY = {
-  categoriesLabel: "Categories",
+  closedBadge: "closed",
+  closedSection: "Closed",
   copiedButton: "Copied!",
   copyButton: "Copy",
-  createdAtLabel: "Created",
   errors: {
     default: "Failed to leave group. Please try again.",
     lastMember: "You are the only member — groups cannot be left empty.",
@@ -14,10 +14,20 @@ export const GROUP_DETAIL_COPY = {
   },
   inviteLabel: "Invite Link",
   leaveButton: "Leave Group",
-  membersLabel: "Members",
+  membersHeading: "Members",
+  membersLabel: "members",
+  memberSingularLabel: "member",
+  noPicksMessage: "No picks yet. Start one from the Categories tab.",
   notFound: "Group not found.",
+  openBadge: "open",
+  openSection: "Open",
   regenerateButton: "Revoke & Regenerate",
   regeneratingButton: "Regenerating…",
+  tabs: {
+    categories: "Categories",
+    members: "Members",
+    picks: "Picks",
+  },
 } as const;
 
 export const CATEGORY_LIST_COPY = {

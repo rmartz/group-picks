@@ -6,6 +6,7 @@ import type { FirebasePickPublic } from "@/lib/firebase/schema/pick";
 import {
   assertPickIsOpenForWrite,
   getPickById,
+  PickNotFoundError,
   PickWriteClosedError,
 } from "./picks";
 
@@ -155,7 +156,7 @@ describe("assertPickIsOpenForWrite", () => {
     expect(storedPick.closedAt).toBe(closedAt);
   });
 
-  it("throws Pick not found when the transaction finds no data", async () => {
+  it("throws PickNotFoundError when the transaction finds no data", async () => {
     const transaction = vi.fn(
       (
         update: (
@@ -180,7 +181,7 @@ describe("assertPickIsOpenForWrite", () => {
 
     await expect(
       assertPickIsOpenForWrite("cat-123", "pick-missing"),
-    ).rejects.toThrow("Pick not found");
+    ).rejects.toBeInstanceOf(PickNotFoundError);
   });
 });
 
