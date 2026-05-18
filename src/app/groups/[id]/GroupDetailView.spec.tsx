@@ -22,6 +22,10 @@ vi.mock("./LeaveGroupButtonView", () => ({
   LeaveGroupButtonView: () => <div data-testid="leave-group-button" />,
 }));
 
+vi.mock("./GroupSettingsPanelView", () => ({
+  GroupSettingsPanelView: () => <div data-testid="group-settings-panel" />,
+}));
+
 function makeGroup() {
   return {
     id: "group-1",
@@ -53,6 +57,9 @@ function renderView(
       memberNames={memberNames}
       picksByCategory={{}}
       initialInviteMode={InviteMode.Group}
+      onTogglePicksRestricted={() => undefined}
+      isSavingSettings={false}
+      settingsError={undefined}
       {...overrides}
     />,
   );
@@ -234,6 +241,20 @@ describe("GroupDetailView", () => {
       "p.text-xs.text-muted-foreground",
     );
     expect(subtitleParagraph).toBeNull();
+  });
+
+  describe("group settings panel", () => {
+    it("renders the settings panel for admin users", () => {
+      const group = { ...makeGroup(), adminIds: ["user-123"] };
+      renderView({ group, currentUserId: "user-123" });
+      expect(screen.getByTestId("group-settings-panel")).toBeDefined();
+    });
+
+    it("does not render the settings panel for non-admin members", () => {
+      const group = { ...makeGroup(), adminIds: ["user-123"] };
+      renderView({ group, currentUserId: "user-456" });
+      expect(screen.queryByTestId("group-settings-panel")).toBeNull();
+    });
   });
 });
 

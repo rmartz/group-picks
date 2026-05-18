@@ -9,6 +9,7 @@ import { EditCategoryFormView } from "./EditCategoryFormView";
 
 export interface CategoryListViewProps {
   categories: Category[];
+  canCreatePick?: boolean;
   groupId: string;
   currentUserId: string;
   showCreateForm: boolean;
@@ -34,6 +35,7 @@ export interface CategoryListViewProps {
 
 export function CategoryListView({
   categories,
+  canCreatePick = true,
   groupId,
   currentUserId,
   showCreateForm,
@@ -179,12 +181,14 @@ export function CategoryListView({
                       })}
                     </ul>
                   )}
-                  <Link
-                    href={`/groups/${groupId}/categories/${category.id}/picks/new`}
-                    className="inline-block rounded bg-black px-3 py-1.5 text-xs font-medium text-white"
-                  >
-                    {CATEGORY_COPY.createPickButton}
-                  </Link>
+                  {canCreatePick && (
+                    <Link
+                      href={`/groups/${groupId}/categories/${category.id}/picks/new`}
+                      className="inline-block rounded bg-black px-3 py-1.5 text-xs font-medium text-white"
+                    >
+                      {CATEGORY_COPY.createPickButton}
+                    </Link>
+                  )}
                 </div>
               )}
             </li>
