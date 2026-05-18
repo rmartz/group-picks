@@ -460,3 +460,118 @@ describe("ranking tab owner filtering", () => {
     expect(screen.queryByText("Other Option")).toBeNull();
   });
 });
+
+describe("pick metadata — category name", () => {
+  it("renders the category name when provided", () => {
+    renderView({ categoryName: "Best Movies" });
+
+    expect(screen.getByText("Best Movies")).toBeDefined();
+  });
+
+  it("does not render the category label when category name is not provided", () => {
+    renderView({ categoryName: undefined });
+
+    expect(
+      screen.queryByText(PICK_DETAIL_SCAFFOLD_COPY.categoryLabel),
+    ).toBeNull();
+  });
+});
+
+describe("pick metadata — due date", () => {
+  it("renders the formatted due date when pick.dueDate is set", () => {
+    const dueDate = new Date("2026-06-01T00:00:00.000Z");
+    renderView({ pick: makePick({ dueDate }) });
+
+    expect(screen.getByText(dueDate.toLocaleDateString())).toBeDefined();
+  });
+
+  it("does not render due date when pick.dueDate is absent", () => {
+    renderView({ pick: makePick({ dueDate: undefined }) });
+
+    expect(
+      screen.queryByText(PICK_DETAIL_SCAFFOLD_COPY.dueDateLabel),
+    ).toBeNull();
+  });
+});
+
+describe("participant count", () => {
+  it("renders the participants label", () => {
+    renderView({ initialOptions: [makeOption({ ownerIds: ["user-1"] })] });
+
+    expect(
+      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.participantsLabel),
+    ).toBeDefined();
+  });
+
+  it("counts unique owners across all options", () => {
+    renderView({
+      pick: makePick({ topCount: 99 }),
+      initialOptions: [
+        makeOption({ id: "opt-1", ownerIds: ["user-1", "user-2"] }),
+        makeOption({ id: "opt-2", ownerIds: ["user-2", "user-3"] }),
+      ],
+    });
+
+    expect(screen.getByText("3")).toBeDefined();
+  });
+});
+
+describe("top picks results", () => {
+  it("renders option titles in the top picks tab when pick is closed", () => {
+    const option1 = makeOption({
+      id: "opt-1",
+      title: "Option Alpha",
+      ownerIds: ["user-1", "user-2"],
+    });
+    const option2 = makeOption({
+      id: "opt-2",
+      title: "Option Beta",
+      ownerIds: ["user-1"],
+    });
+
+    renderView({
+      pick: makePick({
+        closedAt: new Date("2025-06-01T00:00:00.000Z"),
+        topCount: 2,
+      }),
+      initialOptions: [option1, option2],
+    });
+
+    expect(screen.getByText("Option Alpha")).toBeDefined();
+  });
+
+  it("renders only the top N options in the top picks tab", () => {
+    const option1 = makeOption({
+      id: "opt-1",
+      title: "Top Option",
+      ownerIds: ["user-1", "user-2"],
+    });
+    const option2 = makeOption({
+      id: "opt-2",
+      title: "Excluded Option",
+      ownerIds: ["user-3"],
+    });
+
+    renderView({
+      pick: makePick({
+        closedAt: new Date("2025-06-01T00:00:00.000Z"),
+        topCount: 1,
+      }),
+      initialOptions: [option1, option2],
+    });
+
+    expect(screen.getByText("Top Option")).toBeDefined();
+    expect(screen.queryByText("Excluded Option")).toBeNull();
+  });
+
+  it("shows the results placeholder when closed pick has no options", () => {
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      initialOptions: [],
+    });
+
+    expect(
+      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder),
+    ).toBeDefined();
+  });
+});
