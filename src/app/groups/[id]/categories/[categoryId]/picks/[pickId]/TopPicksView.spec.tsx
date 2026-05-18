@@ -59,5 +59,19 @@ describe("TopPicksView", () => {
       render(<TopPicksView isOpen={false} topPicks={options} topCount={3} />);
       expect(screen.getAllByText(/#\d/).length).toBe(1);
     });
+
+    it("truncates to topCount when more picks are supplied than topCount", () => {
+      const options = [
+        makeOption("opt-1", "Alpha"),
+        makeOption("opt-2", "Beta"),
+        makeOption("opt-3", "Gamma"),
+        makeOption("opt-4", "Delta"),
+      ];
+      render(<TopPicksView isOpen={false} topPicks={options} topCount={2} />);
+      expect(screen.getByText("Alpha")).toBeDefined();
+      expect(screen.getByText("Beta")).toBeDefined();
+      expect(screen.queryByText("Gamma")).toBeNull();
+      expect(screen.queryByText("Delta")).toBeNull();
+    });
   });
 });
