@@ -55,3 +55,22 @@ export async function regenerateInvite(
 
   return (await response.json()) as { token: string; expiresAt: string };
 }
+
+export async function updateInviteExpiry(
+  groupId: string,
+  expiresAt: string | null,
+): Promise<{ expiresAt: string | null }> {
+  const response = await fetch(`/api/groups/${groupId}/invite`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ expiresAt }),
+  });
+  if (!response.ok) throw new Error("Failed to update invite expiry");
+
+  const contentType = response.headers.get("content-type");
+  if (response.redirected || !contentType?.includes("application/json")) {
+    throw new Error("Failed to update invite expiry");
+  }
+
+  return (await response.json()) as { expiresAt: string | null };
+}
