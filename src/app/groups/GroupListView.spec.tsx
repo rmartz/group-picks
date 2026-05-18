@@ -49,4 +49,24 @@ describe("GroupListView", () => {
     const link = screen.getByRole("link", { name: /Alpha/ });
     expect((link as HTMLAnchorElement).href).toContain("/groups/g1");
   });
+
+  it("renders plural member count for groups with multiple members", () => {
+    const group = makeGroup({
+      id: "g1",
+      memberIds: ["user-1", "user-2", "user-3"],
+      name: "Alpha",
+    });
+    render(<GroupListView groups={[group]} />);
+
+    expect(screen.getByText(`3 ${GROUP_LIST_COPY.memberPlural}`)).toBeDefined();
+  });
+
+  it("renders singular member count for groups with one member", () => {
+    const group = makeGroup({ id: "g1", memberIds: ["user-1"], name: "Alpha" });
+    render(<GroupListView groups={[group]} />);
+
+    expect(
+      screen.getByText(`1 ${GROUP_LIST_COPY.memberSingular}`),
+    ).toBeDefined();
+  });
 });
