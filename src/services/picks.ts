@@ -2,6 +2,7 @@ export async function createPick(
   groupId: string,
   categoryId: string,
   title: string,
+  description: string | undefined,
   topCount: number,
   dueDate?: string,
 ): Promise<{ pickId: string; createdAt: Date }> {
@@ -10,7 +11,7 @@ export async function createPick(
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, topCount, dueDate }),
+      body: JSON.stringify({ title, description, topCount, dueDate }),
     },
   );
   if (!response.ok) throw new Error("Failed to create pick");
