@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import {
+  assertPickIsOpenForWrite,
   closePick,
-  getPickById,
   PICK_CLOSED_API_ERROR,
+  PickWriteClosedError,
 } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
@@ -37,14 +38,19 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  const pick = await getPickById(categoryId, pickId);
-
-  if (!pick) {
-    return NextResponse.json({ error: "Pick not found" }, { status: 404 });
-  }
-
-  if (pick.closedAt !== undefined) {
-    return NextResponse.json({ error: PICK_CLOSED_API_ERROR }, { status: 409 });
+  try {
+    await assertPickIsOpenForWrite(categoryId, pickId);
+  } catch (err) {
+    if (err instanceof PickWriteClosedError) {
+      return NextResponse.json(
+        { error: PICK_CLOSED_API_ERROR },
+        { status: 409 },
+      );
+    }
+    if (err instanceof Error && err.message === "Pick not found") {
+      return NextResponse.json({ error: "Pick not found" }, { status: 404 });
+    }
+    throw err;
   }
 
   await closePick(categoryId, pickId);
