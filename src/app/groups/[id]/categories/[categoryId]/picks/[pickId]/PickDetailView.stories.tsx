@@ -48,6 +48,7 @@ const meta: Meta<typeof PickDetailView> = {
     currentUserId: "user-1",
     initialOptions: mockOptions,
     initialSuggestions: [],
+    topPicks: [],
   },
 };
 

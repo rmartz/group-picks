@@ -1,10 +1,14 @@
 import { notFound, redirect } from "next/navigation";
 
+import { computeTopPicks } from "@/lib/ranking-score";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
 import { getPickById, getPicksByCategory } from "@/server/data/picks";
-import { getRankingByUser } from "@/server/data/rankings";
+import {
+  getAllRankingsForPick,
+  getRankingByUser,
+} from "@/server/data/rankings";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { PickDetailView } from "./PickDetailView";
@@ -28,11 +32,15 @@ export default async function PickDetailPage({
   const pick = await getPickById(categoryId, pickId);
   if (!pick) notFound();
 
-  const [currentOptions, allPicks, initialTierAssignments] = await Promise.all([
-    getOptionsByPick(pickId),
-    getPicksByCategory(categoryId),
-    getRankingByUser(pickId, uid),
-  ]);
+  const isClosed = pick.closedAt !== undefined;
+
+  const [currentOptions, allPicks, initialTierAssignments, allRankings] =
+    await Promise.all([
+      getOptionsByPick(pickId),
+      getPicksByCategory(categoryId),
+      getRankingByUser(pickId, uid),
+      isClosed ? getAllRankingsForPick(pickId) : Promise.resolve({}),
+    ]);
 
   const priorPickIds = allPicks.filter((p) => p.id !== pickId).map((p) => p.id);
   const priorOptions = await getOptionsByCategory(priorPickIds);
@@ -54,6 +62,8 @@ export default async function PickDetailPage({
       return true;
     });
 
+  const topPicks = computeTopPicks(allRankings, currentOptions, pick.topCount);
+
   return (
     <PickDetailView
       pick={pick}
@@ -64,6 +74,7 @@ export default async function PickDetailPage({
       initialOptions={currentOptions}
       initialSuggestions={suggestions}
       initialTierAssignments={initialTierAssignments}
+      topPicks={topPicks}
     />
   );
 }

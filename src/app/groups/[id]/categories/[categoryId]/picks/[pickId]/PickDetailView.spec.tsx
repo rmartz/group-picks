@@ -19,6 +19,7 @@ import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
 import type { SuggestOptionSheetProps } from "./SuggestOptionSheet";
+import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 
 let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
 
@@ -105,6 +106,7 @@ function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
       currentUserId="user-1"
       initialOptions={[]}
       initialSuggestions={[]}
+      topPicks={[]}
       {...overrides}
     />,
   );
@@ -200,9 +202,7 @@ describe("open state", () => {
   it("renders top picks tab as locked placeholder when open", () => {
     renderView({ pick: makePick({ closedAt: undefined }) });
 
-    expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder),
-    ).toBeDefined();
+    expect(screen.getByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeDefined();
   });
 
   it("does not render the reopen button when open", () => {
@@ -235,11 +235,9 @@ describe("closed state: top picks shows results placeholder", () => {
     });
 
     expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder),
+      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
     ).toBeDefined();
-    expect(
-      screen.queryByText(PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder),
-    ).toBeNull();
+    expect(screen.queryByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeNull();
   });
 });
 
@@ -522,38 +520,26 @@ describe("participant count", () => {
 
 describe("top picks results", () => {
   it("renders option titles in the top picks tab when pick is closed", () => {
-    const option1 = makeOption({
-      id: "opt-1",
-      title: "Option Alpha",
-      ownerIds: ["user-1", "user-2"],
-    });
-    const option2 = makeOption({
-      id: "opt-2",
-      title: "Option Beta",
-      ownerIds: ["user-1"],
-    });
+    const option1 = makeOption({ id: "opt-1", title: "Option Alpha" });
+    const option2 = makeOption({ id: "opt-2", title: "Option Beta" });
 
     renderView({
       pick: makePick({
         closedAt: new Date("2025-06-01T00:00:00.000Z"),
         topCount: 2,
       }),
-      initialOptions: [option1, option2],
+      topPicks: [option1, option2],
     });
 
     expect(screen.getByText("Option Alpha")).toBeDefined();
+    expect(screen.getByText("Option Beta")).toBeDefined();
   });
 
-  it("renders only the top N options in the top picks tab", () => {
-    const option1 = makeOption({
-      id: "opt-1",
-      title: "Top Option",
-      ownerIds: ["user-1", "user-2"],
-    });
-    const option2 = makeOption({
+  it("renders only the provided topPicks in the top picks tab", () => {
+    const topOption = makeOption({ id: "opt-1", title: "Top Option" });
+    const excludedOption = makeOption({
       id: "opt-2",
       title: "Excluded Option",
-      ownerIds: ["user-3"],
     });
 
     renderView({
@@ -561,21 +547,21 @@ describe("top picks results", () => {
         closedAt: new Date("2025-06-01T00:00:00.000Z"),
         topCount: 1,
       }),
-      initialOptions: [option1, option2],
+      topPicks: [topOption, excludedOption],
     });
 
     expect(screen.getByText("Top Option")).toBeDefined();
     expect(screen.queryByText("Excluded Option")).toBeNull();
   });
 
-  it("shows the results placeholder when closed pick has no options", () => {
+  it("shows the results placeholder when closed pick has no top picks", () => {
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      initialOptions: [],
+      topPicks: [],
     });
 
     expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder),
+      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
     ).toBeDefined();
   });
 });
