@@ -8,8 +8,11 @@ export interface FirebaseGroupInvite {
   mode?: InviteMode;
 }
 
-function isInviteMode(value: InviteMode | undefined): value is InviteMode {
-  return value !== undefined && Object.values(InviteMode).includes(value);
+function isInviteMode(value: unknown): value is InviteMode {
+  return (
+    typeof value === "string" &&
+    (Object.values(InviteMode) as string[]).includes(value)
+  );
 }
 
 export function groupInviteToFirebase(

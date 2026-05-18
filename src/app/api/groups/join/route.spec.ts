@@ -71,22 +71,27 @@ describe("POST /api/groups/join — single-use enforcement", () => {
   });
 
   it("revokes the invite after a successful join via a Personal link", async () => {
-    const response = await POST(makeRequest({ token: "valid-token" }));
+    const invite = makeInvite();
+    mockGetGroupInviteByToken.mockResolvedValue(invite);
+    const response = await POST(makeRequest({ token: invite.token }));
     expect(response.status).toBe(200);
     expect(mockAddGroupMember).toHaveBeenCalledWith(
-      "group-1",
+      invite.groupId,
       "user-2",
-      "valid-token",
+      invite.token,
     );
   });
 
   it("does not revoke the invite after a successful join via a Group link", async () => {
-    mockGetGroupInviteByToken.mockResolvedValue(
-      makeInvite({ mode: InviteMode.Group }),
-    );
-    const response = await POST(makeRequest({ token: "valid-token" }));
+    const invite = makeInvite({ mode: InviteMode.Group });
+    mockGetGroupInviteByToken.mockResolvedValue(invite);
+    const response = await POST(makeRequest({ token: invite.token }));
     expect(response.status).toBe(200);
-    expect(mockAddGroupMember).toHaveBeenCalledWith("group-1", "user-2", undefined);
+    expect(mockAddGroupMember).toHaveBeenCalledWith(
+      invite.groupId,
+      "user-2",
+      undefined,
+    );
   });
 
   it("returns 401 when not authenticated", async () => {
