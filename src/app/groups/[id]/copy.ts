@@ -1,4 +1,5 @@
 export const GROUP_DETAIL_COPY = {
+  adminChip: "Admin",
   closedBadge: "closed",
   closedSection: "Closed",
   copiedButton: "Copied!",
@@ -13,8 +14,11 @@ export const GROUP_DETAIL_COPY = {
     default: "Something went wrong. Please try again.",
   },
   inviteLabel: "Invite Link",
+  creatorChip: "Creator",
   leaveButton: "Leave Group",
+  makeAdminAction: "Make admin",
   membersHeading: "Members",
+  revokeAdminAction: "Revoke admin",
   membersLabel: "members",
   memberSingularLabel: "member",
   noPicksMessage: "No picks yet. Start one from the Categories tab.",

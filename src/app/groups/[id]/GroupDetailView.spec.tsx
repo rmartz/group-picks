@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GROUP_DETAIL_COPY } from "./copy";
@@ -231,5 +231,79 @@ describe("GroupDetailView", () => {
       "p.text-xs.text-muted-foreground",
     );
     expect(subtitleParagraph).toBeNull();
+  });
+});
+
+describe("GroupDetailView — member list chips", () => {
+  it("shows Creator chip next to the group creator", () => {
+    renderView();
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.creatorChip)).toBeDefined();
+  });
+
+  it("shows Admin chip next to a promoted non-creator member", () => {
+    const group = {
+      ...makeGroup(),
+      adminIds: ["user-123", "user-456"],
+    };
+    renderView({ group });
+
+    const adminBadges = screen.getAllByText(GROUP_DETAIL_COPY.adminChip);
+    expect(adminBadges.length).toBe(1);
+  });
+
+  it("does not show Admin chip next to the creator (Creator chip only)", () => {
+    renderView();
+
+    expect(screen.queryByText(GROUP_DETAIL_COPY.adminChip)).toBeNull();
+  });
+});
+
+describe("GroupDetailView — member ··· menu (creator view)", () => {
+  it("shows a menu button for non-self members when current user is creator", () => {
+    renderView({ currentUserId: "user-123" });
+
+    // Only Bob's row gets a menu; Alice is the current user (creator's own row)
+    const menuButtons = screen.getAllByTestId("member-menu-trigger");
+    expect(menuButtons.length).toBe(1);
+  });
+
+  it("does not show a menu button for non-creator current users", () => {
+    renderView({ currentUserId: "user-456" });
+
+    expect(screen.queryByTestId("member-menu-trigger")).toBeNull();
+  });
+
+  // TODO: upgrade to userEvent when @testing-library/user-event is available
+  it("calls onMakeAdmin with the member uid when Make admin is clicked", () => {
+    const onMakeAdmin = vi.fn();
+    renderView({ currentUserId: "user-123", onMakeAdmin });
+
+    // Radix DropdownMenu requires the full click sequence to open
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.makeAdminAction));
+
+    expect(onMakeAdmin).toHaveBeenCalledWith("user-456");
+  });
+
+  // TODO: upgrade to userEvent when @testing-library/user-event is available
+  it("calls onRevokeAdmin with the member uid when Revoke admin is clicked", () => {
+    const group = {
+      ...makeGroup(),
+      adminIds: ["user-123", "user-456"],
+    };
+    const onRevokeAdmin = vi.fn();
+    renderView({ group, currentUserId: "user-123", onRevokeAdmin });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.revokeAdminAction));
+
+    expect(onRevokeAdmin).toHaveBeenCalledWith("user-456");
   });
 });

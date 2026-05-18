@@ -6,7 +6,12 @@ import { useState } from "react";
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
 import type { GroupPick } from "@/lib/types/pick";
-import { leaveGroup, LeaveGroupLastMemberError } from "@/services/groups";
+import {
+  leaveGroup,
+  LeaveGroupLastMemberError,
+  promoteAdmin,
+  revokeAdmin,
+} from "@/services/groups";
 
 import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupDetailView } from "./GroupDetailView";
@@ -32,6 +37,16 @@ export function GroupDetailClient({
   const [isLeaving, setIsLeaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  async function handleMakeAdmin(uid: string) {
+    await promoteAdmin(group.id, uid);
+    router.refresh();
+  }
+
+  async function handleRevokeAdmin(uid: string) {
+    await revokeAdmin(group.id, uid);
+    router.refresh();
+  }
+
   async function handleLeave() {
     setError(undefined);
     setIsLeaving(true);
@@ -56,6 +71,12 @@ export function GroupDetailClient({
       currentUserId={currentUserId}
       onLeave={() => {
         void handleLeave();
+      }}
+      onMakeAdmin={(uid) => {
+        void handleMakeAdmin(uid);
+      }}
+      onRevokeAdmin={(uid) => {
+        void handleRevokeAdmin(uid);
       }}
       isLeaving={isLeaving}
       leaveError={error}
