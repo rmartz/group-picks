@@ -19,7 +19,7 @@ function isFirebaseGroupInvite(data: unknown): data is FirebaseGroupInvite {
   return (
     typeof d["groupId"] === "string" &&
     typeof d["createdAt"] === "number" &&
-    (d["expiresAt"] === null || typeof d["expiresAt"] === "number") &&
+    (d["expiresAt"] == null || typeof d["expiresAt"] === "number") &&
     typeof d["active"] === "boolean"
   );
 }

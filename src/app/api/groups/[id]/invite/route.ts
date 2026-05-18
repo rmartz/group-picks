@@ -55,17 +55,21 @@ export async function PATCH(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  let body: Record<string, unknown>;
+  let body: unknown;
   try {
-    body = (await request.json()) as Record<string, unknown>;
+    body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (!("expiresAt" in body)) {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  const bodyRecord = body as Record<string, unknown>;
+  if (!("expiresAt" in bodyRecord)) {
     return NextResponse.json({ error: "Missing expiresAt" }, { status: 400 });
   }
 
-  const { expiresAt: rawExpiresAt } = body;
+  const { expiresAt: rawExpiresAt } = bodyRecord;
 
   let expiresAt: Date | null = null;
   if (rawExpiresAt !== null) {
