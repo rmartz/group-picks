@@ -491,9 +491,9 @@ describe("GroupDetailView — error states", () => {
       removeMemberError: GROUP_DETAIL_COPY.removeMemberError,
     });
 
-    expect(
-      screen.getByTestId("remove-member-error").textContent,
-    ).toBe(GROUP_DETAIL_COPY.removeMemberError);
+    expect(screen.getByTestId("remove-member-error").textContent).toBe(
+      GROUP_DETAIL_COPY.removeMemberError,
+    );
   });
 
   it("renders adminError when provided", () => {
@@ -525,7 +525,7 @@ describe("GroupDetailView — member trigger accessibility", () => {
     renderView({ currentUserId: "user-123" });
 
     const trigger = screen.getByTestId("member-menu-trigger");
-    expect((trigger as HTMLElement).getAttribute("aria-label")).toBe(
+    expect(trigger.getAttribute("aria-label")).toBe(
       GROUP_DETAIL_COPY.memberActionsLabel,
     );
   });
