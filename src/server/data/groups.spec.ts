@@ -69,7 +69,7 @@ describe("removeMember last-member transaction", () => {
     });
   });
 
-  it("preserves the original members value when the snapshot is null (group already gone)", async () => {
+  it("aborts the transaction (returns undefined) when the snapshot is null", async () => {
     let capturedUpdate:
       | ((m: Record<string, unknown> | null) => unknown)
       | undefined;
@@ -82,7 +82,23 @@ describe("removeMember last-member transaction", () => {
 
     await removeMember("group-1", "user-1");
 
-    expect(capturedUpdate?.(null)).toBeNull();
+    expect(capturedUpdate?.(null)).toBeUndefined();
+  });
+
+  it("returns members map unchanged when uid is not in a single-member map", async () => {
+    let capturedUpdate:
+      | ((m: Record<string, unknown> | null) => unknown)
+      | undefined;
+    mockTransaction.mockImplementation(
+      (update: (m: Record<string, unknown> | null) => unknown) => {
+        capturedUpdate = update;
+        return Promise.resolve({ committed: true });
+      },
+    );
+
+    await removeMember("group-1", "user-1");
+
+    expect(capturedUpdate?.({ "user-2": true })).toEqual({ "user-2": true });
   });
 
   it("reports lastMember=true when the transaction did not commit", async () => {
