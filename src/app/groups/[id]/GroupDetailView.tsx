@@ -45,7 +45,9 @@ function formatPickSubtitle(
   if (variant === "open" && pick.dueDate) {
     parts.push(pick.dueDate.toLocaleDateString());
   } else if (variant === "closed" && pick.closedAt) {
-    parts.push(`closed ${pick.closedAt.toLocaleDateString()}`);
+    parts.push(
+      `${GROUP_DETAIL_COPY.closedBadge} ${pick.closedAt.toLocaleDateString()}`,
+    );
   }
   return parts.join(" · ");
 }
