@@ -47,6 +47,12 @@ export function OptionListView({
           </p>
         )}
 
+        {!pickClosed && (
+          <p className="text-sm text-muted-foreground">
+            {PICK_DETAIL_COPY.heartCaption}
+          </p>
+        )}
+
         {options.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {PICK_DETAIL_COPY.noOptionsMessage}
@@ -58,7 +64,12 @@ export function OptionListView({
                 key={option.id}
                 className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
               >
-                <p className="font-medium">{option.title}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium">{option.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {option.ownerIds.length} {PICK_DETAIL_COPY.interestedSuffix}
+                  </p>
+                </div>
                 <HeartButton
                   hearted={option.ownerIds.includes(currentUserId)}
                   disabled={loading}

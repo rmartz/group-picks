@@ -367,4 +367,38 @@ describe("OptionListView", () => {
       expect(screen.getByText("Inception")).toBeDefined();
     });
   });
+
+  describe("heart caption", () => {
+    it("renders the heart caption when pick is open", () => {
+      render(<OptionListView {...defaultProps} />);
+
+      expect(screen.getByText(PICK_DETAIL_COPY.heartCaption)).toBeDefined();
+    });
+
+    it("does not render the heart caption when pick is closed", () => {
+      render(<OptionListView {...defaultProps} pickClosed={true} />);
+
+      expect(screen.queryByText(PICK_DETAIL_COPY.heartCaption)).toBeNull();
+    });
+  });
+
+  describe("interested count", () => {
+    it("renders the interested count for each option", () => {
+      const option = makeOption({ ownerIds: ["user-1", "user-2", "user-3"] });
+      render(<OptionListView {...defaultProps} options={[option]} />);
+
+      expect(
+        screen.getByText(`3 ${PICK_DETAIL_COPY.interestedSuffix}`),
+      ).toBeDefined();
+    });
+
+    it("renders 0 interested for an option with no owners", () => {
+      const option = makeOption({ ownerIds: [] });
+      render(<OptionListView {...defaultProps} options={[option]} />);
+
+      expect(
+        screen.getByText(`0 ${PICK_DETAIL_COPY.interestedSuffix}`),
+      ).toBeDefined();
+    });
+  });
 });

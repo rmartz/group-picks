@@ -11,6 +11,8 @@ export const PICK_DETAIL_COPY = {
     closed: "This Pick is closed",
     removeOwnership: "Remove from your options",
   },
+  heartCaption: "Tap a heart to mark interest",
+  interestedSuffix: "interested",
   noOptionsMessage: "No options have been added yet.",
   optionsHeading: "Options",
   suggestionsHeading: "Suggestions from your prior picks",
