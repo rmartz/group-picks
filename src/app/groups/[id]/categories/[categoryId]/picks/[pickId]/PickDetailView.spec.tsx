@@ -105,6 +105,7 @@ function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
       currentUserId="user-1"
       initialOptions={[]}
       initialSuggestions={[]}
+      topPicks={[]}
       {...overrides}
     />,
   );
@@ -522,56 +523,40 @@ describe("participant count", () => {
 
 describe("top picks results", () => {
   it("renders option titles in the top picks tab when pick is closed", () => {
-    const option1 = makeOption({
-      id: "opt-1",
-      title: "Option Alpha",
-      ownerIds: ["user-1", "user-2"],
-    });
-    const option2 = makeOption({
-      id: "opt-2",
-      title: "Option Beta",
-      ownerIds: ["user-1"],
-    });
+    const option1 = makeOption({ id: "opt-1", title: "Option Alpha" });
+    const option2 = makeOption({ id: "opt-2", title: "Option Beta" });
 
     renderView({
       pick: makePick({
         closedAt: new Date("2025-06-01T00:00:00.000Z"),
         topCount: 2,
       }),
-      initialOptions: [option1, option2],
+      topPicks: [option1, option2],
     });
 
     expect(screen.getByText("Option Alpha")).toBeDefined();
+    expect(screen.getByText("Option Beta")).toBeDefined();
   });
 
-  it("renders only the top N options in the top picks tab", () => {
-    const option1 = makeOption({
-      id: "opt-1",
-      title: "Top Option",
-      ownerIds: ["user-1", "user-2"],
-    });
-    const option2 = makeOption({
-      id: "opt-2",
-      title: "Excluded Option",
-      ownerIds: ["user-3"],
-    });
+  it("renders only the provided topPicks in the top picks tab", () => {
+    const topOption = makeOption({ id: "opt-1", title: "Top Option" });
 
     renderView({
       pick: makePick({
         closedAt: new Date("2025-06-01T00:00:00.000Z"),
         topCount: 1,
       }),
-      initialOptions: [option1, option2],
+      topPicks: [topOption],
     });
 
     expect(screen.getByText("Top Option")).toBeDefined();
     expect(screen.queryByText("Excluded Option")).toBeNull();
   });
 
-  it("shows the results placeholder when closed pick has no options", () => {
+  it("shows the results placeholder when closed pick has no top picks", () => {
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      initialOptions: [],
+      topPicks: [],
     });
 
     expect(
