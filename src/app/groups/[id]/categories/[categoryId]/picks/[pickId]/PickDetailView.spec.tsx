@@ -10,6 +10,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 
+vi.mock("@/services/rankings", () => ({
+  saveRankings: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { CATEGORY_DETAIL_COPY } from "../../copy";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
