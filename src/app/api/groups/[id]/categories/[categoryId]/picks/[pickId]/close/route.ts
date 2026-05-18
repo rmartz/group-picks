@@ -6,6 +6,7 @@ import {
   assertPickIsOpenForWrite,
   closePick,
   PICK_CLOSED_API_ERROR,
+  PickNotFoundError,
   PickWriteClosedError,
 } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
@@ -47,7 +48,7 @@ export async function POST(
         { status: 409 },
       );
     }
-    if (err instanceof Error && err.message === "Pick not found") {
+    if (err instanceof PickNotFoundError) {
       return NextResponse.json({ error: "Pick not found" }, { status: 404 });
     }
     throw err;
