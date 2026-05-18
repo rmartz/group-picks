@@ -20,6 +20,10 @@ export async function DELETE(
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
+  if (!group.memberIds.includes(callerUid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   if (!isGroupAdmin(callerUid, group)) {
     return NextResponse.json(
       { error: "Only group admins can remove members" },

@@ -76,6 +76,21 @@ describe("DELETE /api/groups/[id]/members/[uid]", () => {
     expect(response.status).toBe(403);
   });
 
+  it("returns 403 when caller is in adminIds but not in memberIds", async () => {
+    mockGetVerifiedUid.mockResolvedValue("user-admin");
+    mockGetGroupById.mockResolvedValue({
+      ...makeGroup(),
+      memberIds: ["user-creator", "user-member"],
+    });
+
+    const response = await DELETE(
+      new Request("http://localhost"),
+      makeParams("group-1", "user-member"),
+    );
+
+    expect(response.status).toBe(403);
+  });
+
   it("returns 400 when target uid is the caller themselves", async () => {
     mockGetVerifiedUid.mockResolvedValue("user-admin");
 
