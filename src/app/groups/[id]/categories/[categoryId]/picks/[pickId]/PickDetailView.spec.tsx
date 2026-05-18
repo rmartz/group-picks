@@ -202,9 +202,7 @@ describe("open state", () => {
   it("renders top picks tab as locked placeholder when open", () => {
     renderView({ pick: makePick({ closedAt: undefined }) });
 
-    expect(
-      screen.getByText(TOP_PICKS_VIEW_COPY.lockedMessage),
-    ).toBeDefined();
+    expect(screen.getByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeDefined();
   });
 
   it("does not render the reopen button when open", () => {
@@ -239,9 +237,7 @@ describe("closed state: top picks shows results placeholder", () => {
     expect(
       screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
     ).toBeDefined();
-    expect(
-      screen.queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
-    ).toBeNull();
+    expect(screen.queryByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeNull();
   });
 });
 
@@ -541,7 +537,10 @@ describe("top picks results", () => {
 
   it("renders only the provided topPicks in the top picks tab", () => {
     const topOption = makeOption({ id: "opt-1", title: "Top Option" });
-    const excludedOption = makeOption({ id: "opt-2", title: "Excluded Option" });
+    const excludedOption = makeOption({
+      id: "opt-2",
+      title: "Excluded Option",
+    });
 
     renderView({
       pick: makePick({

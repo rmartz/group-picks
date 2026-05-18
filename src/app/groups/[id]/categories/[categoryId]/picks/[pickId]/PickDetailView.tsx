@@ -16,6 +16,7 @@ import { OptionList } from "./OptionList";
 import { SuggestOptionSheet } from "./SuggestOptionSheet";
 import { TierRanking } from "./TierRanking";
 import { TopPicksView } from "./TopPicksView";
+import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 
 interface PickDetailViewProps {
   pick: GroupPick;
@@ -153,6 +154,12 @@ export function PickDetailView({
           </TabsTrigger>
         </TabsList>
 
+        {isOpen ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            {TOP_PICKS_VIEW_COPY.lockedMessage}
+          </p>
+        ) : null}
+
         <TabsContent value="options" className="mt-4">
           {options.length === 0 && initialSuggestions.length === 0 ? (
             <EmptyPickView
@@ -192,11 +199,13 @@ export function PickDetailView({
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>
-          <TopPicksView
-            isOpen={isOpen}
-            topPicks={topPicks}
-            topCount={pick.topCount}
-          />
+          {!isOpen ? (
+            <TopPicksView
+              isOpen={false}
+              topPicks={topPicks}
+              topCount={pick.topCount}
+            />
+          ) : null}
         </TabsContent>
       </Tabs>
 

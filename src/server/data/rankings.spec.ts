@@ -33,6 +33,7 @@ describe("getAllRankingsForPick", () => {
     const result = await getAllRankingsForPick("pick-1");
 
     expect(result).toEqual({});
+    expect(mockRef).toHaveBeenCalledWith("rankings/pick-1");
   });
 
   it("returns parsed rankings for valid records", async () => {
