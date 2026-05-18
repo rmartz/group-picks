@@ -201,7 +201,7 @@ export function PickDetailView({
         <TabsContent value="top-picks" className="mt-4" keepMounted>
           {!isOpen ? (
             <TopPicksView
-              isOpen={false}
+              isOpen={isOpen}
               topPicks={topPicks}
               topCount={pick.topCount}
             />
