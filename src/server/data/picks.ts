@@ -155,11 +155,21 @@ export async function closePick(
   const db = getDatabase(getAdminApp());
   const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
 
-  await pickRef.transaction((current: FirebasePickPublic | null) => {
-    if (current === null) return current;
-    if (current.closedAt !== undefined) return current;
-    return { ...current, closedAt: Date.now(), closedManually: true };
-  });
+  const result = await pickRef.transaction(
+    (current: FirebasePickPublic | null) => {
+      if (current === null) return undefined;
+      if (current.closedAt !== undefined) return undefined;
+      return { ...current, closedAt: Date.now(), closedManually: true };
+    },
+  );
+
+  if (!result.snapshot.exists()) {
+    throw new PickNotFoundError();
+  }
+
+  if (!result.committed) {
+    throw new PickWriteClosedError();
+  }
 }
 
 export async function reopenPick(
