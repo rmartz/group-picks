@@ -101,6 +101,18 @@ describe("GET /rankings", () => {
     expect(response.status).toBe(404);
   });
 
+  it("returns 403 when user is not a group member", async () => {
+    mockGetGroupById.mockResolvedValue(
+      makeGroup({ memberIds: ["other-user"] }),
+    );
+
+    const response = await GET(new Request("http://localhost"), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(response.status).toBe(403);
+  });
+
   it("returns the user's rankings as JSON", async () => {
     const rankings = {
       "opt-1": RankingTier.LoveIt,
@@ -141,6 +153,36 @@ describe("PUT /rankings", () => {
     );
 
     expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when user is not a group member", async () => {
+    mockGetGroupById.mockResolvedValue(
+      makeGroup({ memberIds: ["other-user"] }),
+    );
+
+    const response = await PUT(
+      new Request("http://localhost", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignments: {} }),
+      }),
+      { params: Promise.resolve(baseParams) },
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  it("returns 400 on invalid JSON body", async () => {
+    const response = await PUT(
+      new Request("http://localhost", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: "not-json",
+      }),
+      { params: Promise.resolve(baseParams) },
+    );
+
+    expect(response.status).toBe(400);
   });
 
   it("returns 200 and saves the rankings", async () => {

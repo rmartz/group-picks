@@ -36,7 +36,7 @@ export function TierRanking({
         TIER_ORDER[(currentIndex + 1) % TIER_ORDER.length] ??
         RankingTier.LoveIt;
       const next = { ...prev, [optionId]: nextTier };
-      void saveRankings(groupId, categoryId, pickId, next);
+      saveRankings(groupId, categoryId, pickId, next).catch(() => {});
       return next;
     });
   }

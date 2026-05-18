@@ -27,6 +27,10 @@ export async function GET(
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
+  if (!group.memberIds.includes(uid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const category = await getCategoryById(categoryId);
   if (category?.groupId !== id) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
@@ -62,6 +66,10 @@ export async function PUT(
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
+  if (!group.memberIds.includes(uid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const category = await getCategoryById(categoryId);
   if (category?.groupId !== id) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
@@ -72,9 +80,15 @@ export async function PUT(
     return NextResponse.json({ error: "Pick not found" }, { status: 404 });
   }
 
-  const body = (await request.json()) as {
-    assignments: Record<string, RankingTier>;
-  };
+  let body: { assignments: Record<string, RankingTier> };
+  try {
+    body = (await request.json()) as {
+      assignments: Record<string, RankingTier>;
+    };
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
   await saveRanking(pickId, uid, body.assignments);
 
   return NextResponse.json({ ok: true });
