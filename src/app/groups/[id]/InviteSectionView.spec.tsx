@@ -176,10 +176,10 @@ describe("InviteSectionView", () => {
   it("selects the correct radio based on mode prop (Group)", () => {
     render(<InviteSectionView {...makeProps({ mode: InviteMode.Group })} />);
 
-    const groupRadio = screen.getByLabelText(
-      GROUP_DETAIL_COPY.groupModeLabel,
-    ) as HTMLInputElement;
-    expect(groupRadio.checked).toBe(true);
+    const groupRadio = screen.getByLabelText(GROUP_DETAIL_COPY.groupModeLabel);
+    expect(groupRadio instanceof HTMLInputElement && groupRadio.checked).toBe(
+      true,
+    );
   });
 
   it("selects the correct radio based on mode prop (Personal)", () => {
@@ -187,8 +187,10 @@ describe("InviteSectionView", () => {
 
     const personalRadio = screen.getByLabelText(
       GROUP_DETAIL_COPY.personalModeLabel,
-    ) as HTMLInputElement;
-    expect(personalRadio.checked).toBe(true);
+    );
+    expect(
+      personalRadio instanceof HTMLInputElement && personalRadio.checked,
+    ).toBe(true);
   });
 
   it("calls onModeChange with Personal when Personal radio is clicked", () => {
