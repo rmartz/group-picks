@@ -105,6 +105,41 @@ describe("PATCH /api/groups/[id]/categories/[categoryId]", () => {
     });
   });
 
+  it("allows an admin to rename a category when only the creator has picks", async () => {
+    mockGetVerifiedUid.mockResolvedValue("user-2");
+    mockGetGroupById.mockResolvedValue({
+      id: "group-1",
+      name: "Weekend Plans",
+      createdAt: new Date("2025-01-01T00:00:00.000Z"),
+      creatorId: "user-1",
+      memberIds: ["user-1", "user-2"],
+      adminIds: ["user-2"],
+      picksRestricted: false,
+    });
+    mockGetPicksByCategory.mockResolvedValue([
+      {
+        id: "pick-1",
+        title: "A",
+        categoryId: "cat-1",
+        createdAt: new Date("2025-01-02T00:00:00.000Z"),
+        creatorId: "user-1",
+      },
+    ]);
+
+    const response = await PATCH(
+      makeRequest({ name: "Admin Rename", description: "" }),
+      {
+        params: Promise.resolve({ id: "group-1", categoryId: "cat-1" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockUpdateCategory).toHaveBeenCalledWith("cat-1", {
+      name: "Admin Rename",
+      description: "",
+    });
+  });
+
   it("returns 409 when renaming and another member has picks in the category", async () => {
     mockGetVerifiedUid.mockResolvedValue("user-1");
     mockGetPicksByCategory.mockResolvedValue([

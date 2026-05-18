@@ -57,7 +57,9 @@ export async function PATCH(
 
   if (name !== category.name) {
     const picks = await getPicksByCategory(categoryId);
-    const hasOtherMemberPicks = picks.some((pick) => pick.creatorId !== uid);
+    const hasOtherMemberPicks = picks.some(
+      (pick) => pick.creatorId !== category.creatorId,
+    );
     if (hasOtherMemberPicks) {
       return NextResponse.json(
         { error: "Category name cannot be changed after others pick it" },
