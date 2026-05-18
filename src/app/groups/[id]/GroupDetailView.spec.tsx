@@ -204,4 +204,32 @@ describe("GroupDetailView", () => {
       "/groups/group-1/categories/cat-3/picks/pick-3",
     );
   });
+
+  it("does not render an empty subtitle paragraph when subtitle content is missing", () => {
+    const category = {
+      id: "cat-4",
+      name: "",
+      groupId: "group-1",
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    const pick = {
+      id: "pick-4",
+      title: "No Subtitle Pick",
+      categoryId: "cat-4",
+      topCount: 1,
+      createdAt: new Date("2025-01-01"),
+      creatorId: "user-123",
+    };
+    renderView({
+      categories: [category],
+      picksByCategory: { "cat-4": [pick] },
+    });
+
+    const link = screen.getByRole("link", { name: /No Subtitle Pick/ });
+    const subtitleParagraph = link.querySelector(
+      "p.text-xs.text-muted-foreground",
+    );
+    expect(subtitleParagraph).toBeNull();
+  });
 });

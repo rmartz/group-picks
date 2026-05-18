@@ -53,6 +53,8 @@ function formatPickSubtitle(
 }
 
 function PickListItem({ pick, category, groupId, variant }: PickListItemProps) {
+  const subtitle = formatPickSubtitle(pick, category, variant);
+
   return (
     <li>
       <Link
@@ -62,9 +64,9 @@ function PickListItem({ pick, category, groupId, variant }: PickListItemProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5">
             <p className="font-medium">{pick.title}</p>
-            <p className="text-xs text-muted-foreground">
-              {formatPickSubtitle(pick, category, variant)}
-            </p>
+            {subtitle && (
+              <p className="text-xs text-muted-foreground">{subtitle}</p>
+            )}
           </div>
           <Badge variant={variant === "open" ? "default" : "secondary"}>
             {variant === "open"
