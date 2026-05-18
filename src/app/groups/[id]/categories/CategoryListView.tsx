@@ -145,16 +145,38 @@ export function CategoryListView({
                     </p>
                   ) : (
                     <ul className="space-y-1">
-                      {picks.map((pick) => (
-                        <li key={pick.id}>
-                          <Link
-                            href={`/groups/${groupId}/categories/${category.id}/picks/${pick.id}`}
-                            className="block rounded px-3 py-2 text-sm hover:bg-gray-50"
+                      {picks.map((pick) => {
+                        const badgeText =
+                          pick.closedAt !== undefined
+                            ? CATEGORY_COPY.closedBadge
+                            : CATEGORY_COPY.openBadge;
+                        return (
+                          <li
+                            key={pick.id}
+                            className="flex items-center gap-3 rounded px-3 py-2 text-sm"
                           >
-                            {pick.title}
-                          </Link>
-                        </li>
-                      ))}
+                            <Link
+                              href={`/groups/${groupId}/categories/${category.id}/picks/${pick.id}`}
+                              className="flex-1 hover:underline"
+                            >
+                              {pick.title}
+                            </Link>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                {badgeText}
+                              </span>
+                              {pick.dueDate && (
+                                <span className="text-xs text-muted-foreground">
+                                  {CATEGORY_COPY.dueDateLabel}{" "}
+                                  <span>
+                                    {pick.dueDate.toLocaleDateString()}
+                                  </span>
+                                </span>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                   <Link

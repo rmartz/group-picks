@@ -21,6 +21,7 @@ export function CreatePickForm({
 }: CreatePickFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [topCount, setTopCount] = useState(3);
   const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState<string | undefined>();
@@ -39,6 +40,7 @@ export function CreatePickForm({
         groupId,
         categoryId,
         title.trim(),
+        description.trim() || undefined,
         topCount,
         dueDate || undefined,
       );
@@ -56,6 +58,8 @@ export function CreatePickForm({
     <CreatePickFormView
       title={title}
       onTitleChange={setTitle}
+      description={description}
+      onDescriptionChange={setDescription}
       topCount={topCount}
       onTopCountChange={setTopCount}
       dueDate={dueDate}

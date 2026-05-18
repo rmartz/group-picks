@@ -17,10 +17,13 @@ export const PICK_DETAIL_COPY = {
 } as const;
 
 export const PICK_DETAIL_SCAFFOLD_COPY = {
+  categoryLabel: "Category",
   closedStatusChip: "Closed",
+  dueDateLabel: "Due:",
   openStatusChip: "Open",
+  participantsLabel: "Participants",
   rankingTabPlaceholder: "Ranking coming soon.",
-  resultsPlaceholder: "Results will appear here once scoring is complete.",
+  resultsPlaceholder: "No options were added to this pick.",
   suggestOptionButton: "Suggest option",
   tabs: {
     options: "Options",
