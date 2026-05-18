@@ -1,5 +1,7 @@
 export const CREATE_PICK_COPY = {
   cancelButton: "Cancel",
+  descriptionLabel: "Description",
+  descriptionPlaceholder: "Optional description",
   dueDateLabel: "Due date (optional)",
   errors: {
     default: "Something went wrong. Please try again.",

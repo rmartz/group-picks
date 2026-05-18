@@ -8,6 +8,8 @@ const meta: Meta<typeof CreatePickFormView> = {
   args: {
     title: "",
     onTitleChange: () => undefined,
+    description: "",
+    onDescriptionChange: () => undefined,
     topCount: 3,
     onTopCountChange: () => undefined,
     dueDate: "",
