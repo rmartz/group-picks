@@ -1,9 +1,10 @@
 export const GROUP_LIST_COPY = {
-  emptyBody:
-    "Create a group to start making picks with friends, or join one with an invite link.",
+  emptyBody: "start one with friends, or join with a link",
   emptyCreateButton: "Create a group",
-  emptyHeadline: "Groups are where picks happen",
-  emptyJoinButton: "Join with an invite link",
+  emptyHeadline: "You're not in any groups yet",
+  emptyJoinButton: "Join with invite link",
+  memberPlural: "members",
+  memberSingular: "member",
   newGroupButton: "New Group",
   title: "My Groups",
 } as const;

@@ -22,14 +22,22 @@ export function GroupListView({ groups }: GroupListViewProps) {
       {groups.length === 0 ? (
         <NoGroupsView />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {groups.map((group) => (
             <li key={group.id}>
               <Link
                 href={`/groups/${group.id}`}
-                className="block rounded border px-4 py-3 text-sm hover:bg-zinc-50"
+                className="block rounded-lg border px-4 py-4 hover:bg-zinc-50"
               >
-                <span className="font-medium">{group.name}</span>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">{group.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {group.memberIds.length}{" "}
+                    {group.memberIds.length === 1
+                      ? GROUP_LIST_COPY.memberSingular
+                      : GROUP_LIST_COPY.memberPlural}
+                  </span>
+                </div>
               </Link>
             </li>
           ))}
