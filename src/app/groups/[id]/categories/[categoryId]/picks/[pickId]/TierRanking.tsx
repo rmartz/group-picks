@@ -3,18 +3,30 @@
 import { useState } from "react";
 
 import type { Option } from "@/lib/types/option";
+import { RankingTier } from "@/lib/types/ranking";
+import { saveRankings } from "@/services/rankings";
 
-import { RankingTier, TIER_ORDER } from "./TierRanking.copy";
+import { TIER_ORDER } from "./TierRanking.copy";
 import { TierRankingView } from "./TierRankingView";
 
 interface TierRankingProps {
+  groupId: string;
+  categoryId: string;
+  pickId: string;
   options: Option[];
+  initialTierAssignments: Record<string, RankingTier>;
 }
 
-export function TierRanking({ options }: TierRankingProps) {
+export function TierRanking({
+  groupId,
+  categoryId,
+  pickId,
+  options,
+  initialTierAssignments,
+}: TierRankingProps) {
   const [tierAssignments, setTierAssignments] = useState<
     Record<string, RankingTier>
-  >({});
+  >(initialTierAssignments);
 
   function handleOptionClick(optionId: string) {
     setTierAssignments((prev) => {
@@ -23,7 +35,11 @@ export function TierRanking({ options }: TierRankingProps) {
       const nextTier =
         TIER_ORDER[(currentIndex + 1) % TIER_ORDER.length] ??
         RankingTier.LoveIt;
-      return { ...prev, [optionId]: nextTier };
+      const next = { ...prev, [optionId]: nextTier };
+      saveRankings(groupId, categoryId, pickId, next).catch(() => {
+        // fire-and-forget: ranking save failures are non-fatal
+      });
+      return next;
     });
   }
 

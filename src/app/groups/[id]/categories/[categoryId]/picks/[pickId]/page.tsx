@@ -4,6 +4,7 @@ import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
 import { getPickById, getPicksByCategory } from "@/server/data/picks";
+import { getRankingByUser } from "@/server/data/rankings";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { PickDetailView } from "./PickDetailView";
@@ -27,9 +28,10 @@ export default async function PickDetailPage({
   const pick = await getPickById(categoryId, pickId);
   if (!pick) notFound();
 
-  const [currentOptions, allPicks] = await Promise.all([
+  const [currentOptions, allPicks, initialTierAssignments] = await Promise.all([
     getOptionsByPick(pickId),
     getPicksByCategory(categoryId),
+    getRankingByUser(pickId, uid),
   ]);
 
   const priorPickIds = allPicks.filter((p) => p.id !== pickId).map((p) => p.id);
@@ -61,6 +63,7 @@ export default async function PickDetailPage({
       currentUserId={uid}
       initialOptions={currentOptions}
       initialSuggestions={suggestions}
+      initialTierAssignments={initialTierAssignments}
     />
   );
 }

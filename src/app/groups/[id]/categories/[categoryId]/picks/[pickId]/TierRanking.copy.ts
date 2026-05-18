@@ -1,10 +1,6 @@
-export enum RankingTier {
-  LoveIt = "love_it",
-  Maybe = "maybe",
-  NotReally = "not_really",
-  Unranked = "unranked",
-  Yes = "yes",
-}
+import { RankingTier } from "@/lib/types/ranking";
+
+export { RankingTier };
 
 export const TIER_ORDER = [
   RankingTier.LoveIt,
