@@ -17,9 +17,8 @@ vi.mock("firebase-admin/database", () => ({
   }),
 }));
 
-const { getAllRankingsForPick, getRankingByUser, saveRanking } = await import(
-  "./rankings"
-);
+const { getAllRankingsForPick, getRankingByUser, saveRanking } =
+  await import("./rankings");
 
 describe("getAllRankingsForPick", () => {
   beforeEach(() => {
