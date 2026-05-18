@@ -57,6 +57,7 @@ export default async function PickDetailPage({
       pick={pick}
       groupId={groupId}
       categoryId={categoryId}
+      categoryName={category.name}
       currentUserId={uid}
       initialOptions={currentOptions}
       initialSuggestions={suggestions}
