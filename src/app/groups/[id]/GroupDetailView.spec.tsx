@@ -468,4 +468,65 @@ describe("GroupDetailView — remove member", () => {
 
     expect(screen.getByText(GROUP_DETAIL_COPY.removeAction)).toBeDefined();
   });
+
+  it("shows the member name in the confirmation description", () => {
+    renderView({ currentUserId: "user-123" });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.removeAction));
+
+    expect(
+      screen.getByText(GROUP_DETAIL_COPY.removeConfirmMemberTitle("Bob")),
+    ).toBeDefined();
+  });
+});
+
+describe("GroupDetailView — error states", () => {
+  it("renders removeMemberError when provided", () => {
+    renderView({
+      currentUserId: "user-123",
+      removeMemberError: GROUP_DETAIL_COPY.removeMemberError,
+    });
+
+    expect(
+      screen.getByTestId("remove-member-error").textContent,
+    ).toBe(GROUP_DETAIL_COPY.removeMemberError);
+  });
+
+  it("renders adminError when provided", () => {
+    renderView({
+      currentUserId: "user-123",
+      adminError: GROUP_DETAIL_COPY.errors.default,
+    });
+
+    expect(screen.getByTestId("admin-error").textContent).toBe(
+      GROUP_DETAIL_COPY.errors.default,
+    );
+  });
+
+  it("does not render the remove-member-error element when removeMemberError is absent", () => {
+    renderView({ currentUserId: "user-123" });
+
+    expect(screen.queryByTestId("remove-member-error")).toBeNull();
+  });
+
+  it("does not render the admin-error element when adminError is absent", () => {
+    renderView({ currentUserId: "user-123" });
+
+    expect(screen.queryByTestId("admin-error")).toBeNull();
+  });
+});
+
+describe("GroupDetailView — member trigger accessibility", () => {
+  it("renders the member-menu-trigger with the correct aria-label", () => {
+    renderView({ currentUserId: "user-123" });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    expect((trigger as HTMLElement).getAttribute("aria-label")).toBe(
+      GROUP_DETAIL_COPY.memberActionsLabel,
+    );
+  });
 });

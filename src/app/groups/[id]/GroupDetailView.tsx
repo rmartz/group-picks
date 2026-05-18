@@ -36,6 +36,7 @@ interface GroupDetailViewProps {
   adminError?: string;
   isLeaving?: boolean;
   leaveError?: string;
+  removeMemberError?: string;
   initialInviteExpiresAt?: string;
   initialInviteMode: InviteMode;
   memberNames: MemberName[];
@@ -91,6 +92,7 @@ function MemberRow({
       {showMenu && (
         <DropdownMenu>
           <DropdownMenuTrigger
+            aria-label={GROUP_DETAIL_COPY.memberActionsLabel}
             className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md p-0 text-sm hover:bg-accent"
             data-testid="member-menu-trigger"
           >
@@ -181,6 +183,7 @@ export function GroupDetailView({
   adminError,
   isLeaving = false,
   leaveError,
+  removeMemberError,
   initialInviteExpiresAt,
   initialInviteMode,
   memberNames,
@@ -232,7 +235,7 @@ export function GroupDetailView({
           </p>
           <p className="text-sm text-muted-foreground">
             {confirmRemoveName
-              ? `Remove ${confirmRemoveName} from this group?`
+              ? GROUP_DETAIL_COPY.removeConfirmMemberTitle(confirmRemoveName)
               : GROUP_DETAIL_COPY.removeConfirmDescription}
           </p>
           <div className="flex gap-2">
@@ -354,10 +357,20 @@ export function GroupDetailView({
                 />
               ))}
             </ul>
-            {adminError && (
-              <p className="text-sm text-destructive">{adminError}</p>
-            )}
           </section>
+          {removeMemberError && (
+            <p
+              className="text-sm text-destructive"
+              data-testid="remove-member-error"
+            >
+              {removeMemberError}
+            </p>
+          )}
+          {adminError && (
+            <p className="text-sm text-destructive" data-testid="admin-error">
+              {adminError}
+            </p>
+          )}
           {isAdmin && (
             <GroupSettingsPanelView
               picksRestricted={group.picksRestricted}

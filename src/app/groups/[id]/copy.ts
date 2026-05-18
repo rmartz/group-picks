@@ -35,6 +35,7 @@ export const GROUP_DETAIL_COPY = {
   removeConfirmButton: "Remove",
   removeConfirmDescription:
     "This will remove the member from the group immediately.",
+  removeConfirmMemberTitle: (name: string) => `Remove ${name} from this group?`,
   removeConfirmTitle: "Remove member?",
   removeMemberError: "Failed to remove member. Please try again.",
   revokeAdminAction: "Revoke admin",
