@@ -22,12 +22,13 @@ export default async function CategoryDetailPage({
   if (!uid) redirect("/sign-in");
 
   const { id, categoryId } = await params;
-  const group = await getGroupById(id);
+
+  const [group, category] = await Promise.all([
+    getGroupById(id),
+    getCategoryById(categoryId),
+  ]);
 
   if (!group?.memberIds.includes(uid)) notFound();
-
-  const category = await getCategoryById(categoryId);
-
   if (!category) notFound();
   if (category.groupId !== id) notFound();
 

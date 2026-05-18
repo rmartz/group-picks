@@ -63,7 +63,8 @@ export async function removeMember(
   const result = await db
     .ref(`groups/${groupId}/members`)
     .transaction((members: Record<string, unknown> | null) => {
-      if (!members) return members;
+      if (!members) return undefined;
+      if (!(uid in members)) return members;
       if (Object.keys(members).length <= 1) return undefined;
       return Object.fromEntries(
         Object.entries(members).filter(([key]) => key !== uid),

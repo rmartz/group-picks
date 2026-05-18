@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
-import { getPicksByCategory } from "@/server/data/picks";
+import { hasPicks } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { CreatePickForm } from "./CreatePickForm";
@@ -25,14 +25,14 @@ export default async function CreatePickPage({
   if (!group.memberIds.includes(uid)) notFound();
   if (category?.groupId !== groupId) notFound();
 
-  const picks = await getPicksByCategory(categoryId);
+  const hasPriorPicks = await hasPicks(categoryId);
 
   return (
     <main className="mx-auto max-w-lg p-6">
       <CreatePickForm
         groupId={groupId}
         categoryId={categoryId}
-        hasPriorPicks={picks.length > 0}
+        hasPriorPicks={hasPriorPicks}
       />
     </main>
   );

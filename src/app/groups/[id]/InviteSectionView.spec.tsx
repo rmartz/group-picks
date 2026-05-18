@@ -15,10 +15,14 @@ function makeProps(
   return {
     inviteUrl: INVITE_URL,
     expiresAt: EXPIRES_AT,
+    dateInput: EXPIRES_AT.toISOString().slice(0, 10),
+    onDateChange: () => undefined,
     onRegenerate: () => undefined,
     onCopy: () => undefined,
+    onSetExpiry: () => undefined,
     regenerating: false,
     copied: false,
+    settingExpiry: false,
     error: undefined,
     ...overrides,
   };
@@ -132,5 +136,65 @@ describe("InviteSectionView", () => {
     render(<InviteSectionView {...makeProps({ expiresAt: undefined })} />);
 
     expect(screen.queryByText(GROUP_DETAIL_COPY.expiresAtLabel)).toBeNull();
+  });
+
+  it("renders a date input for setting the expiry", () => {
+    render(<InviteSectionView {...makeProps()} />);
+
+    expect(
+      screen.getByLabelText(GROUP_DETAIL_COPY.setExpiryLabel),
+    ).toBeDefined();
+  });
+
+  it("pre-fills the date input with the current expiry in YYYY-MM-DD format", () => {
+    render(<InviteSectionView {...makeProps({ dateInput: "2026-05-13" })} />);
+
+    const input = screen.getByLabelText(GROUP_DETAIL_COPY.setExpiryLabel);
+    expect((input as HTMLInputElement).value).toBe("2026-05-13");
+  });
+
+  it("renders the save expiry button", () => {
+    render(<InviteSectionView {...makeProps()} />);
+
+    expect(
+      screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
+    ).toBeDefined();
+  });
+
+  it("calls onSetExpiry with a string when save is clicked with a valid date", () => {
+    const onSetExpiry = vi.fn();
+    render(
+      <InviteSectionView
+        {...makeProps({ onSetExpiry, dateInput: "2099-06-15" })}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
+    );
+
+    expect(onSetExpiry).toHaveBeenCalledWith("2099-06-15");
+  });
+
+  it("calls onSetExpiry with null when save is clicked with an empty date input", () => {
+    const onSetExpiry = vi.fn();
+    render(
+      <InviteSectionView {...makeProps({ onSetExpiry, dateInput: "" })} />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
+    );
+
+    expect(onSetExpiry).toHaveBeenCalledWith(null);
+  });
+
+  it("disables the save expiry button while settingExpiry is true", () => {
+    render(<InviteSectionView {...makeProps({ settingExpiry: true })} />);
+
+    const button = screen.getByRole("button", {
+      name: GROUP_DETAIL_COPY.settingExpiryButton,
+    });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
   });
 });
