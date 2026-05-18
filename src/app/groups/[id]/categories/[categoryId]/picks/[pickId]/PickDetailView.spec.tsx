@@ -19,6 +19,7 @@ import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
 import type { SuggestOptionSheetProps } from "./SuggestOptionSheet";
+import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 
 let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
 
@@ -202,7 +203,7 @@ describe("open state", () => {
     renderView({ pick: makePick({ closedAt: undefined }) });
 
     expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder),
+      screen.getByText(TOP_PICKS_VIEW_COPY.lockedMessage),
     ).toBeDefined();
   });
 
@@ -236,10 +237,10 @@ describe("closed state: top picks shows results placeholder", () => {
     });
 
     expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder),
+      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
     ).toBeDefined();
     expect(
-      screen.queryByText(PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder),
+      screen.queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
     ).toBeNull();
   });
 });
@@ -540,13 +541,14 @@ describe("top picks results", () => {
 
   it("renders only the provided topPicks in the top picks tab", () => {
     const topOption = makeOption({ id: "opt-1", title: "Top Option" });
+    const excludedOption = makeOption({ id: "opt-2", title: "Excluded Option" });
 
     renderView({
       pick: makePick({
         closedAt: new Date("2025-06-01T00:00:00.000Z"),
         topCount: 1,
       }),
-      topPicks: [topOption],
+      topPicks: [topOption, excludedOption],
     });
 
     expect(screen.getByText("Top Option")).toBeDefined();
@@ -560,7 +562,7 @@ describe("top picks results", () => {
     });
 
     expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder),
+      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
     ).toBeDefined();
   });
 });

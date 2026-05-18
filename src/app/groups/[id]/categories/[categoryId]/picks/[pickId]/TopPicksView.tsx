@@ -13,23 +13,13 @@ export function TopPicksView({
   topPicks,
   topCount,
 }: TopPicksViewProps) {
-  if (isOpen) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        {TOP_PICKS_VIEW_COPY.lockedMessage}
-      </p>
-    );
-  }
-
-  if (topPicks.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        {TOP_PICKS_VIEW_COPY.noResultsMessage}
-      </p>
-    );
-  }
-
-  return (
+  return isOpen || topPicks.length === 0 ? (
+    <p className="text-sm text-muted-foreground">
+      {isOpen
+        ? TOP_PICKS_VIEW_COPY.lockedMessage
+        : TOP_PICKS_VIEW_COPY.noResultsMessage}
+    </p>
+  ) : (
     <ol className="space-y-2">
       {topPicks.slice(0, topCount).map((option, index) => (
         <li key={option.id} className="flex items-center gap-3 text-sm">
