@@ -215,3 +215,40 @@ describe("CategoryDetailView — reopen pick action", () => {
     expect(screen.queryByTestId("reopen-pick-open")).toBeNull();
   });
 });
+
+describe("CategoryDetailView — open badge", () => {
+  it("renders an open badge for an open pick", () => {
+    const pick = makePick({ closedAt: undefined });
+    render(<CategoryDetailView category={makeCategory()} picks={[pick]} />);
+
+    expect(screen.getByText(CATEGORY_DETAIL_COPY.openBadge)).toBeDefined();
+  });
+
+  it("does not render an open badge for a closed pick", () => {
+    const pick = makePick({ closedAt: new Date("2025-02-01T09:00:00.000Z") });
+    render(<CategoryDetailView category={makeCategory()} picks={[pick]} />);
+
+    expect(screen.queryByText(CATEGORY_DETAIL_COPY.openBadge)).toBeNull();
+  });
+});
+
+describe("CategoryDetailView — due date", () => {
+  it("renders the formatted due date when dueDate is set", () => {
+    const dueDate = new Date("2026-01-01T00:00:00.000Z");
+    const pick = makePick({ dueDate });
+    render(<CategoryDetailView category={makeCategory()} picks={[pick]} />);
+
+    expect(screen.getByText(dueDate.toLocaleDateString())).toBeDefined();
+  });
+
+  it("does not render due date when dueDate is absent", () => {
+    const pick = makePick({ dueDate: undefined });
+    render(<CategoryDetailView category={makeCategory()} picks={[pick]} />);
+
+    expect(
+      screen.queryByText(
+        new Date("2026-01-01T00:00:00.000Z").toLocaleDateString(),
+      ),
+    ).toBeNull();
+  });
+});

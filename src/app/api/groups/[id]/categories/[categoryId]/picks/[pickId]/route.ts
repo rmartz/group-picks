@@ -5,6 +5,7 @@ import { getGroupById } from "@/server/data/groups";
 import {
   assertPickIsOpenForWrite,
   PICK_CLOSED_API_ERROR,
+  PickNotFoundError,
   PickWriteClosedError,
   updatePick,
 } from "@/server/data/picks";
@@ -15,23 +16,6 @@ interface UpdatePickRequestBody {
   description: unknown;
   topCount: unknown;
   dueDate?: unknown;
-}
-
-function parseDueDate(value: unknown): Date | undefined {
-  if (value === undefined || value === null || value === "") {
-    return undefined;
-  }
-
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const parsedDate = new Date(value);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return undefined;
-  }
-
-  return parsedDate;
 }
 
 export async function PATCH(
@@ -86,17 +70,19 @@ export async function PATCH(
     );
   }
 
-  if (
-    body.dueDate !== undefined &&
-    body.dueDate !== null &&
-    body.dueDate !== "" &&
-    (typeof body.dueDate !== "string" ||
-      Number.isNaN(new Date(body.dueDate).getTime()))
-  ) {
-    return NextResponse.json(
-      { error: "dueDate must be a valid date" },
-      { status: 400 },
-    );
+  let parsedDueDate: Date | undefined;
+  if (typeof body.dueDate === "string" && body.dueDate !== "") {
+    const parsed = new Date(body.dueDate);
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== body.dueDate
+    ) {
+      return NextResponse.json(
+        { error: "dueDate is invalid" },
+        { status: 400 },
+      );
+    }
+    parsedDueDate = parsed;
   }
 
   try {
@@ -108,7 +94,7 @@ export async function PATCH(
         { status: 409 },
       );
     }
-    if (err instanceof Error && err.message === "Pick not found") {
+    if (err instanceof PickNotFoundError) {
       return NextResponse.json({ error: "Pick not found" }, { status: 404 });
     }
     throw err;
@@ -118,13 +104,12 @@ export async function PATCH(
   const description =
     typeof body.description === "string" ? body.description.trim() : "";
   const topCount = body.topCount;
-  const dueDate = parseDueDate(body.dueDate);
 
   await updatePick(categoryId, pickId, {
     title,
     description,
     topCount,
-    dueDate,
+    dueDate: parsedDueDate,
   });
 
   return NextResponse.json({ pickId });

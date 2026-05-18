@@ -6,6 +6,8 @@ import type { FirebasePickPublic } from "@/lib/firebase/schema/pick";
 import {
   assertPickIsOpenForWrite,
   getPickById,
+  hasPicks,
+  PickNotFoundError,
   PickWriteClosedError,
 } from "./picks";
 
@@ -155,7 +157,7 @@ describe("assertPickIsOpenForWrite", () => {
     expect(storedPick.closedAt).toBe(closedAt);
   });
 
-  it("throws Pick not found when the transaction finds no data", async () => {
+  it("throws PickNotFoundError when the transaction finds no data", async () => {
     const transaction = vi.fn(
       (
         update: (
@@ -180,7 +182,41 @@ describe("assertPickIsOpenForWrite", () => {
 
     await expect(
       assertPickIsOpenForWrite("cat-123", "pick-missing"),
-    ).rejects.toThrow("Pick not found");
+    ).rejects.toBeInstanceOf(PickNotFoundError);
+  });
+});
+
+describe("hasPicks", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns true when at least one pick exists", async () => {
+    const get = vi.fn().mockResolvedValue({ exists: () => true });
+    const limitToFirst = vi.fn().mockReturnValue({ get });
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ limitToFirst }),
+    } as never);
+
+    const result = await hasPicks("cat-123");
+
+    expect(result).toBe(true);
+    expect(limitToFirst).toHaveBeenCalledWith(1);
+  });
+
+  it("returns false when no picks exist", async () => {
+    const get = vi.fn().mockResolvedValue({ exists: () => false });
+    const limitToFirst = vi.fn().mockReturnValue({ get });
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ limitToFirst }),
+    } as never);
+
+    const result = await hasPicks("cat-123");
+
+    expect(result).toBe(false);
+    expect(limitToFirst).toHaveBeenCalledWith(1);
   });
 });
 
