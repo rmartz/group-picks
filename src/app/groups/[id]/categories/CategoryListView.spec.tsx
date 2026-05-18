@@ -153,6 +153,73 @@ describe("CategoryListView", () => {
         "/groups/group-1/categories/cat-1/picks/pick-1",
       );
     });
+
+    it("renders a closed badge for a closed pick", () => {
+      render(
+        <CategoryListView
+          {...makeProps({
+            categories: [makeCategory({ id: "cat-1" })],
+            picksByCategory: {
+              "cat-1": [
+                makePick({ closedAt: new Date("2025-02-01T09:00:00.000Z") }),
+              ],
+            },
+          })}
+        />,
+      );
+
+      expect(screen.getByText(CATEGORY_COPY.closedBadge)).toBeDefined();
+    });
+
+    it("renders an open badge for an open pick", () => {
+      render(
+        <CategoryListView
+          {...makeProps({
+            categories: [makeCategory({ id: "cat-1" })],
+            picksByCategory: {
+              "cat-1": [makePick({ closedAt: undefined })],
+            },
+          })}
+        />,
+      );
+
+      expect(screen.getByText(CATEGORY_COPY.openBadge)).toBeDefined();
+    });
+
+    it("renders the formatted due date when dueDate is set", () => {
+      const dueDate = new Date("2026-01-01T00:00:00.000Z");
+      render(
+        <CategoryListView
+          {...makeProps({
+            categories: [makeCategory({ id: "cat-1" })],
+            picksByCategory: {
+              "cat-1": [makePick({ dueDate })],
+            },
+          })}
+        />,
+      );
+
+      expect(screen.getByText(dueDate.toLocaleDateString())).toBeDefined();
+    });
+
+    it("does not render due date when dueDate is absent", () => {
+      render(
+        <CategoryListView
+          {...makeProps({
+            categories: [makeCategory({ id: "cat-1" })],
+            picksByCategory: {
+              "cat-1": [makePick({ dueDate: undefined })],
+            },
+          })}
+        />,
+      );
+
+      expect(
+        screen.queryByText(
+          new Date("2026-01-01T00:00:00.000Z").toLocaleDateString(),
+        ),
+      ).toBeNull();
+    });
   });
 
   describe('"Create pick" CTA', () => {
