@@ -4,6 +4,7 @@ import { getCategoryById, updateCategory } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { canModifyResource } from "@/server/utils/permissions";
 
 export async function PATCH(
   request: Request,
@@ -35,7 +36,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  if (category.creatorId !== uid) {
+  if (!canModifyResource(uid, category.creatorId, group)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
