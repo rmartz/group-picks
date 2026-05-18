@@ -98,8 +98,10 @@ export const WithLabel: Story = {};
     });
 
     expect(result.status).toBe(0);
-    expect(result.output).toContain('name: "components-ui-bar-default"');
-    expect(result.output).toContain('name: "components-ui-bar-with-label"');
+    expect(result.output).toContain('name: "components-ui-bar--default"');
+    expect(result.output).toContain('name: "components-ui-bar--with-label"');
+    expect(result.output).not.toContain('name: "bar-default"');
+    expect(result.output).not.toContain('name: "bar-with-label"');
     expect(result.output).toContain(
       "http://127.0.0.1:6006/?path=/story/components-ui-bar--default",
     );
@@ -131,7 +133,7 @@ export const Populated: Story = {};
 
     expect(result.status).toBe(0);
     expect(result.output).toContain(
-      'name: "profile-user-profile-view-populated"',
+      'name: "profile-user-profile-view--populated"',
     );
     expect(result.output).toContain(
       "http://127.0.0.1:6006/?path=/story/profile-user-profile-view--populated",

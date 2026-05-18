@@ -123,7 +123,7 @@ function getNamedStoryFilter(objectLiteral, propertyName) {
   }
 
   if (ts.isRegularExpressionLiteral(initializer)) {
-    const match = initializer.text.match(/^\/(.+)\/([a-z]*)$/i);
+    const match = initializer.text.match(/^\/(.+)\/([a-z]*)$/);
     if (!match) {
       return undefined;
     }
@@ -284,7 +284,7 @@ function parseStoryFile(storyFilePath) {
 
     return {
       componentName,
-      name: storyId.replace(/--/g, "-"),
+      name: storyId,
       storyExportName,
       storyId,
     };
