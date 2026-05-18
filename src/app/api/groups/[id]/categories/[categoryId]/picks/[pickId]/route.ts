@@ -69,6 +69,7 @@ export async function PATCH(
     );
   }
 
+  let parsedDueDate: Date | undefined;
   if (typeof body.dueDate === "string" && body.dueDate !== "") {
     const parsed = new Date(body.dueDate);
     if (
@@ -80,6 +81,7 @@ export async function PATCH(
         { status: 400 },
       );
     }
+    parsedDueDate = parsed;
   }
 
   try {
@@ -101,16 +103,12 @@ export async function PATCH(
   const description =
     typeof body.description === "string" ? body.description.trim() : "";
   const topCount = body.topCount;
-  const dueDate =
-    typeof body.dueDate === "string" && body.dueDate !== ""
-      ? new Date(body.dueDate)
-      : undefined;
 
   await updatePick(categoryId, pickId, {
     title,
     description,
     topCount,
-    dueDate,
+    dueDate: parsedDueDate,
   });
 
   return NextResponse.json({ pickId });
