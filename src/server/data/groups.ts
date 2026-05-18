@@ -80,3 +80,16 @@ export async function removeMember(
   });
   return { lastMember: false };
 }
+
+export async function promoteAdmin(
+  groupId: string,
+  uid: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`groups/${groupId}/public/adminIds/${uid}`).set(true);
+}
+
+export async function revokeAdmin(groupId: string, uid: string): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`groups/${groupId}/public/adminIds/${uid}`).remove();
+}

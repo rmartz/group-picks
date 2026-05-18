@@ -56,6 +56,25 @@ export async function regenerateInvite(
   return (await response.json()) as { token: string; expiresAt: string };
 }
 
+export async function promoteAdmin(
+  groupId: string,
+  uid: string,
+): Promise<void> {
+  const response = await fetch(`/api/groups/${groupId}/admins`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uid }),
+  });
+  if (!response.ok) throw new Error("Failed to promote admin");
+}
+
+export async function revokeAdmin(groupId: string, uid: string): Promise<void> {
+  const response = await fetch(`/api/groups/${groupId}/admins/${uid}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to revoke admin");
+}
+
 export async function updateInviteExpiry(
   groupId: string,
   expiresAt: string | null,

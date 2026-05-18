@@ -6,7 +6,12 @@ import { useState } from "react";
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
 import type { GroupPick } from "@/lib/types/pick";
-import { leaveGroup, LeaveGroupLastMemberError } from "@/services/groups";
+import {
+  leaveGroup,
+  LeaveGroupLastMemberError,
+  promoteAdmin,
+  revokeAdmin,
+} from "@/services/groups";
 
 import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupDetailView } from "./GroupDetailView";
@@ -31,6 +36,27 @@ export function GroupDetailClient({
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [adminError, setAdminError] = useState<string | undefined>();
+
+  async function handleMakeAdmin(uid: string) {
+    setAdminError(undefined);
+    try {
+      await promoteAdmin(group.id, uid);
+      router.refresh();
+    } catch {
+      setAdminError(GROUP_DETAIL_COPY.errors.adminAction);
+    }
+  }
+
+  async function handleRevokeAdmin(uid: string) {
+    setAdminError(undefined);
+    try {
+      await revokeAdmin(group.id, uid);
+      router.refresh();
+    } catch {
+      setAdminError(GROUP_DETAIL_COPY.errors.adminAction);
+    }
+  }
 
   async function handleLeave() {
     setError(undefined);
@@ -57,6 +83,13 @@ export function GroupDetailClient({
       onLeave={() => {
         void handleLeave();
       }}
+      onMakeAdmin={(uid) => {
+        void handleMakeAdmin(uid);
+      }}
+      onRevokeAdmin={(uid) => {
+        void handleRevokeAdmin(uid);
+      }}
+      adminError={adminError}
       isLeaving={isLeaving}
       leaveError={error}
       initialInviteExpiresAt={initialInviteExpiresAt}

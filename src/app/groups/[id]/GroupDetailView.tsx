@@ -1,6 +1,12 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
@@ -21,11 +27,75 @@ interface GroupDetailViewProps {
   categories: Category[];
   currentUserId: string;
   onLeave: () => void;
+  adminError?: string;
   isLeaving?: boolean;
   leaveError?: string;
   initialInviteExpiresAt?: string;
   memberNames: MemberName[];
   picksByCategory: Record<string, GroupPick[]>;
+  onMakeAdmin?: (uid: string) => void;
+  onRevokeAdmin?: (uid: string) => void;
+}
+
+interface MemberRowProps {
+  member: MemberName;
+  group: Group;
+  isCurrentUser: boolean;
+  isCreator: boolean;
+  onMakeAdmin?: (uid: string) => void;
+  onRevokeAdmin?: (uid: string) => void;
+}
+
+function MemberRow({
+  member,
+  group,
+  isCurrentUser,
+  isCreator,
+  onMakeAdmin,
+  onRevokeAdmin,
+}: MemberRowProps) {
+  const isMemberAdmin = group.adminIds.includes(member.uid);
+  const isMemberCreator = group.creatorId === member.uid;
+  const showMenu = isCreator && !isCurrentUser;
+
+  return (
+    <li className="flex items-center justify-between text-sm">
+      <div className="flex items-center gap-2">
+        <span>{member.name}</span>
+        {isMemberCreator && (
+          <Badge variant="default" className="text-xs">
+            {GROUP_DETAIL_COPY.creatorChip}
+          </Badge>
+        )}
+        {isMemberAdmin && !isMemberCreator && (
+          <Badge variant="secondary" className="text-xs">
+            {GROUP_DETAIL_COPY.adminChip}
+          </Badge>
+        )}
+      </div>
+      {showMenu && (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md p-0 text-sm hover:bg-accent"
+            data-testid="member-menu-trigger"
+          >
+            ···
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {isMemberAdmin ? (
+              <DropdownMenuItem onClick={() => onRevokeAdmin?.(member.uid)}>
+                {GROUP_DETAIL_COPY.revokeAdminAction}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => onMakeAdmin?.(member.uid)}>
+                {GROUP_DETAIL_COPY.makeAdminAction}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </li>
+  );
 }
 
 interface PickListItemProps {
@@ -84,11 +154,14 @@ export function GroupDetailView({
   categories,
   currentUserId,
   onLeave,
+  adminError,
   isLeaving = false,
   leaveError,
   initialInviteExpiresAt,
   memberNames,
   picksByCategory,
+  onMakeAdmin,
+  onRevokeAdmin,
 }: GroupDetailViewProps) {
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
   const allPicks = categories.flatMap((c) => picksByCategory[c.id] ?? []);
@@ -184,13 +257,22 @@ export function GroupDetailView({
             <h2 className="text-sm font-semibold">
               {GROUP_DETAIL_COPY.membersHeading}
             </h2>
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {memberNames.map((m) => (
-                <li key={m.uid} className="text-sm">
-                  {m.name}
-                </li>
+                <MemberRow
+                  key={m.uid}
+                  member={m}
+                  group={group}
+                  isCurrentUser={m.uid === currentUserId}
+                  isCreator={currentUserId === group.creatorId}
+                  onMakeAdmin={onMakeAdmin}
+                  onRevokeAdmin={onRevokeAdmin}
+                />
               ))}
             </ul>
+            {adminError && (
+              <p className="text-sm text-destructive">{adminError}</p>
+            )}
           </section>
           <InviteSection
             groupId={group.id}
