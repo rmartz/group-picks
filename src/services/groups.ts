@@ -42,9 +42,12 @@ export async function createGroup(name: string): Promise<string> {
 
 export async function regenerateInvite(
   groupId: string,
-): Promise<{ token: string; expiresAt: string }> {
+  mode: string,
+): Promise<{ token: string; expiresAt: string; mode: string }> {
   const response = await fetch(`/api/groups/${groupId}/invite`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode }),
   });
   if (!response.ok) throw new Error("Failed to regenerate invite");
 
@@ -53,7 +56,11 @@ export async function regenerateInvite(
     throw new Error("Failed to regenerate invite");
   }
 
-  return (await response.json()) as { token: string; expiresAt: string };
+  return (await response.json()) as {
+    token: string;
+    expiresAt: string;
+    mode: string;
+  };
 }
 
 export async function promoteAdmin(
@@ -73,23 +80,4 @@ export async function revokeAdmin(groupId: string, uid: string): Promise<void> {
     method: "DELETE",
   });
   if (!response.ok) throw new Error("Failed to revoke admin");
-}
-
-export async function updateInviteExpiry(
-  groupId: string,
-  expiresAt: string | null,
-): Promise<{ expiresAt: string | null }> {
-  const response = await fetch(`/api/groups/${groupId}/invite`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ expiresAt }),
-  });
-  if (!response.ok) throw new Error("Failed to update invite expiry");
-
-  const contentType = response.headers.get("content-type");
-  if (response.redirected || !contentType?.includes("application/json")) {
-    throw new Error("Failed to update invite expiry");
-  }
-
-  return (await response.json()) as { expiresAt: string | null };
 }

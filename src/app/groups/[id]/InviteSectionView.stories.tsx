@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { InviteMode } from "@/lib/types/invite";
+
 import { GROUP_DETAIL_COPY } from "./copy";
 import { InviteSectionView } from "./InviteSectionView";
 
@@ -11,13 +13,11 @@ const meta: Meta<typeof InviteSectionView> = {
   args: {
     inviteUrl: INVITE_URL,
     expiresAt: new Date("2026-05-13T12:00:00.000Z"),
-    dateInput: "2026-05-13",
-    onDateChange: () => undefined,
+    mode: InviteMode.Group,
+    onModeChange: () => undefined,
     onRegenerate: () => undefined,
     onCopy: () => undefined,
-    onSetExpiry: () => undefined,
     regenerating: false,
-    settingExpiry: false,
     copied: false,
     error: undefined,
   },
@@ -28,11 +28,16 @@ type Story = StoryObj<typeof InviteSectionView>;
 
 export const Default: Story = {};
 
+export const PersonalMode: Story = {
+  args: {
+    mode: InviteMode.Personal,
+  },
+};
+
 export const NoToken: Story = {
   args: {
     inviteUrl: undefined,
     expiresAt: undefined,
-    dateInput: "",
   },
 };
 
@@ -51,12 +56,6 @@ export const Regenerating: Story = {
 export const WithError: Story = {
   args: {
     error: GROUP_DETAIL_COPY.inviteErrors.default,
-  },
-};
-
-export const SettingExpiry: Story = {
-  args: {
-    settingExpiry: true,
   },
 };
 

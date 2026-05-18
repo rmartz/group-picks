@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { InviteMode } from "@/lib/types/invite";
 import { getGroupById } from "@/server/data/groups";
-import { addGroupMember, getGroupInviteByToken } from "@/server/data/invites";
+import {
+  addGroupMember,
+  getGroupInviteByToken,
+  revokeGroupInvite,
+} from "@/server/data/invites";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 const TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
@@ -64,6 +69,10 @@ export async function POST(request: Request) {
   }
 
   await addGroupMember(invite.groupId, uid);
+
+  if (invite.mode === InviteMode.Personal) {
+    await revokeGroupInvite(token);
+  }
 
   return NextResponse.json({ groupId: invite.groupId });
 }
