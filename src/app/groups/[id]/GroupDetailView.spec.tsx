@@ -57,6 +57,9 @@ function renderView(
       memberNames={memberNames}
       picksByCategory={{}}
       initialInviteMode={InviteMode.Group}
+      onMakeAdmin={vi.fn()}
+      onRevokeAdmin={vi.fn()}
+      onRemoveMember={vi.fn()}
       onTogglePicksRestricted={() => undefined}
       isSavingSettings={false}
       settingsError={undefined}
@@ -266,10 +269,7 @@ describe("GroupDetailView — member list chips", () => {
   });
 
   it("shows Admin chip next to a promoted non-creator member", () => {
-    const group = {
-      ...makeGroup(),
-      adminIds: ["user-123", "user-456"],
-    };
+    const group = { ...makeGroup(), adminIds: ["user-123", "user-456"] };
     renderView({ group });
 
     const adminBadges = screen.getAllByText(GROUP_DETAIL_COPY.adminChip);
@@ -298,27 +298,60 @@ describe("GroupDetailView — admin error", () => {
   });
 });
 
-describe("GroupDetailView — member ··· menu (creator view)", () => {
-  it("shows a menu button for non-self members when current user is creator", () => {
+describe("GroupDetailView — member ··· menu visibility", () => {
+  it("shows a menu button for non-self, non-creator members when current user is an admin", () => {
+    const group = { ...makeGroup(), adminIds: ["user-123", "user-456"] };
+    // Alice is the current user (admin), Bob is also admin but not creator
+    // Only Bob's row gets a menu; Alice is the current user
+    renderView({ currentUserId: "user-456", group });
+
+    // user-456 is admin — should see menu for Alice (user-123 is creator, hidden)
+    // actually user-123 is creator → no menu on that row; user-456 is self → no menu
+    // So with 2 members (creator + self), there are 0 menus
+    expect(screen.queryByTestId("member-menu-trigger")).toBeNull();
+  });
+
+  it("shows menu buttons for non-self non-creator rows when current user is creator", () => {
     renderView({ currentUserId: "user-123" });
 
-    // Only Bob's row gets a menu; Alice is the current user (creator's own row)
+    // Alice (user-123) is creator/self → no menu on Alice's row
+    // Bob (user-456) is neither creator nor self → menu
     const menuButtons = screen.getAllByTestId("member-menu-trigger");
     expect(menuButtons.length).toBe(1);
   });
 
-  it("does not show a menu button for non-creator current users", () => {
+  it("does not show a menu button for non-admin current users", () => {
+    // user-456 is not an admin by default (adminIds: ["user-123"])
     renderView({ currentUserId: "user-456" });
 
     expect(screen.queryByTestId("member-menu-trigger")).toBeNull();
   });
 
+  it("hides the menu on the creator's row even when current user is an admin", () => {
+    const group = {
+      ...makeGroup(),
+      memberIds: ["user-123", "user-456", "user-789"],
+      adminIds: ["user-123", "user-456"],
+    };
+    const names = [
+      { uid: "user-123", name: "Alice" },
+      { uid: "user-456", name: "Bob" },
+      { uid: "user-789", name: "Carol" },
+    ];
+    // Bob (user-456) is an admin (not creator). Should see menu for Carol only.
+    renderView({ group, memberNames: names, currentUserId: "user-456" });
+
+    const menuButtons = screen.getAllByTestId("member-menu-trigger");
+    expect(menuButtons.length).toBe(1);
+  });
+});
+
+describe("GroupDetailView — admin actions in ··· menu (creator view)", () => {
   // TODO: upgrade to userEvent when @testing-library/user-event is available
   it("calls onMakeAdmin with the member uid when Make admin is clicked", () => {
     const onMakeAdmin = vi.fn();
     renderView({ currentUserId: "user-123", onMakeAdmin });
 
-    // Radix DropdownMenu requires the full click sequence to open
     const trigger = screen.getByTestId("member-menu-trigger");
     fireEvent.pointerDown(trigger);
     fireEvent.pointerUp(trigger);
@@ -330,10 +363,7 @@ describe("GroupDetailView — member ··· menu (creator view)", () => {
 
   // TODO: upgrade to userEvent when @testing-library/user-event is available
   it("calls onRevokeAdmin with the member uid when Revoke admin is clicked", () => {
-    const group = {
-      ...makeGroup(),
-      adminIds: ["user-123", "user-456"],
-    };
+    const group = { ...makeGroup(), adminIds: ["user-123", "user-456"] };
     const onRevokeAdmin = vi.fn();
     renderView({ group, currentUserId: "user-123", onRevokeAdmin });
 
@@ -344,5 +374,98 @@ describe("GroupDetailView — member ··· menu (creator view)", () => {
     fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.revokeAdminAction));
 
     expect(onRevokeAdmin).toHaveBeenCalledWith("user-456");
+  });
+
+  it("does not show Make admin / Revoke admin actions to non-creator admins", () => {
+    const group = {
+      ...makeGroup(),
+      memberIds: ["user-123", "user-456", "user-789"],
+      adminIds: ["user-123", "user-456"],
+    };
+    const names = [
+      { uid: "user-123", name: "Alice" },
+      { uid: "user-456", name: "Bob" },
+      { uid: "user-789", name: "Carol" },
+    ];
+    // Bob (user-456) is admin but NOT creator → no Make/Revoke admin in their menu
+    renderView({ group, memberNames: names, currentUserId: "user-456" });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+
+    expect(screen.queryByText(GROUP_DETAIL_COPY.makeAdminAction)).toBeNull();
+    expect(screen.queryByText(GROUP_DETAIL_COPY.revokeAdminAction)).toBeNull();
+  });
+});
+
+describe("GroupDetailView — remove member", () => {
+  // TODO: upgrade to userEvent when @testing-library/user-event is available
+  it("shows confirmation prompt when Remove from group is clicked", () => {
+    renderView({ currentUserId: "user-123" });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.removeAction));
+
+    expect(
+      screen.getByText(GROUP_DETAIL_COPY.removeConfirmButton),
+    ).toBeDefined();
+    expect(
+      screen.getByText(GROUP_DETAIL_COPY.removeCancelButton),
+    ).toBeDefined();
+  });
+
+  it("calls onRemoveMember with the member uid when confirmation is confirmed", () => {
+    const onRemoveMember = vi.fn();
+    renderView({ currentUserId: "user-123", onRemoveMember });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.removeAction));
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.removeConfirmButton));
+
+    expect(onRemoveMember).toHaveBeenCalledWith("user-456");
+  });
+
+  it("does not call onRemoveMember when confirmation is cancelled", () => {
+    const onRemoveMember = vi.fn();
+    renderView({ currentUserId: "user-123", onRemoveMember });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.removeAction));
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.removeCancelButton));
+
+    expect(onRemoveMember).not.toHaveBeenCalled();
+  });
+
+  it("shows Remove from group action for non-creator admins too", () => {
+    const group = {
+      ...makeGroup(),
+      memberIds: ["user-123", "user-456", "user-789"],
+      adminIds: ["user-123", "user-456"],
+    };
+    const names = [
+      { uid: "user-123", name: "Alice" },
+      { uid: "user-456", name: "Bob" },
+      { uid: "user-789", name: "Carol" },
+    ];
+    // Bob (user-456) is admin but NOT creator
+    renderView({ group, memberNames: names, currentUserId: "user-456" });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+
+    expect(screen.getByText(GROUP_DETAIL_COPY.removeAction)).toBeDefined();
   });
 });

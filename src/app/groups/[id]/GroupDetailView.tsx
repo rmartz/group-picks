@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,28 +45,33 @@ interface GroupDetailViewProps {
   onTogglePicksRestricted: () => void;
   isSavingSettings?: boolean;
   settingsError?: string;
+  onRemoveMember: (uid: string) => void;
 }
 
 interface MemberRowProps {
   member: MemberName;
   group: Group;
   isCurrentUser: boolean;
-  isCreator: boolean;
+  isCallerAdmin: boolean;
+  isCallerCreator: boolean;
   onMakeAdmin?: (uid: string) => void;
   onRevokeAdmin?: (uid: string) => void;
+  onRemoveClick: (uid: string) => void;
 }
 
 function MemberRow({
   member,
   group,
   isCurrentUser,
-  isCreator,
+  isCallerAdmin,
+  isCallerCreator,
   onMakeAdmin,
   onRevokeAdmin,
+  onRemoveClick,
 }: MemberRowProps) {
   const isMemberAdmin = group.adminIds.includes(member.uid);
   const isMemberCreator = group.creatorId === member.uid;
-  const showMenu = isCreator && !isCurrentUser;
+  const showMenu = isCallerAdmin && !isCurrentUser && !isMemberCreator;
 
   return (
     <li className="flex items-center justify-between text-sm">
@@ -88,15 +97,24 @@ function MemberRow({
             ···
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {isMemberAdmin ? (
-              <DropdownMenuItem onClick={() => onRevokeAdmin?.(member.uid)}>
-                {GROUP_DETAIL_COPY.revokeAdminAction}
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem onClick={() => onMakeAdmin?.(member.uid)}>
-                {GROUP_DETAIL_COPY.makeAdminAction}
-              </DropdownMenuItem>
-            )}
+            {isCallerCreator &&
+              (isMemberAdmin ? (
+                <DropdownMenuItem onClick={() => onRevokeAdmin?.(member.uid)}>
+                  {GROUP_DETAIL_COPY.revokeAdminAction}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => onMakeAdmin?.(member.uid)}>
+                  {GROUP_DETAIL_COPY.makeAdminAction}
+                </DropdownMenuItem>
+              ))}
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => {
+                onRemoveClick(member.uid);
+              }}
+            >
+              {GROUP_DETAIL_COPY.removeAction}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )}
@@ -172,12 +190,25 @@ export function GroupDetailView({
   onTogglePicksRestricted,
   isSavingSettings = false,
   settingsError,
+  onRemoveMember,
 }: GroupDetailViewProps) {
   const isAdmin = group.adminIds.includes(currentUserId);
+  const [confirmRemoveUid, setConfirmRemoveUid] = useState<string | undefined>(
+    undefined,
+  );
+
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
   const allPicks = categories.flatMap((c) => picksByCategory[c.id] ?? []);
   const openPicks = allPicks.filter((p) => p.closedAt === undefined);
   const closedPicks = allPicks.filter((p) => p.closedAt !== undefined);
+
+  const isCallerAdmin = group.adminIds.includes(currentUserId);
+  const isCallerCreator = group.creatorId === currentUserId;
+
+  const confirmRemoveName = confirmRemoveUid
+    ? (memberNames.find((m) => m.uid === confirmRemoveUid)?.name ??
+      confirmRemoveUid)
+    : undefined;
 
   return (
     <main className="mx-auto max-w-lg space-y-4 p-6">
@@ -190,6 +221,45 @@ export function GroupDetailView({
             : GROUP_DETAIL_COPY.membersLabel}
         </p>
       </div>
+
+      {confirmRemoveUid !== undefined && (
+        <div
+          className="rounded-md border border-destructive/30 bg-destructive/5 p-4 space-y-3"
+          data-testid="remove-confirm-dialog"
+        >
+          <p className="text-sm font-medium">
+            {GROUP_DETAIL_COPY.removeConfirmTitle}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {confirmRemoveName
+              ? `Remove ${confirmRemoveName} from this group?`
+              : GROUP_DETAIL_COPY.removeConfirmDescription}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                onRemoveMember(confirmRemoveUid);
+                setConfirmRemoveUid(undefined);
+              }}
+            >
+              {GROUP_DETAIL_COPY.removeConfirmButton}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setConfirmRemoveUid(undefined);
+              }}
+            >
+              {GROUP_DETAIL_COPY.removeCancelButton}
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="picks">
         <TabsList variant="line">
@@ -276,9 +346,11 @@ export function GroupDetailView({
                   member={m}
                   group={group}
                   isCurrentUser={m.uid === currentUserId}
-                  isCreator={currentUserId === group.creatorId}
+                  isCallerAdmin={isCallerAdmin}
+                  isCallerCreator={isCallerCreator}
                   onMakeAdmin={onMakeAdmin}
                   onRevokeAdmin={onRevokeAdmin}
+                  onRemoveClick={setConfirmRemoveUid}
                 />
               ))}
             </ul>

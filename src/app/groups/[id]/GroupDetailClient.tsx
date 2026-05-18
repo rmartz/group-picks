@@ -11,6 +11,7 @@ import {
   leaveGroup,
   LeaveGroupLastMemberError,
   promoteAdmin,
+  removeGroupMember,
   revokeAdmin,
   updateGroupSettings,
 } from "@/services/groups";
@@ -65,6 +66,15 @@ export function GroupDetailClient({
     }
   }
 
+  async function handleRemoveMember(uid: string) {
+    try {
+      await removeGroupMember(group.id, uid);
+      router.refresh();
+    } catch {
+      setError(GROUP_DETAIL_COPY.removeMemberError);
+    }
+  }
+
   async function handleLeave() {
     setError(undefined);
     setIsLeaving(true);
@@ -109,6 +119,9 @@ export function GroupDetailClient({
       }}
       onRevokeAdmin={(uid) => {
         void handleRevokeAdmin(uid);
+      }}
+      onRemoveMember={(uid) => {
+        void handleRemoveMember(uid);
       }}
       adminError={adminError}
       isLeaving={isLeaving}
