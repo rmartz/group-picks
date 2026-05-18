@@ -388,7 +388,7 @@ describe("OptionListView", () => {
       render(<OptionListView {...defaultProps} options={[option]} />);
 
       expect(
-        screen.getByText(`3 ${PICK_DETAIL_COPY.interestedSuffix}`),
+        screen.getByText(`1/3 ${PICK_DETAIL_COPY.interestedSuffix}`),
       ).toBeDefined();
     });
 
@@ -397,7 +397,7 @@ describe("OptionListView", () => {
       render(<OptionListView {...defaultProps} options={[option]} />);
 
       expect(
-        screen.getByText(`0 ${PICK_DETAIL_COPY.interestedSuffix}`),
+        screen.getByText(`0/0 ${PICK_DETAIL_COPY.interestedSuffix}`),
       ).toBeDefined();
     });
   });
