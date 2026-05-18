@@ -259,6 +259,21 @@ describe("GroupDetailView — member list chips", () => {
   });
 });
 
+describe("GroupDetailView — admin error", () => {
+  it("renders the adminError message when provided", () => {
+    const errorMessage = GROUP_DETAIL_COPY.errors.adminAction;
+    renderView({ adminError: errorMessage });
+
+    expect(screen.getByText(errorMessage)).toBeDefined();
+  });
+
+  it("does not render an admin error paragraph when adminError is undefined", () => {
+    renderView({ adminError: undefined });
+
+    expect(screen.queryByText(GROUP_DETAIL_COPY.errors.adminAction)).toBeNull();
+  });
+});
+
 describe("GroupDetailView — member ··· menu (creator view)", () => {
   it("shows a menu button for non-self members when current user is creator", () => {
     renderView({ currentUserId: "user-123" });

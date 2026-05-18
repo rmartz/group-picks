@@ -27,6 +27,7 @@ interface GroupDetailViewProps {
   categories: Category[];
   currentUserId: string;
   onLeave: () => void;
+  adminError?: string;
   isLeaving?: boolean;
   leaveError?: string;
   initialInviteExpiresAt?: string;
@@ -153,6 +154,7 @@ export function GroupDetailView({
   categories,
   currentUserId,
   onLeave,
+  adminError,
   isLeaving = false,
   leaveError,
   initialInviteExpiresAt,
@@ -268,6 +270,9 @@ export function GroupDetailView({
                 />
               ))}
             </ul>
+            {adminError && (
+              <p className="text-sm text-destructive">{adminError}</p>
+            )}
           </section>
           <InviteSection
             groupId={group.id}

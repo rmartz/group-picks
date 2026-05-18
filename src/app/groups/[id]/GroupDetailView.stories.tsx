@@ -107,3 +107,9 @@ export const EmptyGroup: Story = {
     memberNames: [],
   },
 };
+
+export const AdminError: Story = {
+  args: {
+    adminError: "Failed to update admin status. Please try again.",
+  },
+};

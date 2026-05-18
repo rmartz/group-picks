@@ -36,15 +36,26 @@ export function GroupDetailClient({
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [adminError, setAdminError] = useState<string | undefined>();
 
   async function handleMakeAdmin(uid: string) {
-    await promoteAdmin(group.id, uid);
-    router.refresh();
+    setAdminError(undefined);
+    try {
+      await promoteAdmin(group.id, uid);
+      router.refresh();
+    } catch {
+      setAdminError(GROUP_DETAIL_COPY.errors.adminAction);
+    }
   }
 
   async function handleRevokeAdmin(uid: string) {
-    await revokeAdmin(group.id, uid);
-    router.refresh();
+    setAdminError(undefined);
+    try {
+      await revokeAdmin(group.id, uid);
+      router.refresh();
+    } catch {
+      setAdminError(GROUP_DETAIL_COPY.errors.adminAction);
+    }
   }
 
   async function handleLeave() {
@@ -78,6 +89,7 @@ export function GroupDetailClient({
       onRevokeAdmin={(uid) => {
         void handleRevokeAdmin(uid);
       }}
+      adminError={adminError}
       isLeaving={isLeaving}
       leaveError={error}
       initialInviteExpiresAt={initialInviteExpiresAt}
