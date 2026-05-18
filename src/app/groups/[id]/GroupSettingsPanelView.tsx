@@ -1,11 +1,11 @@
+import { GROUP_DETAIL_COPY } from "./copy";
+
 interface GroupSettingsPanelViewProps {
   picksRestricted: boolean;
   onTogglePicksRestricted: () => void;
   isSaving: boolean;
   error: string | undefined;
 }
-
-import { GROUP_DETAIL_COPY } from "./copy";
 
 export function GroupSettingsPanelView({
   picksRestricted,

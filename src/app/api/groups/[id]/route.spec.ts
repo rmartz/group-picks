@@ -77,6 +77,20 @@ describe("PATCH /api/groups/[id]", () => {
     expect(res.status).toBe(403);
   });
 
+  it("returns 403 when caller is no longer a group member", async () => {
+    mockGetGroupById.mockResolvedValue(
+      makeGroup({
+        memberIds: ["user-2"],
+        adminIds: ["user-1"],
+      }),
+    );
+    const res = await PATCH(makeRequest({ picksRestricted: true }), {
+      params: Promise.resolve(baseParams),
+    });
+    expect(res.status).toBe(403);
+    expect(mockUpdatePicksRestricted).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when body is not valid JSON", async () => {
     const req = new Request("http://localhost/api/groups/group-1", {
       method: "PATCH",

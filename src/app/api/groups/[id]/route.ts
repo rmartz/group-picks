@@ -24,6 +24,10 @@ export async function PATCH(
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
+  if (!group.memberIds.includes(uid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   if (!isGroupAdmin(uid, group)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
