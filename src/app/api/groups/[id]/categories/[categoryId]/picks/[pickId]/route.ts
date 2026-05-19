@@ -3,11 +3,10 @@ import { NextResponse } from "next/server";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import {
-  assertPickIsOpenForWrite,
   PICK_CLOSED_API_ERROR,
   PickNotFoundError,
   PickWriteClosedError,
-  updatePick,
+  updatePickIfOpen,
 } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { parseDueDateField } from "@/server/utils/date";
@@ -77,8 +76,18 @@ export async function PATCH(
   }
   const parsedDueDate = dueDateResult.date;
 
+  const title = body.title.trim();
+  const description =
+    typeof body.description === "string" ? body.description.trim() : "";
+  const topCount = body.topCount;
+
   try {
-    await assertPickIsOpenForWrite(categoryId, pickId);
+    await updatePickIfOpen(categoryId, pickId, {
+      title,
+      description,
+      topCount,
+      dueDate: parsedDueDate,
+    });
   } catch (err) {
     if (err instanceof PickWriteClosedError) {
       return NextResponse.json(
@@ -91,18 +100,6 @@ export async function PATCH(
     }
     throw err;
   }
-
-  const title = body.title.trim();
-  const description =
-    typeof body.description === "string" ? body.description.trim() : "";
-  const topCount = body.topCount;
-
-  await updatePick(categoryId, pickId, {
-    title,
-    description,
-    topCount,
-    dueDate: parsedDueDate,
-  });
 
   return NextResponse.json({ pickId });
 }
