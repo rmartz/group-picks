@@ -5,6 +5,7 @@ import type { FirebasePickPublic } from "@/lib/firebase/schema/pick";
 
 import {
   assertPickIsOpenForWrite,
+  closePick,
   getPickById,
   hasPicks,
   PickNotFoundError,
@@ -262,5 +263,128 @@ describe("getPickById", () => {
     const pick = await getPickById("cat-456", "pick-missing");
 
     expect(pick).toBeUndefined();
+  });
+});
+
+describe("closePick", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("resolves when the pick exists and is open", async () => {
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        const currentPick = makeFirebasePickPublic();
+        const nextPick = update(currentPick);
+        return {
+          committed: true,
+          snapshot: {
+            exists: () => true,
+            val: () => nextPick,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await expect(closePick("cat-123", "pick-123")).resolves.toBeUndefined();
+    expect(transaction).toHaveBeenCalledOnce();
+  });
+
+  it("throws PickWriteClosedError when the pick is already closed", async () => {
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        const closedPick = makeFirebasePickPublic({
+          closedAt: new Date("2025-01-18T12:00:00.000Z").getTime(),
+          closedManually: true,
+        });
+        update(closedPick);
+        return {
+          committed: false,
+          snapshot: {
+            exists: () => true,
+            val: () => closedPick,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await expect(closePick("cat-123", "pick-123")).rejects.toBeInstanceOf(
+      PickWriteClosedError,
+    );
+  });
+
+  it("throws PickNotFoundError when the pick does not exist", async () => {
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        update(null);
+        return {
+          committed: false,
+          snapshot: {
+            exists: () => false,
+            val: () => null,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await expect(closePick("cat-123", "pick-missing")).rejects.toBeInstanceOf(
+      PickNotFoundError,
+    );
+  });
+
+  it("resolves when the pick is expired (dueDate passed, no closedAt)", async () => {
+    const expiredPick = makeFirebasePickPublic({
+      dueDate: new Date("2025-01-01T00:00:00.000Z").getTime(),
+    });
+    let storedPick = expiredPick;
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        const nextPick = update(storedPick);
+        storedPick = nextPick ?? storedPick;
+        return {
+          committed: true,
+          snapshot: {
+            exists: () => true,
+            val: () => storedPick,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await expect(closePick("cat-123", "pick-123")).resolves.toBeUndefined();
+    expect(storedPick.closedAt).toBeDefined();
+    expect(storedPick.closedManually).toBeUndefined();
   });
 });
