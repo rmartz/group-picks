@@ -479,6 +479,20 @@ describe("GroupDetailView — remove member", () => {
       screen.getByText(GROUP_DETAIL_COPY.removeConfirmMemberTitle("Bob")),
     ).toBeDefined();
   });
+
+  it("shows the remove description text in the confirmation panel", () => {
+    renderView({ currentUserId: "user-123" });
+
+    const trigger = screen.getByTestId("member-menu-trigger");
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText(GROUP_DETAIL_COPY.removeAction));
+
+    expect(
+      screen.getByText(GROUP_DETAIL_COPY.removeConfirmDescription),
+    ).toBeDefined();
+  });
 });
 
 describe("GroupDetailView — error states", () => {

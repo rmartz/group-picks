@@ -153,6 +153,9 @@ export function GroupDetailView({
               confirmRemoveName ?? confirmRemoveUid,
             )}
           </p>
+          <p className="text-sm text-muted-foreground">
+            {GROUP_DETAIL_COPY.removeConfirmDescription}
+          </p>
           <div className="flex gap-2">
             <Button
               type="button"
