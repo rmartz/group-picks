@@ -5,7 +5,8 @@ import { NextResponse } from "next/server";
 import { getAdminApp } from "@/lib/firebase/admin";
 import { groupToFirebase } from "@/lib/firebase/schema/group";
 import { groupInviteToFirebase } from "@/lib/firebase/schema/invite";
-import { INVITE_TTL } from "@/server/data/invites";
+import { InviteMode } from "@/lib/types/invite";
+import { INVITE_TTL_GROUP } from "@/server/data/invites";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 export async function POST(request: Request) {
@@ -56,8 +57,9 @@ export async function POST(request: Request) {
     [`invites/${inviteToken}`]: groupInviteToFirebase({
       groupId,
       createdAt: inviteCreatedAt,
-      expiresAt: new Date(inviteCreatedAt.getTime() + INVITE_TTL),
+      expiresAt: new Date(inviteCreatedAt.getTime() + INVITE_TTL_GROUP),
       active: true,
+      mode: InviteMode.Group,
     }),
   });
 

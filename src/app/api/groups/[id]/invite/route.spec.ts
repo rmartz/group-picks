@@ -1,16 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  mockGetVerifiedUid,
-  mockGetGroupById,
-  mockCreateGroupInvite,
-  mockUpdateGroupInviteExpiry,
-} = vi.hoisted(() => ({
-  mockGetVerifiedUid: vi.fn(),
-  mockGetGroupById: vi.fn(),
-  mockCreateGroupInvite: vi.fn(),
-  mockUpdateGroupInviteExpiry: vi.fn(),
-}));
+const { mockGetVerifiedUid, mockGetGroupById, mockCreateGroupInvite } =
+  vi.hoisted(() => ({
+    mockGetVerifiedUid: vi.fn(),
+    mockGetGroupById: vi.fn(),
+    mockCreateGroupInvite: vi.fn(),
+  }));
 
 vi.mock("@/server/utils/auth", () => ({
   getVerifiedUid: mockGetVerifiedUid,
@@ -22,13 +17,9 @@ vi.mock("@/server/data/groups", () => ({
 
 vi.mock("@/server/data/invites", () => ({
   createGroupInvite: mockCreateGroupInvite,
-  updateGroupInviteExpiry: mockUpdateGroupInviteExpiry,
 }));
 
-const { PATCH } = await import("./route");
-
-const FUTURE_DATE = "2099-12-31";
-const PAST_DATE = "2000-01-01";
+const { POST } = await import("./route");
 
 function makeGroup(overrides?: Record<string, unknown>) {
   return {
@@ -44,25 +35,32 @@ function makeGroup(overrides?: Record<string, unknown>) {
   };
 }
 
-function makePatchRequest(body: unknown) {
+function makePostRequest(body?: unknown) {
   return new Request("http://localhost/api/groups/group-1/invite", {
-    method: "PATCH",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }
 
-describe("PATCH /api/groups/[id]/invite", () => {
+describe("POST /api/groups/[id]/invite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetVerifiedUid.mockResolvedValue("user-1");
     mockGetGroupById.mockResolvedValue(makeGroup());
-    mockUpdateGroupInviteExpiry.mockResolvedValue(undefined);
+    mockCreateGroupInvite.mockResolvedValue({
+      token: "new-token",
+      groupId: "group-1",
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      mode: "personal",
+      active: true,
+    });
   });
 
   it("returns 401 when not authenticated", async () => {
     mockGetVerifiedUid.mockResolvedValue(null);
-    const response = await PATCH(makePatchRequest({ expiresAt: FUTURE_DATE }), {
+    const response = await POST(makePostRequest({ mode: "personal" }), {
       params: Promise.resolve({ id: "group-1" }),
     });
     expect(response.status).toBe(401);
@@ -70,7 +68,7 @@ describe("PATCH /api/groups/[id]/invite", () => {
 
   it("returns 404 when group does not exist", async () => {
     mockGetGroupById.mockResolvedValue(null);
-    const response = await PATCH(makePatchRequest({ expiresAt: FUTURE_DATE }), {
+    const response = await POST(makePostRequest({ mode: "personal" }), {
       params: Promise.resolve({ id: "group-1" }),
     });
     expect(response.status).toBe(404);
@@ -78,14 +76,21 @@ describe("PATCH /api/groups/[id]/invite", () => {
 
   it("returns 403 when caller is not a group member", async () => {
     mockGetVerifiedUid.mockResolvedValue("outsider");
-    const response = await PATCH(makePatchRequest({ expiresAt: FUTURE_DATE }), {
+    const response = await POST(makePostRequest({ mode: "personal" }), {
       params: Promise.resolve({ id: "group-1" }),
     });
     expect(response.status).toBe(403);
   });
 
-  it("returns 400 when body is invalid JSON shape", async () => {
-    const response = await PATCH(makePatchRequest({}), {
+  it("returns 400 when mode is missing from body", async () => {
+    const response = await POST(makePostRequest({}), {
+      params: Promise.resolve({ id: "group-1" }),
+    });
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 400 when mode is invalid", async () => {
+    const response = await POST(makePostRequest({ mode: "monthly" }), {
       params: Promise.resolve({ id: "group-1" }),
     });
     expect(response.status).toBe(400);
@@ -93,77 +98,59 @@ describe("PATCH /api/groups/[id]/invite", () => {
 
   it("returns 400 when body is invalid JSON", async () => {
     const request = new Request("http://localhost/api/groups/group-1/invite", {
-      method: "PATCH",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: "not-valid-json",
+      body: "not-json",
     });
-    const response = await PATCH(request, {
+    const response = await POST(request, {
       params: Promise.resolve({ id: "group-1" }),
     });
     expect(response.status).toBe(400);
   });
 
-  it("returns 400 when expiresAt is a past date", async () => {
-    const response = await PATCH(makePatchRequest({ expiresAt: PAST_DATE }), {
+  it("calls createGroupInvite with personal mode", async () => {
+    await POST(makePostRequest({ mode: "personal" }), {
       params: Promise.resolve({ id: "group-1" }),
     });
-    expect(response.status).toBe(400);
-  });
-
-  it("returns 400 when expiresAt is not a valid date string", async () => {
-    const response = await PATCH(
-      makePatchRequest({ expiresAt: "not-a-date" }),
-      { params: Promise.resolve({ id: "group-1" }) },
-    );
-    expect(response.status).toBe(400);
-  });
-
-  it("returns 400 when expiresAt is a datetime string rather than YYYY-MM-DD", async () => {
-    const response = await PATCH(
-      makePatchRequest({ expiresAt: "2099-12-31T00:00:00.000Z" }),
-      { params: Promise.resolve({ id: "group-1" }) },
-    );
-    expect(response.status).toBe(400);
-  });
-
-  it("updates the invite expiry to a future date", async () => {
-    const response = await PATCH(makePatchRequest({ expiresAt: FUTURE_DATE }), {
-      params: Promise.resolve({ id: "group-1" }),
-    });
-    expect(response.status).toBe(200);
-    expect(mockUpdateGroupInviteExpiry).toHaveBeenCalledWith(
+    expect(mockCreateGroupInvite).toHaveBeenCalledWith(
+      "group-1",
       "active-token",
-      expect.any(Date),
+      "personal",
     );
   });
 
-  it("returns the updated expiresAt in the response", async () => {
-    const response = await PATCH(makePatchRequest({ expiresAt: FUTURE_DATE }), {
+  it("calls createGroupInvite with group mode", async () => {
+    mockCreateGroupInvite.mockResolvedValue({
+      token: "new-token",
+      groupId: "group-1",
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      mode: "group",
+      active: true,
+    });
+
+    await POST(makePostRequest({ mode: "group" }), {
       params: Promise.resolve({ id: "group-1" }),
     });
-    const data = (await response.json()) as { expiresAt: string };
+    expect(mockCreateGroupInvite).toHaveBeenCalledWith(
+      "group-1",
+      "active-token",
+      "group",
+    );
+  });
+
+  it("returns 201 with token, expiresAt, and mode", async () => {
+    const response = await POST(makePostRequest({ mode: "personal" }), {
+      params: Promise.resolve({ id: "group-1" }),
+    });
+    expect(response.status).toBe(201);
+    const data = (await response.json()) as {
+      token: string;
+      expiresAt: string;
+      mode: string;
+    };
+    expect(data.token).toBe("new-token");
     expect(typeof data.expiresAt).toBe("string");
-    expect(new Date(data.expiresAt).toISOString().startsWith("2099")).toBe(
-      true,
-    );
-  });
-
-  it("clears the invite expiry when expiresAt is null", async () => {
-    const response = await PATCH(makePatchRequest({ expiresAt: null }), {
-      params: Promise.resolve({ id: "group-1" }),
-    });
-    expect(response.status).toBe(200);
-    expect(mockUpdateGroupInviteExpiry).toHaveBeenCalledWith(
-      "active-token",
-      null,
-    );
-  });
-
-  it("returns null expiresAt when cleared", async () => {
-    const response = await PATCH(makePatchRequest({ expiresAt: null }), {
-      params: Promise.resolve({ id: "group-1" }),
-    });
-    const data = (await response.json()) as { expiresAt: string | null };
-    expect(data.expiresAt).toBeNull();
+    expect(data.mode).toBe("personal");
   });
 });

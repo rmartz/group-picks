@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
+import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
 
 import { GroupDetailView } from "./GroupDetailView";
@@ -83,6 +84,7 @@ const meta: Meta<typeof GroupDetailView> = {
     onLeave: noop,
     memberNames: mockMemberNames,
     picksByCategory: {},
+    initialInviteMode: InviteMode.Group,
   },
 };
 
