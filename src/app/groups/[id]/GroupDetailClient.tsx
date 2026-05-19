@@ -18,6 +18,7 @@ import {
 
 import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupDetailView } from "./GroupDetailView";
+import type { MemberName } from "./MemberRow";
 
 interface GroupDetailClientProps {
   group: Group;
@@ -25,7 +26,7 @@ interface GroupDetailClientProps {
   currentUserId: string;
   initialInviteExpiresAt?: string;
   initialInviteMode: InviteMode;
-  memberNames: { uid: string; name: string }[];
+  memberNames: MemberName[];
   picksByCategory: Record<string, GroupPick[]>;
 }
 

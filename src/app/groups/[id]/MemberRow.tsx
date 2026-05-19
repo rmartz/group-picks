@@ -11,7 +11,7 @@ import type { Group } from "@/lib/types/group";
 
 import { GROUP_DETAIL_COPY } from "./copy";
 
-interface MemberName {
+export interface MemberName {
   uid: string;
   name: string;
 }

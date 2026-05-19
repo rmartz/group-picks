@@ -16,12 +16,8 @@ import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupSettingsPanelView } from "./GroupSettingsPanelView";
 import { InviteSection } from "./InviteSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
+import type { MemberName } from "./MemberRow";
 import { MemberRow } from "./MemberRow";
-
-interface MemberName {
-  uid: string;
-  name: string;
-}
 
 interface GroupDetailViewProps {
   group: Group;
@@ -125,7 +121,6 @@ export function GroupDetailView({
   const openPicks = allPicks.filter((p) => p.closedAt === undefined);
   const closedPicks = allPicks.filter((p) => p.closedAt !== undefined);
 
-  const isCallerAdmin = group.adminIds.includes(currentUserId);
   const isCallerCreator = group.creatorId === currentUserId;
 
   const confirmRemoveName = confirmRemoveUid
@@ -154,9 +149,9 @@ export function GroupDetailView({
             {GROUP_DETAIL_COPY.removeConfirmTitle}
           </p>
           <p className="text-sm text-muted-foreground">
-            {confirmRemoveName
-              ? GROUP_DETAIL_COPY.removeConfirmMemberTitle(confirmRemoveName)
-              : GROUP_DETAIL_COPY.removeConfirmDescription}
+            {GROUP_DETAIL_COPY.removeConfirmMemberTitle(
+              confirmRemoveName ?? confirmRemoveUid,
+            )}
           </p>
           <div className="flex gap-2">
             <Button
@@ -269,7 +264,7 @@ export function GroupDetailView({
                   member={m}
                   group={group}
                   isCurrentUser={m.uid === currentUserId}
-                  isCallerAdmin={isCallerAdmin}
+                  isCallerAdmin={isAdmin}
                   isCallerCreator={isCallerCreator}
                   onMakeAdmin={onMakeAdmin}
                   onRevokeAdmin={onRevokeAdmin}
