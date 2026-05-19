@@ -33,27 +33,12 @@ describe("getPicksByGroupId", () => {
     vi.clearAllMocks();
   });
 
-  describe("returns empty record when group has no categories", () => {
-    it("returns {} when the group has no categories", async () => {
-      const categoriesGet = vi.fn().mockResolvedValue({ exists: () => false });
-
-      getDatabaseMock.mockReturnValue({
-        ref: (path: string) => {
-          if (path === "categories") {
-            return {
-              orderByChild: () => ({
-                equalTo: () => ({ get: categoriesGet }),
-              }),
-            };
-          }
-          return { get: vi.fn().mockResolvedValue({ exists: () => false }) };
-        },
-      } as never);
-
-      const result = await getPicksByGroupId("group-1");
+  describe("returns empty record when no category IDs are provided", () => {
+    it("returns {} when categoryIds is empty", async () => {
+      const result = await getPicksByGroupId([]);
 
       expect(result).toEqual({});
-      expect(categoriesGet).toHaveBeenCalledOnce();
+      expect(getDatabaseMock).not.toHaveBeenCalled();
     });
   });
 
@@ -70,14 +55,6 @@ describe("getPicksByGroupId", () => {
         creatorId: "user-2",
       });
 
-      const categoriesSnap = {
-        exists: () => true,
-        forEach: (cb: (child: { key: string }) => void) => {
-          cb({ key: "cat-1" });
-          cb({ key: "cat-2" });
-        },
-      };
-
       const cat1Snap = {
         exists: () => true,
         val: () => ({ "pick-1": cat1Pick1 }),
@@ -89,15 +66,6 @@ describe("getPicksByGroupId", () => {
 
       getDatabaseMock.mockReturnValue({
         ref: (path: string) => {
-          if (path === "categories") {
-            return {
-              orderByChild: () => ({
-                equalTo: () => ({
-                  get: vi.fn().mockResolvedValue(categoriesSnap),
-                }),
-              }),
-            };
-          }
           if (path === "categories/cat-1/picks") {
             return { get: vi.fn().mockResolvedValue(cat1Snap) };
           }
@@ -108,7 +76,7 @@ describe("getPicksByGroupId", () => {
         },
       } as never);
 
-      const result = await getPicksByGroupId("group-1");
+      const result = await getPicksByGroupId(["cat-1", "cat-2"]);
 
       const cat1Picks = result["cat-1"] ?? [];
       const cat2Picks = result["cat-2"] ?? [];
@@ -123,31 +91,13 @@ describe("getPicksByGroupId", () => {
     });
 
     it("returns an empty array for a category that has no picks", async () => {
-      const categoriesSnap = {
-        exists: () => true,
-        forEach: (cb: (child: { key: string }) => void) => {
-          cb({ key: "cat-empty" });
-        },
-      };
-
       getDatabaseMock.mockReturnValue({
-        ref: (path: string) => {
-          if (path === "categories") {
-            return {
-              orderByChild: () => ({
-                equalTo: () => ({
-                  get: vi.fn().mockResolvedValue(categoriesSnap),
-                }),
-              }),
-            };
-          }
-          return {
-            get: vi.fn().mockResolvedValue({ exists: () => false }),
-          };
+        ref: () => {
+          return { get: vi.fn().mockResolvedValue({ exists: () => false }) };
         },
       } as never);
 
-      const result = await getPicksByGroupId("group-1");
+      const result = await getPicksByGroupId(["cat-empty"]);
 
       expect(result["cat-empty"]).toEqual([]);
     });

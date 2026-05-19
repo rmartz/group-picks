@@ -22,11 +22,15 @@ export default async function GroupDetailPage({
 
   if (!group?.memberIds.includes(uid)) notFound();
 
+  const categoriesPromise = getCategoriesByGroupId(id);
+
   const [invite, categories, memberNames, picksByCategory] = await Promise.all([
     getGroupInviteByToken(group.inviteToken),
-    getCategoriesByGroupId(id),
+    categoriesPromise,
     getMemberDisplayNames(group.memberIds),
-    getPicksByGroupId(id),
+    categoriesPromise.then((resolvedCategories) =>
+      getPicksByGroupId(resolvedCategories.map((category) => category.id)),
+    ),
   ]);
 
   return (
