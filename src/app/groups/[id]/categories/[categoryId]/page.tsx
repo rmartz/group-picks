@@ -65,7 +65,10 @@ export default async function CategoryDetailPage({
     try {
       await closePick(categoryId, pickId);
     } catch (err) {
-      if (err instanceof PickWriteClosedError || err instanceof PickNotFoundError) {
+      if (
+        err instanceof PickWriteClosedError ||
+        err instanceof PickNotFoundError
+      ) {
         revalidatePath(`/groups/${id}/categories/${categoryId}`);
         return;
       }

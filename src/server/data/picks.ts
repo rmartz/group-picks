@@ -174,11 +174,6 @@ export async function closePick(
   if (!result.committed) {
     throw new PickWriteClosedError();
   }
-
-  const closed = result.snapshot.val() as FirebasePickPublic;
-  if (closed.closedManually !== true) {
-    throw new PickWriteClosedError(PICK_DUE_DATE_PASSED_ERROR);
-  }
 }
 
 export async function reopenPick(
