@@ -154,12 +154,16 @@ export async function closePick(
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
   const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
+  const now = Date.now();
 
   const result = await pickRef.transaction(
     (current: FirebasePickPublic | null) => {
       if (current === null) return undefined;
       if (current.closedAt !== undefined) return undefined;
-      return { ...current, closedAt: Date.now(), closedManually: true };
+      if (current.dueDate !== undefined && current.dueDate <= now) {
+        return { ...current, closedAt: now };
+      }
+      return { ...current, closedAt: now, closedManually: true };
     },
   );
 
@@ -169,6 +173,11 @@ export async function closePick(
 
   if (!result.committed) {
     throw new PickWriteClosedError();
+  }
+
+  const closed = result.snapshot.val() as FirebasePickPublic;
+  if (closed.closedManually !== true) {
+    throw new PickWriteClosedError(PICK_DUE_DATE_PASSED_ERROR);
   }
 }
 

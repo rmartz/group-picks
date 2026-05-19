@@ -7,6 +7,8 @@ import {
   closePick,
   getPickById,
   getPicksByCategory,
+  PickNotFoundError,
+  PickWriteClosedError,
 } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
@@ -60,7 +62,15 @@ export default async function CategoryDetailPage({
       throw new Error(CATEGORY_DETAIL_COPY.closePickError);
     }
 
-    await closePick(categoryId, pickId);
+    try {
+      await closePick(categoryId, pickId);
+    } catch (err) {
+      if (err instanceof PickWriteClosedError || err instanceof PickNotFoundError) {
+        revalidatePath(`/groups/${id}/categories/${categoryId}`);
+        return;
+      }
+      throw err;
+    }
 
     revalidatePath(`/groups/${id}/categories/${categoryId}`);
   }
