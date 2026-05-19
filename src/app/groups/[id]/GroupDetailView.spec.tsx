@@ -299,15 +299,12 @@ describe("GroupDetailView — admin error", () => {
 });
 
 describe("GroupDetailView — member ··· menu visibility", () => {
-  it("shows a menu button for non-self, non-creator members when current user is an admin", () => {
+  it("does not show a menu button when all members are either the creator or the current user, even when the current user is an admin", () => {
     const group = { ...makeGroup(), adminIds: ["user-123", "user-456"] };
-    // Alice is the current user (admin), Bob is also admin but not creator
-    // Only Bob's row gets a menu; Alice is the current user
+    // user-123 is creator → no menu on that row; user-456 is self → no menu
+    // So with 2 members (creator + self), there are 0 menus
     renderView({ currentUserId: "user-456", group });
 
-    // user-456 is admin — should see menu for Alice (user-123 is creator, hidden)
-    // actually user-123 is creator → no menu on that row; user-456 is self → no menu
-    // So with 2 members (creator + self), there are 0 menus
     expect(screen.queryByTestId("member-menu-trigger")).toBeNull();
   });
 
