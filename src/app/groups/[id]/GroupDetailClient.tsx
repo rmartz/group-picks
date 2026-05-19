@@ -11,12 +11,14 @@ import {
   leaveGroup,
   LeaveGroupLastMemberError,
   promoteAdmin,
+  removeGroupMember,
   revokeAdmin,
   updateGroupSettings,
 } from "@/services/groups";
 
 import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupDetailView } from "./GroupDetailView";
+import type { MemberName } from "./MemberRow";
 
 interface GroupDetailClientProps {
   group: Group;
@@ -24,7 +26,7 @@ interface GroupDetailClientProps {
   currentUserId: string;
   initialInviteExpiresAt?: string;
   initialInviteMode: InviteMode;
-  memberNames: { uid: string; name: string }[];
+  memberNames: MemberName[];
   picksByCategory: Record<string, GroupPick[]>;
 }
 
@@ -39,11 +41,14 @@ export function GroupDetailClient({
 }: GroupDetailClientProps) {
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
-  const [error, setError] = useState<string | undefined>();
+  const [leaveError, setLeaveError] = useState<string | undefined>();
   const [adminError, setAdminError] = useState<string | undefined>();
   const [picksRestricted, setPicksRestricted] = useState(group.picksRestricted);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsError, setSettingsError] = useState<string | undefined>();
+  const [removeMemberError, setRemoveMemberError] = useState<
+    string | undefined
+  >();
 
   async function handleMakeAdmin(uid: string) {
     setAdminError(undefined);
@@ -65,14 +70,24 @@ export function GroupDetailClient({
     }
   }
 
+  async function handleRemoveMember(uid: string) {
+    setRemoveMemberError(undefined);
+    try {
+      await removeGroupMember(group.id, uid);
+      router.refresh();
+    } catch {
+      setRemoveMemberError(GROUP_DETAIL_COPY.removeMemberError);
+    }
+  }
+
   async function handleLeave() {
-    setError(undefined);
+    setLeaveError(undefined);
     setIsLeaving(true);
     try {
       await leaveGroup(group.id);
       router.push("/");
     } catch (e) {
-      setError(
+      setLeaveError(
         e instanceof LeaveGroupLastMemberError
           ? GROUP_DETAIL_COPY.errors.lastMember
           : GROUP_DETAIL_COPY.errors.default,
@@ -110,9 +125,13 @@ export function GroupDetailClient({
       onRevokeAdmin={(uid) => {
         void handleRevokeAdmin(uid);
       }}
+      onRemoveMember={(uid) => {
+        void handleRemoveMember(uid);
+      }}
       adminError={adminError}
       isLeaving={isLeaving}
-      leaveError={error}
+      leaveError={leaveError}
+      removeMemberError={removeMemberError}
       initialInviteExpiresAt={initialInviteExpiresAt}
       initialInviteMode={initialInviteMode}
       memberNames={memberNames}

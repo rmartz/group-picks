@@ -1,12 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
@@ -18,11 +16,8 @@ import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupSettingsPanelView } from "./GroupSettingsPanelView";
 import { InviteSection } from "./InviteSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
-
-interface MemberName {
-  uid: string;
-  name: string;
-}
+import type { MemberName } from "./MemberRow";
+import { MemberRow } from "./MemberRow";
 
 interface GroupDetailViewProps {
   group: Group;
@@ -32,6 +27,7 @@ interface GroupDetailViewProps {
   adminError?: string;
   isLeaving?: boolean;
   leaveError?: string;
+  removeMemberError?: string;
   initialInviteExpiresAt?: string;
   initialInviteMode: InviteMode;
   memberNames: MemberName[];
@@ -41,67 +37,7 @@ interface GroupDetailViewProps {
   onTogglePicksRestricted: () => void;
   isSavingSettings?: boolean;
   settingsError?: string;
-}
-
-interface MemberRowProps {
-  member: MemberName;
-  group: Group;
-  isCurrentUser: boolean;
-  isCreator: boolean;
-  onMakeAdmin?: (uid: string) => void;
-  onRevokeAdmin?: (uid: string) => void;
-}
-
-function MemberRow({
-  member,
-  group,
-  isCurrentUser,
-  isCreator,
-  onMakeAdmin,
-  onRevokeAdmin,
-}: MemberRowProps) {
-  const isMemberAdmin = group.adminIds.includes(member.uid);
-  const isMemberCreator = group.creatorId === member.uid;
-  const showMenu = isCreator && !isCurrentUser;
-
-  return (
-    <li className="flex items-center justify-between text-sm">
-      <div className="flex items-center gap-2">
-        <span>{member.name}</span>
-        {isMemberCreator && (
-          <Badge variant="default" className="text-xs">
-            {GROUP_DETAIL_COPY.creatorChip}
-          </Badge>
-        )}
-        {isMemberAdmin && !isMemberCreator && (
-          <Badge variant="secondary" className="text-xs">
-            {GROUP_DETAIL_COPY.adminChip}
-          </Badge>
-        )}
-      </div>
-      {showMenu && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md p-0 text-sm hover:bg-accent"
-            data-testid="member-menu-trigger"
-          >
-            ···
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {isMemberAdmin ? (
-              <DropdownMenuItem onClick={() => onRevokeAdmin?.(member.uid)}>
-                {GROUP_DETAIL_COPY.revokeAdminAction}
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem onClick={() => onMakeAdmin?.(member.uid)}>
-                {GROUP_DETAIL_COPY.makeAdminAction}
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-    </li>
-  );
+  onRemoveMember: (uid: string) => void;
 }
 
 interface PickListItemProps {
@@ -163,6 +99,7 @@ export function GroupDetailView({
   adminError,
   isLeaving = false,
   leaveError,
+  removeMemberError,
   initialInviteExpiresAt,
   initialInviteMode,
   memberNames,
@@ -172,12 +109,24 @@ export function GroupDetailView({
   onTogglePicksRestricted,
   isSavingSettings = false,
   settingsError,
+  onRemoveMember,
 }: GroupDetailViewProps) {
   const isAdmin = group.adminIds.includes(currentUserId);
+  const [confirmRemoveUid, setConfirmRemoveUid] = useState<string | undefined>(
+    undefined,
+  );
+
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
   const allPicks = categories.flatMap((c) => picksByCategory[c.id] ?? []);
   const openPicks = allPicks.filter((p) => p.closedAt === undefined);
   const closedPicks = allPicks.filter((p) => p.closedAt !== undefined);
+
+  const isCallerCreator = group.creatorId === currentUserId;
+
+  const confirmRemoveName = confirmRemoveUid
+    ? (memberNames.find((m) => m.uid === confirmRemoveUid)?.name ??
+      confirmRemoveUid)
+    : undefined;
 
   return (
     <main className="mx-auto max-w-lg space-y-4 p-6">
@@ -190,6 +139,48 @@ export function GroupDetailView({
             : GROUP_DETAIL_COPY.membersLabel}
         </p>
       </div>
+
+      {confirmRemoveUid !== undefined && (
+        <div
+          className="rounded-md border border-destructive/30 bg-destructive/5 p-4 space-y-3"
+          data-testid="remove-confirm-dialog"
+        >
+          <p className="text-sm font-medium">
+            {GROUP_DETAIL_COPY.removeConfirmTitle}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {GROUP_DETAIL_COPY.removeConfirmMemberTitle(
+              confirmRemoveName ?? confirmRemoveUid,
+            )}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {GROUP_DETAIL_COPY.removeConfirmDescription}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                onRemoveMember(confirmRemoveUid);
+                setConfirmRemoveUid(undefined);
+              }}
+            >
+              {GROUP_DETAIL_COPY.removeConfirmButton}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setConfirmRemoveUid(undefined);
+              }}
+            >
+              {GROUP_DETAIL_COPY.removeCancelButton}
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="picks">
         <TabsList variant="line">
@@ -276,16 +267,28 @@ export function GroupDetailView({
                   member={m}
                   group={group}
                   isCurrentUser={m.uid === currentUserId}
-                  isCreator={currentUserId === group.creatorId}
+                  isCallerAdmin={isAdmin}
+                  isCallerCreator={isCallerCreator}
                   onMakeAdmin={onMakeAdmin}
                   onRevokeAdmin={onRevokeAdmin}
+                  onRemoveClick={setConfirmRemoveUid}
                 />
               ))}
             </ul>
-            {adminError && (
-              <p className="text-sm text-destructive">{adminError}</p>
-            )}
           </section>
+          {removeMemberError && (
+            <p
+              className="text-sm text-destructive"
+              data-testid="remove-member-error"
+            >
+              {removeMemberError}
+            </p>
+          )}
+          {adminError && (
+            <p className="text-sm text-destructive" data-testid="admin-error">
+              {adminError}
+            </p>
+          )}
           {isAdmin && (
             <GroupSettingsPanelView
               picksRestricted={group.picksRestricted}
