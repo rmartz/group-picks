@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PickNotFoundError, PickWriteClosedError } from "@/server/data/picks";
 
@@ -193,13 +193,22 @@ describe("PATCH /api/.../picks/[pickId]", () => {
   });
 
   describe("PATCH accepts YYYY-MM-DD dueDate and passes a Date to updatePickIfOpen", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-03-15T12:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it("passes the parsed Date to updatePickIfOpen for a valid YYYY-MM-DD dueDate", async () => {
       const response = await PATCH(
         makeRequest({
           title: "T",
           description: "",
           topCount: 1,
-          dueDate: "2026-01-15",
+          dueDate: "2026-06-01",
         }),
         { params: Promise.resolve(baseParams) },
       );
@@ -209,7 +218,7 @@ describe("PATCH /api/.../picks/[pickId]", () => {
         "cat-1",
         "pick-1",
         expect.objectContaining({
-          dueDate: new Date("2026-01-15"),
+          dueDate: new Date("2026-06-01"),
         }),
       );
     });
@@ -247,6 +256,74 @@ describe("PATCH /api/.../picks/[pickId]", () => {
         "pick-1",
         expect.objectContaining({ dueDate: undefined }),
       );
+    });
+  });
+
+  describe("PATCH rejects a dueDate that is already in the past", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-03-15T12:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("returns 400 when dueDate is in the past", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-03-01",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+    });
+
+    it("includes a user-readable error message for a past dueDate", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-03-01",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      const body = (await response.json()) as { error: string };
+      expect(body.error).toBe("dueDate cannot be in the past");
+    });
+
+    it("does not call updatePickIfOpen when dueDate is in the past", async () => {
+      await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-03-01",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(mockUpdatePickIfOpen).not.toHaveBeenCalled();
+    });
+
+    it("returns 200 for a dueDate in the future", async () => {
+      const response = await PATCH(
+        makeRequest({
+          title: "T",
+          description: "",
+          topCount: 1,
+          dueDate: "2026-06-01",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(200);
     });
   });
 });
