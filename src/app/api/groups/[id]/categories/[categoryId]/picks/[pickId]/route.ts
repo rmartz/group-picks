@@ -10,6 +10,7 @@ import {
   updatePick,
 } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { parseDueDateField } from "@/server/utils/date";
 
 interface UpdatePickRequestBody {
   title: unknown;
@@ -70,20 +71,11 @@ export async function PATCH(
     );
   }
 
-  let parsedDueDate: Date | undefined;
-  if (typeof body.dueDate === "string" && body.dueDate !== "") {
-    const parsed = new Date(body.dueDate);
-    if (
-      Number.isNaN(parsed.getTime()) ||
-      parsed.toISOString().slice(0, 10) !== body.dueDate
-    ) {
-      return NextResponse.json(
-        { error: "dueDate is invalid" },
-        { status: 400 },
-      );
-    }
-    parsedDueDate = parsed;
+  const dueDateResult = parseDueDateField(body.dueDate);
+  if ("error" in dueDateResult) {
+    return NextResponse.json({ error: dueDateResult.error }, { status: 400 });
   }
+  const parsedDueDate = dueDateResult.date;
 
   try {
     await assertPickIsOpenForWrite(categoryId, pickId);
