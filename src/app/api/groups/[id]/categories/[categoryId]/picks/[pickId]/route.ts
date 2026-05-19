@@ -76,6 +76,13 @@ export async function PATCH(
   }
   const parsedDueDate = dueDateResult.date;
 
+  if (parsedDueDate !== undefined && parsedDueDate.getTime() <= Date.now()) {
+    return NextResponse.json(
+      { error: "dueDate cannot be in the past" },
+      { status: 400 },
+    );
+  }
+
   const title = body.title.trim();
   const description =
     typeof body.description === "string" ? body.description.trim() : "";
