@@ -89,6 +89,18 @@ export async function removeMember(
   return { lastMember: false };
 }
 
+export async function removeGroupMember(
+  groupId: string,
+  uid: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref("/").update({
+    [`groups/${groupId}/members/${uid}`]: null,
+    [`groups/${groupId}/public/adminIds/${uid}`]: null,
+    [`users/${uid}/groups/${groupId}`]: null,
+  });
+}
+
 export async function promoteAdmin(
   groupId: string,
   uid: string,
