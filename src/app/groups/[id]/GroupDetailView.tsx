@@ -15,6 +15,7 @@ import type { GroupPick } from "@/lib/types/pick";
 
 import { CategoryList } from "./categories/CategoryList";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { GroupSettingsPanelView } from "./GroupSettingsPanelView";
 import { InviteSection } from "./InviteSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
 
@@ -37,6 +38,9 @@ interface GroupDetailViewProps {
   picksByCategory: Record<string, GroupPick[]>;
   onMakeAdmin?: (uid: string) => void;
   onRevokeAdmin?: (uid: string) => void;
+  onTogglePicksRestricted: () => void;
+  isSavingSettings?: boolean;
+  settingsError?: string;
 }
 
 interface MemberRowProps {
@@ -165,7 +169,11 @@ export function GroupDetailView({
   picksByCategory,
   onMakeAdmin,
   onRevokeAdmin,
+  onTogglePicksRestricted,
+  isSavingSettings = false,
+  settingsError,
 }: GroupDetailViewProps) {
+  const isAdmin = group.adminIds.includes(currentUserId);
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
   const allPicks = categories.flatMap((c) => picksByCategory[c.id] ?? []);
   const openPicks = allPicks.filter((p) => p.closedAt === undefined);
@@ -249,6 +257,7 @@ export function GroupDetailView({
             initialCategories={categories}
             currentUserId={currentUserId}
             initialPicksByCategory={picksByCategory}
+            canCreatePick={isAdmin || !group.picksRestricted}
           />
         </TabsContent>
 
@@ -277,6 +286,14 @@ export function GroupDetailView({
               <p className="text-sm text-destructive">{adminError}</p>
             )}
           </section>
+          {isAdmin && (
+            <GroupSettingsPanelView
+              picksRestricted={group.picksRestricted}
+              onTogglePicksRestricted={onTogglePicksRestricted}
+              isSaving={isSavingSettings}
+              error={settingsError}
+            />
+          )}
           <InviteSection
             groupId={group.id}
             initialToken={group.inviteToken}

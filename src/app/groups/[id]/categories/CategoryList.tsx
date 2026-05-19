@@ -14,6 +14,7 @@ interface CategoryListProps {
   initialCategories: Category[];
   currentUserId: string;
   initialPicksByCategory: Record<string, GroupPick[]>;
+  canCreatePick?: boolean;
 }
 
 export function CategoryList({
@@ -21,6 +22,7 @@ export function CategoryList({
   initialCategories,
   currentUserId,
   initialPicksByCategory,
+  canCreatePick = true,
 }: CategoryListProps) {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -121,6 +123,7 @@ export function CategoryList({
   return (
     <CategoryListView
       categories={categories}
+      canCreatePick={canCreatePick}
       groupId={groupId}
       currentUserId={currentUserId}
       showCreateForm={showCreateForm}

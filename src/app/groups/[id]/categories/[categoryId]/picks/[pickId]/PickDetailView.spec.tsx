@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -203,6 +204,28 @@ describe("open state", () => {
     renderView({ pick: makePick({ closedAt: undefined }) });
 
     expect(screen.getByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeDefined();
+  });
+
+  it("does not show the locked message in the options tab panel", () => {
+    renderView({ pick: makePick({ closedAt: undefined }) });
+
+    const optionsPanel = screen.getByRole("tabpanel");
+    expect(
+      within(optionsPanel).queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
+    ).toBeNull();
+  });
+
+  it("does not show the locked message in the ranking tab panel", () => {
+    renderView({ pick: makePick({ closedAt: undefined }) });
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
+    );
+
+    const rankingPanel = screen.getByRole("tabpanel");
+    expect(
+      within(rankingPanel).queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
+    ).toBeNull();
   });
 
   it("does not render the reopen button when open", () => {

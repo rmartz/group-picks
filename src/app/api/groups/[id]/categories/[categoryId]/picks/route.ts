@@ -4,6 +4,7 @@ import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { createPick, getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { isGroupAdmin } from "@/server/utils/permissions";
 
 export async function GET(
   _request: Request,
@@ -67,6 +68,10 @@ export async function POST(
 
   if (category?.groupId !== groupId) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
+  }
+
+  if (group.picksRestricted && !isGroupAdmin(uid, group)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   let body: {

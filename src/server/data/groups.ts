@@ -48,6 +48,14 @@ export async function getMemberDisplayNames(
   return uids.map((uid) => ({ uid, name: nameByUid.get(uid) ?? uid }));
 }
 
+export async function updatePicksRestricted(
+  groupId: string,
+  picksRestricted: boolean,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db.ref(`groups/${groupId}/public/picksRestricted`).set(picksRestricted);
+}
+
 export async function removeMember(
   groupId: string,
   uid: string,

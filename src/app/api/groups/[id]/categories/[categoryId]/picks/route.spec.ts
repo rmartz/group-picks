@@ -183,4 +183,69 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
       expect.objectContaining({ dueDate: undefined }),
     );
   });
+
+  describe("picksRestricted enforcement", () => {
+    it("returns 403 when picksRestricted and caller is not an admin", async () => {
+      mockGetGroupById.mockResolvedValue({
+        id: "group-1",
+        name: "G",
+        createdAt: new Date(),
+        creatorId: "owner-1",
+        memberIds: ["owner-1", "user-1"],
+        adminIds: ["owner-1"],
+        picksRestricted: true,
+        inviteToken: "tok",
+      });
+      mockGetVerifiedUid.mockResolvedValue("user-1");
+
+      const response = await POST(
+        makeRequest({ title: "Best Pizza", topCount: 3 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(403);
+      expect(mockCreatePick).not.toHaveBeenCalled();
+    });
+
+    it("allows pick creation when picksRestricted and caller is an admin", async () => {
+      mockGetGroupById.mockResolvedValue({
+        id: "group-1",
+        name: "G",
+        createdAt: new Date(),
+        creatorId: "user-1",
+        memberIds: ["user-1"],
+        adminIds: ["user-1"],
+        picksRestricted: true,
+        inviteToken: "tok",
+      });
+
+      const response = await POST(
+        makeRequest({ title: "Best Pizza", topCount: 3 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+    });
+
+    it("allows pick creation when picksRestricted is false and caller is not admin", async () => {
+      mockGetGroupById.mockResolvedValue({
+        id: "group-1",
+        name: "G",
+        createdAt: new Date(),
+        creatorId: "owner-1",
+        memberIds: ["owner-1", "user-1"],
+        adminIds: ["owner-1"],
+        picksRestricted: false,
+        inviteToken: "tok",
+      });
+      mockGetVerifiedUid.mockResolvedValue("user-1");
+
+      const response = await POST(
+        makeRequest({ title: "Best Pizza", topCount: 3 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+    });
+  });
 });
