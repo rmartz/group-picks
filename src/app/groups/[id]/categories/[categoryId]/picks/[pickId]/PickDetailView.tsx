@@ -154,12 +154,6 @@ export function PickDetailView({
           </TabsTrigger>
         </TabsList>
 
-        {isOpen ? (
-          <p className="mt-4 text-sm text-muted-foreground">
-            {TOP_PICKS_VIEW_COPY.lockedMessage}
-          </p>
-        ) : null}
-
         <TabsContent value="options" className="mt-4">
           {options.length === 0 && initialSuggestions.length === 0 ? (
             <EmptyPickView
@@ -199,13 +193,17 @@ export function PickDetailView({
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>
-          {!isOpen ? (
+          {isOpen ? (
+            <p className="text-sm text-muted-foreground">
+              {TOP_PICKS_VIEW_COPY.lockedMessage}
+            </p>
+          ) : (
             <TopPicksView
               isOpen={isOpen}
               topPicks={topPicks}
               topCount={pick.topCount}
             />
-          ) : null}
+          )}
         </TabsContent>
       </Tabs>
 
