@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { InviteMode } from "@/lib/types/invite";
+
 import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupDetailView } from "./GroupDetailView";
 
@@ -50,6 +52,7 @@ function renderView(
       onLeave={vi.fn()}
       memberNames={memberNames}
       picksByCategory={{}}
+      initialInviteMode={InviteMode.Group}
       {...overrides}
     />,
   );

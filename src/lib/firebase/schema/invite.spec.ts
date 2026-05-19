@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { InviteMode } from "@/lib/types/invite";
+
 import {
   type FirebaseGroupInvite,
   firebaseToGroupInvite,
@@ -19,6 +21,7 @@ function makeFirebaseGroupInvite(
     createdAt: FIXED_TIMESTAMP,
     expiresAt: null,
     active: true,
+    mode: InviteMode.Group,
     ...overrides,
   };
 }
@@ -30,12 +33,14 @@ describe("groupInviteToFirebase", () => {
       createdAt: FIXED_DATE,
       expiresAt: undefined,
       active: true,
+      mode: InviteMode.Personal,
     });
 
     expect(result.groupId).toBe("group-abc");
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.expiresAt).toBeNull();
     expect(result.active).toBe(true);
+    expect(result.mode).toBe(InviteMode.Personal);
   });
 
   it("converts a group invite to Firebase format with expiry", () => {
@@ -44,10 +49,12 @@ describe("groupInviteToFirebase", () => {
       createdAt: FIXED_DATE,
       expiresAt: EXPIRY_DATE,
       active: false,
+      mode: InviteMode.Group,
     });
 
     expect(result.expiresAt).toBe(EXPIRY_TIMESTAMP);
     expect(result.active).toBe(false);
+    expect(result.mode).toBe(InviteMode.Group);
   });
 });
 
@@ -62,6 +69,7 @@ describe("firebaseToGroupInvite", () => {
     expect(result.createdAt).toEqual(FIXED_DATE);
     expect(result.expiresAt).toBeUndefined();
     expect(result.active).toBe(true);
+    expect(result.mode).toBe(InviteMode.Group);
   });
 
   it("converts Firebase data to a GroupInvite with expiry", () => {
@@ -78,5 +86,23 @@ describe("firebaseToGroupInvite", () => {
     const result = firebaseToGroupInvite("token-xyz", data);
 
     expect(result.active).toBe(false);
+  });
+
+  it("converts Firebase data for a Personal invite", () => {
+    const data = makeFirebaseGroupInvite({ mode: InviteMode.Personal });
+
+    const result = firebaseToGroupInvite("token-xyz", data);
+
+    expect(result.mode).toBe(InviteMode.Personal);
+  });
+
+  it("defaults mode to Group when mode field is missing (legacy data)", () => {
+    const data = makeFirebaseGroupInvite();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { mode: _mode, ...dataWithoutMode } = data;
+
+    const result = firebaseToGroupInvite("token-xyz", dataWithoutMode);
+
+    expect(result.mode).toBe(InviteMode.Group);
   });
 });

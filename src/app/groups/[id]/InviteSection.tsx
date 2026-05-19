@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { regenerateInvite, updateInviteExpiry } from "@/services/groups";
+import { InviteMode } from "@/lib/types/invite";
+import { regenerateInvite } from "@/services/groups";
 
 import { GROUP_DETAIL_COPY } from "./copy";
 import { InviteSectionView } from "./InviteSectionView";
@@ -11,25 +12,22 @@ interface InviteSectionProps {
   groupId: string;
   initialToken: string;
   initialExpiresAt?: string;
+  initialMode: InviteMode;
 }
 
 export function InviteSection({
   groupId,
   initialToken,
   initialExpiresAt,
+  initialMode,
 }: InviteSectionProps) {
   const [token, setToken] = useState(initialToken);
   const [origin, setOrigin] = useState("");
   const [expiresAt, setExpiresAt] = useState(
     initialExpiresAt ? new Date(initialExpiresAt) : undefined,
   );
-  const [dateInput, setDateInput] = useState(
-    initialExpiresAt
-      ? new Date(initialExpiresAt).toISOString().slice(0, 10)
-      : "",
-  );
+  const [mode, setMode] = useState<InviteMode>(initialMode);
   const [regenerating, setRegenerating] = useState(false);
-  const [settingExpiry, setSettingExpiry] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -51,31 +49,15 @@ export function InviteSection({
     setError(undefined);
     setRegenerating(true);
     try {
-      const result = await regenerateInvite(groupId);
+      const result = await regenerateInvite(groupId, mode);
       setToken(result.token);
-      const newExpiresAt = new Date(result.expiresAt);
-      setExpiresAt(newExpiresAt);
-      setDateInput(newExpiresAt.toISOString().slice(0, 10));
+      setExpiresAt(new Date(result.expiresAt));
+      setMode(result.mode);
       setCopied(false);
     } catch {
       setError(GROUP_DETAIL_COPY.inviteErrors.default);
     } finally {
       setRegenerating(false);
-    }
-  }
-
-  async function handleSetExpiry(date: string | null) {
-    setError(undefined);
-    setSettingExpiry(true);
-    try {
-      const result = await updateInviteExpiry(groupId, date);
-      setExpiresAt(
-        result.expiresAt !== null ? new Date(result.expiresAt) : undefined,
-      );
-    } catch {
-      setError(GROUP_DETAIL_COPY.inviteErrors.default);
-    } finally {
-      setSettingExpiry(false);
     }
   }
 
@@ -100,13 +82,11 @@ export function InviteSection({
     <InviteSectionView
       inviteUrl={inviteUrl}
       expiresAt={expiresAt}
-      dateInput={dateInput}
-      onDateChange={setDateInput}
+      mode={mode}
+      onModeChange={setMode}
       onRegenerate={() => void handleRegenerate()}
       onCopy={() => void handleCopy()}
-      onSetExpiry={(date) => void handleSetExpiry(date)}
       regenerating={regenerating}
-      settingExpiry={settingExpiry}
       copied={copied}
       error={error}
     />

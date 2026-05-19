@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { InviteMode } from "@/lib/types/invite";
+
 import { GROUP_DETAIL_COPY } from "./copy";
 import { InviteSectionView } from "./InviteSectionView";
 
@@ -15,14 +17,12 @@ function makeProps(
   return {
     inviteUrl: INVITE_URL,
     expiresAt: EXPIRES_AT,
-    dateInput: EXPIRES_AT.toISOString().slice(0, 10),
-    onDateChange: () => undefined,
+    mode: InviteMode.Group,
+    onModeChange: () => undefined,
     onRegenerate: () => undefined,
     onCopy: () => undefined,
-    onSetExpiry: () => undefined,
     regenerating: false,
     copied: false,
-    settingExpiry: false,
     error: undefined,
     ...overrides,
   };
@@ -138,63 +138,82 @@ describe("InviteSectionView", () => {
     expect(screen.queryByText(GROUP_DETAIL_COPY.expiresAtLabel)).toBeNull();
   });
 
-  it("renders a date input for setting the expiry", () => {
+  it("does not render a date input for manually setting expiry", () => {
     render(<InviteSectionView {...makeProps()} />);
 
     expect(
-      screen.getByLabelText(GROUP_DETAIL_COPY.setExpiryLabel),
-    ).toBeDefined();
+      screen.queryByLabelText(GROUP_DETAIL_COPY.setExpiryLabel),
+    ).toBeNull();
   });
 
-  it("pre-fills the date input with the current expiry in YYYY-MM-DD format", () => {
-    render(<InviteSectionView {...makeProps({ dateInput: "2026-05-13" })} />);
+  it("does not render a Save Expiry button", () => {
+    render(<InviteSectionView {...makeProps()} />);
 
-    const input = screen.getByLabelText(GROUP_DETAIL_COPY.setExpiryLabel);
-    expect((input as HTMLInputElement).value).toBe("2026-05-13");
+    const buttons = screen.getAllByRole("button");
+    expect(
+      buttons.every(
+        (b) => b.textContent !== GROUP_DETAIL_COPY.saveExpiryButton,
+      ),
+    ).toBe(true);
   });
 
-  it("renders the save expiry button", () => {
+  it("renders Personal mode radio option", () => {
     render(<InviteSectionView {...makeProps()} />);
 
     expect(
-      screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
+      screen.getByLabelText(GROUP_DETAIL_COPY.personalModeLabel),
     ).toBeDefined();
   });
 
-  it("calls onSetExpiry with a string when save is clicked with a valid date", () => {
-    const onSetExpiry = vi.fn();
+  it("renders Group mode radio option", () => {
+    render(<InviteSectionView {...makeProps()} />);
+
+    expect(
+      screen.getByLabelText(GROUP_DETAIL_COPY.groupModeLabel),
+    ).toBeDefined();
+  });
+
+  it("selects the correct radio based on mode prop (Group)", () => {
+    render(<InviteSectionView {...makeProps({ mode: InviteMode.Group })} />);
+
+    const groupRadio = screen.getByLabelText(GROUP_DETAIL_COPY.groupModeLabel);
+    expect(groupRadio instanceof HTMLInputElement && groupRadio.checked).toBe(
+      true,
+    );
+  });
+
+  it("selects the correct radio based on mode prop (Personal)", () => {
+    render(<InviteSectionView {...makeProps({ mode: InviteMode.Personal })} />);
+
+    const personalRadio = screen.getByLabelText(
+      GROUP_DETAIL_COPY.personalModeLabel,
+    );
+    expect(
+      personalRadio instanceof HTMLInputElement && personalRadio.checked,
+    ).toBe(true);
+  });
+
+  it("calls onModeChange with Personal when Personal radio is clicked", () => {
+    const onModeChange = vi.fn();
     render(
       <InviteSectionView
-        {...makeProps({ onSetExpiry, dateInput: "2099-06-15" })}
+        {...makeProps({ mode: InviteMode.Group, onModeChange })}
       />,
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
-    );
-
-    expect(onSetExpiry).toHaveBeenCalledWith("2099-06-15");
+    fireEvent.click(screen.getByLabelText(GROUP_DETAIL_COPY.personalModeLabel));
+    expect(onModeChange).toHaveBeenCalledWith(InviteMode.Personal);
   });
 
-  it("calls onSetExpiry with null when save is clicked with an empty date input", () => {
-    const onSetExpiry = vi.fn();
+  it("calls onModeChange with Group when Group radio is clicked", () => {
+    const onModeChange = vi.fn();
     render(
-      <InviteSectionView {...makeProps({ onSetExpiry, dateInput: "" })} />,
+      <InviteSectionView
+        {...makeProps({ mode: InviteMode.Personal, onModeChange })}
+      />,
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: GROUP_DETAIL_COPY.saveExpiryButton }),
-    );
-
-    expect(onSetExpiry).toHaveBeenCalledWith(null);
-  });
-
-  it("disables the save expiry button while settingExpiry is true", () => {
-    render(<InviteSectionView {...makeProps({ settingExpiry: true })} />);
-
-    const button = screen.getByRole("button", {
-      name: GROUP_DETAIL_COPY.settingExpiryButton,
-    });
-    expect((button as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText(GROUP_DETAIL_COPY.groupModeLabel));
+    expect(onModeChange).toHaveBeenCalledWith(InviteMode.Group);
   });
 });

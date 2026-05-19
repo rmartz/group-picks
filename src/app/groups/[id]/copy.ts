@@ -12,6 +12,7 @@ export const GROUP_DETAIL_COPY = {
   },
   expiresAtLabel: "Expires",
   generateButton: "Generate Invite Link",
+  groupModeLabel: "Group (30 days, multi-use)",
   inviteErrors: {
     default: "Something went wrong. Please try again.",
   },
@@ -25,6 +26,7 @@ export const GROUP_DETAIL_COPY = {
   notFound: "Group not found.",
   openBadge: "open",
   openSection: "Open",
+  personalModeLabel: "Personal (7 days, single-use)",
   regenerateButton: "Revoke & Regenerate",
   regeneratingButton: "Regenerating…",
   revokeAdminAction: "Revoke admin",

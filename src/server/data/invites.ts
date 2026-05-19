@@ -7,9 +7,10 @@ import {
   firebaseToGroupInvite,
   groupInviteToFirebase,
 } from "@/lib/firebase/schema/invite";
-import type { GroupInvite } from "@/lib/types/invite";
+import { type GroupInvite, InviteMode } from "@/lib/types/invite";
 
-export const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
+export const INVITE_TTL_PERSONAL = 7 * 24 * 60 * 60 * 1000;
+export const INVITE_TTL_GROUP = 30 * 24 * 60 * 60 * 1000;
 
 export type CreatedGroupInvite = GroupInvite & { expiresAt: Date };
 
@@ -38,12 +39,15 @@ export async function getGroupInviteByToken(
 export async function createGroupInvite(
   groupId: string,
   oldToken: string | undefined,
+  mode: InviteMode,
 ): Promise<CreatedGroupInvite> {
   const db = getDatabase(getAdminApp());
 
   const token = randomUUID().replace(/-/g, "");
   const createdAt = new Date();
-  const expiresAt = new Date(createdAt.getTime() + INVITE_TTL);
+  const ttl =
+    mode === InviteMode.Personal ? INVITE_TTL_PERSONAL : INVITE_TTL_GROUP;
+  const expiresAt = new Date(createdAt.getTime() + ttl);
 
   const invite: CreatedGroupInvite = {
     token,
@@ -51,6 +55,7 @@ export async function createGroupInvite(
     createdAt,
     expiresAt,
     active: true,
+    mode,
   };
 
   const updates: Record<string, unknown> = {
@@ -66,20 +71,27 @@ export async function createGroupInvite(
   return invite;
 }
 
-export async function updateGroupInviteExpiry(
-  token: string,
-  expiresAt: Date | null,
-): Promise<void> {
+export async function revokeGroupInvite(token: string): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db
-    .ref(`invites/${token}/expiresAt`)
-    .set(expiresAt !== null ? expiresAt.getTime() : null);
+  await db.ref(`invites/${token}/active`).set(false);
 }
 
 export async function addGroupMember(
   groupId: string,
   uid: string,
+  revokeToken?: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db.ref(`groups/${groupId}/members/${uid}`).set(true);
+  if (revokeToken) {
+    await db.ref().update({
+      [`groups/${groupId}/members/${uid}`]: true,
+      [`users/${uid}/groups/${groupId}`]: true,
+      [`invites/${revokeToken}/active`]: false,
+    });
+  } else {
+    await db.ref().update({
+      [`groups/${groupId}/members/${uid}`]: true,
+      [`users/${uid}/groups/${groupId}`]: true,
+    });
+  }
 }
