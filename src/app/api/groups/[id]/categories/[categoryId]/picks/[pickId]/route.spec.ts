@@ -6,14 +6,12 @@ const {
   mockGetVerifiedUid,
   mockGetGroupById,
   mockGetCategoryById,
-  mockAssertPickIsOpenForWrite,
-  mockUpdatePick,
+  mockUpdatePickIfOpen,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetCategoryById: vi.fn(),
-  mockAssertPickIsOpenForWrite: vi.fn(),
-  mockUpdatePick: vi.fn(),
+  mockUpdatePickIfOpen: vi.fn(),
 }));
 
 vi.mock("@/server/utils/auth", () => ({
@@ -29,8 +27,7 @@ vi.mock("@/server/data/categories", () => ({
 }));
 
 vi.mock("@/server/data/picks", () => ({
-  assertPickIsOpenForWrite: mockAssertPickIsOpenForWrite,
-  updatePick: mockUpdatePick,
+  updatePickIfOpen: mockUpdatePickIfOpen,
   PICK_CLOSED_API_ERROR: "Pick is closed",
   PickNotFoundError: class PickNotFoundError extends Error {
     readonly code = "pick_not_found";
@@ -86,28 +83,18 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       createdAt: new Date(),
       creatorId: "user-1",
     });
-    mockAssertPickIsOpenForWrite.mockResolvedValue({
-      id: "pick-1",
-      title: "Original Title",
-      description: "",
-      categoryId: "cat-1",
-      topCount: 1,
-      createdAt: new Date(),
-      creatorId: "user-1",
-      closedAt: undefined,
-    });
-    mockUpdatePick.mockResolvedValue(undefined);
+    mockUpdatePickIfOpen.mockResolvedValue(undefined);
   });
 
   describe("Calling PATCH on an open pick succeeds and returns 200", () => {
-    it("returns 200 and calls updatePick for an open pick", async () => {
+    it("returns 200 and calls updatePickIfOpen for an open pick", async () => {
       const response = await PATCH(
         makeRequest({ title: "New Title", description: "", topCount: 1 }),
         { params: Promise.resolve(baseParams) },
       );
 
       expect(response.status).toBe(200);
-      expect(mockUpdatePick).toHaveBeenCalledWith("cat-1", "pick-1", {
+      expect(mockUpdatePickIfOpen).toHaveBeenCalledWith("cat-1", "pick-1", {
         title: "New Title",
         description: "",
         topCount: 1,
@@ -117,8 +104,8 @@ describe("PATCH /api/.../picks/[pickId]", () => {
   });
 
   describe("Calling PATCH on a pick whose dueDate is in the past returns an error response and persists closedAt", () => {
-    it("returns 409 when assertPickIsOpenForWrite throws PickWriteClosedError", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
+    it("returns 409 when updatePickIfOpen throws PickWriteClosedError", async () => {
+      mockUpdatePickIfOpen.mockRejectedValue(
         new PickWriteClosedError(
           "Pick due date has passed. The pick has been closed and no longer accepts changes.",
         ),
@@ -130,11 +117,10 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       );
 
       expect(response.status).toBe(409);
-      expect(mockUpdatePick).not.toHaveBeenCalled();
     });
 
     it("includes a user-readable error message in the 409 response", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
+      mockUpdatePickIfOpen.mockRejectedValue(
         new PickWriteClosedError(
           "Pick due date has passed. The pick has been closed and no longer accepts changes.",
         ),
@@ -149,38 +135,23 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       expect(body.error).toBe("Pick is closed");
     });
 
-    it("calls assertPickIsOpenForWrite before updatePick", async () => {
-      const callOrder: string[] = [];
-      mockAssertPickIsOpenForWrite.mockImplementation(() => {
-        callOrder.push("assertPickIsOpenForWrite");
-        return Promise.resolve({
-          id: "pick-1",
-          title: "P",
-          description: "",
-          categoryId: "cat-1",
-          topCount: 1,
-          createdAt: new Date(),
-          creatorId: "user-1",
-          closedAt: undefined,
-        });
-      });
-      mockUpdatePick.mockImplementation(() => {
-        callOrder.push("updatePick");
-        return Promise.resolve();
-      });
-
+    it("calls updatePickIfOpen with categoryId and pickId", async () => {
       await PATCH(
         makeRequest({ title: "New Title", description: "", topCount: 1 }),
         { params: Promise.resolve(baseParams) },
       );
 
-      expect(callOrder).toEqual(["assertPickIsOpenForWrite", "updatePick"]);
+      expect(mockUpdatePickIfOpen).toHaveBeenCalledWith(
+        "cat-1",
+        "pick-1",
+        expect.any(Object),
+      );
     });
   });
 
   describe("Existing pick-not-found path still returns 404", () => {
-    it("returns 404 when pick not found is thrown from assertPickIsOpenForWrite", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
+    it("returns 404 when pick not found is thrown from updatePickIfOpen", async () => {
+      mockUpdatePickIfOpen.mockRejectedValue(new PickNotFoundError());
 
       const response = await PATCH(
         makeRequest({ title: "New Title", description: "", topCount: 1 }),
@@ -221,8 +192,8 @@ describe("PATCH /api/.../picks/[pickId]", () => {
     });
   });
 
-  describe("PATCH accepts YYYY-MM-DD dueDate and passes a Date to updatePick", () => {
-    it("passes the parsed Date to updatePick for a valid YYYY-MM-DD dueDate", async () => {
+  describe("PATCH accepts YYYY-MM-DD dueDate and passes a Date to updatePickIfOpen", () => {
+    it("passes the parsed Date to updatePickIfOpen for a valid YYYY-MM-DD dueDate", async () => {
       const response = await PATCH(
         makeRequest({
           title: "T",
@@ -234,7 +205,7 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(mockUpdatePick).toHaveBeenCalledWith(
+      expect(mockUpdatePickIfOpen).toHaveBeenCalledWith(
         "cat-1",
         "pick-1",
         expect.objectContaining({
@@ -245,7 +216,7 @@ describe("PATCH /api/.../picks/[pickId]", () => {
   });
 
   describe("PATCH clears dueDate when null or absent", () => {
-    it("passes dueDate: undefined to updatePick when dueDate is null", async () => {
+    it("passes dueDate: undefined to updatePickIfOpen when dueDate is null", async () => {
       const response = await PATCH(
         makeRequest({
           title: "T",
@@ -257,21 +228,21 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(mockUpdatePick).toHaveBeenCalledWith(
+      expect(mockUpdatePickIfOpen).toHaveBeenCalledWith(
         "cat-1",
         "pick-1",
         expect.objectContaining({ dueDate: undefined }),
       );
     });
 
-    it("passes dueDate: undefined to updatePick when dueDate is absent", async () => {
+    it("passes dueDate: undefined to updatePickIfOpen when dueDate is absent", async () => {
       const response = await PATCH(
         makeRequest({ title: "T", description: "", topCount: 1 }),
         { params: Promise.resolve(baseParams) },
       );
 
       expect(response.status).toBe(200);
-      expect(mockUpdatePick).toHaveBeenCalledWith(
+      expect(mockUpdatePickIfOpen).toHaveBeenCalledWith(
         "cat-1",
         "pick-1",
         expect.objectContaining({ dueDate: undefined }),
