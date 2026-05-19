@@ -32,6 +32,11 @@ export const GROUP_DETAIL_COPY = {
   revokeAdminAction: "Revoke admin",
   saveExpiryButton: "Save Expiry",
   setExpiryLabel: "Set expiry date",
+  settings: {
+    error: "Failed to save settings. Please try again.",
+    heading: "Settings",
+    picksRestrictedLabel: "Only admins can create picks",
+  },
   settingExpiryButton: "Saving…",
   tabs: {
     categories: "Categories",

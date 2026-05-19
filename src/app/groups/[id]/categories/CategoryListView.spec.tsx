@@ -240,4 +240,34 @@ describe("CategoryListView", () => {
       );
     });
   });
+
+  describe("canCreatePick prop controls Create Pick visibility", () => {
+    it("shows Create Pick link when canCreatePick is true", () => {
+      render(
+        <CategoryListView
+          {...makeProps({
+            categories: [makeCategory({ id: "cat-1" })],
+            canCreatePick: true,
+          })}
+        />,
+      );
+      expect(
+        screen.getByRole("link", { name: CATEGORY_COPY.createPickButton }),
+      ).toBeDefined();
+    });
+
+    it("hides Create Pick link when canCreatePick is false", () => {
+      render(
+        <CategoryListView
+          {...makeProps({
+            categories: [makeCategory({ id: "cat-1" })],
+            canCreatePick: false,
+          })}
+        />,
+      );
+      expect(
+        screen.queryByRole("link", { name: CATEGORY_COPY.createPickButton }),
+      ).toBeNull();
+    });
+  });
 });

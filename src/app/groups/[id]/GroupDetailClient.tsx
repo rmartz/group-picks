@@ -12,6 +12,7 @@ import {
   LeaveGroupLastMemberError,
   promoteAdmin,
   revokeAdmin,
+  updateGroupSettings,
 } from "@/services/groups";
 
 import { GROUP_DETAIL_COPY } from "./copy";
@@ -40,6 +41,9 @@ export function GroupDetailClient({
   const [isLeaving, setIsLeaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [adminError, setAdminError] = useState<string | undefined>();
+  const [picksRestricted, setPicksRestricted] = useState(group.picksRestricted);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | undefined>();
 
   async function handleMakeAdmin(uid: string) {
     setAdminError(undefined);
@@ -78,9 +82,23 @@ export function GroupDetailClient({
     }
   }
 
+  async function handleTogglePicksRestricted() {
+    setSettingsError(undefined);
+    setIsSavingSettings(true);
+    try {
+      const newValue = !picksRestricted;
+      await updateGroupSettings(group.id, { picksRestricted: newValue });
+      setPicksRestricted(newValue);
+    } catch {
+      setSettingsError(GROUP_DETAIL_COPY.settings.error);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  }
+
   return (
     <GroupDetailView
-      group={group}
+      group={{ ...group, picksRestricted }}
       categories={categories}
       currentUserId={currentUserId}
       onLeave={() => {
@@ -99,6 +117,11 @@ export function GroupDetailClient({
       initialInviteMode={initialInviteMode}
       memberNames={memberNames}
       picksByCategory={picksByCategory}
+      onTogglePicksRestricted={() => {
+        void handleTogglePicksRestricted();
+      }}
+      isSavingSettings={isSavingSettings}
+      settingsError={settingsError}
     />
   );
 }
