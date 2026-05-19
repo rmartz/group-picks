@@ -6,13 +6,11 @@ const {
   mockGetVerifiedUid,
   mockGetGroupById,
   mockGetCategoryById,
-  mockAssertPickIsOpenForWrite,
   mockClosePick,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetCategoryById: vi.fn(),
-  mockAssertPickIsOpenForWrite: vi.fn(),
   mockClosePick: vi.fn(),
 }));
 
@@ -29,7 +27,6 @@ vi.mock("@/server/data/categories", () => ({
 }));
 
 vi.mock("@/server/data/picks", () => ({
-  assertPickIsOpenForWrite: mockAssertPickIsOpenForWrite,
   closePick: mockClosePick,
   PICK_CLOSED_API_ERROR: "Pick is closed",
   PickNotFoundError: class PickNotFoundError extends Error {
@@ -82,77 +79,22 @@ describe("POST /api/.../picks/[pickId]/close", () => {
       createdAt: new Date(),
       creatorId: "user-1",
     });
-    mockAssertPickIsOpenForWrite.mockResolvedValue({
-      id: "pick-1",
-      title: "Open Pick",
-      description: "",
-      categoryId: "cat-1",
-      topCount: 1,
-      createdAt: new Date(),
-      creatorId: "user-1",
-      closedAt: undefined,
-    });
     mockClosePick.mockResolvedValue(undefined);
   });
 
-  describe("Close succeeds for an open pick", () => {
-    it("returns 200 and calls closePick when pick is open", async () => {
-      const response = await POST(makeRequest(), {
-        params: Promise.resolve(baseParams),
-      });
-
-      expect(response.status).toBe(200);
-      expect(mockClosePick).toHaveBeenCalledWith("cat-1", "pick-1");
-    });
-
-    it("calls assertPickIsOpenForWrite before closePick", async () => {
-      const callOrder: string[] = [];
-      mockAssertPickIsOpenForWrite.mockImplementation(() => {
-        callOrder.push("assertPickIsOpenForWrite");
-        return Promise.resolve({
-          id: "pick-1",
-          title: "P",
-          description: "",
-          categoryId: "cat-1",
-          topCount: 1,
-          createdAt: new Date(),
-          creatorId: "user-1",
-          closedAt: undefined,
-        });
-      });
-      mockClosePick.mockImplementation(() => {
-        callOrder.push("closePick");
-        return Promise.resolve();
-      });
-
-      await POST(makeRequest(), { params: Promise.resolve(baseParams) });
-
-      expect(callOrder).toEqual(["assertPickIsOpenForWrite", "closePick"]);
-    });
-  });
-
-  describe("Close returns 409 when pick is already closed", () => {
-    it("returns 409 when assertPickIsOpenForWrite throws PickWriteClosedError", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
-        new PickWriteClosedError(
-          "Pick is closed and no longer accepts changes.",
-        ),
-      );
+  describe("concurrent close attempts return 409 to the second caller", () => {
+    it("returns 409 when closePick throws PickWriteClosedError", async () => {
+      mockClosePick.mockRejectedValue(new PickWriteClosedError());
 
       const response = await POST(makeRequest(), {
         params: Promise.resolve(baseParams),
       });
 
       expect(response.status).toBe(409);
-      expect(mockClosePick).not.toHaveBeenCalled();
     });
 
     it("includes PICK_CLOSED_API_ERROR in the 409 response body", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
-        new PickWriteClosedError(
-          "Pick is closed and no longer accepts changes.",
-        ),
-      );
+      mockClosePick.mockRejectedValue(new PickWriteClosedError());
 
       const response = await POST(makeRequest(), {
         params: Promise.resolve(baseParams),
@@ -163,9 +105,89 @@ describe("POST /api/.../picks/[pickId]/close", () => {
     });
   });
 
-  describe("Close returns 404 when pick is not found", () => {
-    it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {
-      mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
+  describe("close returns 404 when closePick reports pick not found", () => {
+    it("returns 404 when closePick throws PickNotFoundError", async () => {
+      mockClosePick.mockRejectedValue(new PickNotFoundError());
+
+      const response = await POST(makeRequest(), {
+        params: Promise.resolve(baseParams),
+      });
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe("successful close", () => {
+    it("returns 200 with pickId when closePick resolves", async () => {
+      const response = await POST(makeRequest(), {
+        params: Promise.resolve(baseParams),
+      });
+
+      expect(response.status).toBe(200);
+      const data = (await response.json()) as { pickId: string };
+      expect(data.pickId).toBe("pick-1");
+    });
+
+    it("calls closePick with categoryId and pickId", async () => {
+      await POST(makeRequest(), { params: Promise.resolve(baseParams) });
+
+      expect(mockClosePick).toHaveBeenCalledWith("cat-1", "pick-1");
+    });
+  });
+
+  describe("auth and access guards", () => {
+    it("returns 401 when caller is not authenticated", async () => {
+      mockGetVerifiedUid.mockResolvedValue(null);
+
+      const response = await POST(makeRequest(), {
+        params: Promise.resolve(baseParams),
+      });
+
+      expect(response.status).toBe(401);
+    });
+
+    it("returns 404 when group does not exist", async () => {
+      mockGetGroupById.mockResolvedValue(undefined);
+
+      const response = await POST(makeRequest(), {
+        params: Promise.resolve(baseParams),
+      });
+
+      expect(response.status).toBe(404);
+    });
+
+    it("returns 403 when caller is not a group member", async () => {
+      mockGetGroupById.mockResolvedValue({
+        id: "group-1",
+        name: "G",
+        createdAt: new Date(),
+        creatorId: "owner-1",
+        memberIds: ["owner-1"],
+      });
+
+      const response = await POST(makeRequest(), {
+        params: Promise.resolve(baseParams),
+      });
+
+      expect(response.status).toBe(403);
+    });
+
+    it("returns 404 when category does not exist", async () => {
+      mockGetCategoryById.mockResolvedValue(undefined);
+
+      const response = await POST(makeRequest(), {
+        params: Promise.resolve(baseParams),
+      });
+
+      expect(response.status).toBe(404);
+    });
+
+    it("returns 404 when category belongs to a different group", async () => {
+      mockGetCategoryById.mockResolvedValue({
+        id: "cat-1",
+        groupId: "other-group",
+        name: "C",
+      });
 
       const response = await POST(makeRequest(), {
         params: Promise.resolve(baseParams),

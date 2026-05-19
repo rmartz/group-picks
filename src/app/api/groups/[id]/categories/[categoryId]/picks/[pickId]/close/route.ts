@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import {
-  assertPickIsOpenForWrite,
   closePick,
   PICK_CLOSED_API_ERROR,
   PickNotFoundError,
@@ -40,7 +39,7 @@ export async function POST(
   }
 
   try {
-    await assertPickIsOpenForWrite(categoryId, pickId);
+    await closePick(categoryId, pickId);
   } catch (err) {
     if (err instanceof PickWriteClosedError) {
       return NextResponse.json(
@@ -53,8 +52,6 @@ export async function POST(
     }
     throw err;
   }
-
-  await closePick(categoryId, pickId);
 
   return NextResponse.json({ pickId });
 }
