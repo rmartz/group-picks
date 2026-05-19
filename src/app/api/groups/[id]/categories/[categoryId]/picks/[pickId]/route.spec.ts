@@ -298,7 +298,7 @@ describe("PATCH /api/.../picks/[pickId]", () => {
       expect(body.error).toBe("dueDate cannot be in the past");
     });
 
-    it("does not call assertPickIsOpenForWrite when dueDate is in the past", async () => {
+    it("does not call updatePickIfOpen when dueDate is in the past", async () => {
       await PATCH(
         makeRequest({
           title: "T",
