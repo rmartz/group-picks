@@ -113,3 +113,15 @@ export async function revokeAdmin(groupId: string, uid: string): Promise<void> {
   const db = getDatabase(getAdminApp());
   await db.ref(`groups/${groupId}/public/adminIds/${uid}`).remove();
 }
+
+export async function deleteGroup(
+  groupId: string,
+  memberIds: string[],
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  const updates: Record<string, null> = { [`groups/${groupId}`]: null };
+  for (const uid of memberIds) {
+    updates[`users/${uid}/groups/${groupId}`] = null;
+  }
+  await db.ref("/").update(updates);
+}
