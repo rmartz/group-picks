@@ -118,53 +118,45 @@ describe("POST /api/.../picks/[pickId]/options", () => {
     expect(mockAddOption).toHaveBeenCalledWith("pick-1", "Tacos", "user-1");
   });
 
-  describe("returns 404 when the pick does not exist", () => {
-    it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {
-      const { PickNotFoundError } = await import("@/server/data/picks");
-      mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
+  it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {
+    const { PickNotFoundError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
 
-      const response = await POST(makeRequest({ title: "Tacos" }), {
-        params: Promise.resolve(baseParams),
-      });
-
-      expect(response.status).toBe(404);
-      expect(mockAddOption).not.toHaveBeenCalled();
-      expect(mockJoinOption).not.toHaveBeenCalled();
+    const response = await POST(makeRequest({ title: "Tacos" }), {
+      params: Promise.resolve(baseParams),
     });
+
+    expect(response.status).toBe(404);
+    expect(mockAddOption).not.toHaveBeenCalled();
+    expect(mockJoinOption).not.toHaveBeenCalled();
   });
 
-  describe("returns 409 when the pick is closed", () => {
-    it("returns 409 when assertPickIsOpenForWrite throws PickWriteClosedError", async () => {
-      const { PickWriteClosedError } = await import("@/server/data/picks");
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
-        new PickWriteClosedError(),
-      );
+  it("returns 409 when assertPickIsOpenForWrite throws PickWriteClosedError", async () => {
+    const { PickWriteClosedError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickWriteClosedError());
 
-      const response = await POST(makeRequest({ title: "Tacos" }), {
-        params: Promise.resolve(baseParams),
-      });
-
-      expect(response.status).toBe(409);
-      expect(mockAddOption).not.toHaveBeenCalled();
-      expect(mockJoinOption).not.toHaveBeenCalled();
+    const response = await POST(makeRequest({ title: "Tacos" }), {
+      params: Promise.resolve(baseParams),
     });
 
-    it("rejects joining an existing option when the pick is closed", async () => {
-      const { PickWriteClosedError } = await import("@/server/data/picks");
-      mockAssertPickIsOpenForWrite.mockRejectedValue(
-        new PickWriteClosedError(),
-      );
-      mockGetOptionsByPick.mockResolvedValue([
-        { id: "opt-existing", title: "Tacos", ownerIds: ["user-2"] },
-      ]);
+    expect(response.status).toBe(409);
+    expect(mockAddOption).not.toHaveBeenCalled();
+    expect(mockJoinOption).not.toHaveBeenCalled();
+  });
 
-      const response = await POST(makeRequest({ title: "Tacos" }), {
-        params: Promise.resolve(baseParams),
-      });
+  it("rejects joining an existing option when the pick is closed", async () => {
+    const { PickWriteClosedError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickWriteClosedError());
+    mockGetOptionsByPick.mockResolvedValue([
+      { id: "opt-existing", title: "Tacos", ownerIds: ["user-2"] },
+    ]);
 
-      expect(response.status).toBe(409);
-      expect(mockJoinOption).not.toHaveBeenCalled();
+    const response = await POST(makeRequest({ title: "Tacos" }), {
+      params: Promise.resolve(baseParams),
     });
+
+    expect(response.status).toBe(409);
+    expect(mockJoinOption).not.toHaveBeenCalled();
   });
 
   it("calls assertPickIsOpenForWrite with categoryId and pickId", async () => {
