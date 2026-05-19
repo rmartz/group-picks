@@ -134,18 +134,65 @@ export async function createPick(
   return { id, createdAt };
 }
 
-export async function updatePick(
+export async function updatePickIfOpen(
   categoryId: string,
   pickId: string,
   updates: Pick<GroupPick, "title" | "description" | "topCount" | "dueDate">,
+  now: Date = new Date(),
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db.ref(`categories/${categoryId}/picks/${pickId}`).update({
-    title: updates.title,
-    description: updates.description !== "" ? updates.description : null,
-    topCount: updates.topCount,
-    dueDate: updates.dueDate?.getTime() ?? null,
-  });
+  const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
+  const nowTimestamp = now.getTime();
+
+  const result = await pickRef.transaction(
+    (currentData: FirebasePickPublic | null) => {
+      if (currentData === null) return undefined;
+      if (currentData.closedAt !== undefined) return currentData;
+      if (
+        currentData.dueDate !== undefined &&
+        currentData.dueDate <= nowTimestamp
+      ) {
+        return { ...currentData, closedAt: nowTimestamp };
+      }
+
+      const next: FirebasePickPublic = {
+        ...currentData,
+        title: updates.title,
+        topCount: updates.topCount,
+      };
+
+      if (updates.description !== "") {
+        next.description = updates.description;
+      } else {
+        delete next.description;
+      }
+
+      if (updates.dueDate !== undefined) {
+        next.dueDate = updates.dueDate.getTime();
+      } else {
+        delete next.dueDate;
+      }
+
+      return next;
+    },
+  );
+
+  if (!result.snapshot.exists()) {
+    throw new PickNotFoundError();
+  }
+
+  const pick = firebaseToPick(
+    pickId,
+    result.snapshot.val() as FirebasePickPublic,
+  );
+
+  if (pick.closedAt !== undefined) {
+    throw new PickWriteClosedError(
+      pick.closedAt.getTime() === nowTimestamp
+        ? PICK_DUE_DATE_PASSED_ERROR
+        : PICK_CLOSED_ERROR,
+    );
+  }
 }
 
 export async function closePick(
