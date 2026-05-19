@@ -4,14 +4,14 @@ const {
   mockGetVerifiedUid,
   mockGetGroupById,
   mockGetCategoryById,
-  mockGetPickById,
+  mockAssertPickIsOpenForWrite,
   mockJoinOption,
   mockUnjoinOption,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetCategoryById: vi.fn(),
-  mockGetPickById: vi.fn(),
+  mockAssertPickIsOpenForWrite: vi.fn(),
   mockJoinOption: vi.fn(),
   mockUnjoinOption: vi.fn(),
 }));
@@ -29,8 +29,22 @@ vi.mock("@/server/data/categories", () => ({
 }));
 
 vi.mock("@/server/data/picks", () => ({
-  getPickById: mockGetPickById,
+  assertPickIsOpenForWrite: mockAssertPickIsOpenForWrite,
   PICK_CLOSED_API_ERROR: "Pick is closed",
+  PickNotFoundError: class PickNotFoundError extends Error {
+    readonly code = "pick_not_found";
+    constructor() {
+      super("Pick not found");
+      this.name = "PickNotFoundError";
+    }
+  },
+  PickWriteClosedError: class PickWriteClosedError extends Error {
+    readonly code = "pick_closed";
+    constructor(message = "Pick is closed and no longer accepts changes.") {
+      super(message);
+      this.name = "PickWriteClosedError";
+    }
+  },
 }));
 
 vi.mock("@/server/data/options", () => ({
@@ -73,7 +87,7 @@ describe("POST /api/.../options/[optionId]/owners", () => {
       createdAt: new Date(),
       creatorId: "user-1",
     });
-    mockGetPickById.mockResolvedValue({
+    mockAssertPickIsOpenForWrite.mockResolvedValue({
       id: "pick-1",
       title: "P",
       categoryId: "cat-1",
@@ -134,8 +148,9 @@ describe("POST /api/.../options/[optionId]/owners", () => {
     expect(mockJoinOption).toHaveBeenCalledWith("pick-1", "opt-1", "user-1");
   });
 
-  it("returns 404 when the pick does not exist", async () => {
-    mockGetPickById.mockResolvedValue(undefined);
+  it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {
+    const { PickNotFoundError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
 
     const response = await POST(makeRequest("POST"), {
       params: Promise.resolve(baseParams),
@@ -145,16 +160,9 @@ describe("POST /api/.../options/[optionId]/owners", () => {
     expect(mockJoinOption).not.toHaveBeenCalled();
   });
 
-  it("returns 409 when the pick is closed", async () => {
-    mockGetPickById.mockResolvedValue({
-      id: "pick-1",
-      title: "P",
-      categoryId: "cat-1",
-      topCount: 1,
-      createdAt: new Date(),
-      creatorId: "user-1",
-      closedAt: new Date(),
-    });
+  it("returns 409 when assertPickIsOpenForWrite throws PickWriteClosedError", async () => {
+    const { PickWriteClosedError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickWriteClosedError());
 
     const response = await POST(makeRequest("POST"), {
       params: Promise.resolve(baseParams),
@@ -184,7 +192,7 @@ describe("DELETE /api/.../options/[optionId]/owners", () => {
       createdAt: new Date(),
       creatorId: "user-1",
     });
-    mockGetPickById.mockResolvedValue({
+    mockAssertPickIsOpenForWrite.mockResolvedValue({
       id: "pick-1",
       title: "P",
       categoryId: "cat-1",
@@ -242,8 +250,9 @@ describe("DELETE /api/.../options/[optionId]/owners", () => {
     expect(body.deleted).toBe(false);
   });
 
-  it("returns 404 when the pick does not exist", async () => {
-    mockGetPickById.mockResolvedValue(undefined);
+  it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {
+    const { PickNotFoundError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
 
     const response = await DELETE(makeRequest("DELETE"), {
       params: Promise.resolve(baseParams),
@@ -253,16 +262,9 @@ describe("DELETE /api/.../options/[optionId]/owners", () => {
     expect(mockUnjoinOption).not.toHaveBeenCalled();
   });
 
-  it("returns 409 when the pick is closed", async () => {
-    mockGetPickById.mockResolvedValue({
-      id: "pick-1",
-      title: "P",
-      categoryId: "cat-1",
-      topCount: 1,
-      createdAt: new Date(),
-      creatorId: "user-1",
-      closedAt: new Date(),
-    });
+  it("returns 409 when assertPickIsOpenForWrite throws PickWriteClosedError", async () => {
+    const { PickWriteClosedError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickWriteClosedError());
 
     const response = await DELETE(makeRequest("DELETE"), {
       params: Promise.resolve(baseParams),

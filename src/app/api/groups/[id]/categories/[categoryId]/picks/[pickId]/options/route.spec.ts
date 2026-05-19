@@ -4,7 +4,7 @@ const {
   mockGetVerifiedUid,
   mockGetGroupById,
   mockGetCategoryById,
-  mockGetPickById,
+  mockAssertPickIsOpenForWrite,
   mockGetOptionsByPick,
   mockAddOption,
   mockJoinOption,
@@ -12,7 +12,7 @@ const {
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetCategoryById: vi.fn(),
-  mockGetPickById: vi.fn(),
+  mockAssertPickIsOpenForWrite: vi.fn(),
   mockGetOptionsByPick: vi.fn(),
   mockAddOption: vi.fn(),
   mockJoinOption: vi.fn(),
@@ -31,9 +31,23 @@ vi.mock("@/server/data/categories", () => ({
 }));
 
 vi.mock("@/server/data/picks", () => ({
-  getPickById: mockGetPickById,
+  assertPickIsOpenForWrite: mockAssertPickIsOpenForWrite,
   getPicksByCategory: vi.fn(),
   PICK_CLOSED_API_ERROR: "Pick is closed",
+  PickNotFoundError: class PickNotFoundError extends Error {
+    readonly code = "pick_not_found";
+    constructor() {
+      super("Pick not found");
+      this.name = "PickNotFoundError";
+    }
+  },
+  PickWriteClosedError: class PickWriteClosedError extends Error {
+    readonly code = "pick_closed";
+    constructor(message = "Pick is closed and no longer accepts changes.") {
+      super(message);
+      this.name = "PickWriteClosedError";
+    }
+  },
 }));
 
 vi.mock("@/server/data/options", () => ({
@@ -81,7 +95,7 @@ describe("POST /api/.../picks/[pickId]/options", () => {
       createdAt: new Date(),
       creatorId: "user-1",
     });
-    mockGetPickById.mockResolvedValue({
+    mockAssertPickIsOpenForWrite.mockResolvedValue({
       id: "pick-1",
       title: "P",
       categoryId: "cat-1",
@@ -104,8 +118,9 @@ describe("POST /api/.../picks/[pickId]/options", () => {
     expect(mockAddOption).toHaveBeenCalledWith("pick-1", "Tacos", "user-1");
   });
 
-  it("returns 404 when the pick does not exist", async () => {
-    mockGetPickById.mockResolvedValue(undefined);
+  it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {
+    const { PickNotFoundError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());
 
     const response = await POST(makeRequest({ title: "Tacos" }), {
       params: Promise.resolve(baseParams),
@@ -116,16 +131,9 @@ describe("POST /api/.../picks/[pickId]/options", () => {
     expect(mockJoinOption).not.toHaveBeenCalled();
   });
 
-  it("returns 409 when the pick is closed", async () => {
-    mockGetPickById.mockResolvedValue({
-      id: "pick-1",
-      title: "P",
-      categoryId: "cat-1",
-      topCount: 1,
-      createdAt: new Date(),
-      creatorId: "user-1",
-      closedAt: new Date(),
-    });
+  it("returns 409 when assertPickIsOpenForWrite throws PickWriteClosedError", async () => {
+    const { PickWriteClosedError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickWriteClosedError());
 
     const response = await POST(makeRequest({ title: "Tacos" }), {
       params: Promise.resolve(baseParams),
@@ -137,15 +145,8 @@ describe("POST /api/.../picks/[pickId]/options", () => {
   });
 
   it("rejects joining an existing option when the pick is closed", async () => {
-    mockGetPickById.mockResolvedValue({
-      id: "pick-1",
-      title: "P",
-      categoryId: "cat-1",
-      topCount: 1,
-      createdAt: new Date(),
-      creatorId: "user-1",
-      closedAt: new Date(),
-    });
+    const { PickWriteClosedError } = await import("@/server/data/picks");
+    mockAssertPickIsOpenForWrite.mockRejectedValue(new PickWriteClosedError());
     mockGetOptionsByPick.mockResolvedValue([
       { id: "opt-existing", title: "Tacos", ownerIds: ["user-2"] },
     ]);
@@ -156,5 +157,16 @@ describe("POST /api/.../picks/[pickId]/options", () => {
 
     expect(response.status).toBe(409);
     expect(mockJoinOption).not.toHaveBeenCalled();
+  });
+
+  it("calls assertPickIsOpenForWrite with categoryId and pickId", async () => {
+    await POST(makeRequest({ title: "Tacos" }), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(mockAssertPickIsOpenForWrite).toHaveBeenCalledWith(
+      "cat-1",
+      "pick-1",
+    );
   });
 });
