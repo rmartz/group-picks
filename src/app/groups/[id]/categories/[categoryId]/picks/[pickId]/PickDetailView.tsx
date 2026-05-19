@@ -15,6 +15,8 @@ import { EmptyPickView } from "./EmptyPickView";
 import { OptionList } from "./OptionList";
 import { SuggestOptionSheet } from "./SuggestOptionSheet";
 import { TierRanking } from "./TierRanking";
+import { TopPicksView } from "./TopPicksView";
+import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 
 interface PickDetailViewProps {
   pick: GroupPick;
@@ -25,6 +27,7 @@ interface PickDetailViewProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   initialTierAssignments?: Record<string, RankingTier>;
+  topPicks: Option[];
 }
 
 export function PickDetailView({
@@ -36,14 +39,12 @@ export function PickDetailView({
   initialOptions,
   initialSuggestions,
   initialTierAssignments = {},
+  topPicks,
 }: PickDetailViewProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
   const isOpen = pick.closedAt === undefined;
   const uniqueOwnerCount = new Set(options.flatMap((opt) => opt.ownerIds)).size;
-  const topPicksOptions = [...options]
-    .sort((a, b) => b.ownerIds.length - a.ownerIds.length)
-    .slice(0, pick.topCount);
 
   function handleOptionAdded({
     optionId,
@@ -153,6 +154,12 @@ export function PickDetailView({
           </TabsTrigger>
         </TabsList>
 
+        {isOpen ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            {TOP_PICKS_VIEW_COPY.lockedMessage}
+          </p>
+        ) : null}
+
         <TabsContent value="options" className="mt-4">
           {options.length === 0 && initialSuggestions.length === 0 ? (
             <EmptyPickView
@@ -192,21 +199,13 @@ export function PickDetailView({
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>
-          {isOpen || topPicksOptions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {isOpen
-                ? PICK_DETAIL_SCAFFOLD_COPY.topPicksLockedPlaceholder
-                : PICK_DETAIL_SCAFFOLD_COPY.resultsPlaceholder}
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {topPicksOptions.map((opt) => (
-                <li key={opt.id} className="text-sm">
-                  {opt.title}
-                </li>
-              ))}
-            </ul>
-          )}
+          {!isOpen ? (
+            <TopPicksView
+              isOpen={isOpen}
+              topPicks={topPicks}
+              topCount={pick.topCount}
+            />
+          ) : null}
         </TabsContent>
       </Tabs>
 

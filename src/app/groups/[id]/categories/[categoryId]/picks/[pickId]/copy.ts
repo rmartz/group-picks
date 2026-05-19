@@ -25,7 +25,6 @@ export const PICK_DETAIL_SCAFFOLD_COPY = {
   openStatusChip: "Open",
   participantsLabel: "Participants",
   rankingTabPlaceholder: "Ranking coming soon.",
-  resultsPlaceholder: "No options were added to this pick.",
   suggestOptionButton: "Suggest option",
   tabs: {
     options: "Options",
@@ -33,6 +32,4 @@ export const PICK_DETAIL_SCAFFOLD_COPY = {
     topPicks: "Top picks",
   },
   topCountLabel: "Top",
-  topPicksLockedPlaceholder:
-    "Top picks will be revealed when this pick closes.",
 } as const;
