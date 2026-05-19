@@ -1,5 +1,7 @@
+import { getDatabase } from "firebase-admin/database";
 import { NextResponse } from "next/server";
 
+import { getAdminApp } from "@/lib/firebase/admin";
 import { InviteMode } from "@/lib/types/invite";
 import { getGroupById } from "@/server/data/groups";
 import { addGroupMember, getGroupInviteByToken } from "@/server/data/invites";
@@ -64,8 +66,24 @@ export async function POST(request: Request) {
     );
   }
 
-  const revokeToken = invite.mode === InviteMode.Personal ? token : undefined;
-  await addGroupMember(invite.groupId, uid, revokeToken);
+  if (invite.mode === InviteMode.Personal) {
+    const db = getDatabase(getAdminApp());
+    const result = await db
+      .ref(`invites/${token}/active`)
+      .transaction((current: boolean | null) => {
+        if (current !== true) return undefined;
+        return false;
+      });
+    if (!result.committed) {
+      return NextResponse.json(
+        { error: "Invite link has been revoked" },
+        { status: 410 },
+      );
+    }
+    await addGroupMember(invite.groupId, uid);
+  } else {
+    await addGroupMember(invite.groupId, uid);
+  }
 
   return NextResponse.json({ groupId: invite.groupId });
 }

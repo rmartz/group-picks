@@ -10,6 +10,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
+import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
 
 import { CategoryList } from "./categories/CategoryList";
@@ -31,6 +32,7 @@ interface GroupDetailViewProps {
   isLeaving?: boolean;
   leaveError?: string;
   initialInviteExpiresAt?: string;
+  initialInviteMode: InviteMode;
   memberNames: MemberName[];
   picksByCategory: Record<string, GroupPick[]>;
   onMakeAdmin?: (uid: string) => void;
@@ -158,6 +160,7 @@ export function GroupDetailView({
   isLeaving = false,
   leaveError,
   initialInviteExpiresAt,
+  initialInviteMode,
   memberNames,
   picksByCategory,
   onMakeAdmin,
@@ -278,6 +281,7 @@ export function GroupDetailView({
             groupId={group.id}
             initialToken={group.inviteToken}
             initialExpiresAt={initialInviteExpiresAt}
+            initialMode={initialInviteMode}
           />
           <LeaveGroupButtonView
             onLeave={onLeave}

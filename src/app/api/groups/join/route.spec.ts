@@ -2,16 +2,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { InviteMode } from "@/lib/types/invite";
 
+const mockTransaction = vi.fn();
+const mockRef = vi.fn().mockReturnValue({ transaction: mockTransaction });
+const mockGetDatabase = vi.fn().mockReturnValue({ ref: mockRef });
+
 const {
   mockGetVerifiedUid,
   mockGetGroupById,
   mockGetGroupInviteByToken,
   mockAddGroupMember,
+  mockGetAdminApp,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetGroupInviteByToken: vi.fn(),
   mockAddGroupMember: vi.fn(),
+  mockGetAdminApp: vi.fn(),
 }));
 
 vi.mock("@/server/utils/auth", () => ({
@@ -25,6 +31,14 @@ vi.mock("@/server/data/groups", () => ({
 vi.mock("@/server/data/invites", () => ({
   getGroupInviteByToken: mockGetGroupInviteByToken,
   addGroupMember: mockAddGroupMember,
+}));
+
+vi.mock("firebase-admin/database", () => ({
+  getDatabase: mockGetDatabase,
+}));
+
+vi.mock("@/lib/firebase/admin", () => ({
+  getAdminApp: mockGetAdminApp,
 }));
 
 const { POST } = await import("./route");
@@ -68,30 +82,35 @@ describe("POST /api/groups/join — single-use enforcement", () => {
     mockGetGroupInviteByToken.mockResolvedValue(makeInvite());
     mockGetGroupById.mockResolvedValue(makeGroup());
     mockAddGroupMember.mockResolvedValue(undefined);
+    mockRef.mockReturnValue({ transaction: mockTransaction });
+    mockGetDatabase.mockReturnValue({ ref: mockRef });
+    // By default, transaction commits (active: true → false)
+    mockTransaction.mockResolvedValue({ committed: true });
   });
 
-  it("revokes the invite after a successful join via a Personal link", async () => {
+  it("consumes the invite atomically and adds the member for a Personal link", async () => {
     const invite = makeInvite();
     mockGetGroupInviteByToken.mockResolvedValue(invite);
     const response = await POST(makeRequest({ token: invite.token }));
     expect(response.status).toBe(200);
-    expect(mockAddGroupMember).toHaveBeenCalledWith(
-      invite.groupId,
-      "user-2",
-      invite.token,
-    );
+    expect(mockRef).toHaveBeenCalledWith(`invites/${invite.token}/active`);
+    expect(mockAddGroupMember).toHaveBeenCalledWith(invite.groupId, "user-2");
   });
 
-  it("does not revoke the invite after a successful join via a Group link", async () => {
+  it("returns 410 when the Personal invite transaction does not commit", async () => {
+    mockTransaction.mockResolvedValue({ committed: false });
+    const response = await POST(makeRequest({ token: "valid-token" }));
+    expect(response.status).toBe(410);
+    expect(mockAddGroupMember).not.toHaveBeenCalled();
+  });
+
+  it("adds the member without a transaction for a Group link", async () => {
     const invite = makeInvite({ mode: InviteMode.Group });
     mockGetGroupInviteByToken.mockResolvedValue(invite);
     const response = await POST(makeRequest({ token: invite.token }));
     expect(response.status).toBe(200);
-    expect(mockAddGroupMember).toHaveBeenCalledWith(
-      invite.groupId,
-      "user-2",
-      undefined,
-    );
+    expect(mockTransaction).not.toHaveBeenCalled();
+    expect(mockAddGroupMember).toHaveBeenCalledWith(invite.groupId, "user-2");
   });
 
   it("returns 401 when not authenticated", async () => {

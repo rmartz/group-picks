@@ -12,19 +12,21 @@ interface InviteSectionProps {
   groupId: string;
   initialToken: string;
   initialExpiresAt?: string;
+  initialMode: InviteMode;
 }
 
 export function InviteSection({
   groupId,
   initialToken,
   initialExpiresAt,
+  initialMode,
 }: InviteSectionProps) {
   const [token, setToken] = useState(initialToken);
   const [origin, setOrigin] = useState("");
   const [expiresAt, setExpiresAt] = useState(
     initialExpiresAt ? new Date(initialExpiresAt) : undefined,
   );
-  const [mode, setMode] = useState<InviteMode>(InviteMode.Group);
+  const [mode, setMode] = useState<InviteMode>(initialMode);
   const [regenerating, setRegenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -50,6 +52,7 @@ export function InviteSection({
       const result = await regenerateInvite(groupId, mode);
       setToken(result.token);
       setExpiresAt(new Date(result.expiresAt));
+      setMode(result.mode);
       setCopied(false);
     } catch {
       setError(GROUP_DETAIL_COPY.inviteErrors.default);

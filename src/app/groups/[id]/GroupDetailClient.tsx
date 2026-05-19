@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
+import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
 import {
   leaveGroup,
@@ -21,6 +22,7 @@ interface GroupDetailClientProps {
   categories: Category[];
   currentUserId: string;
   initialInviteExpiresAt?: string;
+  initialInviteMode: InviteMode;
   memberNames: { uid: string; name: string }[];
   picksByCategory: Record<string, GroupPick[]>;
 }
@@ -30,6 +32,7 @@ export function GroupDetailClient({
   categories,
   currentUserId,
   initialInviteExpiresAt,
+  initialInviteMode,
   memberNames,
   picksByCategory,
 }: GroupDetailClientProps) {
@@ -93,6 +96,7 @@ export function GroupDetailClient({
       isLeaving={isLeaving}
       leaveError={error}
       initialInviteExpiresAt={initialInviteExpiresAt}
+      initialInviteMode={initialInviteMode}
       memberNames={memberNames}
       picksByCategory={picksByCategory}
     />

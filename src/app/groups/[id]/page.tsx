@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
+import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
 import { getCategoriesByGroupId } from "@/server/data/categories";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
@@ -41,6 +42,7 @@ export default async function GroupDetailPage({
       categories={categories}
       currentUserId={uid}
       initialInviteExpiresAt={invite?.expiresAt?.toISOString()}
+      initialInviteMode={invite?.mode ?? InviteMode.Group}
       memberNames={memberNames}
       picksByCategory={picksByCategory}
     />

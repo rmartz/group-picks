@@ -85,9 +85,13 @@ export async function addGroupMember(
   if (revokeToken) {
     await db.ref().update({
       [`groups/${groupId}/members/${uid}`]: true,
+      [`users/${uid}/groups/${groupId}`]: true,
       [`invites/${revokeToken}/active`]: false,
     });
   } else {
-    await db.ref(`groups/${groupId}/members/${uid}`).set(true);
+    await db.ref().update({
+      [`groups/${groupId}/members/${uid}`]: true,
+      [`users/${uid}/groups/${groupId}`]: true,
+    });
   }
 }
