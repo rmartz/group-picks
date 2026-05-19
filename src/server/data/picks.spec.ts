@@ -10,6 +10,7 @@ import {
   hasPicks,
   PickNotFoundError,
   PickWriteClosedError,
+  updatePickIfOpen,
 } from "./picks";
 
 vi.mock("firebase-admin/database", () => ({
@@ -386,5 +387,204 @@ describe("closePick", () => {
     await expect(closePick("cat-123", "pick-123")).resolves.toBeUndefined();
     expect(storedPick.closedAt).toBeDefined();
     expect(storedPick.closedManually).toBeUndefined();
+  });
+});
+
+describe("updatePickIfOpen", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("applies field updates atomically when the pick is open", async () => {
+    let storedPick = makeFirebasePickPublic({
+      title: "Old Title",
+      description: "Old desc",
+      topCount: 1,
+      dueDate: new Date("2025-01-20T12:00:00.000Z").getTime(),
+    });
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        const nextPick = update(storedPick);
+        if (nextPick !== undefined) storedPick = nextPick;
+        return {
+          snapshot: {
+            exists: () => true,
+            val: () => storedPick,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await updatePickIfOpen(
+      "cat-123",
+      "pick-123",
+      {
+        title: "New Title",
+        description: "New desc",
+        topCount: 3,
+        dueDate: undefined,
+      },
+      new Date("2025-01-19T12:00:00.000Z"),
+    );
+
+    expect(storedPick.title).toBe("New Title");
+    expect(storedPick.description).toBe("New desc");
+    expect(storedPick.topCount).toBe(3);
+    expect(storedPick.dueDate).toBeUndefined();
+    expect(transaction).toHaveBeenCalledOnce();
+  });
+
+  it("clears description when an empty string is provided", async () => {
+    let storedPick = makeFirebasePickPublic({ description: "Old desc" });
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        const nextPick = update(storedPick);
+        if (nextPick !== undefined) storedPick = nextPick;
+        return {
+          snapshot: {
+            exists: () => true,
+            val: () => storedPick,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await updatePickIfOpen("cat-123", "pick-123", {
+      title: "T",
+      description: "",
+      topCount: 1,
+      dueDate: undefined,
+    });
+
+    expect(storedPick.description).toBeUndefined();
+  });
+
+  it("throws PickWriteClosedError without modifying when the pick is already closed", async () => {
+    const closedAt = new Date("2025-01-18T12:00:00.000Z").getTime();
+    let storedPick = makeFirebasePickPublic({ closedAt });
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        const nextPick = update(storedPick);
+        storedPick = nextPick ?? storedPick;
+        return {
+          snapshot: {
+            exists: () => true,
+            val: () => storedPick,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await expect(
+      updatePickIfOpen("cat-123", "pick-123", {
+        title: "T",
+        description: "",
+        topCount: 1,
+        dueDate: undefined,
+      }),
+    ).rejects.toMatchObject(
+      new PickWriteClosedError("Pick is closed and no longer accepts changes."),
+    );
+
+    expect(storedPick.closedAt).toBe(closedAt);
+    expect(storedPick.title).toBe("Best Picture");
+  });
+
+  it("atomically closes an overdue pick and throws PickWriteClosedError", async () => {
+    const now = new Date("2025-01-21T12:00:00.000Z");
+    let storedPick = makeFirebasePickPublic({
+      dueDate: new Date("2025-01-20T12:00:00.000Z").getTime(),
+    });
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        const nextPick = update(storedPick);
+        storedPick = nextPick ?? storedPick;
+        return {
+          snapshot: {
+            exists: () => true,
+            val: () => storedPick,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await expect(
+      updatePickIfOpen(
+        "cat-123",
+        "pick-123",
+        { title: "T", description: "", topCount: 1, dueDate: undefined },
+        now,
+      ),
+    ).rejects.toMatchObject({
+      code: "pick_closed",
+      message:
+        "Pick due date has passed. The pick has been closed and no longer accepts changes.",
+    });
+
+    expect(storedPick.closedAt).toBe(now.getTime());
+    expect(storedPick.title).toBe("Best Picture");
+  });
+
+  it("throws PickNotFoundError when the pick does not exist", async () => {
+    const transaction = vi.fn(
+      (
+        update: (
+          currentData: FirebasePickPublic | null,
+        ) => FirebasePickPublic | undefined,
+      ) => {
+        update(null);
+        return {
+          snapshot: {
+            exists: () => false,
+            val: () => null,
+          },
+        };
+      },
+    );
+
+    getDatabaseMock.mockReturnValue({
+      ref: () => ({ transaction }),
+    } as never);
+
+    await expect(
+      updatePickIfOpen("cat-123", "pick-missing", {
+        title: "T",
+        description: "",
+        topCount: 1,
+        dueDate: undefined,
+      }),
+    ).rejects.toBeInstanceOf(PickNotFoundError);
   });
 });

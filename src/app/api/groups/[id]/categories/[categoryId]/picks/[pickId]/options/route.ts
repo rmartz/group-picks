@@ -9,9 +9,11 @@ import {
   joinOption,
 } from "@/server/data/options";
 import {
-  getPickById,
+  assertPickIsOpenForWrite,
   getPicksByCategory,
   PICK_CLOSED_API_ERROR,
+  PickNotFoundError,
+  PickWriteClosedError,
 } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
@@ -110,13 +112,19 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  const pick = await getPickById(categoryId, pickId);
-  if (!pick) {
-    return NextResponse.json({ error: "Pick not found" }, { status: 404 });
-  }
-
-  if (pick.closedAt !== undefined) {
-    return NextResponse.json({ error: PICK_CLOSED_API_ERROR }, { status: 409 });
+  try {
+    await assertPickIsOpenForWrite(categoryId, pickId);
+  } catch (err) {
+    if (err instanceof PickNotFoundError) {
+      return NextResponse.json({ error: "Pick not found" }, { status: 404 });
+    }
+    if (err instanceof PickWriteClosedError) {
+      return NextResponse.json(
+        { error: PICK_CLOSED_API_ERROR },
+        { status: 409 },
+      );
+    }
+    throw err;
   }
 
   let body: { title: unknown };
