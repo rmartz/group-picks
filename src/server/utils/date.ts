@@ -5,7 +5,7 @@ export function parseDueDateField(
     return { date: undefined };
   }
   if (typeof value !== "string") {
-    return { error: "dueDate is invalid" };
+    return { date: undefined };
   }
   const parsed = new Date(value);
   if (

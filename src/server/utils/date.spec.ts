@@ -20,30 +20,30 @@ describe("parseDueDateField", () => {
     });
   });
 
-  describe("returns an error for invalid inputs", () => {
-    it("returns error for a non-string value", () => {
+  describe("returns an error for invalid string inputs, or date: undefined for non-string inputs", () => {
+    it("returns date: undefined for a non-string value", () => {
       const result = parseDueDateField(20250101);
-      expect("error" in result).toBe(true);
+      expect(result).toEqual({ date: undefined });
     });
 
     it("returns error for a human-readable date string", () => {
       const result = parseDueDateField("January 15, 2025");
-      expect("error" in result).toBe(true);
+      expect(result).toEqual({ error: "dueDate is invalid" });
     });
 
     it("returns error for an ISO datetime string", () => {
       const result = parseDueDateField("2025-06-15T12:00:00Z");
-      expect("error" in result).toBe(true);
+      expect(result).toEqual({ error: "dueDate is invalid" });
     });
 
     it("returns error for an impossible calendar date", () => {
       const result = parseDueDateField("2025-02-31");
-      expect("error" in result).toBe(true);
+      expect(result).toEqual({ error: "dueDate is invalid" });
     });
 
     it("returns error for a random non-date string", () => {
       const result = parseDueDateField("not-a-date");
-      expect("error" in result).toBe(true);
+      expect(result).toEqual({ error: "dueDate is invalid" });
     });
   });
 
