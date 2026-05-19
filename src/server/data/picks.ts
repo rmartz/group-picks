@@ -54,7 +54,7 @@ export async function getPicksByCategory(
   );
 }
 
-export async function getPicksByGroupId(
+export async function getPicksByCategoryIds(
   categoryIds: string[],
 ): Promise<Record<string, GroupPick[]>> {
   const pickArrays = await Promise.all(

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { FirebasePickPublic } from "@/lib/firebase/schema/pick";
 
-import { getPicksByGroupId } from "../picks";
+import { getPicksByCategoryIds } from "../picks";
 
 vi.mock("firebase-admin/database", () => ({
   getDatabase: vi.fn(),
@@ -28,14 +28,14 @@ function makeFirebasePickPublic(
   };
 }
 
-describe("getPicksByGroupId", () => {
+describe("getPicksByCategoryIds", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe("returns empty record when no category IDs are provided", () => {
     it("returns {} when categoryIds is empty", async () => {
-      const result = await getPicksByGroupId([]);
+      const result = await getPicksByCategoryIds([]);
 
       expect(result).toEqual({});
       expect(getDatabaseMock).not.toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe("getPicksByGroupId", () => {
         },
       } as never);
 
-      const result = await getPicksByGroupId(["cat-1", "cat-2"]);
+      const result = await getPicksByCategoryIds(["cat-1", "cat-2"]);
 
       const cat1Picks = result["cat-1"] ?? [];
       const cat2Picks = result["cat-2"] ?? [];
@@ -97,7 +97,7 @@ describe("getPicksByGroupId", () => {
         },
       } as never);
 
-      const result = await getPicksByGroupId(["cat-empty"]);
+      const result = await getPicksByCategoryIds(["cat-empty"]);
 
       expect(result["cat-empty"]).toEqual([]);
     });

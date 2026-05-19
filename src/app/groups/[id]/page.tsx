@@ -4,7 +4,7 @@ import { InviteMode } from "@/lib/types/invite";
 import { getCategoriesByGroupId } from "@/server/data/categories";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
-import { getPicksByGroupId } from "@/server/data/picks";
+import { getPicksByCategoryIds } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { GroupDetailClient } from "./GroupDetailClient";
@@ -29,7 +29,7 @@ export default async function GroupDetailPage({
     categoriesPromise,
     getMemberDisplayNames(group.memberIds),
     categoriesPromise.then((resolvedCategories) =>
-      getPicksByGroupId(resolvedCategories.map((category) => category.id)),
+      getPicksByCategoryIds(resolvedCategories.map((category) => category.id)),
     ),
   ]);
 
