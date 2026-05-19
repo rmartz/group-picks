@@ -96,6 +96,16 @@ export async function updateGroupSettings(
   if (!response.ok) throw new Error("Failed to update group settings");
 }
 
+export async function removeGroupMember(
+  groupId: string,
+  uid: string,
+): Promise<void> {
+  const response = await fetch(`/api/groups/${groupId}/members/${uid}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to remove member");
+}
+
 export async function updateInviteExpiry(
   groupId: string,
   expiresAt: string | null,

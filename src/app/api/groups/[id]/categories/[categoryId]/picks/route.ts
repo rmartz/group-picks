@@ -4,6 +4,7 @@ import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { createPick, getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { parseDueDateField } from "@/server/utils/date";
 import { isGroupAdmin } from "@/server/utils/permissions";
 
 export async function GET(
@@ -110,20 +111,11 @@ export async function POST(
   }
   const topCount = body.topCount;
 
-  let dueDate: Date | undefined;
-  if (typeof body.dueDate === "string" && body.dueDate) {
-    const parsed = new Date(body.dueDate);
-    if (
-      Number.isNaN(parsed.getTime()) ||
-      parsed.toISOString().slice(0, 10) !== body.dueDate
-    ) {
-      return NextResponse.json(
-        { error: "dueDate is invalid" },
-        { status: 400 },
-      );
-    }
-    dueDate = parsed;
+  const dueDateResult = parseDueDateField(body.dueDate);
+  if ("error" in dueDateResult) {
+    return NextResponse.json({ error: dueDateResult.error }, { status: 400 });
   }
+  const dueDate = dueDateResult.date;
 
   const { id: pickId, createdAt } = await createPick({
     title,
