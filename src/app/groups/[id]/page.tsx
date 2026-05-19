@@ -1,11 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 
 import { InviteMode } from "@/lib/types/invite";
-import type { GroupPick } from "@/lib/types/pick";
 import { getCategoriesByGroupId } from "@/server/data/categories";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
-import { getPicksByCategory } from "@/server/data/picks";
+import { getPicksByGroupId } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { GroupDetailClient } from "./GroupDetailClient";
@@ -23,18 +22,12 @@ export default async function GroupDetailPage({
 
   if (!group?.memberIds.includes(uid)) notFound();
 
-  const [invite, categories, memberNames] = await Promise.all([
+  const [invite, categories, memberNames, picksByCategory] = await Promise.all([
     getGroupInviteByToken(group.inviteToken),
     getCategoriesByGroupId(id),
     getMemberDisplayNames(group.memberIds),
+    getPicksByGroupId(id),
   ]);
-
-  const pickArrays = await Promise.all(
-    categories.map((c) => getPicksByCategory(c.id)),
-  );
-  const picksByCategory: Record<string, GroupPick[]> = Object.fromEntries(
-    categories.map((c, i) => [c.id, pickArrays[i] ?? []]),
-  );
 
   return (
     <GroupDetailClient

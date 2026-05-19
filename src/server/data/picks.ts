@@ -54,6 +54,32 @@ export async function getPicksByCategory(
   );
 }
 
+export async function getPicksByGroupId(
+  groupId: string,
+): Promise<Record<string, GroupPick[]>> {
+  const db = getDatabase(getAdminApp());
+  const categoriesSnap = await db
+    .ref("categories")
+    .orderByChild("public/groupId")
+    .equalTo(groupId)
+    .get();
+
+  if (!categoriesSnap.exists()) return {};
+
+  const categoryIds: string[] = [];
+  categoriesSnap.forEach((child) => {
+    if (child.key) categoryIds.push(child.key);
+  });
+
+  const pickArrays = await Promise.all(
+    categoryIds.map((id) => getPicksByCategory(id)),
+  );
+
+  return Object.fromEntries(
+    categoryIds.map((id, i) => [id, pickArrays[i] ?? []]),
+  );
+}
+
 export async function getPickById(
   categoryId: string,
   pickId: string,
