@@ -6,5 +6,4 @@ export const DELETE_GROUP_COPY = {
     `Type "${groupName}" to confirm deletion:`,
   deleteButton: "Delete Group",
   deletingButton: "Deleting…",
-  error: "Failed to delete group. Please try again.",
 } as const;

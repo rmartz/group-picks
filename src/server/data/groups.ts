@@ -117,11 +117,25 @@ export async function revokeAdmin(groupId: string, uid: string): Promise<void> {
 export async function deleteGroup(
   groupId: string,
   memberIds: string[],
+  inviteToken: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  const updates: Record<string, null> = { [`groups/${groupId}`]: null };
+  const categorySnap = await db
+    .ref("categories")
+    .orderByChild("public/groupId")
+    .equalTo(groupId)
+    .get();
+
+  const updates: Record<string, null> = {
+    [`groups/${groupId}`]: null,
+    [`invites/${inviteToken}`]: null,
+  };
   for (const uid of memberIds) {
     updates[`users/${uid}/groups/${groupId}`] = null;
   }
+  categorySnap.forEach((category) => {
+    updates[`categories/${category.key}`] = null;
+    return false;
+  });
   await db.ref("/").update(updates);
 }

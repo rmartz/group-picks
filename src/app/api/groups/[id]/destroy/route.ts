@@ -23,7 +23,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await deleteGroup(id, group.memberIds);
+  await deleteGroup(id, group.memberIds, group.inviteToken);
 
   return new NextResponse(null, { status: 204 });
 }

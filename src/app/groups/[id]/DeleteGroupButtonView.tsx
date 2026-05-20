@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -19,6 +19,8 @@ export function DeleteGroupButtonView({
   isDeleting,
   error,
 }: DeleteGroupButtonViewProps) {
+  const confirmInputId = useId();
+  const confirmPromptId = `${confirmInputId}-prompt`;
   const [isConfirming, setIsConfirming] = useState(false);
   const [confirmText, setConfirmText] = useState("");
 
@@ -28,12 +30,16 @@ export function DeleteGroupButtonView({
     <div className="space-y-3 border-t border-destructive/20 pt-3">
       {isConfirming ? (
         <div className="space-y-3" data-testid="delete-group-confirm">
-          <p className="text-sm text-destructive">
+          <p className="text-sm text-destructive" id={confirmPromptId}>
             {DELETE_GROUP_COPY.confirmPrompt(groupName)}
           </p>
           <input
+            aria-describedby={confirmPromptId}
+            aria-label={DELETE_GROUP_COPY.confirmPrompt(groupName)}
             type="text"
+            id={confirmInputId}
             value={confirmText}
+            disabled={isDeleting}
             onChange={(e) => {
               setConfirmText(e.target.value);
             }}
@@ -45,17 +51,20 @@ export function DeleteGroupButtonView({
               type="button"
               variant="destructive"
               size="sm"
-              disabled={!canConfirm}
+              disabled={!canConfirm || isDeleting}
               onClick={() => {
-                if (canConfirm) onDelete();
+                if (canConfirm && !isDeleting) onDelete();
               }}
             >
-              {DELETE_GROUP_COPY.confirmDeleteButton}
+              {isDeleting
+                ? DELETE_GROUP_COPY.deletingButton
+                : DELETE_GROUP_COPY.confirmDeleteButton}
             </Button>
             <Button
               type="button"
               variant="outline"
               size="sm"
+              disabled={isDeleting}
               onClick={() => {
                 setIsConfirming(false);
                 setConfirmText("");

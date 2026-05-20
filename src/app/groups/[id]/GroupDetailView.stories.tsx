@@ -81,6 +81,7 @@ const meta: Meta<typeof GroupDetailView> = {
     group: mockGroup,
     categories: [],
     currentUserId: "user-123",
+    onDeleteGroup: noop,
     onLeave: noop,
     memberNames: mockMemberNames,
     picksByCategory: {},
