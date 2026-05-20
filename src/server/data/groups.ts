@@ -135,7 +135,6 @@ export async function deleteGroup(
   }
   categorySnap.forEach((category) => {
     updates[`categories/${category.key}`] = null;
-    return false;
   });
   await db.ref("/").update(updates);
 }
