@@ -11,7 +11,9 @@ function renderView(
 ) {
   const defaults = {
     name: "",
+    emoji: "👥",
     onNameChange: vi.fn(),
+    onEmojiChange: vi.fn(),
     onSubmit: vi.fn(),
     onCancel: vi.fn(),
     loading: false,
@@ -33,6 +35,11 @@ describe("page structure", () => {
     expect(
       screen.getByRole("button", { name: CREATE_GROUP_COPY.emojiPickerLabel }),
     ).toBeDefined();
+  });
+
+  it("reflects the emoji prop on the picker button", () => {
+    renderView({ emoji: "🎬" });
+    expect(screen.getByText("🎬")).toBeDefined();
   });
 });
 

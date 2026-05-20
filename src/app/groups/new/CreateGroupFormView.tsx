@@ -6,7 +6,9 @@ import { CREATE_GROUP_COPY } from "./copy";
 
 interface CreateGroupFormViewProps {
   name: string;
+  emoji: string;
   onNameChange: (name: string) => void;
+  onEmojiChange: (emoji: string) => void;
   onSubmit: (e: React.SyntheticEvent) => void;
   onCancel: () => void;
   loading: boolean;
@@ -15,6 +17,7 @@ interface CreateGroupFormViewProps {
 
 export function CreateGroupFormView({
   name,
+  emoji,
   onNameChange,
   onSubmit,
   onCancel,
@@ -31,7 +34,7 @@ export function CreateGroupFormView({
           disabled={loading}
           className="flex h-24 w-24 items-center justify-center rounded-2xl bg-muted text-4xl disabled:pointer-events-none disabled:opacity-50"
         >
-          🏷️
+          {emoji}
         </button>
       </div>
       <form

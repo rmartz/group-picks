@@ -27,6 +27,7 @@ describe("groupToFirebase", () => {
   it("converts a group to Firebase format", () => {
     const result = groupToFirebase({
       name: "My Group",
+      emoji: "👥",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
       inviteToken: "tok-xyz",
@@ -43,6 +44,7 @@ describe("groupToFirebase", () => {
   it("converts adminIds array to Firebase map", () => {
     const result = groupToFirebase({
       name: "My Group",
+      emoji: "👥",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
       inviteToken: "tok-xyz",
@@ -56,6 +58,7 @@ describe("groupToFirebase", () => {
   it("preserves picksRestricted=true", () => {
     const result = groupToFirebase({
       name: "My Group",
+      emoji: "👥",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
       inviteToken: "tok-xyz",
@@ -69,6 +72,7 @@ describe("groupToFirebase", () => {
   it("preserves picksRestricted=false", () => {
     const result = groupToFirebase({
       name: "My Group",
+      emoji: "👥",
       createdAt: FIXED_DATE,
       creatorId: "user-abc",
       inviteToken: "tok-xyz",
@@ -146,5 +150,37 @@ describe("firebaseToGroup", () => {
     const result = firebaseToGroup("group-1", data, ["user-123"]);
 
     expect(result.picksRestricted).toBe(false);
+  });
+
+  it("preserves emoji when present in Firebase data", () => {
+    const data = makeFirebaseGroupPublic({ emoji: "🎬" });
+
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
+
+    expect(result.emoji).toBe("🎬");
+  });
+
+  it("falls back to default emoji when absent in Firebase data", () => {
+    const data = makeFirebaseGroupPublic({ emoji: undefined });
+
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
+
+    expect(result.emoji).toBe("👥");
+  });
+});
+
+describe("groupToFirebase emoji", () => {
+  it("serializes emoji to Firebase format", () => {
+    const result = groupToFirebase({
+      name: "My Group",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      inviteToken: "tok-xyz",
+      adminIds: ["user-abc"],
+      picksRestricted: false,
+      emoji: "🎸",
+    });
+
+    expect(result.emoji).toBe("🎸");
   });
 });

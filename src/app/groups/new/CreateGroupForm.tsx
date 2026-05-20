@@ -11,6 +11,7 @@ import { CreateGroupFormView } from "./CreateGroupFormView";
 export function CreateGroupForm() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [emoji, setEmoji] = useState("👥");
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +20,7 @@ export function CreateGroupForm() {
     setError(undefined);
     setLoading(true);
     try {
-      const groupId = await createGroup(name);
+      const groupId = await createGroup(name, emoji);
       router.push(`/groups/${groupId}`);
     } catch {
       setError(CREATE_GROUP_COPY.errors.default);
@@ -31,7 +32,9 @@ export function CreateGroupForm() {
   return (
     <CreateGroupFormView
       name={name}
+      emoji={emoji}
       onNameChange={setName}
+      onEmojiChange={setEmoji}
       onSubmit={(e) => void handleSubmit(e)}
       onCancel={() => {
         router.back();

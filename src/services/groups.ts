@@ -25,11 +25,14 @@ export async function joinGroup(token: string): Promise<string> {
   return data.groupId;
 }
 
-export async function createGroup(name: string): Promise<string> {
+export async function createGroup(
+  name: string,
+  emoji: string,
+): Promise<string> {
   const response = await fetch("/api/groups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, emoji }),
   });
   if (!response.ok) throw new Error("Failed to create group");
 

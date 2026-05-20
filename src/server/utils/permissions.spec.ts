@@ -12,6 +12,7 @@ function makeGroup(overrides: Partial<Group> = {}): Group {
   return {
     id: "group-1",
     name: "Test Group",
+    emoji: "👥",
     createdAt: new Date("2025-01-01"),
     creatorId: "creator-1",
     memberIds: ["creator-1", "admin-1", "member-1"],

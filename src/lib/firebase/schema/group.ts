@@ -7,12 +7,14 @@ export interface FirebaseGroupPublic {
   inviteToken: string;
   adminIds?: Record<string, true>;
   picksRestricted?: boolean;
+  emoji?: string;
 }
 
 export function groupToFirebase(
   group: Pick<
     Group,
     | "name"
+    | "emoji"
     | "createdAt"
     | "creatorId"
     | "inviteToken"
@@ -22,6 +24,7 @@ export function groupToFirebase(
 ): FirebaseGroupPublic {
   return {
     name: group.name,
+    emoji: group.emoji,
     createdAt: group.createdAt.getTime(),
     creatorId: group.creatorId,
     inviteToken: group.inviteToken,
@@ -41,6 +44,7 @@ export function firebaseToGroup(
   return {
     id,
     name: data.name,
+    emoji: data.emoji ?? "👥",
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
     memberIds,
