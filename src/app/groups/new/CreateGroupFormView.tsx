@@ -4,7 +4,14 @@ import { Label } from "@/components/ui/label";
 
 import { CREATE_GROUP_COPY } from "./copy";
 
-const GROUP_EMOJI_OPTIONS = ["👥", "🎬", "🍽️", "🎮", "🎵", "⚽"];
+const NEXT_GROUP_EMOJI: Record<string, string> = {
+  "👥": "🎬",
+  "🎬": "🍽️",
+  "🍽️": "🎮",
+  "🎮": "🎵",
+  "🎵": "⚽",
+  "⚽": "👥",
+};
 
 interface CreateGroupFormViewProps {
   name: string;
@@ -28,11 +35,7 @@ export function CreateGroupFormView({
   error,
 }: CreateGroupFormViewProps) {
   function handleEmojiButtonClick() {
-    const currentIndex = GROUP_EMOJI_OPTIONS.indexOf(emoji);
-    const nextIndex = currentIndex >= 0 ? currentIndex + 1 : 0;
-    const nextEmoji =
-      GROUP_EMOJI_OPTIONS[nextIndex % GROUP_EMOJI_OPTIONS.length] ?? "👥";
-    onEmojiChange(nextEmoji);
+    onEmojiChange(NEXT_GROUP_EMOJI[emoji] ?? "👥");
   }
 
   return (
