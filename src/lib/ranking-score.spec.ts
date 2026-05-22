@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Option } from "@/lib/types/option";
 import { RankingTier } from "@/lib/types/ranking";
 
-import { computeTopPicks } from "./ranking-score";
+import { computeOptionTierAttribution, computeTopPicks } from "./ranking-score";
 
 function makeOption(id: string, title: string): Option {
   return { id, title, pickId: "pick-1", ownerIds: ["user-1"] };
@@ -110,5 +110,37 @@ describe("computeTopPicks", () => {
       expect(result[0]?.id).toBe("opt-a");
       expect(result[1]?.id).toBe("opt-b");
     });
+  });
+});
+
+describe("computeOptionTierAttribution", () => {
+  it("buckets members into option tiers and noRank by option", () => {
+    const allRankings = {
+      "user-1": { "opt-a": RankingTier.LoveIt, "opt-b": RankingTier.Yes },
+      "user-2": { "opt-a": RankingTier.NotReally },
+      "user-3": { "opt-a": RankingTier.Unranked },
+    };
+
+    const attribution = computeOptionTierAttribution(
+      allRankings,
+      [optA],
+      [
+        { uid: "user-1", name: "Alice Johnson" },
+        { uid: "user-2", name: "Bob Brown" },
+        { uid: "user-3", name: "charlie@example.com" },
+        { uid: "user-4", name: "Dana" },
+      ],
+    );
+
+    expect(attribution["opt-a"]?.[RankingTier.LoveIt]).toEqual([
+      { uid: "user-1", firstName: "Alice" },
+    ]);
+    expect(attribution["opt-a"]?.[RankingTier.NotReally]).toEqual([
+      { uid: "user-2", firstName: "Bob" },
+    ]);
+    expect(attribution["opt-a"]?.noRank).toEqual([
+      { uid: "user-3", firstName: "charlie" },
+      { uid: "user-4", firstName: "Dana" },
+    ]);
   });
 });

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { OptionTierAttribution } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 import type { RankingTier } from "@/lib/types/ranking";
@@ -28,6 +29,7 @@ interface PickDetailViewProps {
   initialSuggestions: Option[];
   initialTierAssignments?: Record<string, RankingTier>;
   topPicks: Option[];
+  topPickAttribution?: Record<string, OptionTierAttribution>;
 }
 
 export function PickDetailView({
@@ -40,6 +42,7 @@ export function PickDetailView({
   initialSuggestions,
   initialTierAssignments = {},
   topPicks,
+  topPickAttribution = {},
 }: PickDetailViewProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
@@ -202,6 +205,7 @@ export function PickDetailView({
               isOpen={isOpen}
               topPicks={topPicks}
               topCount={pick.topCount}
+              topPickAttribution={topPickAttribution}
             />
           )}
         </TabsContent>
