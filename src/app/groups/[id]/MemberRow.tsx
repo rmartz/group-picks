@@ -77,7 +77,7 @@ export function MemberRow({
                 </DropdownMenuItem>
               ))}
             <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
+              variant="destructive"
               onClick={() => {
                 onRemoveClick(member.uid);
               }}
