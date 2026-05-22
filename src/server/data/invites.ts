@@ -8,6 +8,7 @@ import {
   groupInviteToFirebase,
 } from "@/lib/firebase/schema/invite";
 import { type GroupInvite, InviteMode } from "@/lib/types/invite";
+import { markGroupActivitySeen } from "@/server/data/groups";
 
 export const INVITE_TTL_PERSONAL = 7 * 24 * 60 * 60 * 1000;
 export const INVITE_TTL_GROUP = 30 * 24 * 60 * 60 * 1000;
@@ -82,24 +83,17 @@ export async function addGroupMember(
   revokeToken?: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  const activityCountSnap = await db
-    .ref(`groups/${groupId}/public/activityCount`)
-    .get();
-  const activityCount = activityCountSnap.exists()
-    ? (activityCountSnap.val() as number)
-    : 0;
   if (revokeToken) {
     await db.ref().update({
       [`groups/${groupId}/members/${uid}`]: true,
       [`users/${uid}/groups/${groupId}`]: true,
-      [`users/${uid}/groupSeenActivityCounts/${groupId}`]: activityCount,
       [`invites/${revokeToken}/active`]: false,
     });
   } else {
     await db.ref().update({
       [`groups/${groupId}/members/${uid}`]: true,
       [`users/${uid}/groups/${groupId}`]: true,
-      [`users/${uid}/groupSeenActivityCounts/${groupId}`]: activityCount,
     });
   }
+  await markGroupActivitySeen(groupId, uid);
 }

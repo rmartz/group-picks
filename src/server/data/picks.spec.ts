@@ -295,7 +295,12 @@ describe("closePick", () => {
       ref: () => ({ transaction }),
     } as never);
 
-    await expect(closePick("cat-123", "pick-123")).resolves.toBeDefined();
+    await expect(closePick("cat-123", "pick-123")).resolves.toMatchObject({
+      id: "pick-123",
+      title: expect.any(String),
+      closedAt: expect.any(Date),
+      closedManually: true,
+    });
     expect(transaction).toHaveBeenCalledOnce();
   });
 
@@ -384,7 +389,10 @@ describe("closePick", () => {
       ref: () => ({ transaction }),
     } as never);
 
-    await expect(closePick("cat-123", "pick-123")).resolves.toBeDefined();
+    await expect(closePick("cat-123", "pick-123")).resolves.toMatchObject({
+      id: "pick-123",
+      closedAt: expect.any(Date),
+    });
     expect(storedPick.closedAt).toBeDefined();
     expect(storedPick.closedManually).toBeUndefined();
   });

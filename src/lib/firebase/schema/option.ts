@@ -12,7 +12,10 @@ export function optionToFirebase(
   return {
     title: option.title,
     ownerIds: Object.fromEntries(option.ownerIds.map((uid) => [uid, true])),
-    createdAt: option.createdAt?.getTime(),
+    createdAt:
+      option.createdAt !== undefined
+        ? new Date(option.createdAt).getTime()
+        : undefined,
   };
 }
 
@@ -27,6 +30,8 @@ export function firebaseToOption(
     pickId,
     ownerIds: Object.keys(data.ownerIds ?? {}),
     createdAt:
-      typeof data.createdAt === "number" ? new Date(data.createdAt) : undefined,
+      typeof data.createdAt === "number"
+        ? new Date(data.createdAt).toISOString()
+        : undefined,
   };
 }

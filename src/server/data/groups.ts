@@ -78,8 +78,10 @@ export async function recordGroupActivity(
       };
     },
   );
-  if (!result.snapshot.exists()) {
-    throw new Error("Group public data not found");
+  if (!result.committed || !result.snapshot.exists()) {
+    throw new Error(
+      "Group public data not found or activity transaction aborted",
+    );
   }
 }
 

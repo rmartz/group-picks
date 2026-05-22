@@ -107,8 +107,8 @@ describe("saveRanking", () => {
   });
 
   it("writes the tier assignments to the correct Firebase path", async () => {
-    const update = vi.fn().mockResolvedValue(undefined);
-    mockRef.mockReturnValue({ update });
+    const set = vi.fn().mockResolvedValue(undefined);
+    mockRef.mockReturnValue({ set });
 
     const assignments = {
       "opt-1": RankingTier.Yes,
@@ -116,10 +116,7 @@ describe("saveRanking", () => {
     };
     await saveRanking("pick-42", "user-99", assignments);
 
-    expect(mockRef).toHaveBeenCalledWith("/");
-    expect(update).toHaveBeenCalledWith({
-      "rankings/pick-42/user-99": assignments,
-      "rankingsMeta/pick-42/user-99/updatedAt": expect.any(Number),
-    });
+    expect(mockRef).toHaveBeenCalledWith("rankings/pick-42/user-99");
+    expect(set).toHaveBeenCalledWith(assignments);
   });
 });
