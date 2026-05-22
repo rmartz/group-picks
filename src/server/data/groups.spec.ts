@@ -175,9 +175,22 @@ describe("deleteGroup", () => {
 
   it("deletes group, invite, member indexes, and all matching categories in one update", async () => {
     mockCategoriesGet.mockResolvedValue({
-      forEach: (callback: (child: { key: string | null }) => void) => {
-        callback({ key: "category-1" });
-        callback({ key: "category-2" });
+      forEach: (
+        callback: (child: {
+          child: (path: string) => {
+            val: () => Record<string, unknown> | null;
+          };
+          key: string | null;
+        }) => void,
+      ) => {
+        callback({
+          child: () => ({ val: () => ({ "pick-1": true, "pick-2": true }) }),
+          key: "category-1",
+        });
+        callback({
+          child: () => ({ val: () => ({ "pick-3": true }) }),
+          key: "category-2",
+        });
       },
     });
 
@@ -190,6 +203,9 @@ describe("deleteGroup", () => {
       "categories/category-2": null,
       "groups/group-1": null,
       "invites/invite-token-1": null,
+      "picks/pick-1": null,
+      "picks/pick-2": null,
+      "picks/pick-3": null,
       "users/user-1/groups/group-1": null,
       "users/user-2/groups/group-1": null,
     });
@@ -203,6 +219,33 @@ describe("deleteGroup", () => {
     await deleteGroup("group-1", ["user-1"], "invite-token-1");
 
     expect(mockUpdate).toHaveBeenCalledWith({
+      "groups/group-1": null,
+      "invites/invite-token-1": null,
+      "users/user-1/groups/group-1": null,
+    });
+  });
+
+  it("deletes categories without writing picks paths when category has no picks", async () => {
+    mockCategoriesGet.mockResolvedValue({
+      forEach: (
+        callback: (child: {
+          child: (path: string) => {
+            val: () => Record<string, unknown> | null;
+          };
+          key: string | null;
+        }) => void,
+      ) => {
+        callback({
+          child: () => ({ val: () => null }),
+          key: "category-1",
+        });
+      },
+    });
+
+    await deleteGroup("group-1", ["user-1"], "invite-token-1");
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      "categories/category-1": null,
       "groups/group-1": null,
       "invites/invite-token-1": null,
       "users/user-1/groups/group-1": null,

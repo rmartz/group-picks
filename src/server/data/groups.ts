@@ -134,6 +134,12 @@ export async function deleteGroup(
     updates[`users/${uid}/groups/${groupId}`] = null;
   }
   categorySnap.forEach((category) => {
+    const pickIds = Object.keys(
+      (category.child("picks").val() as Record<string, unknown> | null) ?? {},
+    );
+    for (const pickId of pickIds) {
+      updates[`picks/${pickId}`] = null;
+    }
     updates[`categories/${category.key}`] = null;
   });
   await db.ref("/").update(updates);
