@@ -27,15 +27,6 @@ export interface OptionTierAttribution {
   noRank: AttributionMember[];
 }
 
-function firstNameFromDisplayName(name: string): string {
-  const trimmed = name.trim();
-  if (!trimmed) return "";
-  const atIndex = trimmed.indexOf("@");
-  const normalized = atIndex > 0 ? trimmed.slice(0, atIndex) : trimmed;
-  const [first] = normalized.split(/\s+/);
-  return first ?? normalized;
-}
-
 export function computeTopPicks(
   allRankings: Record<string, Record<string, RankingTier>>,
   options: Option[],
@@ -72,9 +63,19 @@ export function computeOptionTierAttribution(
 
     for (const member of members) {
       const userTier = allRankings[member.uid]?.[option.id];
+      const trimmedName = member.name.trim();
+      const atIndex = trimmedName.indexOf("@");
+      const normalizedName = !trimmedName
+        ? "Unknown"
+        : atIndex > 0
+          ? trimmedName.slice(0, atIndex)
+          : trimmedName;
+      const [firstName] = normalizedName.split(/\s+/);
+      const resolvedFirstName =
+        firstName && firstName.length > 0 ? firstName : normalizedName;
       const memberIdentity: AttributionMember = {
         uid: member.uid,
-        firstName: firstNameFromDisplayName(member.name) || member.uid,
+        firstName: resolvedFirstName,
       };
 
       if (

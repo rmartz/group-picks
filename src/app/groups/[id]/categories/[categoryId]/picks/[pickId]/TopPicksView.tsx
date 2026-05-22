@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { OptionTierAttribution } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import { RankingTier } from "@/lib/types/ranking";
+import { cn } from "@/lib/utils";
 
 import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 
@@ -12,6 +13,17 @@ interface TopPicksViewProps {
   topCount: number;
   topPickAttribution: Record<string, OptionTierAttribution>;
 }
+
+const ATTRIBUTION_ROWS = [
+  { key: RankingTier.LoveIt, label: TOP_PICKS_VIEW_COPY.tiers.loveIt },
+  { key: RankingTier.Yes, label: TOP_PICKS_VIEW_COPY.tiers.yes },
+  { key: RankingTier.Maybe, label: TOP_PICKS_VIEW_COPY.tiers.maybe },
+  {
+    key: RankingTier.NotReally,
+    label: TOP_PICKS_VIEW_COPY.tiers.notForMe,
+  },
+  { key: "noRank", label: TOP_PICKS_VIEW_COPY.tiers.noRank },
+] as const;
 
 export function TopPicksView({
   isOpen,
@@ -36,16 +48,6 @@ export function TopPicksView({
       {topPicksToRender.map((option, index) => {
         const isExpanded = expandedOptionId === option.id;
         const attribution = topPickAttribution[option.id];
-        const rows = [
-          { key: RankingTier.LoveIt, label: TOP_PICKS_VIEW_COPY.tiers.loveIt },
-          { key: RankingTier.Yes, label: TOP_PICKS_VIEW_COPY.tiers.yes },
-          { key: RankingTier.Maybe, label: TOP_PICKS_VIEW_COPY.tiers.maybe },
-          {
-            key: RankingTier.NotReally,
-            label: TOP_PICKS_VIEW_COPY.tiers.notForMe,
-          },
-          { key: "noRank", label: TOP_PICKS_VIEW_COPY.tiers.noRank },
-        ] as const;
 
         return (
           <li key={option.id} className="rounded-md border p-2 text-sm">
@@ -69,14 +71,15 @@ export function TopPicksView({
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {TOP_PICKS_VIEW_COPY.attributionHeading}
                 </p>
-                {rows.map((row) => {
+                {ATTRIBUTION_ROWS.map((row) => {
                   const members = attribution?.[row.key] ?? [];
                   return (
                     <div
                       key={row.key}
-                      className={`grid grid-cols-[96px_1fr] items-start gap-3 ${
-                        row.key === "noRank" ? "opacity-60" : ""
-                      }`}
+                      className={cn(
+                        "grid grid-cols-[96px_1fr] items-start gap-3",
+                        row.key === "noRank" && "opacity-60",
+                      )}
                     >
                       <span className="text-xs font-medium text-muted-foreground">
                         {row.label}
@@ -89,9 +92,19 @@ export function TopPicksView({
                               className="inline-flex h-6 w-6 items-center justify-center rounded-full border bg-background text-[10px] font-semibold"
                               title={member.firstName}
                             >
-                              {member.firstName.charAt(0).toUpperCase()}
+                              {(
+                                member.firstName.charAt(0) || "?"
+                              ).toUpperCase()}
                             </span>
                           ))}
+                          {members.length > 6 && (
+                            <span
+                              className="inline-flex h-6 w-6 items-center justify-center rounded-full border bg-muted text-[10px] font-semibold"
+                              title={"+" + String(members.length - 6) + " more"}
+                            >
+                              +{members.length - 6}
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {members.length > 0

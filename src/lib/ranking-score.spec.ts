@@ -143,4 +143,28 @@ describe("computeOptionTierAttribution", () => {
       { uid: "user-4", firstName: "Dana" },
     ]);
   });
+
+  it("extracts stable first-name display values from different name formats", () => {
+    const attribution = computeOptionTierAttribution(
+      {},
+      [optA],
+      [
+        { uid: "u-empty", name: "   " },
+        { uid: "u-email", name: "charlie@example.com" },
+        { uid: "u-multi", name: "Alice Johnson" },
+        { uid: "u-single", name: "Mononym" },
+        { uid: "u-spaces", name: "   Bob   Brown   " },
+        { uid: "u-special", name: "Élodie Durand" },
+      ],
+    );
+
+    expect(attribution["opt-a"]?.noRank).toEqual([
+      { uid: "u-empty", firstName: "Unknown" },
+      { uid: "u-email", firstName: "charlie" },
+      { uid: "u-multi", firstName: "Alice" },
+      { uid: "u-single", firstName: "Mononym" },
+      { uid: "u-spaces", firstName: "Bob" },
+      { uid: "u-special", firstName: "Élodie" },
+    ]);
+  });
 });

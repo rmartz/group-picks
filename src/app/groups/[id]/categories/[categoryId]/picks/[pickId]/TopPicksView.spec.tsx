@@ -169,5 +169,37 @@ describe("TopPicksView", () => {
       expect(screen.getByText("Bob")).toBeDefined();
       expect(screen.getByText("Cara")).toBeDefined();
     });
+
+    it("shows an avatar overflow indicator when a tier has more than six members", () => {
+      const options = [makeOption("opt-1", "Inception")];
+      render(
+        <TopPicksView
+          isOpen={false}
+          topPicks={options}
+          topCount={1}
+          topPickAttribution={{
+            "opt-1": {
+              [RankingTier.LoveIt]: [
+                { uid: "u1", firstName: "A" },
+                { uid: "u2", firstName: "B" },
+                { uid: "u3", firstName: "C" },
+                { uid: "u4", firstName: "D" },
+                { uid: "u5", firstName: "E" },
+                { uid: "u6", firstName: "F" },
+                { uid: "u7", firstName: "G" },
+              ],
+              [RankingTier.Yes]: [],
+              [RankingTier.Maybe]: [],
+              [RankingTier.NotReally]: [],
+              noRank: [],
+            },
+          }}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /Inception/ }));
+
+      expect(screen.getByText("+1")).toBeDefined();
+    });
   });
 });
