@@ -54,6 +54,7 @@ export async function POST(request: Request) {
       members: { [uid]: true },
     },
     [`users/${uid}/groups/${groupId}`]: true,
+    [`users/${uid}/groupSeenActivityCounts/${groupId}`]: 0,
     [`invites/${inviteToken}`]: groupInviteToFirebase({
       groupId,
       createdAt: inviteCreatedAt,

@@ -30,7 +30,9 @@ export async function addOption(
   const id = ref.key;
   if (!id) throw new Error("Failed to generate option ID");
 
-  await ref.set(optionToFirebase({ title, ownerIds: [ownerUid] }));
+  await ref.set(
+    optionToFirebase({ title, ownerIds: [ownerUid], createdAt: new Date() }),
+  );
 
   return { id };
 }

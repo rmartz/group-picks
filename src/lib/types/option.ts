@@ -3,4 +3,5 @@ export interface Option {
   title: string;
   pickId: string;
   ownerIds: string[];
+  createdAt?: Date;
 }

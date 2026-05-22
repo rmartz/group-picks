@@ -82,16 +82,24 @@ export async function addGroupMember(
   revokeToken?: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
+  const activityCountSnap = await db
+    .ref(`groups/${groupId}/public/activityCount`)
+    .get();
+  const activityCount = activityCountSnap.exists()
+    ? (activityCountSnap.val() as number)
+    : 0;
   if (revokeToken) {
     await db.ref().update({
       [`groups/${groupId}/members/${uid}`]: true,
       [`users/${uid}/groups/${groupId}`]: true,
+      [`users/${uid}/groupSeenActivityCounts/${groupId}`]: activityCount,
       [`invites/${revokeToken}/active`]: false,
     });
   } else {
     await db.ref().update({
       [`groups/${groupId}/members/${uid}`]: true,
       [`users/${uid}/groups/${groupId}`]: true,
+      [`users/${uid}/groupSeenActivityCounts/${groupId}`]: activityCount,
     });
   }
 }

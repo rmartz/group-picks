@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
+import type { GroupPick } from "@/lib/types/pick";
 import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, recordGroupActivity } from "@/server/data/groups";
 import {
   addOption,
   getOptionsByCategory,
@@ -112,8 +113,9 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
+  let pick: GroupPick;
   try {
-    await assertPickIsOpenForWrite(categoryId, pickId);
+    pick = await assertPickIsOpenForWrite(categoryId, pickId);
   } catch (err) {
     if (err instanceof PickNotFoundError) {
       return NextResponse.json({ error: "Pick not found" }, { status: 404 });
@@ -153,6 +155,9 @@ export async function POST(
   }
 
   const { id: optionId } = await addOption(pickId, title, uid);
+  await recordGroupActivity(groupId, {
+    summary: `Pick "${pick.title}" · new option`,
+  });
 
   return NextResponse.json({ optionId }, { status: 201 });
 }

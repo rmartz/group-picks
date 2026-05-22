@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, recordGroupActivity } from "@/server/data/groups";
 import { getPickById } from "@/server/data/picks";
 import { getRankingByUser, saveRanking } from "@/server/data/rankings";
 import { getVerifiedUid } from "@/server/utils/auth";
@@ -107,6 +107,10 @@ export async function PUT(
   }
 
   await saveRanking(pickId, uid, body.assignments);
+  const rankedCount = Object.keys(body.assignments).length;
+  await recordGroupActivity(id, {
+    summary: `Ranking submitted · ${String(rankedCount)} options`,
+  });
 
   return NextResponse.json({ ok: true });
 }

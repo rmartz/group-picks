@@ -5,12 +5,16 @@ import { PickNotFoundError, PickWriteClosedError } from "@/server/data/picks";
 const {
   mockGetVerifiedUid,
   mockGetGroupById,
+  mockRecordGroupActivity,
   mockGetCategoryById,
+  mockGetPickById,
   mockClosePick,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
+  mockRecordGroupActivity: vi.fn(),
   mockGetCategoryById: vi.fn(),
+  mockGetPickById: vi.fn(),
   mockClosePick: vi.fn(),
 }));
 
@@ -20,6 +24,7 @@ vi.mock("@/server/utils/auth", () => ({
 
 vi.mock("@/server/data/groups", () => ({
   getGroupById: mockGetGroupById,
+  recordGroupActivity: mockRecordGroupActivity,
 }));
 
 vi.mock("@/server/data/categories", () => ({
@@ -28,6 +33,7 @@ vi.mock("@/server/data/categories", () => ({
 
 vi.mock("@/server/data/picks", () => ({
   closePick: mockClosePick,
+  getPickById: mockGetPickById,
   PICK_CLOSED_API_ERROR: "Pick is closed",
   PickNotFoundError: class PickNotFoundError extends Error {
     readonly code = "pick_not_found";
@@ -80,6 +86,8 @@ describe("POST /api/.../picks/[pickId]/close", () => {
       creatorId: "user-1",
     });
     mockClosePick.mockResolvedValue(undefined);
+    mockGetPickById.mockResolvedValue({ id: "pick-1", title: "Best Pizza" });
+    mockRecordGroupActivity.mockResolvedValue(undefined);
   });
 
   describe("concurrent close attempts return 409 to the second caller", () => {
@@ -132,6 +140,14 @@ describe("POST /api/.../picks/[pickId]/close", () => {
       await POST(makeRequest(), { params: Promise.resolve(baseParams) });
 
       expect(mockClosePick).toHaveBeenCalledWith("cat-1", "pick-1");
+    });
+
+    it("records group activity after closing a pick", async () => {
+      await POST(makeRequest(), { params: Promise.resolve(baseParams) });
+
+      expect(mockRecordGroupActivity).toHaveBeenCalledWith("group-1", {
+        summary: 'Closed: "Best Pizza"',
+      });
     });
   });
 

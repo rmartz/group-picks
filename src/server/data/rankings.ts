@@ -48,5 +48,8 @@ export async function saveRanking(
   assignments: Record<string, RankingTier>,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db.ref(`rankings/${pickId}/${userId}`).set(assignments);
+  await db.ref("/").update({
+    [`rankings/${pickId}/${userId}`]: assignments,
+    [`rankingsMeta/${pickId}/${userId}/updatedAt`]: Date.now(),
+  });
 }

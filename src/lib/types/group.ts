@@ -7,4 +7,8 @@ export interface Group {
   adminIds: string[];
   picksRestricted: boolean;
   inviteToken: string;
+  lastActivity?: string;
+  lastActivityAt?: Date;
+  activityCount?: number;
+  unreadCount?: number;
 }

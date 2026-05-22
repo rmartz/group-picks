@@ -32,12 +32,18 @@ describe("groupToFirebase", () => {
       inviteToken: "tok-xyz",
       adminIds: ["user-abc"],
       picksRestricted: false,
+      lastActivity: 'New pick "Friday flick"',
+      lastActivityAt: FIXED_DATE,
+      activityCount: 3,
     });
 
     expect(result.name).toBe("My Group");
     expect(result.createdAt).toBe(FIXED_TIMESTAMP);
     expect(result.creatorId).toBe("user-abc");
     expect(result.inviteToken).toBe("tok-xyz");
+    expect(result.lastActivity).toBe('New pick "Friday flick"');
+    expect(result.lastActivityAt).toBe(FIXED_TIMESTAMP);
+    expect(result.activityCount).toBe(3);
   });
 
   it("converts adminIds array to Firebase map", () => {
@@ -82,7 +88,11 @@ describe("groupToFirebase", () => {
 
 describe("firebaseToGroup", () => {
   it("converts Firebase data to a Group", () => {
-    const data = makeFirebaseGroupPublic();
+    const data = makeFirebaseGroupPublic({
+      lastActivity: 'Closed: "Q2 read"',
+      lastActivityAt: FIXED_TIMESTAMP,
+      activityCount: 2,
+    });
     const memberIds = ["user-123", "user-456"];
 
     const result = firebaseToGroup("group-1", data, memberIds);
@@ -93,6 +103,9 @@ describe("firebaseToGroup", () => {
     expect(result.creatorId).toBe("user-123");
     expect(result.memberIds).toEqual(["user-123", "user-456"]);
     expect(result.inviteToken).toBe("token-abc");
+    expect(result.lastActivity).toBe('Closed: "Q2 read"');
+    expect(result.lastActivityAt).toEqual(FIXED_DATE);
+    expect(result.activityCount).toBe(2);
   });
 
   it("handles empty member list", () => {
@@ -146,5 +159,13 @@ describe("firebaseToGroup", () => {
     const result = firebaseToGroup("group-1", data, ["user-123"]);
 
     expect(result.picksRestricted).toBe(false);
+  });
+
+  it("falls back to activityCount=0 when absent", () => {
+    const data = makeFirebaseGroupPublic({ activityCount: undefined });
+
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
+
+    expect(result.activityCount).toBe(0);
   });
 });

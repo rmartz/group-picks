@@ -12,6 +12,7 @@ function makeFirebaseOption(
   return {
     title: "The Shawshank Redemption",
     ownerIds: { "user-1": true, "user-2": true },
+    createdAt: new Date("2025-01-01T00:00:00.000Z").getTime(),
     ...overrides,
   };
 }
@@ -21,10 +22,14 @@ describe("optionToFirebase", () => {
     const result = optionToFirebase({
       title: "Inception",
       ownerIds: ["user-a", "user-b"],
+      createdAt: new Date("2025-01-01T00:00:00.000Z"),
     });
 
     expect(result.title).toBe("Inception");
     expect(result.ownerIds).toEqual({ "user-a": true, "user-b": true });
+    expect(result.createdAt).toBe(
+      new Date("2025-01-01T00:00:00.000Z").getTime(),
+    );
   });
 
   it("produces an empty ownerIds map when no owners", () => {
@@ -43,6 +48,7 @@ describe("firebaseToOption", () => {
     expect(result.title).toBe("The Shawshank Redemption");
     expect(result.pickId).toBe("pick-42");
     expect(result.ownerIds).toEqual(["user-1", "user-2"]);
+    expect(result.createdAt).toEqual(new Date("2025-01-01T00:00:00.000Z"));
   });
 
   it("returns an empty ownerIds array when ownerIds map is absent", () => {

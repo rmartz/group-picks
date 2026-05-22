@@ -5,6 +5,7 @@ import { RankingTier } from "@/lib/types/ranking";
 const {
   mockGetVerifiedUid,
   mockGetGroupById,
+  mockRecordGroupActivity,
   mockGetCategoryById,
   mockGetPickById,
   mockGetRankingByUser,
@@ -12,6 +13,7 @@ const {
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
+  mockRecordGroupActivity: vi.fn(),
   mockGetCategoryById: vi.fn(),
   mockGetPickById: vi.fn(),
   mockGetRankingByUser: vi.fn(),
@@ -24,6 +26,7 @@ vi.mock("@/server/utils/auth", () => ({
 
 vi.mock("@/server/data/groups", () => ({
   getGroupById: mockGetGroupById,
+  recordGroupActivity: mockRecordGroupActivity,
 }));
 
 vi.mock("@/server/data/categories", () => ({
@@ -138,6 +141,7 @@ describe("PUT /rankings", () => {
     mockGetCategoryById.mockResolvedValue(makeCategory());
     mockGetPickById.mockResolvedValue(makePick());
     mockSaveRanking.mockResolvedValue(undefined);
+    mockRecordGroupActivity.mockResolvedValue(undefined);
   });
 
   it("returns 401 when user is not authenticated", async () => {
@@ -220,6 +224,9 @@ describe("PUT /rankings", () => {
       "user-1",
       assignments,
     );
+    expect(mockRecordGroupActivity).toHaveBeenCalledWith("group-1", {
+      summary: "Ranking submitted · 2 options",
+    });
   });
 
   it("calls saveRanking before returning 200", async () => {

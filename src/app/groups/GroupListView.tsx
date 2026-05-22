@@ -23,24 +23,42 @@ export function GroupListView({ groups }: GroupListViewProps) {
         <NoGroupsView />
       ) : (
         <ul className="space-y-3">
-          {groups.map((group) => (
-            <li key={group.id}>
-              <Link
-                href={`/groups/${group.id}`}
-                className="block rounded-lg border px-4 py-4 hover:bg-zinc-50"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">{group.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {group.memberIds.length}{" "}
-                    {group.memberIds.length === 1
-                      ? GROUP_LIST_COPY.memberSingular
-                      : GROUP_LIST_COPY.memberPlural}
-                  </span>
-                </div>
-              </Link>
-            </li>
-          ))}
+          {groups.map((group) => {
+            const unreadCount = group.unreadCount ?? 0;
+            return (
+              <li key={group.id}>
+                <Link
+                  href={`/groups/${group.id}`}
+                  className="block rounded-lg border px-4 py-4 hover:bg-zinc-50"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">{group.name}</span>
+                      {unreadCount > 0 && (
+                        <span
+                          className="inline-flex min-w-5 items-center justify-center rounded-full bg-foreground px-1.5 py-0.5 text-[10px] font-semibold text-background"
+                          aria-label={`${String(unreadCount)} unread updates`}
+                        >
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {group.memberIds.length}{" "}
+                      {group.memberIds.length === 1
+                        ? GROUP_LIST_COPY.memberSingular
+                        : GROUP_LIST_COPY.memberPlural}
+                    </span>
+                  </div>
+                  {group.lastActivity && (
+                    <span className="mt-1 block truncate text-sm text-muted-foreground">
+                      {group.lastActivity}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>

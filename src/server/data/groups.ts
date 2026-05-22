@@ -28,13 +28,67 @@ export async function getGroupById(id: string): Promise<Group | undefined> {
 export async function getGroupsByUserId(uid: string): Promise<Group[]> {
   const db = getDatabase(getAdminApp());
 
-  const membershipSnap = await db.ref(`users/${uid}/groups`).get();
+  const [membershipSnap, seenCountsSnap] = await Promise.all([
+    db.ref(`users/${uid}/groups`).get(),
+    db.ref(`users/${uid}/groupSeenActivityCounts`).get(),
+  ]);
   if (!membershipSnap.exists()) return [];
 
   const groupIds = Object.keys(membershipSnap.val() as Record<string, unknown>);
+  const seenCounts = seenCountsSnap.exists()
+    ? (seenCountsSnap.val() as Record<string, number>)
+    : {};
 
   const groups = await Promise.all(groupIds.map((id) => getGroupById(id)));
-  return groups.filter((g): g is Group => g !== undefined);
+  return groups
+    .filter((g): g is Group => g !== undefined)
+    .map((group) => {
+      const seenCount = seenCounts[group.id] ?? 0;
+      return {
+        ...group,
+        unreadCount: Math.max((group.activityCount ?? 0) - seenCount, 0),
+      };
+    });
+}
+
+interface GroupActivityPayload {
+  summary: string;
+  at?: Date;
+}
+
+export async function recordGroupActivity(
+  groupId: string,
+  payload: GroupActivityPayload,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  const eventTimestamp = payload.at?.getTime() ?? Date.now();
+  const publicRef = db.ref(`groups/${groupId}/public`);
+
+  await publicRef.transaction((current: FirebaseGroupPublic | null) => {
+    if (current === null) return current;
+    return {
+      ...current,
+      lastActivity: payload.summary,
+      lastActivityAt: eventTimestamp,
+      activityCount: (current.activityCount ?? 0) + 1,
+    };
+  });
+}
+
+export async function markGroupActivitySeen(
+  groupId: string,
+  uid: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  const activityCountSnap = await db
+    .ref(`groups/${groupId}/public/activityCount`)
+    .get();
+  const activityCount = activityCountSnap.exists()
+    ? (activityCountSnap.val() as number)
+    : 0;
+  await db
+    .ref(`users/${uid}/groupSeenActivityCounts/${groupId}`)
+    .set(activityCount);
 }
 
 export async function getMemberDisplayNames(
@@ -85,6 +139,7 @@ export async function removeMember(
   // would not affect group membership.
   await db.ref("/").update({
     [`users/${uid}/groups/${groupId}`]: null,
+    [`users/${uid}/groupSeenActivityCounts/${groupId}`]: null,
   });
   return { lastMember: false };
 }
@@ -98,6 +153,7 @@ export async function removeGroupMember(
     [`groups/${groupId}/members/${uid}`]: null,
     [`groups/${groupId}/public/adminIds/${uid}`]: null,
     [`users/${uid}/groups/${groupId}`]: null,
+    [`users/${uid}/groupSeenActivityCounts/${groupId}`]: null,
   });
 }
 

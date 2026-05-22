@@ -69,4 +69,29 @@ describe("GroupListView", () => {
       screen.getByText(`1 ${GROUP_LIST_COPY.memberSingular}`),
     ).toBeDefined();
   });
+
+  it("renders a group's activity line when provided", () => {
+    const group = makeGroup({
+      id: "g1",
+      name: "Alpha",
+      lastActivity: 'Pick "Friday flick" · new option',
+    });
+    render(<GroupListView groups={[group]} />);
+
+    expect(screen.getByText('Pick "Friday flick" · new option')).toBeDefined();
+  });
+
+  it("renders an unread badge when unreadCount is greater than zero", () => {
+    const group = makeGroup({ id: "g1", name: "Alpha", unreadCount: 2 });
+    render(<GroupListView groups={[group]} />);
+
+    expect(screen.getByLabelText("2 unread updates")).toBeDefined();
+  });
+
+  it("hides the unread badge when unreadCount is zero", () => {
+    const group = makeGroup({ id: "g1", name: "Alpha", unreadCount: 0 });
+    render(<GroupListView groups={[group]} />);
+
+    expect(screen.queryByLabelText(/unread updates/)).toBeNull();
+  });
 });

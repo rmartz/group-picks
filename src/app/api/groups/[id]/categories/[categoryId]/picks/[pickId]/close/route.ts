@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, recordGroupActivity } from "@/server/data/groups";
 import {
   closePick,
+  getPickById,
   PICK_CLOSED_API_ERROR,
   PickNotFoundError,
   PickWriteClosedError,
@@ -38,6 +39,11 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
+  const pick = await getPickById(categoryId, pickId);
+  if (!pick) {
+    return NextResponse.json({ error: "Pick not found" }, { status: 404 });
+  }
+
   try {
     await closePick(categoryId, pickId);
   } catch (err) {
@@ -52,6 +58,9 @@ export async function POST(
     }
     throw err;
   }
+  await recordGroupActivity(id, {
+    summary: `Closed: "${pick.title}"`,
+  });
 
   return NextResponse.json({ pickId });
 }

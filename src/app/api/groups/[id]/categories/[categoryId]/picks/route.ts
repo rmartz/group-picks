@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, recordGroupActivity } from "@/server/data/groups";
 import { createPick, getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { parseDueDateField } from "@/server/utils/date";
@@ -124,6 +124,10 @@ export async function POST(
     creatorId: uid,
     topCount,
     dueDate,
+  });
+  await recordGroupActivity(groupId, {
+    summary: `New pick "${title}"`,
+    at: createdAt,
   });
 
   return NextResponse.json(

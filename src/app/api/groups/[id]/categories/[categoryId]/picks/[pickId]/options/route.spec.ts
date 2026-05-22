@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockGetVerifiedUid,
   mockGetGroupById,
+  mockRecordGroupActivity,
   mockGetCategoryById,
   mockAssertPickIsOpenForWrite,
   mockGetOptionsByPick,
@@ -11,6 +12,7 @@ const {
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
+  mockRecordGroupActivity: vi.fn(),
   mockGetCategoryById: vi.fn(),
   mockAssertPickIsOpenForWrite: vi.fn(),
   mockGetOptionsByPick: vi.fn(),
@@ -24,6 +26,7 @@ vi.mock("@/server/utils/auth", () => ({
 
 vi.mock("@/server/data/groups", () => ({
   getGroupById: mockGetGroupById,
+  recordGroupActivity: mockRecordGroupActivity,
 }));
 
 vi.mock("@/server/data/categories", () => ({
@@ -107,6 +110,7 @@ describe("POST /api/.../picks/[pickId]/options", () => {
     mockGetOptionsByPick.mockResolvedValue([]);
     mockAddOption.mockResolvedValue({ id: "opt-new" });
     mockJoinOption.mockResolvedValue(undefined);
+    mockRecordGroupActivity.mockResolvedValue(undefined);
   });
 
   it("creates a new option for an open pick", async () => {
@@ -116,6 +120,9 @@ describe("POST /api/.../picks/[pickId]/options", () => {
 
     expect(response.status).toBe(201);
     expect(mockAddOption).toHaveBeenCalledWith("pick-1", "Tacos", "user-1");
+    expect(mockRecordGroupActivity).toHaveBeenCalledWith("group-1", {
+      summary: 'Pick "P" · new option',
+    });
   });
 
   it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {

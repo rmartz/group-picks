@@ -124,6 +124,7 @@ describe("removeMember last-member transaction", () => {
 
     expect(mockUpdate).toHaveBeenCalledWith({
       "users/user-1/groups/group-1": null,
+      "users/user-1/groupSeenActivityCounts/group-1": null,
     });
   });
 

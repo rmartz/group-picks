@@ -3,11 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockGetVerifiedUid,
   mockGetGroupById,
+  mockRecordGroupActivity,
   mockGetCategoryById,
   mockCreatePick,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
+  mockRecordGroupActivity: vi.fn(),
   mockGetCategoryById: vi.fn(),
   mockCreatePick: vi.fn(),
 }));
@@ -18,6 +20,7 @@ vi.mock("@/server/utils/auth", () => ({
 
 vi.mock("@/server/data/groups", () => ({
   getGroupById: mockGetGroupById,
+  recordGroupActivity: mockRecordGroupActivity,
 }));
 
 vi.mock("@/server/data/categories", () => ({
@@ -67,6 +70,7 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
       id: "pick-new",
       createdAt: new Date("2025-01-15T00:00:00Z"),
     });
+    mockRecordGroupActivity.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -85,6 +89,10 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
     expect(mockCreatePick).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Best Pizza", topCount: 3 }),
     );
+    expect(mockRecordGroupActivity).toHaveBeenCalledWith("group-1", {
+      summary: 'New pick "Best Pizza"',
+      at: new Date("2025-01-15T00:00:00Z"),
+    });
   });
 
   it("creates a pick with dueDate set", async () => {

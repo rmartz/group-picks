@@ -2,7 +2,11 @@ import { notFound, redirect } from "next/navigation";
 
 import { InviteMode } from "@/lib/types/invite";
 import { getCategoriesByGroupId } from "@/server/data/categories";
-import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
+import {
+  getGroupById,
+  getMemberDisplayNames,
+  markGroupActivitySeen,
+} from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
 import { getPicksByCategoryIds } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
@@ -21,6 +25,8 @@ export default async function GroupDetailPage({
   const group = await getGroupById(id);
 
   if (!group?.memberIds.includes(uid)) notFound();
+
+  await markGroupActivitySeen(id, uid);
 
   const categoriesPromise = getCategoriesByGroupId(id);
 
