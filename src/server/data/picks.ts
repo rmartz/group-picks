@@ -210,7 +210,7 @@ export async function updatePickIfOpen(
 export async function closePick(
   categoryId: string,
   pickId: string,
-): Promise<void> {
+): Promise<GroupPick> {
   const db = getDatabase(getAdminApp());
   const pickRef = db.ref(`categories/${categoryId}/picks/${pickId}`);
   const now = Date.now();
@@ -233,6 +233,8 @@ export async function closePick(
   if (!result.committed) {
     throw new PickWriteClosedError();
   }
+
+  return firebaseToPick(pickId, result.snapshot.val() as FirebasePickPublic);
 }
 
 export async function reopenPick(

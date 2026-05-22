@@ -109,7 +109,7 @@ export async function PUT(
   await saveRanking(pickId, uid, body.assignments);
   const rankedCount = Object.keys(body.assignments).length;
   await recordGroupActivity(id, {
-    summary: `Ranking submitted · ${String(rankedCount)} options`,
+    summary: "Ranking submitted · " + rankedCount.toString() + " options",
   });
 
   return NextResponse.json({ ok: true });

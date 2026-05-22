@@ -10,6 +10,7 @@ export function makeGroup(overrides?: Partial<Group>): Group {
     adminIds: ["user-1"],
     picksRestricted: false,
     inviteToken: "invite-token-1",
+    activityCount: 0,
     ...overrides,
   };
 }

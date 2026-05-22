@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     inviteToken,
     adminIds: [uid],
     picksRestricted: false,
+    activityCount: 0,
   });
 
   await db.ref().update({

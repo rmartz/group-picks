@@ -44,9 +44,12 @@ export async function getGroupsByUserId(uid: string): Promise<Group[]> {
     .filter((g): g is Group => g !== undefined)
     .map((group) => {
       const seenCount = seenCounts[group.id] ?? 0;
+      if (group.activityCount === undefined) {
+        return { ...group, unreadCount: 0 };
+      }
       return {
         ...group,
-        unreadCount: Math.max((group.activityCount ?? 0) - seenCount, 0),
+        unreadCount: Math.max(group.activityCount - seenCount, 0),
       };
     });
 }
@@ -64,15 +67,20 @@ export async function recordGroupActivity(
   const eventTimestamp = payload.at?.getTime() ?? Date.now();
   const publicRef = db.ref(`groups/${groupId}/public`);
 
-  await publicRef.transaction((current: FirebaseGroupPublic | null) => {
-    if (current === null) return current;
-    return {
-      ...current,
-      lastActivity: payload.summary,
-      lastActivityAt: eventTimestamp,
-      activityCount: (current.activityCount ?? 0) + 1,
-    };
-  });
+  const result = await publicRef.transaction(
+    (current: FirebaseGroupPublic | null) => {
+      if (current === null) return undefined;
+      return {
+        ...current,
+        lastActivity: payload.summary,
+        lastActivityAt: eventTimestamp,
+        activityCount: (current.activityCount ?? 0) + 1,
+      };
+    },
+  );
+  if (!result.snapshot.exists()) {
+    throw new Error("Group public data not found");
+  }
 }
 
 export async function markGroupActivitySeen(

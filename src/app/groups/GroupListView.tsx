@@ -37,7 +37,7 @@ export function GroupListView({ groups }: GroupListViewProps) {
                       {unreadCount > 0 && (
                         <span
                           className="inline-flex min-w-5 items-center justify-center rounded-full bg-foreground px-1.5 py-0.5 text-[10px] font-semibold text-background"
-                          aria-label={`${String(unreadCount)} unread updates`}
+                          aria-label={[unreadCount, "unread updates"].join(" ")}
                         >
                           {unreadCount}
                         </span>

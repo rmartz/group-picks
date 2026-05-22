@@ -295,7 +295,7 @@ describe("closePick", () => {
       ref: () => ({ transaction }),
     } as never);
 
-    await expect(closePick("cat-123", "pick-123")).resolves.toBeUndefined();
+    await expect(closePick("cat-123", "pick-123")).resolves.toBeDefined();
     expect(transaction).toHaveBeenCalledOnce();
   });
 
@@ -384,7 +384,7 @@ describe("closePick", () => {
       ref: () => ({ transaction }),
     } as never);
 
-    await expect(closePick("cat-123", "pick-123")).resolves.toBeUndefined();
+    await expect(closePick("cat-123", "pick-123")).resolves.toBeDefined();
     expect(storedPick.closedAt).toBeDefined();
     expect(storedPick.closedManually).toBeUndefined();
   });

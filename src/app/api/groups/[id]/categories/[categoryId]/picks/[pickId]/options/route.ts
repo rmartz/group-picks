@@ -18,6 +18,26 @@ import {
 } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
+async function assertPickIsOpenOrGetErrorResponse(
+  categoryId: string,
+  pickId: string,
+): Promise<GroupPick | NextResponse> {
+  try {
+    return await assertPickIsOpenForWrite(categoryId, pickId);
+  } catch (err) {
+    if (err instanceof PickNotFoundError) {
+      return NextResponse.json({ error: "Pick not found" }, { status: 404 });
+    }
+    if (err instanceof PickWriteClosedError) {
+      return NextResponse.json(
+        { error: PICK_CLOSED_API_ERROR },
+        { status: 409 },
+      );
+    }
+    throw err;
+  }
+}
+
 export async function GET(
   _request: Request,
   {
@@ -113,21 +133,14 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  let pick: GroupPick;
-  try {
-    pick = await assertPickIsOpenForWrite(categoryId, pickId);
-  } catch (err) {
-    if (err instanceof PickNotFoundError) {
-      return NextResponse.json({ error: "Pick not found" }, { status: 404 });
-    }
-    if (err instanceof PickWriteClosedError) {
-      return NextResponse.json(
-        { error: PICK_CLOSED_API_ERROR },
-        { status: 409 },
-      );
-    }
-    throw err;
+  const pickOrResponse = await assertPickIsOpenOrGetErrorResponse(
+    categoryId,
+    pickId,
+  );
+  if (pickOrResponse instanceof Response) {
+    return pickOrResponse;
   }
+  const pick = pickOrResponse;
 
   let body: { title: unknown };
   try {

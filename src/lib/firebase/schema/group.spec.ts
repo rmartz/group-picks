@@ -54,6 +54,7 @@ describe("groupToFirebase", () => {
       inviteToken: "tok-xyz",
       adminIds: ["user-abc", "user-def"],
       picksRestricted: false,
+      activityCount: 0,
     });
 
     expect(result.adminIds).toEqual({ "user-abc": true, "user-def": true });
@@ -67,6 +68,7 @@ describe("groupToFirebase", () => {
       inviteToken: "tok-xyz",
       adminIds: ["user-abc"],
       picksRestricted: true,
+      activityCount: 0,
     });
 
     expect(result.picksRestricted).toBe(true);
@@ -80,6 +82,7 @@ describe("groupToFirebase", () => {
       inviteToken: "tok-xyz",
       adminIds: ["user-abc"],
       picksRestricted: false,
+      activityCount: 0,
     });
 
     expect(result.picksRestricted).toBe(false);
@@ -161,11 +164,11 @@ describe("firebaseToGroup", () => {
     expect(result.picksRestricted).toBe(false);
   });
 
-  it("falls back to activityCount=0 when absent", () => {
+  it("leaves activityCount undefined when absent", () => {
     const data = makeFirebaseGroupPublic({ activityCount: undefined });
 
     const result = firebaseToGroup("group-1", data, ["user-123"]);
 
-    expect(result.activityCount).toBe(0);
+    expect(result.activityCount).toBeUndefined();
   });
 });

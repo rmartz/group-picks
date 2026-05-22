@@ -62,6 +62,6 @@ export function firebaseToGroup(
         ? new Date(data.lastActivityAt)
         : undefined,
     activityCount:
-      typeof data.activityCount === "number" ? data.activityCount : 0,
+      typeof data.activityCount === "number" ? data.activityCount : undefined,
   };
 }

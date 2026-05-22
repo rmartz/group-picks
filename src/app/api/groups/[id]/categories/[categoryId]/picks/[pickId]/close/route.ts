@@ -4,7 +4,6 @@ import { getCategoryById } from "@/server/data/categories";
 import { getGroupById, recordGroupActivity } from "@/server/data/groups";
 import {
   closePick,
-  getPickById,
   PICK_CLOSED_API_ERROR,
   PickNotFoundError,
   PickWriteClosedError,
@@ -39,13 +38,10 @@ export async function POST(
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
   }
 
-  const pick = await getPickById(categoryId, pickId);
-  if (!pick) {
-    return NextResponse.json({ error: "Pick not found" }, { status: 404 });
-  }
-
+  let closedPickTitle: string;
   try {
-    await closePick(categoryId, pickId);
+    const closedPick = await closePick(categoryId, pickId);
+    closedPickTitle = closedPick.title;
   } catch (err) {
     if (err instanceof PickWriteClosedError) {
       return NextResponse.json(
@@ -59,7 +55,7 @@ export async function POST(
     throw err;
   }
   await recordGroupActivity(id, {
-    summary: `Closed: "${pick.title}"`,
+    summary: `Closed: "${closedPickTitle}"`,
   });
 
   return NextResponse.json({ pickId });

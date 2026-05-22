@@ -7,14 +7,12 @@ const {
   mockGetGroupById,
   mockRecordGroupActivity,
   mockGetCategoryById,
-  mockGetPickById,
   mockClosePick,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockRecordGroupActivity: vi.fn(),
   mockGetCategoryById: vi.fn(),
-  mockGetPickById: vi.fn(),
   mockClosePick: vi.fn(),
 }));
 
@@ -33,7 +31,6 @@ vi.mock("@/server/data/categories", () => ({
 
 vi.mock("@/server/data/picks", () => ({
   closePick: mockClosePick,
-  getPickById: mockGetPickById,
   PICK_CLOSED_API_ERROR: "Pick is closed",
   PickNotFoundError: class PickNotFoundError extends Error {
     readonly code = "pick_not_found";
@@ -85,8 +82,14 @@ describe("POST /api/.../picks/[pickId]/close", () => {
       createdAt: new Date(),
       creatorId: "user-1",
     });
-    mockClosePick.mockResolvedValue(undefined);
-    mockGetPickById.mockResolvedValue({ id: "pick-1", title: "Best Pizza" });
+    mockClosePick.mockResolvedValue({
+      id: "pick-1",
+      title: "Best Pizza",
+      categoryId: "cat-1",
+      topCount: 1,
+      createdAt: new Date(),
+      creatorId: "user-1",
+    });
     mockRecordGroupActivity.mockResolvedValue(undefined);
   });
 
