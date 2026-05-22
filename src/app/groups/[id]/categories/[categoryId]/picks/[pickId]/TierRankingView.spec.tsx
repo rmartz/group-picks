@@ -57,7 +57,7 @@ describe("TierRankingView", () => {
       ).toBeDefined();
     });
 
-    it("renders the Not really tier header", () => {
+    it("renders the Not for me tier header", () => {
       render(
         <TierRankingView
           options={[]}
@@ -66,7 +66,7 @@ describe("TierRankingView", () => {
         />,
       );
       expect(
-        screen.getByText(TIER_RANKING_COPY.tiers[RankingTier.NotReally]),
+        screen.getByText(TIER_RANKING_COPY.tiers[RankingTier.NotForMe]),
       ).toBeDefined();
     });
 

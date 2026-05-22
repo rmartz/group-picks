@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+import { RankingMode } from "@/lib/types/pick";
 
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
@@ -33,6 +34,7 @@ const mockPicks: GroupPick[] = [
     categoryId: "cat-1",
     createdAt: new Date("2024-01-10"),
     creatorId: "user-1",
+    rankingMode: RankingMode.TierBuckets,
   },
   {
     id: "pick-2",
@@ -41,6 +43,7 @@ const mockPicks: GroupPick[] = [
     categoryId: "cat-1",
     createdAt: new Date("2024-01-11"),
     creatorId: "user-2",
+    rankingMode: RankingMode.TierBuckets,
   },
 ];
 

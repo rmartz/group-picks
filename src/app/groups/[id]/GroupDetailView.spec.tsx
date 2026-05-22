@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { InviteMode } from "@/lib/types/invite";
+import { RankingMode } from "@/lib/types/pick";
 
 import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupDetailView } from "./GroupDetailView";
@@ -153,6 +154,7 @@ describe("GroupDetailView", () => {
       topCount: 1,
       createdAt: new Date("2025-01-01"),
       creatorId: "user-123",
+      rankingMode: RankingMode.TierBuckets,
     };
     renderView({
       categories: [category],
@@ -180,6 +182,7 @@ describe("GroupDetailView", () => {
       createdAt: new Date("2025-01-01"),
       creatorId: "user-123",
       closedAt: new Date("2025-06-01"),
+      rankingMode: RankingMode.TierBuckets,
     };
     renderView({
       categories: [category],
@@ -206,6 +209,7 @@ describe("GroupDetailView", () => {
       topCount: 1,
       createdAt: new Date("2025-01-01"),
       creatorId: "user-123",
+      rankingMode: RankingMode.TierBuckets,
     };
     renderView({
       categories: [category],
@@ -233,6 +237,7 @@ describe("GroupDetailView", () => {
       topCount: 1,
       createdAt: new Date("2025-01-01"),
       creatorId: "user-123",
+      rankingMode: RankingMode.TierBuckets,
     };
     renderView({
       categories: [category],
