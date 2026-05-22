@@ -80,6 +80,7 @@ export async function POST(
     description: unknown;
     topCount: unknown;
     dueDate: unknown;
+    resultsVisible: unknown;
   };
   try {
     body = (await request.json()) as {
@@ -87,6 +88,7 @@ export async function POST(
       description: unknown;
       topCount: unknown;
       dueDate: unknown;
+      resultsVisible: unknown;
     };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -117,6 +119,8 @@ export async function POST(
   }
   const dueDate = dueDateResult.date;
 
+  const resultsVisible = body.resultsVisible === false ? false : true;
+
   const { id: pickId, createdAt } = await createPick({
     title,
     description,
@@ -124,6 +128,7 @@ export async function POST(
     creatorId: uid,
     topCount,
     dueDate,
+    resultsVisible,
   });
 
   return NextResponse.json(

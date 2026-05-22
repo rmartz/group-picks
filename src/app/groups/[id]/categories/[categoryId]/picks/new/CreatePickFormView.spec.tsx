@@ -16,6 +16,8 @@ describe("CreatePickFormView", () => {
     onTopCountChange: vi.fn(),
     dueDate: "",
     onDueDateChange: vi.fn(),
+    resultsVisible: true,
+    onResultsVisibleChange: vi.fn(),
     hasPriorPicks: false,
     onSubmit: vi.fn(),
     onCancel: vi.fn(),
@@ -187,6 +189,65 @@ describe("CreatePickFormView", () => {
       const error = "Something went wrong.";
       render(<CreatePickFormView {...defaultProps} error={error} />);
       expect(screen.getByText(error)).toBeDefined();
+    });
+  });
+
+  describe("results visibility toggle", () => {
+    it("renders the Show running results label", () => {
+      render(<CreatePickFormView {...defaultProps} />);
+      expect(
+        screen.getByText(CREATE_PICK_COPY.resultsVisibleLabel),
+      ).toBeDefined();
+    });
+
+    it("renders the toggle as checked when resultsVisible is true", () => {
+      render(<CreatePickFormView {...defaultProps} resultsVisible={true} />);
+      const checkbox = screen.getByRole<HTMLInputElement>("checkbox", {
+        name: CREATE_PICK_COPY.resultsVisibleLabel,
+      });
+      expect(checkbox.checked).toBe(true);
+    });
+
+    it("renders the toggle as unchecked when resultsVisible is false", () => {
+      render(<CreatePickFormView {...defaultProps} resultsVisible={false} />);
+      const checkbox = screen.getByRole<HTMLInputElement>("checkbox", {
+        name: CREATE_PICK_COPY.resultsVisibleLabel,
+      });
+      expect(checkbox.checked).toBe(false);
+    });
+
+    it("calls onResultsVisibleChange with false when toggled off", () => {
+      const onResultsVisibleChange = vi.fn();
+      render(
+        <CreatePickFormView
+          {...defaultProps}
+          resultsVisible={true}
+          onResultsVisibleChange={onResultsVisibleChange}
+        />,
+      );
+      fireEvent.click(
+        screen.getByRole("checkbox", {
+          name: CREATE_PICK_COPY.resultsVisibleLabel,
+        }),
+      );
+      expect(onResultsVisibleChange).toHaveBeenCalledWith(false);
+    });
+
+    it("calls onResultsVisibleChange with true when toggled on", () => {
+      const onResultsVisibleChange = vi.fn();
+      render(
+        <CreatePickFormView
+          {...defaultProps}
+          resultsVisible={false}
+          onResultsVisibleChange={onResultsVisibleChange}
+        />,
+      );
+      fireEvent.click(
+        screen.getByRole("checkbox", {
+          name: CREATE_PICK_COPY.resultsVisibleLabel,
+        }),
+      );
+      expect(onResultsVisibleChange).toHaveBeenCalledWith(true);
     });
   });
 });

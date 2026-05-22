@@ -126,6 +126,7 @@ export async function createPick(
   pick: Pick<GroupPick, "title" | "categoryId" | "creatorId" | "topCount"> & {
     description?: string;
     dueDate?: Date;
+    resultsVisible?: boolean;
   },
 ): Promise<{ id: string; createdAt: Date }> {
   const db = getDatabase(getAdminApp());

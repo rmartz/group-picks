@@ -5,13 +5,20 @@ export async function createPick(
   description: string | undefined,
   topCount: number,
   dueDate?: string,
+  resultsVisible?: boolean,
 ): Promise<{ pickId: string; createdAt: Date }> {
   const response = await fetch(
     `/api/groups/${groupId}/categories/${categoryId}/picks`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, topCount, dueDate }),
+      body: JSON.stringify({
+        title,
+        description,
+        topCount,
+        dueDate,
+        resultsVisible,
+      }),
     },
   );
   if (!response.ok) throw new Error("Failed to create pick");

@@ -16,4 +16,5 @@ export interface GroupPick {
   createdAt: Date;
   creatorId: string;
   options?: PickOption[];
+  resultsVisible?: boolean;
 }

@@ -157,6 +157,47 @@ describe("pickToFirebase", () => {
 
     expect(result.closedManually).toBeUndefined();
   });
+
+  describe("resultsVisible", () => {
+    it("serializes resultsVisible when true", () => {
+      const result = pickToFirebase({
+        title: "Movie",
+        topCount: 1,
+        categoryId: "cat-abc",
+        createdAt: FIXED_DATE,
+        creatorId: "user-abc",
+        resultsVisible: true,
+      });
+
+      expect(result.resultsVisible).toBe(true);
+    });
+
+    it("serializes resultsVisible when false", () => {
+      const result = pickToFirebase({
+        title: "Movie",
+        topCount: 1,
+        categoryId: "cat-abc",
+        createdAt: FIXED_DATE,
+        creatorId: "user-abc",
+        resultsVisible: false,
+      });
+
+      expect(result.resultsVisible).toBe(false);
+    });
+
+    it("omits resultsVisible when undefined", () => {
+      const result = pickToFirebase({
+        title: "Movie",
+        topCount: 1,
+        categoryId: "cat-abc",
+        createdAt: FIXED_DATE,
+        creatorId: "user-abc",
+        resultsVisible: undefined,
+      });
+
+      expect(result.resultsVisible).toBeUndefined();
+    });
+  });
 });
 
 describe("firebaseToPick", () => {
@@ -274,6 +315,24 @@ describe("firebaseToPick", () => {
     const result = firebaseToPick("pick-xyz", data);
 
     expect(result.closedManually).toBeUndefined();
+  });
+
+  describe("resultsVisible", () => {
+    it("deserializes resultsVisible when false", () => {
+      const data = makeFirebasePickPublic({ resultsVisible: false });
+
+      const result = firebaseToPick("pick-xyz", data);
+
+      expect(result.resultsVisible).toBe(false);
+    });
+
+    it("defaults resultsVisible to true when absent", () => {
+      const data = makeFirebasePickPublic({ resultsVisible: undefined });
+
+      const result = firebaseToPick("pick-xyz", data);
+
+      expect(result.resultsVisible).toBe(true);
+    });
   });
 });
 

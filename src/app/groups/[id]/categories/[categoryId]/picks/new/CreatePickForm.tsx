@@ -24,6 +24,7 @@ export function CreatePickForm({
   const [description, setDescription] = useState("");
   const [topCount, setTopCount] = useState(3);
   const [dueDate, setDueDate] = useState("");
+  const [resultsVisible, setResultsVisible] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
@@ -43,6 +44,7 @@ export function CreatePickForm({
         description.trim() || undefined,
         topCount,
         dueDate || undefined,
+        resultsVisible,
       );
       router.push(
         `/groups/${groupId}/categories/${categoryId}/picks/${pickId}`,
@@ -64,6 +66,8 @@ export function CreatePickForm({
       onTopCountChange={setTopCount}
       dueDate={dueDate}
       onDueDateChange={setDueDate}
+      resultsVisible={resultsVisible}
+      onResultsVisibleChange={setResultsVisible}
       hasPriorPicks={hasPriorPicks}
       onSubmit={(e) => void handleSubmit(e)}
       onCancel={() => {
