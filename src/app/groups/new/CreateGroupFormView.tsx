@@ -4,6 +4,8 @@ import { Label } from "@/components/ui/label";
 
 import { CREATE_GROUP_COPY } from "./copy";
 
+const GROUP_EMOJI_OPTIONS = ["👥", "🎬", "🍽️", "🎮", "🎵", "⚽"];
+
 interface CreateGroupFormViewProps {
   name: string;
   emoji: string;
@@ -19,11 +21,20 @@ export function CreateGroupFormView({
   name,
   emoji,
   onNameChange,
+  onEmojiChange,
   onSubmit,
   onCancel,
   loading,
   error,
 }: CreateGroupFormViewProps) {
+  function handleEmojiButtonClick() {
+    const currentIndex = GROUP_EMOJI_OPTIONS.indexOf(emoji);
+    const nextIndex = currentIndex >= 0 ? currentIndex + 1 : 0;
+    const nextEmoji =
+      GROUP_EMOJI_OPTIONS[nextIndex % GROUP_EMOJI_OPTIONS.length] ?? "👥";
+    onEmojiChange(nextEmoji);
+  }
+
   return (
     <div className="w-full max-w-sm space-y-6">
       <h1 className="text-2xl font-semibold">{CREATE_GROUP_COPY.title}</h1>
@@ -31,6 +42,7 @@ export function CreateGroupFormView({
         <button
           type="button"
           aria-label={CREATE_GROUP_COPY.emojiPickerLabel}
+          onClick={handleEmojiButtonClick}
           disabled={loading}
           className="flex h-24 w-24 items-center justify-center rounded-2xl bg-muted text-4xl disabled:pointer-events-none disabled:opacity-50"
         >

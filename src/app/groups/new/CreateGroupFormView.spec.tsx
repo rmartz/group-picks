@@ -41,6 +41,15 @@ describe("page structure", () => {
     renderView({ emoji: "🎬" });
     expect(screen.getByText("🎬")).toBeDefined();
   });
+
+  it("calls onEmojiChange when emoji button is clicked", () => {
+    const onEmojiChange = vi.fn();
+    renderView({ emoji: "👥", onEmojiChange });
+    fireEvent.click(
+      screen.getByRole("button", { name: CREATE_GROUP_COPY.emojiPickerLabel }),
+    );
+    expect(onEmojiChange).toHaveBeenCalledWith("🎬");
+  });
 });
 
 describe("name field", () => {

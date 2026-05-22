@@ -167,6 +167,22 @@ describe("firebaseToGroup", () => {
 
     expect(result.emoji).toBe("👥");
   });
+
+  it("falls back to default emoji when empty in Firebase data", () => {
+    const data = makeFirebaseGroupPublic({ emoji: "" });
+
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
+
+    expect(result.emoji).toBe("👥");
+  });
+
+  it("falls back to default emoji when whitespace in Firebase data", () => {
+    const data = makeFirebaseGroupPublic({ emoji: "   " });
+
+    const result = firebaseToGroup("group-1", data, ["user-123"]);
+
+    expect(result.emoji).toBe("👥");
+  });
 });
 
 describe("groupToFirebase emoji", () => {

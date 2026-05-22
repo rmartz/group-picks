@@ -41,10 +41,14 @@ export function firebaseToGroup(
   const adminIds = data.adminIds
     ? Object.keys(data.adminIds)
     : [data.creatorId];
+  const emoji =
+    typeof data.emoji === "string" && data.emoji.trim()
+      ? data.emoji.trim()
+      : "👥";
   return {
     id,
     name: data.name,
-    emoji: data.emoji ?? "👥",
+    emoji,
     createdAt: new Date(data.createdAt),
     creatorId: data.creatorId,
     memberIds,

@@ -26,7 +26,10 @@ export async function POST(request: Request) {
   }
 
   const name = body.name.trim();
-  const emoji = typeof body.emoji === "string" ? body.emoji : "👥";
+  const emoji =
+    typeof body.emoji === "string" && body.emoji.trim()
+      ? body.emoji.trim()
+      : "👥";
   const db = getDatabase(getAdminApp());
   const groupRef = db.ref("groups").push();
   const groupId = groupRef.key;
