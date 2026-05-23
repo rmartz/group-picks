@@ -152,6 +152,24 @@ describe("POST /api/.../picks/[pickId]/close", () => {
         summary: 'Closed: "Best Pizza"',
       });
     });
+
+    it("returns 200 when activity recording fails", async () => {
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+      mockRecordGroupActivity.mockRejectedValue(new Error("network"));
+
+      const response = await POST(makeRequest(), {
+        params: Promise.resolve(baseParams),
+      });
+
+      expect(response.status).toBe(200);
+      expect(consoleError).toHaveBeenCalledWith(
+        "Failed to record group activity:",
+        expect.any(Error),
+      );
+      consoleError.mockRestore();
+    });
   });
 
   describe("auth and access guards", () => {

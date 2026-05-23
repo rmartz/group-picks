@@ -106,11 +106,20 @@ export async function PUT(
     return NextResponse.json({ error: "Invalid tier value" }, { status: 400 });
   }
 
+  const existingRanking = await getRankingByUser(pickId, uid);
+  const isResubmission = Object.keys(existingRanking).length > 0;
   await saveRanking(pickId, uid, body.assignments);
-  const rankedCount = Object.keys(body.assignments).length;
-  await recordGroupActivity(id, {
-    summary: "Ranking submitted · " + rankedCount.toString() + " options",
-  });
+  if (!isResubmission) {
+    const rankedCount = Object.keys(body.assignments).length;
+    const rankedCountText = rankedCount.toString();
+    try {
+      await recordGroupActivity(id, {
+        summary: `Ranking submitted · ${rankedCountText} options`,
+      });
+    } catch (error) {
+      console.error("Failed to record group activity:", error);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

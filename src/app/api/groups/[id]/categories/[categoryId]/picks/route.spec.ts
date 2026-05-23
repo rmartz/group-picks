@@ -95,6 +95,25 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
     });
   });
 
+  it("returns 201 when activity recording fails", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    mockRecordGroupActivity.mockRejectedValue(new Error("network"));
+
+    const response = await POST(
+      makeRequest({ title: "Best Pizza", topCount: 3 }),
+      { params: Promise.resolve(baseParams) },
+    );
+
+    expect(response.status).toBe(201);
+    expect(consoleError).toHaveBeenCalledWith(
+      "Failed to record group activity:",
+      expect.any(Error),
+    );
+    consoleError.mockRestore();
+  });
+
   it("creates a pick with dueDate set", async () => {
     const response = await POST(
       makeRequest({ title: "Top Albums", topCount: 5, dueDate: "2025-06-30" }),

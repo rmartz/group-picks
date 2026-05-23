@@ -125,6 +125,24 @@ describe("POST /api/.../picks/[pickId]/options", () => {
     });
   });
 
+  it("returns 201 when activity recording fails", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    mockRecordGroupActivity.mockRejectedValue(new Error("network"));
+
+    const response = await POST(makeRequest({ title: "Tacos" }), {
+      params: Promise.resolve(baseParams),
+    });
+
+    expect(response.status).toBe(201);
+    expect(consoleError).toHaveBeenCalledWith(
+      "Failed to record group activity:",
+      expect.any(Error),
+    );
+    consoleError.mockRestore();
+  });
+
   it("returns 404 when assertPickIsOpenForWrite throws PickNotFoundError", async () => {
     const { PickNotFoundError } = await import("@/server/data/picks");
     mockAssertPickIsOpenForWrite.mockRejectedValue(new PickNotFoundError());

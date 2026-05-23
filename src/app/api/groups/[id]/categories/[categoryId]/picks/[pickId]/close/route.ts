@@ -54,9 +54,13 @@ export async function POST(
     }
     throw err;
   }
-  await recordGroupActivity(id, {
-    summary: `Closed: "${closedPickTitle}"`,
-  });
+  try {
+    await recordGroupActivity(id, {
+      summary: `Closed: "${closedPickTitle}"`,
+    });
+  } catch (error) {
+    console.error("Failed to record group activity:", error);
+  }
 
   return NextResponse.json({ pickId });
 }

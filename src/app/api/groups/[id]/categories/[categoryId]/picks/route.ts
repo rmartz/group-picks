@@ -125,10 +125,14 @@ export async function POST(
     topCount,
     dueDate,
   });
-  await recordGroupActivity(groupId, {
-    summary: `New pick "${title}"`,
-    at: createdAt,
-  });
+  try {
+    await recordGroupActivity(groupId, {
+      summary: `New pick "${title}"`,
+      at: createdAt,
+    });
+  } catch (error) {
+    console.error("Failed to record group activity:", error);
+  }
 
   return NextResponse.json(
     { pickId, creatorId: uid, createdAt: createdAt.toISOString() },

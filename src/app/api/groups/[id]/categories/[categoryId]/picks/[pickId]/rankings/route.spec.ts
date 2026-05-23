@@ -140,6 +140,7 @@ describe("PUT /rankings", () => {
     mockGetGroupById.mockResolvedValue(makeGroup());
     mockGetCategoryById.mockResolvedValue(makeCategory());
     mockGetPickById.mockResolvedValue(makePick());
+    mockGetRankingByUser.mockResolvedValue({});
     mockSaveRanking.mockResolvedValue(undefined);
     mockRecordGroupActivity.mockResolvedValue(undefined);
   });
@@ -224,9 +225,52 @@ describe("PUT /rankings", () => {
       "user-1",
       assignments,
     );
+    expect(mockGetRankingByUser).toHaveBeenCalledWith("pick-1", "user-1");
     expect(mockRecordGroupActivity).toHaveBeenCalledWith("group-1", {
       summary: "Ranking submitted · 2 options",
     });
+  });
+
+  it("does not record group activity for ranking re-submission", async () => {
+    mockGetRankingByUser.mockResolvedValue({ "opt-1": RankingTier.Yes });
+
+    const response = await PUT(
+      new Request("http://localhost", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignments: { "opt-1": RankingTier.Maybe } }),
+      }),
+      { params: Promise.resolve(baseParams) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockSaveRanking).toHaveBeenCalledWith("pick-1", "user-1", {
+      "opt-1": RankingTier.Maybe,
+    });
+    expect(mockRecordGroupActivity).not.toHaveBeenCalled();
+  });
+
+  it("returns 200 when activity recording fails", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    mockRecordGroupActivity.mockRejectedValue(new Error("network"));
+
+    const response = await PUT(
+      new Request("http://localhost", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignments: { "opt-1": RankingTier.Yes } }),
+      }),
+      { params: Promise.resolve(baseParams) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(consoleError).toHaveBeenCalledWith(
+      "Failed to record group activity:",
+      expect.any(Error),
+    );
+    consoleError.mockRestore();
   });
 
   it("calls saveRanking before returning 200", async () => {

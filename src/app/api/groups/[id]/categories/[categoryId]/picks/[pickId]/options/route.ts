@@ -168,9 +168,13 @@ export async function POST(
   }
 
   const { id: optionId } = await addOption(pickId, title, uid);
-  await recordGroupActivity(groupId, {
-    summary: `Pick "${pick.title}" · new option`,
-  });
+  try {
+    await recordGroupActivity(groupId, {
+      summary: `Pick "${pick.title}" · new option`,
+    });
+  } catch (error) {
+    console.error("Failed to record group activity:", error);
+  }
 
   return NextResponse.json({ optionId }, { status: 201 });
 }
