@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Option } from "@/lib/types/option";
 import { RankingTier } from "@/lib/types/ranking";
 
-import { computeTopPicks } from "./ranking-score";
+import { computeRankedResults, computeTopPicks } from "./ranking-score";
 
 function makeOption(id: string, title: string): Option {
   return { id, title, pickId: "pick-1", ownerIds: ["user-1"] };
@@ -110,5 +110,84 @@ describe("computeTopPicks", () => {
       expect(result[0]?.id).toBe("opt-a");
       expect(result[1]?.id).toBe("opt-b");
     });
+  });
+});
+
+describe("computeRankedResults", () => {
+  it("returns empty arrays for no options", () => {
+    const { topPicks, runnersUp } = computeRankedResults({}, [], 3);
+    expect(topPicks).toHaveLength(0);
+    expect(runnersUp).toHaveLength(0);
+  });
+
+  it("sets score from tier weights", () => {
+    const allRankings = { "user-1": { "opt-a": RankingTier.LoveIt } };
+    const { topPicks } = computeRankedResults(allRankings, [optA], 1);
+    expect(topPicks[0]?.score).toBe(4);
+  });
+
+  it("assigns rank 1 to the highest-scoring option", () => {
+    const allRankings = {
+      "user-1": { "opt-a": RankingTier.LoveIt, "opt-b": RankingTier.Yes },
+    };
+    const { topPicks } = computeRankedResults(allRankings, [optA, optB], 2);
+    const entry = topPicks.find((e) => e.option.id === "opt-a");
+    expect(entry?.rank).toBe(1);
+  });
+
+  it("assigns the same rank to tied options", () => {
+    const allRankings = {
+      "user-1": { "opt-a": RankingTier.Yes, "opt-b": RankingTier.Yes },
+    };
+    const { topPicks } = computeRankedResults(allRankings, [optA, optB], 2);
+    expect(topPicks[0]?.rank).toBe(topPicks[1]?.rank);
+  });
+
+  it("expands topPicks past topCount when a tie spans the boundary", () => {
+    const allRankings = {
+      "user-1": {
+        "opt-a": RankingTier.LoveIt,
+        "opt-b": RankingTier.Yes,
+        "opt-c": RankingTier.Yes,
+      },
+    };
+    // opt-a: 4, opt-b: 3, opt-c: 3 — tie at rank 2, topCount=2
+    const { topPicks, runnersUp } = computeRankedResults(
+      allRankings,
+      [optA, optB, optC],
+      2,
+    );
+    expect(topPicks).toHaveLength(3);
+    expect(runnersUp).toHaveLength(0);
+  });
+
+  it("puts options with rank > topCount in runnersUp", () => {
+    const allRankings = {
+      "user-1": {
+        "opt-a": RankingTier.LoveIt,
+        "opt-b": RankingTier.Yes,
+        "opt-c": RankingTier.Maybe,
+      },
+    };
+    const { topPicks, runnersUp } = computeRankedResults(
+      allRankings,
+      [optA, optB, optC],
+      2,
+    );
+    expect(topPicks.map((e) => e.option.id)).toContain("opt-a");
+    expect(topPicks.map((e) => e.option.id)).toContain("opt-b");
+    expect(runnersUp.map((e) => e.option.id)).toContain("opt-c");
+  });
+
+  it("scores unranked options as 0", () => {
+    const allRankings = { "user-1": { "opt-a": RankingTier.LoveIt } };
+    const { topPicks, runnersUp } = computeRankedResults(
+      allRankings,
+      [optA, optB],
+      2,
+    );
+    const allEntries = [...topPicks, ...runnersUp];
+    const bEntry = allEntries.find((e) => e.option.id === "opt-b");
+    expect(bEntry?.score).toBe(0);
   });
 });
