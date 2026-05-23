@@ -199,17 +199,15 @@ describe("re-open action card", () => {
   it("renders the error message when reopenError is provided", () => {
     renderView({
       onReopen: vi.fn(),
-      reopenError: CLOSED_PICK_RESULTS_COPY.reopenCard.errorMessage,
+      reopenError: "Network error",
     });
-    expect(
-      screen.getByText(CLOSED_PICK_RESULTS_COPY.reopenCard.errorMessage),
-    ).toBeDefined();
+    expect(screen.getByTestId("reopen-error").textContent).toBe(
+      "Network error",
+    );
   });
 
   it("does not render an error message when reopenError is absent", () => {
     renderView({ onReopen: vi.fn() });
-    expect(
-      screen.queryByText(CLOSED_PICK_RESULTS_COPY.reopenCard.errorMessage),
-    ).toBeNull();
+    expect(screen.queryByTestId("reopen-error")).toBeNull();
   });
 });

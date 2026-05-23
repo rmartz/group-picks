@@ -129,7 +129,12 @@ export function ClosedPickResultsView({
                 {CLOSED_PICK_RESULTS_COPY.reopenCard.body}
               </p>
               {reopenError && (
-                <p className="mt-2 text-xs text-destructive">{reopenError}</p>
+                <p
+                  className="mt-2 text-xs text-destructive"
+                  data-testid="reopen-error"
+                >
+                  {reopenError}
+                </p>
               )}
               <button
                 type="button"
