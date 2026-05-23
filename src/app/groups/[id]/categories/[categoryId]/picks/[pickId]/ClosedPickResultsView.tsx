@@ -6,10 +6,11 @@ import { CLOSED_PICK_RESULTS_COPY } from "./ClosedPickResultsView.copy";
 
 interface ClosedPickResultsViewProps {
   topCount: number;
-  closedAt: Date;
   topPicks: ClosedPickResultEntry[];
   runnersUp: ClosedPickResultEntry[];
   onReopen?: () => void;
+  isReopening?: boolean;
+  reopenError?: string;
 }
 
 function groupByRank(
@@ -49,6 +50,8 @@ export function ClosedPickResultsView({
   topPicks,
   runnersUp,
   onReopen,
+  isReopening = false,
+  reopenError,
 }: ClosedPickResultsViewProps) {
   const isEmpty = topPicks.length === 0 && runnersUp.length === 0;
   const topPicksByRank = groupByRank(topPicks);
@@ -125,10 +128,14 @@ export function ClosedPickResultsView({
               <p className="mt-1 text-xs text-muted-foreground">
                 {CLOSED_PICK_RESULTS_COPY.reopenCard.body}
               </p>
+              {reopenError && (
+                <p className="mt-2 text-xs text-destructive">{reopenError}</p>
+              )}
               <button
                 type="button"
                 onClick={onReopen}
-                className="mt-3 rounded border px-3 py-1 text-xs font-medium text-blue-600"
+                disabled={isReopening}
+                className="mt-3 rounded border px-3 py-1 text-xs font-medium text-blue-600 disabled:opacity-50"
               >
                 {CLOSED_PICK_RESULTS_COPY.reopenCard.button}
               </button>

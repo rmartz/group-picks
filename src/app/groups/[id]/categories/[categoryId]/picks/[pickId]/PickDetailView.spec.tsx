@@ -82,7 +82,14 @@ vi.mock("./SuggestOptionSheet", () => ({
 let capturedOnReopen: (() => void) | undefined;
 
 vi.mock("./ClosedPickResultsView", () => ({
-  ClosedPickResultsView: ({ onReopen }: { onReopen?: () => void }) => {
+  ClosedPickResultsView: ({
+    onReopen,
+    reopenError,
+  }: {
+    onReopen?: () => void;
+    isReopening?: boolean;
+    reopenError?: string;
+  }) => {
     capturedOnReopen = onReopen;
     return (
       <div data-testid="closed-pick-results-view">
@@ -91,6 +98,7 @@ vi.mock("./ClosedPickResultsView", () => ({
             {CLOSED_PICK_RESULTS_COPY.reopenCard.button}
           </button>
         )}
+        {reopenError && <p>{reopenError}</p>}
       </div>
     );
   },
@@ -346,6 +354,31 @@ describe("closed state: re-open wiring", () => {
 
     await vi.waitFor(() => {
       expect(mockReopenPick).toHaveBeenCalledWith("group-1", "cat-1", "pick-1");
+    });
+  });
+
+  it("surfaces the error message when reopenPick rejects", async () => {
+    const { reopenPick: mockReopenPick } = await import("@/services/picks");
+    vi.mocked(mockReopenPick).mockRejectedValueOnce(new Error("Network error"));
+
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
+      }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: CLOSED_PICK_RESULTS_COPY.reopenCard.button,
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(screen.getByText("Network error")).toBeDefined();
     });
   });
 });

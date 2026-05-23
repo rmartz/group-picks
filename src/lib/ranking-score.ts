@@ -34,7 +34,8 @@ export function computeTopPicks(
 }
 
 /**
- * Computes fully-ranked pick results using tier-weighted scoring (Borda count).
+ * Computes fully-ranked pick results using fixed-weight tier scoring.
+ * Each option's score is the sum of its per-voter tier weights (see TIER_SCORES).
  * Ties share the same rank; ranks after a tie skip accordingly.
  * Top picks include all options with rank <= topCount (ties at the boundary expand the list).
  */

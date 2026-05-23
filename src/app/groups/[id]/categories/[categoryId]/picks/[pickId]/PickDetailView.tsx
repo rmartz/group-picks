@@ -50,17 +50,21 @@ export function PickDetailView({
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
   const [isReopening, setIsReopening] = useState(false);
+  const [reopenError, setReopenError] = useState<string | null>(null);
   const closedAt = pick.closedAt;
   const isOpen = closedAt === undefined;
   const uniqueOwnerCount = new Set(options.flatMap((opt) => opt.ownerIds)).size;
 
   async function handleReopen() {
     setIsReopening(true);
+    setReopenError(null);
     try {
       await reopenPick(groupId, categoryId, pick.id);
       router.refresh();
-    } catch {
-      // error is surfaced in ClosedPickResultsView via the re-open card
+    } catch (err) {
+      setReopenError(
+        err instanceof Error ? err.message : "Failed to re-open pick",
+      );
     } finally {
       setIsReopening(false);
     }
@@ -212,10 +216,11 @@ export function PickDetailView({
           ) : (
             <ClosedPickResultsView
               topCount={pick.topCount}
-              closedAt={closedAt}
               topPicks={closedPickResults.topPicks}
               runnersUp={closedPickResults.runnersUp}
-              onReopen={isReopening ? undefined : () => void handleReopen()}
+              onReopen={() => void handleReopen()}
+              isReopening={isReopening}
+              reopenError={reopenError ?? undefined}
             />
           )}
         </TabsContent>

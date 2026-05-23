@@ -23,7 +23,6 @@ const meta: Meta<typeof ClosedPickResultsView> = {
   component: ClosedPickResultsView,
   args: {
     topCount: 3,
-    closedAt: new Date("2025-06-01T00:00:00.000Z"),
     topPicks: [
       makeEntry("opt-1", "The Shawshank Redemption", 1, 8),
       makeEntry("opt-2", "Inception", 2, 6),

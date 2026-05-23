@@ -28,7 +28,6 @@ function renderView(
   return render(
     <ClosedPickResultsView
       topCount={3}
-      closedAt={new Date("2025-06-01T00:00:00.000Z")}
       topPicks={[makeEntry("opt-1", "Movie Alpha", 1, 3)]}
       runnersUp={[]}
       {...overrides}
@@ -177,5 +176,40 @@ describe("re-open action card", () => {
       }),
     );
     expect(onReopen).toHaveBeenCalledOnce();
+  });
+
+  it("disables the Re-open button when isReopening is true", () => {
+    renderView({ onReopen: vi.fn(), isReopening: true });
+    expect(
+      screen.getByRole("button", {
+        name: CLOSED_PICK_RESULTS_COPY.reopenCard.button,
+      }),
+    ).toHaveProperty("disabled", true);
+  });
+
+  it("enables the Re-open button when isReopening is false", () => {
+    renderView({ onReopen: vi.fn(), isReopening: false });
+    expect(
+      screen.getByRole("button", {
+        name: CLOSED_PICK_RESULTS_COPY.reopenCard.button,
+      }),
+    ).toHaveProperty("disabled", false);
+  });
+
+  it("renders the error message when reopenError is provided", () => {
+    renderView({
+      onReopen: vi.fn(),
+      reopenError: CLOSED_PICK_RESULTS_COPY.reopenCard.errorMessage,
+    });
+    expect(
+      screen.getByText(CLOSED_PICK_RESULTS_COPY.reopenCard.errorMessage),
+    ).toBeDefined();
+  });
+
+  it("does not render an error message when reopenError is absent", () => {
+    renderView({ onReopen: vi.fn() });
+    expect(
+      screen.queryByText(CLOSED_PICK_RESULTS_COPY.reopenCard.errorMessage),
+    ).toBeNull();
   });
 });
