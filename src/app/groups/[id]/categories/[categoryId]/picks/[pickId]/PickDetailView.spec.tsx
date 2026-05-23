@@ -362,7 +362,7 @@ describe("closed state: re-open wiring", () => {
   });
 
   it("passes isReopening=true to ClosedPickResultsView while the API call is in flight", async () => {
-    let resolveReopen!: () => void;
+    let resolveReopen: (() => void) | undefined;
     const { reopenPick: mockReopenPick } = await import("@/services/picks");
     vi.mocked(mockReopenPick).mockImplementationOnce(
       () =>
@@ -388,17 +388,17 @@ describe("closed state: re-open wiring", () => {
 
     await vi.waitFor(() => {
       expect(
-        screen.getByTestId("closed-pick-results-view").dataset.isReopening,
+        screen.getByTestId("closed-pick-results-view").dataset["isReopening"],
       ).toBe("true");
     });
 
     act(() => {
-      resolveReopen();
+      resolveReopen?.();
     });
 
     await vi.waitFor(() => {
       expect(
-        screen.getByTestId("closed-pick-results-view").dataset.isReopening,
+        screen.getByTestId("closed-pick-results-view").dataset["isReopening"],
       ).toBe("false");
     });
   });
