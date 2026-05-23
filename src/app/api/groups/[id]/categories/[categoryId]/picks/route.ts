@@ -120,12 +120,16 @@ export async function POST(
   }
   const dueDate = dueDateResult.date;
 
-  const rankingMode =
-    body.rankingMode === RankingMode.StackRank
-      ? RankingMode.StackRank
-      : body.rankingMode === RankingMode.HeadToHead
-        ? RankingMode.HeadToHead
-        : RankingMode.TierBuckets;
+  let rankingMode: RankingMode;
+  if (body.rankingMode === undefined) {
+    rankingMode = RankingMode.TierBuckets;
+  } else if (
+    Object.values(RankingMode).includes(body.rankingMode as RankingMode)
+  ) {
+    rankingMode = body.rankingMode as RankingMode;
+  } else {
+    return NextResponse.json({ error: "Invalid rankingMode" }, { status: 400 });
+  }
 
   const { id: pickId, createdAt } = await createPick({
     title,
