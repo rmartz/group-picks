@@ -11,7 +11,7 @@ interface TopPicksViewProps {
   isOpen: boolean;
   topPicks: Option[];
   topCount: number;
-  topPickAttribution: Record<string, OptionTierAttribution>;
+  topPickAttribution?: Record<string, OptionTierAttribution>;
 }
 
 const ATTRIBUTION_ROWS = [
@@ -47,7 +47,7 @@ export function TopPicksView({
     <ol className="space-y-2">
       {topPicksToRender.map((option, index) => {
         const isExpanded = expandedOptionId === option.id;
-        const attribution = topPickAttribution[option.id];
+        const attribution = topPickAttribution?.[option.id];
 
         return (
           <li key={option.id} className="rounded-md border p-2 text-sm">
@@ -89,6 +89,7 @@ export function TopPicksView({
                           {members.slice(0, 6).map((member) => (
                             <span
                               key={member.uid}
+                              aria-hidden="true"
                               className="inline-flex h-6 w-6 items-center justify-center rounded-full border bg-background text-[10px] font-semibold"
                               title={member.firstName}
                             >
@@ -99,6 +100,7 @@ export function TopPicksView({
                           ))}
                           {members.length > 6 && (
                             <span
+                              aria-hidden="true"
                               className="inline-flex h-6 w-6 items-center justify-center rounded-full border bg-muted text-[10px] font-semibold"
                               title={"+" + String(members.length - 6) + " more"}
                             >
