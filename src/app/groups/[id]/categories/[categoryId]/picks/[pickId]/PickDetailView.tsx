@@ -50,14 +50,14 @@ export function PickDetailView({
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
   const [isReopening, setIsReopening] = useState(false);
-  const [reopenError, setReopenError] = useState<string | null>(null);
+  const [reopenError, setReopenError] = useState<string | undefined>(undefined);
   const closedAt = pick.closedAt;
   const isOpen = closedAt === undefined;
   const uniqueOwnerCount = new Set(options.flatMap((opt) => opt.ownerIds)).size;
 
   async function handleReopen() {
     setIsReopening(true);
-    setReopenError(null);
+    setReopenError(undefined);
     try {
       await reopenPick(groupId, categoryId, pick.id);
       router.refresh();
@@ -220,7 +220,7 @@ export function PickDetailView({
               runnersUp={closedPickResults.runnersUp}
               onReopen={() => void handleReopen()}
               isReopening={isReopening}
-              reopenError={reopenError ?? undefined}
+              reopenError={reopenError}
             />
           )}
         </TabsContent>
