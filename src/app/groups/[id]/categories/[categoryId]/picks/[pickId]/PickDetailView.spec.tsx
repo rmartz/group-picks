@@ -84,6 +84,7 @@ let capturedOnReopen: (() => void) | undefined;
 vi.mock("./ClosedPickResultsView", () => ({
   ClosedPickResultsView: ({
     onReopen,
+    isReopening,
     reopenError,
   }: {
     onReopen?: () => void;
@@ -92,7 +93,10 @@ vi.mock("./ClosedPickResultsView", () => ({
   }) => {
     capturedOnReopen = onReopen;
     return (
-      <div data-testid="closed-pick-results-view">
+      <div
+        data-testid="closed-pick-results-view"
+        data-is-reopening={isReopening}
+      >
         {onReopen !== undefined && (
           <button type="button" onClick={onReopen}>
             {CLOSED_PICK_RESULTS_COPY.reopenCard.button}
@@ -354,6 +358,48 @@ describe("closed state: re-open wiring", () => {
 
     await vi.waitFor(() => {
       expect(mockReopenPick).toHaveBeenCalledWith("group-1", "cat-1", "pick-1");
+    });
+  });
+
+  it("passes isReopening=true to ClosedPickResultsView while the API call is in flight", async () => {
+    let resolveReopen!: () => void;
+    const { reopenPick: mockReopenPick } = await import("@/services/picks");
+    vi.mocked(mockReopenPick).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveReopen = resolve;
+        }),
+    );
+
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: CLOSED_PICK_RESULTS_COPY.reopenCard.button,
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(
+        screen.getByTestId("closed-pick-results-view").dataset.isReopening,
+      ).toBe("true");
+    });
+
+    act(() => {
+      resolveReopen();
+    });
+
+    await vi.waitFor(() => {
+      expect(
+        screen.getByTestId("closed-pick-results-view").dataset.isReopening,
+      ).toBe("false");
     });
   });
 
