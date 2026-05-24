@@ -1,0 +1,118 @@
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+
+import { INVITE_LANDING_COPY } from "./copy";
+
+interface InviteLandingViewProps {
+  groupName: string;
+  memberCount: number;
+  memberNames: string[];
+  currentPickTitle?: string;
+  // Unauthenticated: signInHref is provided (join = link to sign-in)
+  signInHref?: string;
+  // Authenticated: onJoin is provided (join = direct action)
+  onJoin?: () => void;
+  isJoining?: boolean;
+  onSignInDifferentAccount?: () => void;
+  error?: string;
+}
+
+export function InviteLandingView({
+  groupName,
+  memberCount,
+  memberNames,
+  currentPickTitle,
+  signInHref,
+  onJoin,
+  isJoining = false,
+  onSignInDifferentAccount,
+  error,
+}: InviteLandingViewProps) {
+  const isAuthenticated = onJoin !== undefined;
+
+  return (
+    <main className="mx-auto max-w-lg space-y-6 p-6">
+      <p className="text-sm text-muted-foreground">
+        {INVITE_LANDING_COPY.heading}
+      </p>
+      <div className="rounded-lg border p-4 space-y-1">
+        <p className="font-semibold text-lg">{groupName}</p>
+        <p className="text-sm text-muted-foreground">
+          {memberCount}{" "}
+          {memberCount === 1
+            ? INVITE_LANDING_COPY.memberSingular
+            : INVITE_LANDING_COPY.memberPlural}
+        </p>
+      </div>
+
+      {currentPickTitle !== undefined && (
+        <div className="rounded-lg border p-4 space-y-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {INVITE_LANDING_COPY.currentlyPickingHeading}
+          </p>
+          <p className="font-medium">{currentPickTitle}</p>
+        </div>
+      )}
+
+      {memberNames.length > 0 && (
+        <div className="rounded-lg border p-4 space-y-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {INVITE_LANDING_COPY.whoIsInHeading}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {memberNames.slice(0, 3).join(", ")}
+            {memberNames.length > 3 &&
+              `, +${String(memberNames.length - 3)} more`}
+          </p>
+        </div>
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <div className="space-y-3">
+        {isAuthenticated ? (
+          <>
+            <Button
+              type="button"
+              onClick={onJoin}
+              disabled={isJoining}
+              className="w-full"
+            >
+              {isJoining ? "Joining…" : INVITE_LANDING_COPY.joinButton}
+            </Button>
+            {onSignInDifferentAccount !== undefined && (
+              <p className="text-center text-sm text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={onSignInDifferentAccount}
+                  disabled={isJoining}
+                  className="underline underline-offset-4 hover:text-foreground"
+                >
+                  {INVITE_LANDING_COPY.signInDifferentAccount}
+                </button>
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <Button
+              render={<Link href={signInHref ?? "/sign-in"} />}
+              className="w-full"
+            >
+              {INVITE_LANDING_COPY.joinButton}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              <Link
+                href={signInHref ?? "/sign-in"}
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                {INVITE_LANDING_COPY.alreadyMemberSignIn}
+              </Link>
+            </p>
+          </>
+        )}
+      </div>
+    </main>
+  );
+}
