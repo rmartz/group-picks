@@ -4,6 +4,7 @@ import {
   computeOptionTierAttribution,
   computeTopPicks,
 } from "@/lib/ranking-score";
+import type { RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
@@ -71,9 +72,19 @@ export default async function PickDetailPage({
       return true;
     });
 
-  const topPicks = computeTopPicks(allRankings, currentOptions, pick.topCount);
+  const filteredRankings = Object.fromEntries(
+    Object.entries(allRankings).filter(([uid]) =>
+      group.memberIds.includes(uid),
+    ),
+  ) as Record<string, Record<string, RankingTier>>;
+
+  const topPicks = computeTopPicks(
+    filteredRankings,
+    currentOptions,
+    pick.topCount,
+  );
   const topPickAttribution = computeOptionTierAttribution(
-    allRankings,
+    filteredRankings,
     topPicks,
     memberNames,
   );
