@@ -33,7 +33,10 @@ export function GroupListView({ groups }: GroupListViewProps) {
                   <span className="font-semibold">{group.name}</span>
                   <div className="flex items-center gap-2">
                     {group.unreadCount > 0 && (
-                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs text-primary-foreground">
+                      <span
+                        aria-label={`${String(group.unreadCount)} unread`}
+                        className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs text-primary-foreground"
+                      >
                         {group.unreadCount}
                       </span>
                     )}

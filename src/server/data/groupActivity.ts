@@ -23,9 +23,11 @@ export async function getLastSeenAt(
   groupId: string,
 ): Promise<Date | undefined> {
   const db = getDatabase(getAdminApp());
-  const snap = await db.ref(`users/${uid}/groups/${groupId}/lastSeenAt`).get();
+  const snap = await db.ref(`users/${uid}/groupLastSeenAt/${groupId}`).get();
   if (!snap.exists()) return undefined;
-  return new Date(snap.val() as number);
+  const val: unknown = snap.val();
+  if (typeof val !== "number" || !Number.isFinite(val)) return undefined;
+  return new Date(val);
 }
 
 export async function markGroupSeen(
@@ -34,9 +36,7 @@ export async function markGroupSeen(
   seenAt: Date = new Date(),
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db
-    .ref(`users/${uid}/groups/${groupId}/lastSeenAt`)
-    .set(seenAt.getTime());
+  await db.ref(`users/${uid}/groupLastSeenAt/${groupId}`).set(seenAt.getTime());
 }
 
 export async function deriveGroupActivity(
