@@ -6,7 +6,7 @@ import {
   firebaseToPick,
   pickToFirebase,
 } from "@/lib/firebase/schema/pick";
-import type { GroupPick } from "@/lib/types/pick";
+import type { GroupPick, RankingMode } from "@/lib/types/pick";
 
 export const PICK_CLOSED_API_ERROR = "Pick is closed";
 const PICK_CLOSED_ERROR = "Pick is closed and no longer accepts changes.";
@@ -51,6 +51,18 @@ export async function getPicksByCategory(
   const data = snap.val() as Record<string, FirebasePickPublic>;
   return Object.entries(data).map(([id, pickData]) =>
     firebaseToPick(id, pickData),
+  );
+}
+
+export async function getPicksByCategoryIds(
+  categoryIds: string[],
+): Promise<Record<string, GroupPick[]>> {
+  const pickArrays = await Promise.all(
+    categoryIds.map((id) => getPicksByCategory(id)),
+  );
+
+  return Object.fromEntries(
+    categoryIds.map((id, i) => [id, pickArrays[i] ?? []]),
   );
 }
 
@@ -114,6 +126,7 @@ export async function createPick(
   pick: Pick<GroupPick, "title" | "categoryId" | "creatorId" | "topCount"> & {
     description?: string;
     dueDate?: Date;
+    rankingMode?: RankingMode;
   },
 ): Promise<{ id: string; createdAt: Date }> {
   const db = getDatabase(getAdminApp());

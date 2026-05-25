@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 
+import { RankingMode } from "@/lib/types/pick";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { createPick, getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { parseDueDateField } from "@/server/utils/date";
 import { isGroupAdmin } from "@/server/utils/permissions";
 
 export async function GET(
@@ -79,6 +81,7 @@ export async function POST(
     description: unknown;
     topCount: unknown;
     dueDate: unknown;
+    rankingMode: unknown;
   };
   try {
     body = (await request.json()) as {
@@ -86,6 +89,7 @@ export async function POST(
       description: unknown;
       topCount: unknown;
       dueDate: unknown;
+      rankingMode: unknown;
     };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -110,19 +114,21 @@ export async function POST(
   }
   const topCount = body.topCount;
 
-  let dueDate: Date | undefined;
-  if (typeof body.dueDate === "string" && body.dueDate) {
-    const parsed = new Date(body.dueDate);
-    if (
-      Number.isNaN(parsed.getTime()) ||
-      parsed.toISOString().slice(0, 10) !== body.dueDate
-    ) {
-      return NextResponse.json(
-        { error: "dueDate is invalid" },
-        { status: 400 },
-      );
-    }
-    dueDate = parsed;
+  const dueDateResult = parseDueDateField(body.dueDate);
+  if ("error" in dueDateResult) {
+    return NextResponse.json({ error: dueDateResult.error }, { status: 400 });
+  }
+  const dueDate = dueDateResult.date;
+
+  let rankingMode: RankingMode;
+  if (body.rankingMode === undefined) {
+    rankingMode = RankingMode.TierBuckets;
+  } else if (
+    Object.values(RankingMode).includes(body.rankingMode as RankingMode)
+  ) {
+    rankingMode = body.rankingMode as RankingMode;
+  } else {
+    return NextResponse.json({ error: "Invalid rankingMode" }, { status: 400 });
   }
 
   const { id: pickId, createdAt } = await createPick({
@@ -132,6 +138,7 @@ export async function POST(
     creatorId: uid,
     topCount,
     dueDate,
+    rankingMode,
   });
 
   return NextResponse.json(

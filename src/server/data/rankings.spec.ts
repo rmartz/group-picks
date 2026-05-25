@@ -112,7 +112,7 @@ describe("saveRanking", () => {
 
     const assignments = {
       "opt-1": RankingTier.Yes,
-      "opt-2": RankingTier.NotReally,
+      "opt-2": RankingTier.NotForMe,
     };
     await saveRanking("pick-42", "user-99", assignments);
 
