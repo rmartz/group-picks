@@ -251,4 +251,30 @@ describe("deleteGroup", () => {
       "users/user-1/groups/group-1": null,
     });
   });
+
+  it("skips categories with a null key", async () => {
+    mockCategoriesGet.mockResolvedValue({
+      forEach: (
+        callback: (child: {
+          child: (path: string) => {
+            val: () => Record<string, unknown> | null;
+          };
+          key: string | null;
+        }) => void,
+      ) => {
+        callback({
+          child: () => ({ val: () => ({ "pick-1": true }) }),
+          key: null,
+        });
+      },
+    });
+
+    await deleteGroup("group-1", ["user-1"], "invite-token-1");
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      "groups/group-1": null,
+      "invites/invite-token-1": null,
+      "users/user-1/groups/group-1": null,
+    });
+  });
 });
