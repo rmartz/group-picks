@@ -4,6 +4,7 @@ import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
 import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
+import { RankingMode } from "@/lib/types/pick";
 
 import { GroupDetailView } from "./GroupDetailView";
 
@@ -53,6 +54,7 @@ const mockFridayFlick: GroupPick = {
   dueDate: new Date("2025-06-07"),
   createdAt: new Date("2025-01-15T12:00:00.000Z"),
   creatorId: "user-123",
+  rankingMode: RankingMode.TierBuckets,
 };
 
 const mockBeachWeekRead: GroupPick = {
@@ -62,6 +64,7 @@ const mockBeachWeekRead: GroupPick = {
   topCount: 1,
   createdAt: new Date("2025-01-16T12:00:00.000Z"),
   creatorId: "user-123",
+  rankingMode: RankingMode.TierBuckets,
 };
 
 const mockDateNightFilm: GroupPick = {
@@ -72,6 +75,7 @@ const mockDateNightFilm: GroupPick = {
   closedAt: new Date("2025-03-24"),
   createdAt: new Date("2025-01-10T12:00:00.000Z"),
   creatorId: "user-456",
+  rankingMode: RankingMode.TierBuckets,
 };
 
 const meta: Meta<typeof GroupDetailView> = {
