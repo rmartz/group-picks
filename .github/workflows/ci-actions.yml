@@ -13,6 +13,7 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -21,6 +22,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -29,6 +31,7 @@ jobs:
   format:
     name: Format
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -37,6 +40,7 @@ jobs:
   storybook-tests:
     name: Storybook Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -47,6 +51,7 @@ jobs:
     name: Storybook Screenshots
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
       pull-requests: write
@@ -97,6 +102,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
