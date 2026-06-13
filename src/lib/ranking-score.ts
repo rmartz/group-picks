@@ -1,6 +1,11 @@
-import type { ClosedPickResultEntry } from "@/lib/computePickResults";
 import type { Option } from "@/lib/types/option";
 import { RankingTier } from "@/lib/types/ranking";
+
+export interface ClosedPickResultEntry {
+  option: Option;
+  rank: number;
+  score: number;
+}
 
 const TIER_SCORES: Record<RankingTier, number> = {
   [RankingTier.LoveIt]: 4,
@@ -20,17 +25,6 @@ function computeOptionScores(
     }
   }
   return scores;
-}
-
-export function computeTopPicks(
-  allRankings: Record<string, Record<string, RankingTier>>,
-  options: Option[],
-  topCount: number,
-): Option[] {
-  const scores = computeOptionScores(allRankings);
-  return [...options]
-    .sort((a, b) => (scores[b.id] ?? 0) - (scores[a.id] ?? 0))
-    .slice(0, topCount);
 }
 
 /**
@@ -61,7 +55,6 @@ export function computeRankedResults(
   for (let i = 0; i < sorted.length; i++) {
     const item = sorted[i];
     const prevItem = sorted[i - 1];
-    if (!item) continue;
     if (
       i > 0 &&
       prevItem &&

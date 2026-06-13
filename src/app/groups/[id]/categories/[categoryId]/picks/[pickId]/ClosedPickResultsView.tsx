@@ -1,6 +1,6 @@
 "use client";
 
-import type { ClosedPickResultEntry } from "@/lib/computePickResults";
+import type { ClosedPickResultEntry } from "@/lib/ranking-score";
 
 import { CLOSED_PICK_RESULTS_COPY } from "./ClosedPickResultsView.copy";
 
