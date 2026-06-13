@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
 import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, recordGroupActivity } from "@/server/data/groups";
 import {
   closePick,
   getPickById,
@@ -62,8 +62,10 @@ export default async function CategoryDetailPage({
       throw new Error(CATEGORY_DETAIL_COPY.closePickError);
     }
 
+    let closedPickTitle: string;
     try {
-      await closePick(categoryId, pickId);
+      const closedPick = await closePick(categoryId, pickId);
+      closedPickTitle = closedPick.title;
     } catch (err) {
       if (
         err instanceof PickWriteClosedError ||
@@ -73,6 +75,13 @@ export default async function CategoryDetailPage({
         return;
       }
       throw err;
+    }
+    try {
+      await recordGroupActivity(id, {
+        summary: `Closed: "${closedPickTitle}"`,
+      });
+    } catch (error) {
+      console.error("Failed to record group activity:", error);
     }
 
     revalidatePath(`/groups/${id}/categories/${categoryId}`);

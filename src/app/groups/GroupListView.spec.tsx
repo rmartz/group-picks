@@ -85,7 +85,18 @@ describe("GroupListView", () => {
     const group = makeGroup({ id: "g1", name: "Alpha", unreadCount: 2 });
     render(<GroupListView groups={[group]} />);
 
-    expect(screen.getByLabelText("2 unread updates")).toBeDefined();
+    expect(
+      screen.getByLabelText(`2 ${GROUP_LIST_COPY.unreadPlural}`),
+    ).toBeDefined();
+  });
+
+  it("renders a singular aria-label when unreadCount is 1", () => {
+    const group = makeGroup({ id: "g1", name: "Alpha", unreadCount: 1 });
+    render(<GroupListView groups={[group]} />);
+
+    expect(
+      screen.getByLabelText(`1 ${GROUP_LIST_COPY.unreadSingular}`),
+    ).toBeDefined();
   });
 
   it("hides the unread badge when unreadCount is zero", () => {

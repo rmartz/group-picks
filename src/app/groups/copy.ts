@@ -7,4 +7,6 @@ export const GROUP_LIST_COPY = {
   memberSingular: "member",
   newGroupButton: "New Group",
   title: "My Groups",
+  unreadPlural: "unread updates",
+  unreadSingular: "unread update",
 } as const;

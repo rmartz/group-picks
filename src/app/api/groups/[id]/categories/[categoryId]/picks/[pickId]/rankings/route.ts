@@ -111,10 +111,9 @@ export async function PUT(
   await saveRanking(pickId, uid, body.assignments);
   if (!isResubmission) {
     const rankedCount = Object.keys(body.assignments).length;
-    const rankedCountText = rankedCount.toString();
     try {
       await recordGroupActivity(id, {
-        summary: `Ranking submitted · ${rankedCountText} options`,
+        summary: `Ranking submitted · ${rankedCount.toString()} options`,
       });
     } catch (error) {
       console.error("Failed to record group activity:", error);
