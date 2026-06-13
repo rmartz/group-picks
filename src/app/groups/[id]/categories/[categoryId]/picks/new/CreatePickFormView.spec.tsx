@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { RankingMode } from "@/lib/types/pick";
+
 import { CREATE_PICK_COPY } from "./copy";
 import { CreatePickFormView } from "./CreatePickFormView";
 
@@ -16,6 +18,8 @@ describe("CreatePickFormView", () => {
     onTopCountChange: vi.fn(),
     dueDate: "",
     onDueDateChange: vi.fn(),
+    rankingMode: RankingMode.TierBuckets,
+    onRankingModeChange: vi.fn(),
     hasPriorPicks: false,
     onSubmit: vi.fn(),
     onCancel: vi.fn(),
@@ -187,6 +191,56 @@ describe("CreatePickFormView", () => {
       const error = "Something went wrong.";
       render(<CreatePickFormView {...defaultProps} error={error} />);
       expect(screen.getByText(error)).toBeDefined();
+    });
+  });
+
+  describe("ranking mode selector", () => {
+    it("renders the ranking mode section label", () => {
+      render(<CreatePickFormView {...defaultProps} />);
+      expect(screen.getByText(CREATE_PICK_COPY.rankingModeLabel)).toBeDefined();
+    });
+
+    it("renders the Tier Buckets option as enabled", () => {
+      render(<CreatePickFormView {...defaultProps} />);
+      const tierBucketsButton = screen.getByRole("radio", {
+        name: CREATE_PICK_COPY.rankingModes.tierBuckets,
+      });
+      expect(tierBucketsButton.disabled).toBe(false);
+    });
+
+    it("renders the Stack Rank option as disabled", () => {
+      render(<CreatePickFormView {...defaultProps} />);
+      const stackRankButton = screen.getByRole("radio", {
+        name: new RegExp(CREATE_PICK_COPY.rankingModes.stackRank),
+      });
+      expect(stackRankButton.disabled).toBe(true);
+    });
+
+    it("renders the Head-to-Head option as disabled", () => {
+      render(<CreatePickFormView {...defaultProps} />);
+      const headToHeadButton = screen.getByRole("radio", {
+        name: new RegExp(CREATE_PICK_COPY.rankingModes.headToHead),
+      });
+      expect(headToHeadButton.disabled).toBe(true);
+    });
+
+    it("calls onRankingModeChange when Tier Buckets is selected", () => {
+      const onRankingModeChange = vi.fn();
+      // Render with a non-TierBuckets mode so the TierBuckets radio is unchecked
+      // and clicking it fires onChange
+      render(
+        <CreatePickFormView
+          {...defaultProps}
+          rankingMode={RankingMode.StackRank}
+          onRankingModeChange={onRankingModeChange}
+        />,
+      );
+      fireEvent.click(
+        screen.getByRole("radio", {
+          name: CREATE_PICK_COPY.rankingModes.tierBuckets,
+        }),
+      );
+      expect(onRankingModeChange).toHaveBeenCalledWith(RankingMode.TierBuckets);
     });
   });
 });
