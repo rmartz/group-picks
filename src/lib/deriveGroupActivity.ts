@@ -31,5 +31,9 @@ export function computeUnreadCount(
   lastSeenAt: Date | undefined,
 ): number {
   if (lastSeenAt === undefined) return picks.length;
-  return picks.filter((p) => p.createdAt > lastSeenAt).length;
+  return picks.filter(
+    (p) =>
+      Math.max(p.createdAt.getTime(), p.closedAt?.getTime() ?? 0) >
+      lastSeenAt.getTime(),
+  ).length;
 }

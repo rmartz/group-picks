@@ -120,5 +120,14 @@ describe("computeUnreadCount", () => {
       const pick = makePick({ createdAt: lastSeenAt });
       expect(computeUnreadCount([pick], lastSeenAt)).toBe(0);
     });
+
+    it("counts a pick closed after lastSeenAt as unread even if created before", () => {
+      const lastSeenAt = new Date("2025-03-01T00:00:00.000Z");
+      const pick = makePick({
+        createdAt: new Date("2025-01-01T00:00:00.000Z"),
+        closedAt: new Date("2025-06-01T00:00:00.000Z"),
+      });
+      expect(computeUnreadCount([pick], lastSeenAt)).toBe(1);
+    });
   });
 });
