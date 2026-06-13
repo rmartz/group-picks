@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
+import { RankingMode } from "@/lib/types/pick";
 
 vi.mock("@/services/rankings", () => ({
   saveRankings: vi.fn().mockResolvedValue(undefined),
@@ -84,6 +85,7 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
     categoryId: "cat-1",
     createdAt: new Date("2025-01-01T00:00:00.000Z"),
     creatorId: "user-1",
+    rankingMode: RankingMode.TierBuckets,
     ...overrides,
   };
 }

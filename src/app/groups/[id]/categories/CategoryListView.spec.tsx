@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+import { RankingMode } from "@/lib/types/pick";
 
 import { CategoryListView } from "./CategoryListView";
 import { CATEGORY_COPY } from "./copy";
@@ -32,6 +33,7 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
     categoryId: "cat-1",
     createdAt: new Date("2025-01-15T12:00:00.000Z"),
     creatorId: "user-1",
+    rankingMode: RankingMode.TierBuckets,
     ...overrides,
   };
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { RankingMode } from "@/lib/types/pick";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById, recordGroupActivity } from "@/server/data/groups";
 import { createPick, getPicksByCategory } from "@/server/data/picks";
@@ -80,6 +81,7 @@ export async function POST(
     description: unknown;
     topCount: unknown;
     dueDate: unknown;
+    rankingMode: unknown;
   };
   try {
     body = (await request.json()) as {
@@ -87,6 +89,7 @@ export async function POST(
       description: unknown;
       topCount: unknown;
       dueDate: unknown;
+      rankingMode: unknown;
     };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -117,6 +120,17 @@ export async function POST(
   }
   const dueDate = dueDateResult.date;
 
+  let rankingMode: RankingMode;
+  if (body.rankingMode === undefined) {
+    rankingMode = RankingMode.TierBuckets;
+  } else if (
+    Object.values(RankingMode).includes(body.rankingMode as RankingMode)
+  ) {
+    rankingMode = body.rankingMode as RankingMode;
+  } else {
+    return NextResponse.json({ error: "Invalid rankingMode" }, { status: 400 });
+  }
+
   const { id: pickId, createdAt } = await createPick({
     title,
     description,
@@ -124,6 +138,7 @@ export async function POST(
     creatorId: uid,
     topCount,
     dueDate,
+    rankingMode,
   });
   try {
     await recordGroupActivity(groupId, {
