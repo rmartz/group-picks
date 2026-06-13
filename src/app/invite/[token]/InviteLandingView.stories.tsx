@@ -11,7 +11,7 @@ const meta: Meta<typeof InviteLandingView> = {
     groupName: "Book Club",
     memberCount: 5,
     memberNames: ["Alice", "Bob", "Carol"],
-    currentPickTitle: undefined,
+    currentPick: undefined,
     signInHref: "/sign-in?invite_token=abc123",
     onJoin: undefined,
     isJoining: false,
@@ -27,7 +27,7 @@ export const Unauthenticated: Story = {};
 
 export const UnauthenticatedWithCurrentPick: Story = {
   args: {
-    currentPickTitle: "Best Sci-Fi Novel of 2024",
+    currentPick: { title: "Best Sci-Fi Novel of 2024" },
   },
 };
 
@@ -65,7 +65,7 @@ export const AuthenticatedWithCurrentPick: Story = {
     signInHref: undefined,
     onJoin: () => undefined,
     onSignInDifferentAccount: () => undefined,
-    currentPickTitle: "Best Sci-Fi Novel of 2024",
+    currentPick: { title: "Best Sci-Fi Novel of 2024" },
   },
 };
 
