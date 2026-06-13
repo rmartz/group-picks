@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
+import { RankingMode } from "@/lib/types/pick";
 
 import { CategoryDetailView } from "./CategoryDetailView";
 
@@ -24,6 +25,7 @@ const picks: GroupPick[] = [
     closedAt: undefined,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
     creatorId: "user-1",
+    rankingMode: RankingMode.TierBuckets,
   },
   {
     id: "pick-closed",
@@ -35,6 +37,7 @@ const picks: GroupPick[] = [
     closedManually: true,
     createdAt: new Date("2025-01-20T12:00:00.000Z"),
     creatorId: "user-1",
+    rankingMode: RankingMode.TierBuckets,
   },
 ];
 
