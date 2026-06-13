@@ -6,6 +6,7 @@ export interface FirebaseGroupInvite {
   expiresAt: number | null;
   active: boolean;
   mode?: InviteMode;
+  createdBy?: string;
 }
 
 function isInviteMode(value: unknown): value is InviteMode {
@@ -18,7 +19,7 @@ function isInviteMode(value: unknown): value is InviteMode {
 export function groupInviteToFirebase(
   invite: Pick<
     GroupInvite,
-    "groupId" | "createdAt" | "expiresAt" | "active" | "mode"
+    "groupId" | "createdAt" | "expiresAt" | "active" | "mode" | "createdBy"
   >,
 ): FirebaseGroupInvite {
   return {
@@ -27,6 +28,7 @@ export function groupInviteToFirebase(
     expiresAt: invite.expiresAt?.getTime() ?? null,
     active: invite.active,
     mode: invite.mode,
+    createdBy: invite.createdBy,
   };
 }
 
@@ -41,5 +43,6 @@ export function firebaseToGroupInvite(
     expiresAt: data.expiresAt !== null ? new Date(data.expiresAt) : undefined,
     active: data.active,
     mode: isInviteMode(data.mode) ? data.mode : InviteMode.Group,
+    createdBy: data.createdBy,
   };
 }

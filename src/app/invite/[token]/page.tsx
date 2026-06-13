@@ -30,9 +30,14 @@ function InviteErrorPage({ title, description }: InviteErrorPageProps) {
 
 const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
 
-async function getCurrentPickTitle(
+interface CurrentPick {
+  title: string;
+  dueDate?: Date;
+}
+
+async function getCurrentPick(
   groupId: string,
-): Promise<string | undefined> {
+): Promise<CurrentPick | undefined> {
   const categories = await getCategoriesByGroupId(groupId);
   const pickArrays = await Promise.all(
     categories.map((c) => getPicksByCategory(c.id)),
@@ -41,7 +46,9 @@ async function getCurrentPickTitle(
     .flat()
     .filter((p) => p.closedAt === undefined)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  return openPicks[0]?.title;
+  const pick = openPicks[0];
+  if (!pick) return undefined;
+  return { title: pick.title, dueDate: pick.dueDate };
 }
 
 export default async function InvitePage({ params }: InvitePageProps) {
@@ -104,15 +111,19 @@ export default async function InvitePage({ params }: InvitePageProps) {
     redirect(`/groups/${invite.groupId}`);
   }
 
-  const [memberNameRecords, currentPickTitle] = await Promise.all([
-    getMemberDisplayNames(group.memberIds),
-    getCurrentPickTitle(invite.groupId),
-  ]);
+  const inviterUids = invite.createdBy ? [invite.createdBy] : [];
+  const [memberNameRecords, currentPick, inviterNameRecords] =
+    await Promise.all([
+      getMemberDisplayNames(group.memberIds),
+      getCurrentPick(invite.groupId),
+      getMemberDisplayNames(inviterUids),
+    ]);
 
   const memberNames = memberNameRecords.map(({ name }) => {
     const firstName = name.split(" ")[0];
     return firstName ?? name;
   });
+  const invitedByName = inviterNameRecords[0]?.name.split(" ")[0];
 
   if (uid !== undefined) {
     return (
@@ -121,7 +132,8 @@ export default async function InvitePage({ params }: InvitePageProps) {
         groupName={group.name}
         memberCount={group.memberIds.length}
         memberNames={memberNames}
-        currentPickTitle={currentPickTitle}
+        currentPick={currentPick}
+        invitedByName={invitedByName}
         signInHref={signInHref}
       />
     );
@@ -132,7 +144,8 @@ export default async function InvitePage({ params }: InvitePageProps) {
       groupName={group.name}
       memberCount={group.memberIds.length}
       memberNames={memberNames}
-      currentPickTitle={currentPickTitle}
+      currentPick={currentPick}
+      invitedByName={invitedByName}
       signInHref={signInHref}
     />
   );

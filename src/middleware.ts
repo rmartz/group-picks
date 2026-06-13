@@ -6,6 +6,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
 
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/forgot-password"];
+const PUBLIC_PATHS = ["/invite/"];
 const SESSION_COOKIE_NAME = "session";
 
 async function getVerifiedUid(
@@ -28,6 +29,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
 
+  const isPublicPath = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  if (isPublicPath) return NextResponse.next();
+
   const uid = await getVerifiedUid(request);
 
   if (isAuthPage) {
@@ -40,12 +44,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const signInUrl = new URL("/sign-in", request.url);
-    const [, inviteToken] = /^\/invite\/([A-Za-z0-9_-]+)$/.exec(pathname) ?? [];
-    if (inviteToken) {
-      signInUrl.searchParams.set("invite_token", inviteToken);
-    } else {
-      signInUrl.searchParams.set("next", pathname);
-    }
+    signInUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(signInUrl);
   }
 

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { INVITE_LANDING_COPY } from "./copy";
+import { JOIN_GROUP_COPY } from "@/app/groups/join/copy";
+
 import { InviteLandingView } from "./InviteLandingView";
 
 const meta: Meta<typeof InviteLandingView> = {
@@ -82,6 +83,6 @@ export const AuthenticatedWithError: Story = {
     signInHref: undefined,
     onJoin: () => undefined,
     onSignInDifferentAccount: () => undefined,
-    error: INVITE_LANDING_COPY.joinButton,
+    error: JOIN_GROUP_COPY.errors.default,
   },
 };

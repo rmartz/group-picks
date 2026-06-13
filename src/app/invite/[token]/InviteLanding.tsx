@@ -9,12 +9,18 @@ import { joinGroup } from "@/services/groups";
 
 import { InviteLandingView } from "./InviteLandingView";
 
+interface CurrentPick {
+  title: string;
+  dueDate?: Date;
+}
+
 interface InviteLandingProps {
   token: string;
   groupName: string;
   memberCount: number;
   memberNames: string[];
-  currentPickTitle?: string;
+  currentPick?: CurrentPick;
+  invitedByName?: string;
   signInHref: string;
 }
 
@@ -23,7 +29,8 @@ export function InviteLanding({
   groupName,
   memberCount,
   memberNames,
-  currentPickTitle,
+  currentPick,
+  invitedByName,
   signInHref,
 }: InviteLandingProps) {
   const router = useRouter();
@@ -65,7 +72,8 @@ export function InviteLanding({
       groupName={groupName}
       memberCount={memberCount}
       memberNames={memberNames}
-      currentPickTitle={currentPickTitle}
+      currentPick={currentPick}
+      invitedByName={invitedByName}
       onJoin={() => void handleJoin()}
       isJoining={isJoining || isSigningIn}
       error={error}

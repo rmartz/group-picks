@@ -78,7 +78,7 @@ describe("currently picking section", () => {
     render(
       <InviteLandingView
         {...makeDefaultProps()}
-        currentPickTitle="Summer Read"
+        currentPick={{ title: "Summer Read" }}
         signInHref="/sign-in"
       />,
     );
