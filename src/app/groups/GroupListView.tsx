@@ -30,7 +30,9 @@ export function GroupListView({ groups }: GroupListViewProps) {
                 className="block rounded-lg border px-4 py-4 hover:bg-zinc-50"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{group.emoji}</span>
+                  <span className="text-2xl" aria-hidden="true">
+                    {group.emoji}
+                  </span>
                   <div className="flex flex-1 items-center justify-between">
                     <span className="font-semibold">{group.name}</span>
                     <span className="text-xs text-muted-foreground">

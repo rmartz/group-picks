@@ -1,4 +1,5 @@
 import type { Group } from "@/lib/types/group";
+import { DEFAULT_GROUP_EMOJI } from "@/lib/types/group";
 
 export interface FirebaseGroupPublic {
   name: string;
@@ -44,7 +45,7 @@ export function firebaseToGroup(
   const emoji =
     typeof data.emoji === "string" && data.emoji.trim()
       ? data.emoji.trim()
-      : "👥";
+      : DEFAULT_GROUP_EMOJI;
   return {
     id,
     name: data.name,

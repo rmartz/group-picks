@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { getAdminApp } from "@/lib/firebase/admin";
 import { groupToFirebase } from "@/lib/firebase/schema/group";
 import { groupInviteToFirebase } from "@/lib/firebase/schema/invite";
+import { DEFAULT_GROUP_EMOJI } from "@/lib/types/group";
 import { InviteMode } from "@/lib/types/invite";
 import { INVITE_TTL_GROUP } from "@/server/data/invites";
 import { getVerifiedUid } from "@/server/utils/auth";
@@ -15,9 +16,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { name: unknown; emoji: unknown };
+  let body: { name: unknown; emoji?: unknown };
   try {
-    body = (await request.json()) as { name: unknown; emoji: unknown };
+    body = (await request.json()) as { name: unknown; emoji?: unknown };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
   const emoji =
     typeof body.emoji === "string" && body.emoji.trim()
       ? body.emoji.trim()
-      : "👥";
+      : DEFAULT_GROUP_EMOJI;
   const db = getDatabase(getAdminApp());
   const groupRef = db.ref("groups").push();
   const groupId = groupRef.key;
