@@ -44,7 +44,7 @@ export const MixedTiers: Story = {
       "opt-1": RankingTier.LoveIt,
       "opt-2": RankingTier.Yes,
       "opt-3": RankingTier.Maybe,
-      "opt-4": RankingTier.NotReally,
+      "opt-4": RankingTier.NotForMe,
     },
   },
 };

@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { RankingMode } from "@/lib/types/pick";
+
 import {
   type FirebasePickPublic,
   firebaseToPick,
@@ -333,6 +335,54 @@ describe("firebaseToPick", () => {
 
       expect(result.resultsVisible).toBe(true);
     });
+  });
+});
+
+describe("pickToFirebase rankingMode", () => {
+  it("serializes rankingMode when provided", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      topCount: 1,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      rankingMode: RankingMode.TierBuckets,
+    });
+
+    expect(result.rankingMode).toBe(RankingMode.TierBuckets);
+  });
+
+  it("omits rankingMode when undefined", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      topCount: 1,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      rankingMode: undefined,
+    });
+
+    expect(result.rankingMode).toBeUndefined();
+  });
+});
+
+describe("firebaseToPick rankingMode", () => {
+  it("deserializes rankingMode when present", () => {
+    const data = makeFirebasePickPublic({
+      rankingMode: RankingMode.TierBuckets,
+    });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.rankingMode).toBe(RankingMode.TierBuckets);
+  });
+
+  it("defaults rankingMode to TierBuckets when absent", () => {
+    const data = makeFirebasePickPublic({ rankingMode: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.rankingMode).toBe(RankingMode.TierBuckets);
   });
 });
 

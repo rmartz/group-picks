@@ -6,7 +6,7 @@ import {
   firebaseToPick,
   pickToFirebase,
 } from "@/lib/firebase/schema/pick";
-import type { GroupPick } from "@/lib/types/pick";
+import type { GroupPick, RankingMode } from "@/lib/types/pick";
 
 export const PICK_CLOSED_API_ERROR = "Pick is closed";
 const PICK_CLOSED_ERROR = "Pick is closed and no longer accepts changes.";
@@ -126,6 +126,7 @@ export async function createPick(
   pick: Pick<GroupPick, "title" | "categoryId" | "creatorId" | "topCount"> & {
     description?: string;
     dueDate?: Date;
+    rankingMode?: RankingMode;
     resultsVisible?: boolean;
   },
 ): Promise<{ id: string; createdAt: Date }> {

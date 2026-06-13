@@ -1,4 +1,5 @@
 import type { GroupPick, PickOption } from "@/lib/types/pick";
+import { RankingMode } from "@/lib/types/pick";
 
 export interface FirebasePickOption {
   ownerIds: string[];
@@ -16,6 +17,7 @@ export interface FirebasePickPublic {
   closedManually?: boolean;
   createdAt: number;
   creatorId: string;
+  rankingMode?: string;
   resultsVisible?: boolean;
 }
 
@@ -51,7 +53,7 @@ export function pickToFirebase(
     | "closedAt"
     | "closedManually"
     | "resultsVisible"
-  >,
+  > & { rankingMode?: RankingMode },
 ): FirebasePickPublic {
   const options =
     pick.options === undefined
@@ -74,6 +76,7 @@ export function pickToFirebase(
     creatorId: pick.creatorId,
     closedAt: pick.closedAt?.getTime(),
     closedManually: pick.closedManually,
+    rankingMode: pick.rankingMode,
     resultsVisible: pick.resultsVisible,
   };
 }
@@ -95,6 +98,13 @@ export function firebaseToPick(
           firebaseToPickOption(optionId, optionData),
         );
 
+  const rankingMode =
+    data.rankingMode === RankingMode.StackRank
+      ? RankingMode.StackRank
+      : data.rankingMode === RankingMode.HeadToHead
+        ? RankingMode.HeadToHead
+        : RankingMode.TierBuckets;
+
   return {
     id,
     options,
@@ -111,6 +121,7 @@ export function firebaseToPick(
         ? new Date(data.closedAt)
         : undefined,
     closedManually: data.closedManually,
+    rankingMode,
     resultsVisible: data.resultsVisible !== false,
   };
 }

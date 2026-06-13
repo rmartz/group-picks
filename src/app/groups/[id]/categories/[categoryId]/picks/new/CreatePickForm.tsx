@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { RankingMode } from "@/lib/types/pick";
 import { createPick } from "@/services/picks";
 
 import { CREATE_PICK_COPY } from "./copy";
@@ -24,6 +25,9 @@ export function CreatePickForm({
   const [description, setDescription] = useState("");
   const [topCount, setTopCount] = useState(3);
   const [dueDate, setDueDate] = useState("");
+  const [rankingMode, setRankingMode] = useState<RankingMode>(
+    RankingMode.TierBuckets,
+  );
   const [resultsVisible, setResultsVisible] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
@@ -44,6 +48,7 @@ export function CreatePickForm({
         description.trim() || undefined,
         topCount,
         dueDate || undefined,
+        rankingMode,
         resultsVisible,
       );
       router.push(
@@ -66,6 +71,8 @@ export function CreatePickForm({
       onTopCountChange={setTopCount}
       dueDate={dueDate}
       onDueDateChange={setDueDate}
+      rankingMode={rankingMode}
+      onRankingModeChange={setRankingMode}
       resultsVisible={resultsVisible}
       onResultsVisibleChange={setResultsVisible}
       hasPriorPicks={hasPriorPicks}

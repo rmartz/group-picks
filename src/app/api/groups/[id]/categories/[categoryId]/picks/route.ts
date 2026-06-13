@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { RankingMode } from "@/lib/types/pick";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { createPick, getPicksByCategory } from "@/server/data/picks";
@@ -80,6 +81,7 @@ export async function POST(
     description: unknown;
     topCount: unknown;
     dueDate: unknown;
+    rankingMode: unknown;
     resultsVisible: unknown;
   };
   try {
@@ -88,6 +90,7 @@ export async function POST(
       description: unknown;
       topCount: unknown;
       dueDate: unknown;
+      rankingMode: unknown;
       resultsVisible: unknown;
     };
   } catch {
@@ -119,7 +122,28 @@ export async function POST(
   }
   const dueDate = dueDateResult.date;
 
-  const resultsVisible = body.resultsVisible === false ? false : true;
+  let rankingMode: RankingMode;
+  if (body.rankingMode === undefined) {
+    rankingMode = RankingMode.TierBuckets;
+  } else if (
+    Object.values(RankingMode).includes(body.rankingMode as RankingMode)
+  ) {
+    rankingMode = body.rankingMode as RankingMode;
+  } else {
+    return NextResponse.json({ error: "Invalid rankingMode" }, { status: 400 });
+  }
+
+  let resultsVisible: boolean;
+  if (body.resultsVisible === undefined) {
+    resultsVisible = true;
+  } else if (typeof body.resultsVisible === "boolean") {
+    resultsVisible = body.resultsVisible;
+  } else {
+    return NextResponse.json(
+      { error: "resultsVisible must be a boolean" },
+      { status: 400 },
+    );
+  }
 
   const { id: pickId, createdAt } = await createPick({
     title,
@@ -128,6 +152,7 @@ export async function POST(
     creatorId: uid,
     topCount,
     dueDate,
+    rankingMode,
     resultsVisible,
   });
 

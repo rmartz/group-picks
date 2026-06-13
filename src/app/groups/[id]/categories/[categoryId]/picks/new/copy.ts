@@ -10,6 +10,13 @@ export const CREATE_PICK_COPY = {
   priorPicksBannerBody:
     "This category already has picks. The new pick will be listed alongside them.",
   priorPicksBannerTitle: "Prior picks exist",
+  rankingModeLabel: "Ranking mode",
+  rankingModes: {
+    headToHead: "Head-to-head",
+    stackRank: "Stack rank",
+    tierBuckets: "Tier buckets",
+  },
+  rankingModesPostMvp: "(post-MVP)",
   resultsVisibleHint: "Hide for 'surprise me' reveal at close.",
   resultsVisibleLabel: "Show running results",
   submitButton: "Create pick",

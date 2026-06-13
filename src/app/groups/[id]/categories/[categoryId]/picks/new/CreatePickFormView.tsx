@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RankingMode } from "@/lib/types/pick";
 
 import { CREATE_PICK_COPY } from "./copy";
 
@@ -16,6 +17,8 @@ interface CreatePickFormViewProps {
   onTopCountChange: (topCount: number) => void;
   dueDate: string;
   onDueDateChange: (dueDate: string) => void;
+  rankingMode: RankingMode;
+  onRankingModeChange: (mode: RankingMode) => void;
   resultsVisible: boolean;
   onResultsVisibleChange: (visible: boolean) => void;
   hasPriorPicks: boolean;
@@ -34,6 +37,8 @@ export function CreatePickFormView({
   onTopCountChange,
   dueDate,
   onDueDateChange,
+  rankingMode,
+  onRankingModeChange,
   resultsVisible,
   onResultsVisibleChange,
   hasPriorPicks,
@@ -125,6 +130,55 @@ export function CreatePickFormView({
             disabled={loading}
           />
         </div>
+
+        <fieldset className="space-y-1">
+          <legend className="text-sm font-medium">
+            {CREATE_PICK_COPY.rankingModeLabel}
+          </legend>
+          <div className="space-y-1">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="ranking-mode"
+                value={RankingMode.TierBuckets}
+                checked={rankingMode === RankingMode.TierBuckets}
+                onChange={() => {
+                  onRankingModeChange(RankingMode.TierBuckets);
+                }}
+                disabled={loading}
+              />
+              {CREATE_PICK_COPY.rankingModes.tierBuckets}
+            </label>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="radio"
+                name="ranking-mode"
+                value={RankingMode.StackRank}
+                checked={rankingMode === RankingMode.StackRank}
+                onChange={() => {
+                  onRankingModeChange(RankingMode.StackRank);
+                }}
+                disabled
+              />
+              {CREATE_PICK_COPY.rankingModes.stackRank}{" "}
+              {CREATE_PICK_COPY.rankingModesPostMvp}
+            </label>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="radio"
+                name="ranking-mode"
+                value={RankingMode.HeadToHead}
+                checked={rankingMode === RankingMode.HeadToHead}
+                onChange={() => {
+                  onRankingModeChange(RankingMode.HeadToHead);
+                }}
+                disabled
+              />
+              {CREATE_PICK_COPY.rankingModes.headToHead}{" "}
+              {CREATE_PICK_COPY.rankingModesPostMvp}
+            </label>
+          </div>
+        </fieldset>
 
         <div className="flex items-start gap-3">
           <input

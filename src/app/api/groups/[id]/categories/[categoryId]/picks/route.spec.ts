@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { RankingMode } from "@/lib/types/pick";
+
 const {
   mockGetVerifiedUid,
   mockGetGroupById,
@@ -246,6 +248,130 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
       );
 
       expect(response.status).toBe(201);
+    });
+  });
+
+  describe("resultsVisible handling", () => {
+    it("defaults resultsVisible to true when omitted", async () => {
+      const response = await POST(
+        makeRequest({ title: "Best Pizza", topCount: 3 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ resultsVisible: true }),
+      );
+    });
+
+    it("passes through resultsVisible: false", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          resultsVisible: false,
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ resultsVisible: false }),
+      );
+    });
+
+    it("returns 400 for a non-boolean resultsVisible", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          resultsVisible: "yes",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe("resultsVisible must be a boolean");
+      expect(mockCreatePick).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("rankingMode handling", () => {
+    it("defaults rankingMode to TierBuckets when omitted", async () => {
+      const response = await POST(
+        makeRequest({ title: "Best Pizza", topCount: 3 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ rankingMode: RankingMode.TierBuckets }),
+      );
+    });
+
+    it("passes through rankingMode tier-buckets", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          rankingMode: "tier-buckets",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ rankingMode: RankingMode.TierBuckets }),
+      );
+    });
+
+    it("passes through rankingMode stack-rank", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          rankingMode: "stack-rank",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ rankingMode: RankingMode.StackRank }),
+      );
+    });
+
+    it("passes through rankingMode head-to-head", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          rankingMode: "head-to-head",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ rankingMode: RankingMode.HeadToHead }),
+      );
+    });
+
+    it("returns 400 for an invalid rankingMode value", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          rankingMode: "invalid-value",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe("Invalid rankingMode");
+      expect(mockCreatePick).not.toHaveBeenCalled();
     });
   });
 });

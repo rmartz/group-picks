@@ -1,3 +1,5 @@
+import type { RankingMode } from "@/lib/types/pick";
+
 export async function createPick(
   groupId: string,
   categoryId: string,
@@ -5,6 +7,7 @@ export async function createPick(
   description: string | undefined,
   topCount: number,
   dueDate?: string,
+  rankingMode?: RankingMode,
   resultsVisible?: boolean,
 ): Promise<{ pickId: string; createdAt: Date }> {
   const response = await fetch(
@@ -17,6 +20,7 @@ export async function createPick(
         description,
         topCount,
         dueDate,
+        rankingMode,
         resultsVisible,
       }),
     },
