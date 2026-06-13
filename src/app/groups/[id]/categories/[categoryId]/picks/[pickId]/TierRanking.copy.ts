@@ -6,7 +6,7 @@ export const TIER_ORDER = [
   RankingTier.LoveIt,
   RankingTier.Yes,
   RankingTier.Maybe,
-  RankingTier.NotReally,
+  RankingTier.NotForMe,
   RankingTier.Unranked,
 ] as const;
 
@@ -14,7 +14,7 @@ export const TIER_RANKING_COPY = {
   tiers: {
     [RankingTier.LoveIt]: "Love it",
     [RankingTier.Maybe]: "Maybe",
-    [RankingTier.NotReally]: "Not really",
+    [RankingTier.NotForMe]: "Not for me",
     [RankingTier.Unranked]: "Unranked",
     [RankingTier.Yes]: "Yes",
   },

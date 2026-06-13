@@ -6,7 +6,7 @@ const TIER_SCORES: Record<RankingTier, number> = {
   [RankingTier.LoveIt]: 4,
   [RankingTier.Yes]: 3,
   [RankingTier.Maybe]: 2,
-  [RankingTier.NotReally]: 1,
+  [RankingTier.NotForMe]: 1,
   [RankingTier.Unranked]: 0,
 };
 
