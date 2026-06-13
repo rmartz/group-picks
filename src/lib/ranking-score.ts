@@ -23,7 +23,7 @@ export interface OptionTierAttribution {
   [RankingTier.LoveIt]: AttributionMember[];
   [RankingTier.Yes]: AttributionMember[];
   [RankingTier.Maybe]: AttributionMember[];
-  [RankingTier.NotReally]: AttributionMember[];
+  [RankingTier.NotForMe]: AttributionMember[];
   noRank: AttributionMember[];
 }
 
@@ -57,7 +57,7 @@ export function computeOptionTierAttribution(
       [RankingTier.LoveIt]: [],
       [RankingTier.Yes]: [],
       [RankingTier.Maybe]: [],
-      [RankingTier.NotReally]: [],
+      [RankingTier.NotForMe]: [],
       noRank: [],
     };
 
@@ -82,7 +82,7 @@ export function computeOptionTierAttribution(
         userTier === RankingTier.LoveIt ||
         userTier === RankingTier.Yes ||
         userTier === RankingTier.Maybe ||
-        userTier === RankingTier.NotReally
+        userTier === RankingTier.NotForMe
       ) {
         attribution[userTier].push(memberIdentity);
       } else {

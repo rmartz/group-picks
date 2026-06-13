@@ -1,5 +1,5 @@
-import { render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { OptionTierAttribution } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
@@ -111,6 +111,8 @@ function setupClosedPickDefaults() {
     { uid: "uid-member2", name: "Bob" },
   ]);
 }
+
+afterEach(cleanup);
 
 describe("PickDetailPage — former-member exclusion", () => {
   it("excludes former members' rankings when computing top picks for a closed pick", async () => {

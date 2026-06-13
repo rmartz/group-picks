@@ -117,7 +117,7 @@ describe("computeOptionTierAttribution", () => {
   it("buckets members into option tiers and noRank by option", () => {
     const allRankings = {
       "user-1": { "opt-a": RankingTier.LoveIt, "opt-b": RankingTier.Yes },
-      "user-2": { "opt-a": RankingTier.NotReally },
+      "user-2": { "opt-a": RankingTier.NotForMe },
       "user-3": { "opt-a": RankingTier.Unranked },
     };
 
@@ -135,7 +135,7 @@ describe("computeOptionTierAttribution", () => {
     expect(attribution["opt-a"]?.[RankingTier.LoveIt]).toEqual([
       { uid: "user-1", firstName: "Alice" },
     ]);
-    expect(attribution["opt-a"]?.[RankingTier.NotReally]).toEqual([
+    expect(attribution["opt-a"]?.[RankingTier.NotForMe]).toEqual([
       { uid: "user-2", firstName: "Bob" },
     ]);
     expect(attribution["opt-a"]?.noRank).toEqual([

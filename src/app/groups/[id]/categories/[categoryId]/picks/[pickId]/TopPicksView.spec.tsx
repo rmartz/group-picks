@@ -17,7 +17,7 @@ const emptyAttribution = {
   [RankingTier.LoveIt]: [],
   [RankingTier.Yes]: [],
   [RankingTier.Maybe]: [],
-  [RankingTier.NotReally]: [],
+  [RankingTier.NotForMe]: [],
   noRank: [],
 };
 
@@ -155,7 +155,7 @@ describe("TopPicksView", () => {
               [RankingTier.LoveIt]: [{ uid: "user-1", firstName: "Alice" }],
               [RankingTier.Yes]: [{ uid: "user-2", firstName: "Bob" }],
               [RankingTier.Maybe]: [],
-              [RankingTier.NotReally]: [],
+              [RankingTier.NotForMe]: [],
               noRank: [{ uid: "user-3", firstName: "Cara" }],
             },
           }}
@@ -190,7 +190,7 @@ describe("TopPicksView", () => {
               ],
               [RankingTier.Yes]: [],
               [RankingTier.Maybe]: [],
-              [RankingTier.NotReally]: [],
+              [RankingTier.NotForMe]: [],
               noRank: [],
             },
           }}

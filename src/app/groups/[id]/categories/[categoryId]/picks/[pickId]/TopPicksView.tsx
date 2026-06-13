@@ -21,7 +21,7 @@ const ATTRIBUTION_ROWS = [
   { key: RankingTier.Yes, label: TOP_PICKS_VIEW_COPY.tiers.yes },
   { key: RankingTier.Maybe, label: TOP_PICKS_VIEW_COPY.tiers.maybe },
   {
-    key: RankingTier.NotReally,
+    key: RankingTier.NotForMe,
     label: TOP_PICKS_VIEW_COPY.tiers.notForMe,
   },
   { key: "noRank", label: TOP_PICKS_VIEW_COPY.tiers.noRank },
