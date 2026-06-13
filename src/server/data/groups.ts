@@ -141,6 +141,7 @@ export async function deleteGroup(
     );
     for (const pickId of pickIds) {
       updates[`picks/${pickId}`] = null;
+      updates[`rankings/${pickId}`] = null;
     }
     updates[`categories/${categoryKey}`] = null;
   });

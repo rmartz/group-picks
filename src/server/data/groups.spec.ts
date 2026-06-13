@@ -206,6 +206,9 @@ describe("deleteGroup", () => {
       "picks/pick-1": null,
       "picks/pick-2": null,
       "picks/pick-3": null,
+      "rankings/pick-1": null,
+      "rankings/pick-2": null,
+      "rankings/pick-3": null,
       "users/user-1/groups/group-1": null,
       "users/user-2/groups/group-1": null,
     });
