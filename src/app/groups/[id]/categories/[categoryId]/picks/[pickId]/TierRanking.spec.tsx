@@ -336,6 +336,28 @@ describe("TierRanking", () => {
           }),
         ).toBeNull();
       });
+
+      it("shows from-prior-pick label on pre-filled options after applying pre-fill", () => {
+        const option = makeOption({ id: "opt-1", title: "Inception" });
+        render(
+          <TierRanking
+            {...baseProps}
+            options={[option]}
+            initialTierAssignments={{}}
+            priorPickBannerData={makeBannerData({
+              prefillAssignments: { "opt-1": RankingTier.LoveIt },
+            })}
+          />,
+        );
+        fireEvent.click(
+          screen.getByRole("button", {
+            name: PRIOR_PICK_BANNER_COPY.prefillButton,
+          }),
+        );
+        expect(
+          screen.getByText(TIER_RANKING_COPY.fromPriorPickLabel),
+        ).toBeDefined();
+      });
     });
   });
 });

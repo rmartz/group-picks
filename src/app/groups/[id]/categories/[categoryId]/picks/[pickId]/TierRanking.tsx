@@ -33,6 +33,9 @@ export function TierRanking({
   const [tierAssignments, setTierAssignments] = useState<
     Record<string, RankingTier>
   >(initialTierAssignments);
+  const [prefillOptionIds, setPrefillOptionIds] = useState<ReadonlySet<string>>(
+    new Set(),
+  );
 
   const hasExistingAssignments = Object.keys(initialTierAssignments).length > 0;
   const [showBanner, setShowBanner] = useState(
@@ -56,6 +59,7 @@ export function TierRanking({
 
   function handlePrefill(assignments: Record<string, RankingTier>) {
     setTierAssignments(assignments);
+    setPrefillOptionIds(new Set(Object.keys(assignments)));
     setShowBanner(false);
     saveRankings(groupId, categoryId, pickId, assignments).catch(() => {
       // fire-and-forget: ranking save failures are non-fatal
@@ -82,6 +86,7 @@ export function TierRanking({
       )}
       <TierRankingView
         options={options}
+        prefillOptionIds={prefillOptionIds}
         tierAssignments={tierAssignments}
         onOptionClick={handleOptionClick}
       />

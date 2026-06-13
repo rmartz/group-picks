@@ -33,8 +33,9 @@ export function PriorPickBannerView({
             {PRIOR_PICK_BANNER_COPY.heading(categoryName)}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {pickTitle} &middot; {rankedAt.toLocaleDateString()} &middot;{" "}
-            {overlappingCount} {PRIOR_PICK_BANNER_COPY.overlapSuffix}
+            {pickTitle} &middot; {PRIOR_PICK_BANNER_COPY.rankedLabel}{" "}
+            {rankedAt.toLocaleDateString()} &middot; {overlappingCount}{" "}
+            {PRIOR_PICK_BANNER_COPY.overlapSuffix}
           </p>
         </div>
         <button
