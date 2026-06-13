@@ -182,13 +182,13 @@ describe("TierRanking", () => {
         TIER_RANKING_COPY.tiers[RankingTier.Maybe],
       );
 
-      // Maybe → NotReally
+      // Maybe → NotForMe
       fireEvent.click(getChip());
       expect(getTierSectionFor(getChip())).toBe(
-        TIER_RANKING_COPY.tiers[RankingTier.NotReally],
+        TIER_RANKING_COPY.tiers[RankingTier.NotForMe],
       );
 
-      // NotReally → Unranked
+      // NotForMe → Unranked
       fireEvent.click(getChip());
       expect(getTierSectionFor(getChip())).toBe(
         TIER_RANKING_COPY.tiers[RankingTier.Unranked],

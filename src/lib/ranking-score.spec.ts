@@ -52,11 +52,11 @@ describe("computeTopPicks", () => {
       expect(second?.id).toBe("opt-b");
     });
 
-    it("ranks Maybe higher than NotReally", () => {
+    it("ranks Maybe higher than NotForMe", () => {
       const allRankings = {
         "user-1": {
           "opt-a": RankingTier.Maybe,
-          "opt-b": RankingTier.NotReally,
+          "opt-b": RankingTier.NotForMe,
         },
       };
       const [first, second] = computeTopPicks(allRankings, [optA, optB], 2);
@@ -64,10 +64,10 @@ describe("computeTopPicks", () => {
       expect(second?.id).toBe("opt-b");
     });
 
-    it("ranks NotReally higher than Unranked", () => {
+    it("ranks NotForMe higher than Unranked", () => {
       const allRankings = {
         "user-1": {
-          "opt-a": RankingTier.NotReally,
+          "opt-a": RankingTier.NotForMe,
           "opt-b": RankingTier.Unranked,
         },
       };
@@ -89,7 +89,7 @@ describe("computeTopPicks", () => {
 
     it("options not ranked by any user score 0 and appear last", () => {
       const allRankings = {
-        "user-1": { "opt-a": RankingTier.NotReally },
+        "user-1": { "opt-a": RankingTier.NotForMe },
       };
       const [first, second] = computeTopPicks(allRankings, [optA, optB], 2);
       expect(first?.id).toBe("opt-a");
@@ -102,7 +102,7 @@ describe("computeTopPicks", () => {
           "opt-a": RankingTier.LoveIt,
           "opt-b": RankingTier.Yes,
           "opt-c": RankingTier.Maybe,
-          "opt-d": RankingTier.NotReally,
+          "opt-d": RankingTier.NotForMe,
         },
       };
       const result = computeTopPicks(allRankings, [optA, optB, optC, optD], 2);

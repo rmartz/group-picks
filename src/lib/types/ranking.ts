@@ -1,7 +1,7 @@
 export enum RankingTier {
   LoveIt = "love_it",
   Maybe = "maybe",
-  NotReally = "not_really",
+  NotForMe = "not_for_me",
   Unranked = "unranked",
   Yes = "yes",
 }

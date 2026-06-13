@@ -1,3 +1,9 @@
+export enum RankingMode {
+  HeadToHead = "head-to-head",
+  StackRank = "stack-rank",
+  TierBuckets = "tier-buckets",
+}
+
 export interface PickOption {
   id: string;
   ownerIds: string[];
@@ -15,5 +21,6 @@ export interface GroupPick {
   closedManually?: boolean;
   createdAt: Date;
   creatorId: string;
+  rankingMode: RankingMode;
   options?: PickOption[];
 }
