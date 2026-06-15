@@ -52,8 +52,7 @@ export function computeRankedResults(
 
   const ranked: ClosedPickResultEntry[] = [];
   let currentRank = 1;
-  for (let i = 0; i < sorted.length; i++) {
-    const item = sorted[i];
+  for (const [i, item] of sorted.entries()) {
     const prevItem = sorted[i - 1];
     if (
       i > 0 &&
