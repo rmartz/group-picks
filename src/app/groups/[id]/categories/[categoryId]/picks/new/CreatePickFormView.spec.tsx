@@ -205,7 +205,7 @@ describe("CreatePickFormView", () => {
       const tierBucketsButton = screen.getByRole("radio", {
         name: CREATE_PICK_COPY.rankingModes.tierBuckets,
       });
-      expect(tierBucketsButton.disabled).toBe(false);
+      expect(tierBucketsButton.hasAttribute("disabled")).toBe(false);
     });
 
     it("renders the Stack Rank option as disabled", () => {
@@ -213,7 +213,7 @@ describe("CreatePickFormView", () => {
       const stackRankButton = screen.getByRole("radio", {
         name: new RegExp(CREATE_PICK_COPY.rankingModes.stackRank),
       });
-      expect(stackRankButton.disabled).toBe(true);
+      expect(stackRankButton.hasAttribute("disabled")).toBe(true);
     });
 
     it("renders the Head-to-Head option as disabled", () => {
@@ -221,7 +221,7 @@ describe("CreatePickFormView", () => {
       const headToHeadButton = screen.getByRole("radio", {
         name: new RegExp(CREATE_PICK_COPY.rankingModes.headToHead),
       });
-      expect(headToHeadButton.disabled).toBe(true);
+      expect(headToHeadButton.hasAttribute("disabled")).toBe(true);
     });
 
     it("calls onRankingModeChange when Tier Buckets is selected", () => {
