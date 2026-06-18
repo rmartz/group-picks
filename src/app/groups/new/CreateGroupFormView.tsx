@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DEFAULT_GROUP_EMOJI } from "@/lib/types/group";
 
 import { CREATE_GROUP_COPY } from "./copy";
 
@@ -35,7 +36,7 @@ export function CreateGroupFormView({
   error,
 }: CreateGroupFormViewProps) {
   function handleEmojiButtonClick() {
-    onEmojiChange(NEXT_GROUP_EMOJI[emoji] ?? "👥");
+    onEmojiChange(NEXT_GROUP_EMOJI[emoji] ?? DEFAULT_GROUP_EMOJI);
   }
 
   return (
