@@ -104,6 +104,9 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 ## Documentation
 
 - Keep documentation in sync with the code — outdated docs are worse than no docs.
+- **`docs/` is an [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)-conformant knowledge base** — curated reference background an agent retrieves before a task (architecture, data model, per-domain notes). It is _pull/retrieval_ reference, distinct from this file's always-in-context _policy_. Detailed explanatory background belongs in `docs/`; behavioral rules belong here. See [`docs/index.md`](docs/index.md).
+- **Every `docs/` page must carry OKF YAML frontmatter.** `type` is required and must be one of the canonical vocabulary — `Index`, `Architecture`, `DataModel`, `Domain`, `Workflow` (defined in [`docs/index.md`](docs/index.md)). `title`, `description`, `resource` (relative path to the primary source file/module the page documents), and `tags` are recommended. Cross-link related pages with normal markdown links.
+- **When adding or removing a `docs/` page, update [`docs/index.md`](docs/index.md)** so the directory listing stays in sync.
 
 ## React / Next.js Standards
 
