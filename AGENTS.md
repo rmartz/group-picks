@@ -25,6 +25,14 @@ pnpm run secrets-check # Config validation + gitleaks scan (also runs pre-commit
 
 After creating a git worktree (`git worktree add .git-worktrees/<name> -b <branch> origin/main`), run `pnpm install --frozen-lockfile` inside the worktree before invoking any build, test, or lint command. pnpm's `node-modules` linker creates per-directory `node_modules` trees; a fresh worktree has none. The global store is already populated so this step only creates hardlinks — it takes a few seconds and requires no network access.
 
+### Pre-commit hook architecture
+
+`.husky/pre-commit` currently runs in both the root worktree (human commits) and agent worktrees (`.git-worktrees/`), because `new-worktree.py` installs `node_modules` in every worktree so all hook steps work correctly in both contexts.
+
+A sibling repository (`rmartz/dotfiles`) splits these concerns differently: `.husky/pre-commit` exits immediately in worktrees (detects them via `[ -f ".git" ]` — a worktree's `.git` is a file, not a directory) and each agent worktree gets `core.hooksPath` pointed at a separate `claude/hooks/pre-commit` instead. The motivation there was that worktrees may not have `node_modules`, making Husky's lint-staged step fail. That problem does not currently apply here.
+
+If the Husky hook ever becomes unreliable in worktrees (missing dependencies, path issues, or checks that should behave differently for agents vs humans), adopt the same split: guard `.husky/pre-commit` with `[ -f ".git" ] && exit 0`, add a `scripts/hooks/pre-commit` with the agent-appropriate checks, and configure `core.hooksPath=scripts/hooks` in `new-worktree.py`.
+
 ## Deployment Config
 
 Public (non-secret) environment config lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml`. Only `NEXT_PUBLIC_*` and explicitly allowlisted keys are permitted; patterns matching `*SECRET*`, `*_TOKEN*`, or `*PRIVATE_KEY*` are hard-denied.
