@@ -32,6 +32,8 @@ This repo uses a two-hook split, matching the pattern in `rmartz/dotfiles`:
 - **`.husky/pre-commit`** — runs for human commits in the root worktree only. Detects worktrees via `[ -f ".git" ]` (a worktree's `.git` is a file, not a directory) and exits immediately there, so Husky's `node_modules` dependency is never a problem in agent contexts.
 - **`scripts/hooks/pre-commit`** — runs for agent commits in `.git-worktrees/`. Contains the same checks as the Husky hook plus the `node_modules` self-healing guard (since new worktrees may not have had `pnpm install` run).
 
+Both hooks run `scripts/check-conflict-markers.sh --staged` before `lint-staged`, so a staged merge-conflict marker fails the commit before Prettier can reflow and mangle it. It flags only unambiguous angle markers (`<<<<<<<` / `>>>>>>>`), never a lone `=======`, so Markdown dividers and setext underlines are not false positives. Bypass with `git commit --no-verify` or `ALLOW_CONFLICT_MARKERS=1`.
+
 Agent worktrees use this hook via `core.hooksPath=scripts/hooks`. This is a shared git config value — set it once in the root repository and all linked worktrees inherit it automatically:
 
 ```sh
