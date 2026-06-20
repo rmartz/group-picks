@@ -32,6 +32,8 @@ This repo uses a two-hook split, matching the pattern in `rmartz/dotfiles`:
 - **`.husky/pre-commit`** — runs for human commits in the root worktree only. Detects worktrees via `[ -f ".git" ]` (a worktree's `.git` is a file, not a directory) and exits immediately there, so Husky's `node_modules` dependency is never a problem in agent contexts.
 - **`scripts/hooks/pre-commit`** — runs for agent commits in `.git-worktrees/`. Contains the same checks as the Husky hook plus the `node_modules` self-healing guard (since new worktrees may not have had `pnpm install` run).
 
+Both hooks run `scripts/check-conflict-markers.sh --staged` before `lint-staged`, so a staged merge-conflict marker fails the commit before Prettier can reflow and mangle it. It flags only unambiguous angle markers (`<<<<<<<` / `>>>>>>>`), never a lone `=======`, so Markdown dividers and setext underlines are not false positives. Bypass with `git commit --no-verify` or `ALLOW_CONFLICT_MARKERS=1`.
+
 Agent worktrees use this hook via `core.hooksPath=scripts/hooks`. This is a shared git config value — set it once in the root repository and all linked worktrees inherit it automatically:
 
 ```sh
@@ -111,9 +113,6 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 ## Documentation
 
 - Keep documentation in sync with the code — outdated docs are worse than no docs.
-- **`docs/` is an [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)-conformant knowledge base** — curated reference background an agent retrieves before a task (architecture, data model, per-domain notes). It is _pull/retrieval_ reference, distinct from this file's always-in-context _policy_. Detailed explanatory background belongs in `docs/`; behavioral rules belong here. See [`docs/index.md`](docs/index.md).
-- **Every `docs/` page must carry OKF YAML frontmatter.** `type` is required and must be one of the canonical vocabulary — `Index`, `Architecture`, `DataModel`, `Domain`, `Workflow` (defined in [`docs/index.md`](docs/index.md)). `title`, `description`, `resource` (relative path to the primary source file/module the page documents), and `tags` are recommended. Cross-link related pages with normal markdown links.
-- **When adding or removing a `docs/` page, update [`docs/index.md`](docs/index.md)** so the directory listing stays in sync.
 
 ## React / Next.js Standards
 
