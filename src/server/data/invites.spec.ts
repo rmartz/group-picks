@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockUpdate, mockRef } = vi.hoisted(() => ({
+const { mockUpdate, mockRef, mockGet, mockSet } = vi.hoisted(() => ({
   mockUpdate: vi.fn(),
   mockRef: vi.fn(),
+  mockGet: vi.fn(),
+  mockSet: vi.fn(),
 }));
 
 vi.mock("@/lib/firebase/admin", () => ({
@@ -20,8 +22,10 @@ const { addGroupMember } = await import("./invites");
 describe("addGroupMember writes both membership paths", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRef.mockReturnValue({ update: mockUpdate });
+    mockGet.mockResolvedValue({ exists: () => false, val: () => null });
+    mockSet.mockResolvedValue(undefined);
     mockUpdate.mockResolvedValue(undefined);
+    mockRef.mockReturnValue({ update: mockUpdate, get: mockGet, set: mockSet });
   });
 
   it("writes the group member set entry", async () => {

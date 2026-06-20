@@ -113,7 +113,7 @@ export async function PUT(
     const rankedCount = Object.keys(body.assignments).length;
     try {
       await recordGroupActivity(id, {
-        summary: `Ranking submitted · ${rankedCount} options`,
+        summary: `Ranking submitted · ${rankedCount.toString()} options`,
       });
     } catch (error) {
       console.error("Failed to record group activity:", error);

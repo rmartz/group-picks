@@ -1,7 +1,10 @@
 import { getDatabase } from "firebase-admin/database";
 
 import { getAdminApp, getAdminAuth } from "@/lib/firebase/admin";
-import { firebaseToGroup } from "@/lib/firebase/schema/group";
+import {
+  type FirebaseGroupPublic,
+  firebaseToGroup,
+} from "@/lib/firebase/schema/group";
 import type { Group } from "@/lib/types/group";
 
 export async function getGroupById(id: string): Promise<Group | undefined> {
