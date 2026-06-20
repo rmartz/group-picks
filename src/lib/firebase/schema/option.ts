@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type { Option } from "@/lib/types/option";
 
 export interface FirebaseOption {
@@ -5,6 +7,13 @@ export interface FirebaseOption {
   ownerIds?: Record<string, true>;
   createdAt?: number;
 }
+
+// Runtime shape of a persisted option node, parsed on read.
+const FirebaseOptionSchema = z.object({
+  title: z.string(),
+  ownerIds: z.record(z.string(), z.literal(true)).optional(),
+  createdAt: z.number().optional(),
+});
 
 export function optionToFirebase(
   option: Pick<Option, "title" | "ownerIds" | "createdAt">,
@@ -22,16 +31,17 @@ export function optionToFirebase(
 export function firebaseToOption(
   id: string,
   pickId: string,
-  data: FirebaseOption,
+  data: unknown,
 ): Option {
+  const parsed = FirebaseOptionSchema.parse(data);
   return {
     id,
-    title: data.title,
+    title: parsed.title,
     pickId,
-    ownerIds: Object.keys(data.ownerIds ?? {}),
+    ownerIds: Object.keys(parsed.ownerIds ?? {}),
     createdAt:
-      typeof data.createdAt === "number"
-        ? new Date(data.createdAt).toISOString()
+      parsed.createdAt !== undefined
+        ? new Date(parsed.createdAt).toISOString()
         : undefined,
   };
 }

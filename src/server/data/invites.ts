@@ -3,7 +3,6 @@ import { getDatabase } from "firebase-admin/database";
 
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
-  type FirebaseGroupInvite,
   firebaseToGroupInvite,
   groupInviteToFirebase,
 } from "@/lib/firebase/schema/invite";
@@ -15,26 +14,19 @@ export const INVITE_TTL_GROUP = 30 * 24 * 60 * 60 * 1000;
 
 export type CreatedGroupInvite = GroupInvite & { expiresAt: Date };
 
-function isFirebaseGroupInvite(data: unknown): data is FirebaseGroupInvite {
-  if (typeof data !== "object" || data === null) return false;
-  const d = data as Record<string, unknown>;
-  return (
-    typeof d["groupId"] === "string" &&
-    typeof d["createdAt"] === "number" &&
-    (d["expiresAt"] == null || typeof d["expiresAt"] === "number") &&
-    typeof d["active"] === "boolean"
-  );
-}
-
 export async function getGroupInviteByToken(
   token: string,
 ): Promise<GroupInvite | undefined> {
   const db = getDatabase(getAdminApp());
   const snap = await db.ref(`invites/${token}`).get();
   if (!snap.exists()) return undefined;
-  const raw: unknown = snap.val();
-  if (!isFirebaseGroupInvite(raw)) return undefined;
-  return firebaseToGroupInvite(token, raw);
+  // A malformed invite node is treated as "no such invite" (404) rather than
+  // an error, so the converter's parse is caught here and mapped to undefined.
+  try {
+    return firebaseToGroupInvite(token, snap.val());
+  } catch {
+    return undefined;
+  }
 }
 
 export async function createGroupInvite(

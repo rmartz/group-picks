@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type { Group } from "@/lib/types/group";
 
 export interface FirebaseGroupPublic {
@@ -11,6 +13,20 @@ export interface FirebaseGroupPublic {
   lastActivityAt?: number;
   activityCount?: number;
 }
+
+// Runtime shape of a persisted group's public node. Parsed on read so a
+// malformed document fails loudly instead of producing silent undefined bugs.
+const FirebaseGroupPublicSchema = z.object({
+  name: z.string(),
+  createdAt: z.number(),
+  creatorId: z.string(),
+  inviteToken: z.string(),
+  adminIds: z.record(z.string(), z.literal(true)).optional(),
+  picksRestricted: z.boolean().optional(),
+  lastActivity: z.string().optional(),
+  lastActivityAt: z.number().optional(),
+  activityCount: z.number().optional(),
+});
 
 export function groupToFirebase(
   group: Pick<
@@ -41,27 +57,27 @@ export function groupToFirebase(
 
 export function firebaseToGroup(
   id: string,
-  data: FirebaseGroupPublic,
+  data: unknown,
   memberIds: string[],
 ): Group {
-  const adminIds = data.adminIds
-    ? Object.keys(data.adminIds)
-    : [data.creatorId];
+  const parsed = FirebaseGroupPublicSchema.parse(data);
+  const adminIds = parsed.adminIds
+    ? Object.keys(parsed.adminIds)
+    : [parsed.creatorId];
   return {
     id,
-    name: data.name,
-    createdAt: new Date(data.createdAt),
-    creatorId: data.creatorId,
+    name: parsed.name,
+    createdAt: new Date(parsed.createdAt),
+    creatorId: parsed.creatorId,
     memberIds,
     adminIds,
-    picksRestricted: data.picksRestricted ?? false,
-    inviteToken: data.inviteToken,
-    lastActivity: data.lastActivity,
+    picksRestricted: parsed.picksRestricted ?? false,
+    inviteToken: parsed.inviteToken,
+    lastActivity: parsed.lastActivity,
     lastActivityAt:
-      typeof data.lastActivityAt === "number"
-        ? new Date(data.lastActivityAt)
+      parsed.lastActivityAt !== undefined
+        ? new Date(parsed.lastActivityAt)
         : undefined,
-    activityCount:
-      typeof data.activityCount === "number" ? data.activityCount : undefined,
+    activityCount: parsed.activityCount,
   };
 }

@@ -172,3 +172,15 @@ describe("firebaseToGroup", () => {
     expect(result.activityCount).toBeUndefined();
   });
 });
+
+describe("firebaseToGroup rejects malformed input", () => {
+  it("throws when a required field is missing", () => {
+    expect(() => firebaseToGroup("group-1", { name: "Orphan" }, [])).toThrow();
+  });
+
+  it("throws when a field has the wrong type", () => {
+    const data = { ...makeFirebaseGroupPublic(), createdAt: "not-a-number" };
+
+    expect(() => firebaseToGroup("group-1", data, [])).toThrow();
+  });
+});

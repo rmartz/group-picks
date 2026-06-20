@@ -1,2 +1,4 @@
+[ -f ".git" ] && exit 0
 pnpm exec lint-staged
 pnpm run secrets-check
+bash scripts/check-file-length.sh --staged

@@ -2,7 +2,6 @@ import { getDatabase } from "firebase-admin/database";
 
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
-  type FirebaseOption,
   firebaseToOption,
   optionToFirebase,
 } from "@/lib/firebase/schema/option";
@@ -14,7 +13,7 @@ export async function getOptionsByPick(pickId: string): Promise<Option[]> {
 
   if (!snap.exists()) return [];
 
-  const data = snap.val() as Record<string, FirebaseOption>;
+  const data = snap.val() as Record<string, unknown>;
   return Object.entries(data).map(([id, optionData]) =>
     firebaseToOption(id, pickId, optionData),
   );
@@ -98,7 +97,7 @@ export async function getOptionsByCategory(
   for (const [i, snap] of snapshots.entries()) {
     const pickId = pickIds[i];
     if (!snap.exists() || !pickId) continue;
-    const data = snap.val() as Record<string, FirebaseOption>;
+    const data = snap.val() as Record<string, unknown>;
     for (const [id, optionData] of Object.entries(data)) {
       options.push(firebaseToOption(id, pickId, optionData));
     }

@@ -1,10 +1,7 @@
 import { getDatabase } from "firebase-admin/database";
 
 import { getAdminApp, getAdminAuth } from "@/lib/firebase/admin";
-import {
-  type FirebaseGroupPublic,
-  firebaseToGroup,
-} from "@/lib/firebase/schema/group";
+import { firebaseToGroup } from "@/lib/firebase/schema/group";
 import type { Group } from "@/lib/types/group";
 
 export async function getGroupById(id: string): Promise<Group | undefined> {
@@ -17,7 +14,7 @@ export async function getGroupById(id: string): Promise<Group | undefined> {
 
   if (!publicSnap.exists()) return undefined;
 
-  const publicData = publicSnap.val() as FirebaseGroupPublic;
+  const publicData: unknown = publicSnap.val();
   const memberIds = membersSnap.exists()
     ? Object.keys(membersSnap.val() as Record<string, unknown>)
     : [];
