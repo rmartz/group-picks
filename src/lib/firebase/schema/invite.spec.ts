@@ -106,3 +106,17 @@ describe("firebaseToGroupInvite", () => {
     expect(result.mode).toBe(InviteMode.Group);
   });
 });
+
+describe("firebaseToGroupInvite rejects malformed input", () => {
+  it("throws when required fields are missing", () => {
+    expect(() =>
+      firebaseToGroupInvite("token-xyz", { groupId: "g", active: true }),
+    ).toThrow();
+  });
+
+  it("throws when active has the wrong type", () => {
+    const data = { ...makeFirebaseGroupInvite(), active: "yes" };
+
+    expect(() => firebaseToGroupInvite("token-xyz", data)).toThrow();
+  });
+});

@@ -3,7 +3,6 @@ import { getDatabase } from "firebase-admin/database";
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
   categoryToFirebase,
-  type FirebaseCategoryPublic,
   firebaseToCategory,
 } from "@/lib/firebase/schema/category";
 import type { Category } from "@/lib/types/category";
@@ -27,8 +26,7 @@ export async function getCategoriesByGroupId(
   snap.forEach((child) => {
     const id = child.key;
     if (!id) return;
-    const publicData = (child.val() as { public: FirebaseCategoryPublic })
-      .public;
+    const publicData = (child.val() as { public: unknown }).public;
     categories.push(firebaseToCategory(id, publicData));
   });
 
@@ -43,7 +41,7 @@ export async function getCategoryById(
 
   if (!snap.exists()) return undefined;
 
-  const data = snap.val() as FirebaseCategoryPublic;
+  const data: unknown = snap.val();
   return firebaseToCategory(id, data);
 }
 
