@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type { Group } from "@/lib/types/group";
 import { DEFAULT_GROUP_EMOJI } from "@/lib/types/group";
 
@@ -10,6 +12,18 @@ export interface FirebaseGroupPublic {
   picksRestricted?: boolean;
   emoji?: string;
 }
+
+// Runtime shape of a persisted group's public node. Parsed on read so a
+// malformed document fails loudly instead of producing silent undefined bugs.
+const FirebaseGroupPublicSchema = z.object({
+  name: z.string(),
+  createdAt: z.number(),
+  creatorId: z.string(),
+  inviteToken: z.string(),
+  adminIds: z.record(z.string(), z.literal(true)).optional(),
+  picksRestricted: z.boolean().optional(),
+  emoji: z.string().optional(),
+});
 
 export function groupToFirebase(
   group: Pick<
@@ -36,25 +50,26 @@ export function groupToFirebase(
 
 export function firebaseToGroup(
   id: string,
-  data: FirebaseGroupPublic,
+  data: unknown,
   memberIds: string[],
 ): Group {
-  const adminIds = data.adminIds
-    ? Object.keys(data.adminIds)
-    : [data.creatorId];
+  const parsed = FirebaseGroupPublicSchema.parse(data);
+  const adminIds = parsed.adminIds
+    ? Object.keys(parsed.adminIds)
+    : [parsed.creatorId];
   const emoji =
-    typeof data.emoji === "string" && data.emoji.trim()
-      ? data.emoji.trim()
+    typeof parsed.emoji === "string" && parsed.emoji.trim()
+      ? parsed.emoji.trim()
       : DEFAULT_GROUP_EMOJI;
   return {
     id,
-    name: data.name,
+    name: parsed.name,
     emoji,
-    createdAt: new Date(data.createdAt),
-    creatorId: data.creatorId,
+    createdAt: new Date(parsed.createdAt),
+    creatorId: parsed.creatorId,
     memberIds,
     adminIds,
-    picksRestricted: data.picksRestricted ?? false,
-    inviteToken: data.inviteToken,
+    picksRestricted: parsed.picksRestricted ?? false,
+    inviteToken: parsed.inviteToken,
   };
 }
