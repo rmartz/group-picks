@@ -67,7 +67,8 @@ export function InviteLandingView({
           </div>
           {currentPick.dueDate !== undefined && (
             <p className="text-xs text-muted-foreground">
-              Due {currentPick.dueDate.toLocaleDateString()}
+              {INVITE_LANDING_COPY.duePrefix}
+              {currentPick.dueDate.toLocaleDateString()}
             </p>
           )}
         </div>
@@ -81,7 +82,7 @@ export function InviteLandingView({
           <p className="text-sm text-muted-foreground">
             {memberNames.slice(0, 3).join(", ")}
             {memberNames.length > 3 &&
-              `, +${String(memberNames.length - 3)} more`}
+              `, +${String(memberNames.length - 3)}${INVITE_LANDING_COPY.memberOverflowSuffix}`}
           </p>
         </div>
       )}
@@ -97,7 +98,9 @@ export function InviteLandingView({
               disabled={isJoining}
               className="w-full"
             >
-              {isJoining ? "Joining…" : INVITE_LANDING_COPY.joinButton}
+              {isJoining
+                ? INVITE_LANDING_COPY.joiningButton
+                : INVITE_LANDING_COPY.joinButton}
             </Button>
             {onSignInDifferentAccount !== undefined && (
               <p className="text-center text-sm text-muted-foreground">

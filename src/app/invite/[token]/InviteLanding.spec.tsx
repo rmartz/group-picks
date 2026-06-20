@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { JOIN_GROUP_COPY } from "@/app/groups/join/copy";
 import { deleteSession, signOut } from "@/services/auth";
 import { joinGroup } from "@/services/groups";
 
@@ -67,9 +68,7 @@ describe("handleJoin", () => {
       screen.getByRole("button", { name: INVITE_LANDING_COPY.joinButton }),
     );
     await waitFor(() => {
-      expect(
-        screen.getByText("Something went wrong. Please try again."),
-      ).toBeDefined();
+      expect(screen.getByText(JOIN_GROUP_COPY.errors.default)).toBeDefined();
     });
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -116,9 +115,7 @@ describe("handleSignInDifferentAccount", () => {
       }),
     );
     await waitFor(() => {
-      expect(
-        screen.getByText("Something went wrong. Please try again."),
-      ).toBeDefined();
+      expect(screen.getByText(JOIN_GROUP_COPY.errors.default)).toBeDefined();
     });
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -132,9 +129,7 @@ describe("handleSignInDifferentAccount", () => {
       }),
     );
     await waitFor(() => {
-      expect(
-        screen.getByText("Something went wrong. Please try again."),
-      ).toBeDefined();
+      expect(screen.getByText(JOIN_GROUP_COPY.errors.default)).toBeDefined();
     });
     expect(mockPush).not.toHaveBeenCalled();
   });

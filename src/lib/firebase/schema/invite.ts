@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { type GroupInvite, InviteMode } from "@/lib/types/invite";
 
 export interface FirebaseGroupInvite {
@@ -8,6 +10,18 @@ export interface FirebaseGroupInvite {
   mode?: InviteMode;
   createdBy?: string;
 }
+
+// Runtime shape of a persisted invite node, parsed on read. `mode` is left
+// permissive (validated post-parse by isInviteMode) so an unknown mode value
+// falls back to the default rather than throwing.
+export const FirebaseGroupInviteSchema = z.object({
+  groupId: z.string(),
+  createdAt: z.number(),
+  createdBy: z.string().optional(),
+  expiresAt: z.number().nullable(),
+  active: z.boolean(),
+  mode: z.unknown().optional(),
+});
 
 function isInviteMode(value: unknown): value is InviteMode {
   return (
@@ -34,15 +48,17 @@ export function groupInviteToFirebase(
 
 export function firebaseToGroupInvite(
   token: string,
-  data: FirebaseGroupInvite,
+  data: unknown,
 ): GroupInvite {
+  const parsed = FirebaseGroupInviteSchema.parse(data);
   return {
     token,
-    groupId: data.groupId,
-    createdAt: new Date(data.createdAt),
-    expiresAt: data.expiresAt !== null ? new Date(data.expiresAt) : undefined,
-    active: data.active,
-    mode: isInviteMode(data.mode) ? data.mode : InviteMode.Group,
-    createdBy: data.createdBy,
+    groupId: parsed.groupId,
+    createdAt: new Date(parsed.createdAt),
+    expiresAt:
+      parsed.expiresAt !== null ? new Date(parsed.expiresAt) : undefined,
+    active: parsed.active,
+    mode: isInviteMode(parsed.mode) ? parsed.mode : InviteMode.Group,
+    createdBy: parsed.createdBy,
   };
 }

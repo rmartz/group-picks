@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type { Category } from "@/lib/types/category";
 
 export interface FirebaseCategoryPublic {
@@ -7,6 +9,15 @@ export interface FirebaseCategoryPublic {
   createdAt: number;
   creatorId: string;
 }
+
+// Runtime shape of a persisted category's public node, parsed on read.
+const FirebaseCategoryPublicSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  groupId: z.string(),
+  createdAt: z.number(),
+  creatorId: z.string(),
+});
 
 export function categoryToFirebase(
   category: Pick<
@@ -23,16 +34,14 @@ export function categoryToFirebase(
   };
 }
 
-export function firebaseToCategory(
-  id: string,
-  data: FirebaseCategoryPublic,
-): Category {
+export function firebaseToCategory(id: string, data: unknown): Category {
+  const parsed = FirebaseCategoryPublicSchema.parse(data);
   return {
     id,
-    name: data.name,
-    description: data.description,
-    groupId: data.groupId,
-    createdAt: new Date(data.createdAt),
-    creatorId: data.creatorId,
+    name: parsed.name,
+    description: parsed.description,
+    groupId: parsed.groupId,
+    createdAt: new Date(parsed.createdAt),
+    creatorId: parsed.creatorId,
   };
 }
