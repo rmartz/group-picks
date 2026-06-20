@@ -1,0 +1,21 @@
+name: File Length
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check file lengths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check changed file lengths
+        run: |
+          base=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          bash scripts/check-file-length.sh --base "$base"

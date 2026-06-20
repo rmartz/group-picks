@@ -48,7 +48,7 @@ export async function getPicksByCategory(
 
   if (!snap.exists()) return [];
 
-  const data = snap.val() as Record<string, FirebasePickPublic>;
+  const data = snap.val() as Record<string, unknown>;
   return Object.entries(data).map(([id, pickData]) =>
     firebaseToPick(id, pickData),
   );
@@ -75,7 +75,7 @@ export async function getPickById(
 
   if (!snap.exists()) return undefined;
 
-  return firebaseToPick(pickId, snap.val() as FirebasePickPublic);
+  return firebaseToPick(pickId, snap.val());
 }
 
 export async function assertPickIsOpenForWrite(
@@ -106,10 +106,7 @@ export async function assertPickIsOpenForWrite(
     throw new PickNotFoundError();
   }
 
-  const pick = firebaseToPick(
-    pickId,
-    result.snapshot.val() as FirebasePickPublic,
-  );
+  const pick = firebaseToPick(pickId, result.snapshot.val());
 
   if (pick.closedAt !== undefined) {
     throw new PickWriteClosedError(
@@ -195,10 +192,7 @@ export async function updatePickIfOpen(
     throw new PickNotFoundError();
   }
 
-  const pick = firebaseToPick(
-    pickId,
-    result.snapshot.val() as FirebasePickPublic,
-  );
+  const pick = firebaseToPick(pickId, result.snapshot.val());
 
   if (pick.closedAt !== undefined) {
     throw new PickWriteClosedError(
