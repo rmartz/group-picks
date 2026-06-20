@@ -48,7 +48,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - run: pnpm exec playwright install --with-deps chromium
+      # Retry: `--with-deps` runs `apt-get update`, which fails hard if any
+      # preinstalled runner apt repo has a transient signing/403 hiccup (#283).
+      - name: Install Playwright Chromium
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
+            sleep 15
+          done
+          echo "Playwright install failed after 3 attempts." >&2
+          exit 1
       - run: pnpm storybook-tests
 
   storybook-screenshots:
@@ -76,7 +88,18 @@ jobs:
             --github-output="$GITHUB_OUTPUT"
       - name: Install Playwright Chromium
         if: steps.screenshot-config.outputs.has_stories == 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        # Retry: `--with-deps` runs `apt-get update`, which fails hard if any
+        # preinstalled runner apt repo has a transient signing/403 hiccup (#283).
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
+            sleep 15
+          done
+          echo "Playwright install failed after 3 attempts." >&2
+          exit 1
       - name: Start Storybook
         if: steps.screenshot-config.outputs.has_stories == 'true'
         run: pnpm storybook --ci --port 6006 &
