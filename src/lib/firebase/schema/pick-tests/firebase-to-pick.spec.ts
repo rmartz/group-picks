@@ -149,3 +149,15 @@ describe("firebaseToPick rankingMode", () => {
     expect(result.rankingMode).toBe(RankingMode.TierBuckets);
   });
 });
+
+describe("firebaseToPick rejects malformed input", () => {
+  it("throws when a required field is missing", () => {
+    expect(() => firebaseToPick("pick-1", { title: "Orphan" })).toThrow();
+  });
+
+  it("throws when a field has the wrong type", () => {
+    const data = { ...makeFirebasePickPublic(), createdAt: "not-a-number" };
+
+    expect(() => firebaseToPick("pick-1", data)).toThrow();
+  });
+});
