@@ -1,2 +1,5 @@
+[ -f ".git" ] && exit 0
+bash scripts/check-conflict-markers.sh --staged
 pnpm exec lint-staged
 pnpm run secrets-check
+bash scripts/check-file-length.sh --staged
