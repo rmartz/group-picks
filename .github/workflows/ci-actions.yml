@@ -13,6 +13,7 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -21,6 +22,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -29,6 +31,7 @@ jobs:
   format:
     name: Format
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -37,6 +40,7 @@ jobs:
   type-check:
     name: Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -45,6 +49,7 @@ jobs:
   storybook-tests:
     name: Storybook Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -53,8 +58,17 @@ jobs:
 
   storybook-screenshots:
     name: Storybook Screenshots
+    # Serialize this job across every PR run. The screenshots action pushes to
+    # the shared gh-screenshots branch, so two overlapping runs race and the
+    # loser fails with "Update is not a fast forward" (#268). A single global
+    # concurrency group with cancel-in-progress: false queues the runs so each
+    # push lands as a clean fast-forward instead of racing.
+    concurrency:
+      group: storybook-screenshots-push
+      cancel-in-progress: false
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
       pull-requests: write
@@ -105,6 +119,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
