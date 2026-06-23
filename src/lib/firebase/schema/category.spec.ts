@@ -92,3 +92,15 @@ describe("firebaseToCategory", () => {
     expect(result.creatorId).toBe(original.creatorId);
   });
 });
+
+describe("firebaseToCategory rejects malformed input", () => {
+  it("throws when a required field is missing", () => {
+    expect(() => firebaseToCategory("cat-1", { name: "Orphan" })).toThrow();
+  });
+
+  it("throws when a field has the wrong type", () => {
+    const data = { ...makeFirebaseCategoryPublic(), createdAt: "not-a-number" };
+
+    expect(() => firebaseToCategory("cat-1", data)).toThrow();
+  });
+});

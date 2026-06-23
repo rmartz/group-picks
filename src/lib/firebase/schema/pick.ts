@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type { GroupPick, PickOption } from "@/lib/types/pick";
 import { RankingMode } from "@/lib/types/pick";
 
@@ -19,6 +21,31 @@ export interface FirebasePickPublic {
   creatorId: string;
   rankingMode?: string;
 }
+
+const FirebasePickOptionSchema = z.object({
+  ownerIds: z.array(z.string()),
+  title: z.string(),
+});
+
+// Runtime shape of a persisted pick's public node, parsed on read. Optional and
+// loosely-typed fields (topCount, rankingMode, closedAt) are normalised by the
+// transform below, so the schema only enforces presence/type, not defaults.
+const FirebasePickPublicSchema = z.object({
+  options: z.record(z.string(), FirebasePickOptionSchema).optional(),
+  title: z.string(),
+  description: z.string().optional(),
+  topCount: z.number().optional(),
+  dueDate: z.number().optional(),
+  categoryId: z.string(),
+  // closedAt is sanitised post-parse (isValidClosedAt below): a non-finite or
+  // out-of-range value means "still open", so NaN must pass the schema rather
+  // than throw (Zod v4's z.number() rejects NaN by default).
+  closedAt: z.union([z.number(), z.nan()]).optional(),
+  closedManually: z.boolean().optional(),
+  createdAt: z.number(),
+  creatorId: z.string(),
+  rankingMode: z.string().optional(),
+});
 
 function pickOptionToFirebase(option: PickOption): FirebasePickOption {
   return {
@@ -78,46 +105,45 @@ export function pickToFirebase(
   };
 }
 
-export function firebaseToPick(
-  id: string,
-  data: FirebasePickPublic,
-): GroupPick {
+export function firebaseToPick(id: string, data: unknown): GroupPick {
+  const parsed = FirebasePickPublicSchema.parse(data);
+
   const isValidClosedAt =
-    typeof data.closedAt === "number" &&
-    Number.isFinite(data.closedAt) &&
-    data.closedAt > 0 &&
-    data.closedAt <= Date.now();
+    typeof parsed.closedAt === "number" &&
+    Number.isFinite(parsed.closedAt) &&
+    parsed.closedAt > 0 &&
+    parsed.closedAt <= Date.now();
 
   const options =
-    data.options === undefined
+    parsed.options === undefined
       ? undefined
-      : Object.entries(data.options).map(([optionId, optionData]) =>
+      : Object.entries(parsed.options).map(([optionId, optionData]) =>
           firebaseToPickOption(optionId, optionData),
         );
 
   const rankingMode =
-    data.rankingMode === RankingMode.StackRank
+    parsed.rankingMode === RankingMode.StackRank
       ? RankingMode.StackRank
-      : data.rankingMode === RankingMode.HeadToHead
+      : parsed.rankingMode === RankingMode.HeadToHead
         ? RankingMode.HeadToHead
         : RankingMode.TierBuckets;
 
   return {
     id,
     options,
-    title: data.title,
-    description: data.description,
-    topCount: typeof data.topCount === "number" ? data.topCount : 1,
+    title: parsed.title,
+    description: parsed.description,
+    topCount: typeof parsed.topCount === "number" ? parsed.topCount : 1,
     dueDate:
-      typeof data.dueDate === "number" ? new Date(data.dueDate) : undefined,
-    categoryId: data.categoryId,
-    createdAt: new Date(data.createdAt),
-    creatorId: data.creatorId,
+      typeof parsed.dueDate === "number" ? new Date(parsed.dueDate) : undefined,
+    categoryId: parsed.categoryId,
+    createdAt: new Date(parsed.createdAt),
+    creatorId: parsed.creatorId,
     closedAt:
-      isValidClosedAt && data.closedAt !== undefined
-        ? new Date(data.closedAt)
+      isValidClosedAt && parsed.closedAt !== undefined
+        ? new Date(parsed.closedAt)
         : undefined,
-    closedManually: data.closedManually,
+    closedManually: parsed.closedManually,
     rankingMode,
   };
 }
