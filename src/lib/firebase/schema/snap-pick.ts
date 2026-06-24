@@ -9,6 +9,8 @@
 //
 // Domain types use Date; the persisted shapes use epoch-millisecond numbers.
 
+import { z } from "zod";
+
 import type { SnapPick, SnapPickActivation } from "@/lib/types/snap-pick";
 
 export interface FirebaseSnapPick {
@@ -28,6 +30,25 @@ export interface FirebaseSnapPickActivation {
   startedBy: string;
 }
 
+// Runtime shapes of the persisted nodes, parsed on read so a malformed document
+// fails loudly instead of producing silent undefined/null bugs.
+const FirebaseSnapPickSchema = z.object({
+  title: z.string(),
+  categoryId: z.string(),
+  createdAt: z.number(),
+  creatorId: z.string(),
+  defaultDurationMs: z.number(),
+});
+
+const FirebaseSnapPickActivationSchema = z.object({
+  snapPickId: z.string(),
+  startedAt: z.number(),
+  closesAt: z.number(),
+  closedAt: z.number().optional(),
+  winnerId: z.string().optional(),
+  startedBy: z.string(),
+});
+
 export function snapPickToFirebase(
   snapPick: Pick<
     SnapPick,
@@ -43,17 +64,15 @@ export function snapPickToFirebase(
   };
 }
 
-export function firebaseToSnapPick(
-  id: string,
-  data: FirebaseSnapPick,
-): SnapPick {
+export function firebaseToSnapPick(id: string, data: unknown): SnapPick {
+  const parsed = FirebaseSnapPickSchema.parse(data);
   return {
     id,
-    title: data.title,
-    categoryId: data.categoryId,
-    createdAt: new Date(data.createdAt),
-    creatorId: data.creatorId,
-    defaultDurationMs: data.defaultDurationMs,
+    title: parsed.title,
+    categoryId: parsed.categoryId,
+    createdAt: new Date(parsed.createdAt),
+    creatorId: parsed.creatorId,
+    defaultDurationMs: parsed.defaultDurationMs,
   };
 }
 
@@ -80,15 +99,17 @@ export function snapPickActivationToFirebase(
 
 export function firebaseToSnapPickActivation(
   id: string,
-  data: FirebaseSnapPickActivation,
+  data: unknown,
 ): SnapPickActivation {
+  const parsed = FirebaseSnapPickActivationSchema.parse(data);
   return {
     id,
-    snapPickId: data.snapPickId,
-    startedAt: new Date(data.startedAt),
-    closesAt: new Date(data.closesAt),
-    closedAt: data.closedAt !== undefined ? new Date(data.closedAt) : undefined,
-    winnerId: data.winnerId,
-    startedBy: data.startedBy,
+    snapPickId: parsed.snapPickId,
+    startedAt: new Date(parsed.startedAt),
+    closesAt: new Date(parsed.closesAt),
+    closedAt:
+      parsed.closedAt !== undefined ? new Date(parsed.closedAt) : undefined,
+    winnerId: parsed.winnerId,
+    startedBy: parsed.startedBy,
   };
 }

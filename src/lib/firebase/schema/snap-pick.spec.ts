@@ -153,3 +153,29 @@ describe("firebaseToSnapPickActivation", () => {
     expect(result.winnerId).toBeUndefined();
   });
 });
+
+describe("firebaseToSnapPick rejects malformed input", () => {
+  it("throws when a required field is missing", () => {
+    expect(() => firebaseToSnapPick("snap-1", { title: "Orphan" })).toThrow();
+  });
+
+  it("throws when a field has the wrong type", () => {
+    const data = { ...makeFirebaseSnapPick(), createdAt: "not-a-number" };
+
+    expect(() => firebaseToSnapPick("snap-1", data)).toThrow();
+  });
+});
+
+describe("firebaseToSnapPickActivation rejects malformed input", () => {
+  it("throws when a required field is missing", () => {
+    expect(() =>
+      firebaseToSnapPickActivation("act-1", { snapPickId: "snap-1" }),
+    ).toThrow();
+  });
+
+  it("throws when a field has the wrong type", () => {
+    const data = { ...makeFirebaseSnapPickActivation(), startedAt: "nope" };
+
+    expect(() => firebaseToSnapPickActivation("act-1", data)).toThrow();
+  });
+});

@@ -2,8 +2,6 @@ import { getDatabase } from "firebase-admin/database";
 
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
-  type FirebaseSnapPick,
-  type FirebaseSnapPickActivation,
   firebaseToSnapPick,
   firebaseToSnapPickActivation,
 } from "@/lib/firebase/schema/snap-pick";
@@ -18,7 +16,7 @@ export async function getSnapPickById(
 
   if (!snap.exists()) return undefined;
 
-  return firebaseToSnapPick(snapPickId, snap.val() as FirebaseSnapPick);
+  return firebaseToSnapPick(snapPickId, snap.val());
 }
 
 export async function getSnapPicksByCategory(
@@ -29,7 +27,7 @@ export async function getSnapPicksByCategory(
 
   if (!snap.exists()) return [];
 
-  const data = snap.val() as Record<string, FirebaseSnapPick>;
+  const data = snap.val() as Record<string, unknown>;
   return Object.entries(data).map(([id, snapPickData]) =>
     firebaseToSnapPick(id, snapPickData),
   );
@@ -43,7 +41,7 @@ export async function getSnapPickActivations(
 
   if (!snap.exists()) return [];
 
-  const data = snap.val() as Record<string, FirebaseSnapPickActivation>;
+  const data = snap.val() as Record<string, unknown>;
   return Object.entries(data).map(([id, activationData]) =>
     firebaseToSnapPickActivation(id, activationData),
   );
