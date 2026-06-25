@@ -8,15 +8,24 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { ClosedPickResultEntry } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 import { RankingMode } from "@/lib/types/pick";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
 
 vi.mock("@/services/rankings", () => ({
   saveRankings: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { CATEGORY_DETAIL_COPY } from "../../copy";
+vi.mock("@/services/picks", () => ({
+  reopenPick: vi.fn().mockResolvedValue(undefined),
+}));
+
+import { CLOSED_PICK_RESULTS_COPY } from "./ClosedPickResultsView.copy";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
 import { PickDetailView } from "./PickDetailView";
@@ -71,10 +80,33 @@ vi.mock("./SuggestOptionSheet", () => ({
     ) : null,
 }));
 
-vi.mock("../../ReopenPickButton", () => ({
-  ReopenPickButton: () => (
-    <button>{CATEGORY_DETAIL_COPY.reopenPickButton}</button>
-  ),
+let capturedOnReopen: (() => void) | undefined;
+
+vi.mock("./ClosedPickResultsView", () => ({
+  ClosedPickResultsView: ({
+    onReopen,
+    isReopening,
+    reopenError,
+  }: {
+    onReopen?: () => void;
+    isReopening?: boolean;
+    reopenError?: string;
+  }) => {
+    capturedOnReopen = onReopen;
+    return (
+      <div
+        data-testid="closed-pick-results-view"
+        data-is-reopening={isReopening}
+      >
+        {onReopen !== undefined && (
+          <button type="button" onClick={onReopen}>
+            {CLOSED_PICK_RESULTS_COPY.reopenCard.button}
+          </button>
+        )}
+        {reopenError && <p>{reopenError}</p>}
+      </div>
+    );
+  },
 }));
 
 function makePick(overrides?: Partial<GroupPick>): GroupPick {
@@ -100,7 +132,21 @@ function makeOption(overrides: Partial<Option> = {}): Option {
   };
 }
 
+function makeEntry(
+  id: string,
+  title: string,
+  rank: number,
+  score: number,
+): ClosedPickResultEntry {
+  return {
+    option: { id, title, pickId: "pick-1", ownerIds: ["user-1"] },
+    rank,
+    score,
+  };
+}
+
 function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
+  capturedOnReopen = undefined;
   return render(
     <PickDetailView
       pick={makePick()}
@@ -109,7 +155,7 @@ function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
       currentUserId="user-1"
       initialOptions={[]}
       initialSuggestions={[]}
-      topPicks={[]}
+      closedPickResults={{ topPicks: [], runnersUp: [] }}
       {...overrides}
     />,
   );
@@ -230,12 +276,14 @@ describe("open state", () => {
     ).toBeNull();
   });
 
-  it("does not render the reopen button when open", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
+  it("does not render the suggest option button when closed", () => {
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
 
     expect(
       screen.queryByRole("button", {
-        name: CATEGORY_DETAIL_COPY.reopenPickButton,
+        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
       }),
     ).toBeNull();
   });
@@ -253,44 +301,133 @@ describe("closed state: status chip shows Closed", () => {
   });
 });
 
-describe("closed state: top picks shows results placeholder", () => {
-  it("renders results placeholder instead of locked message when closed", () => {
+describe("closed state: renders ClosedPickResultsView", () => {
+  it("renders ClosedPickResultsView in top-picks tab when closed", () => {
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
     });
 
-    expect(
-      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
-    ).toBeDefined();
+    expect(screen.getByTestId("closed-pick-results-view")).toBeDefined();
+  });
+
+  it("does not render the locked placeholder when closed", () => {
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
+
     expect(screen.queryByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeNull();
+  });
+
+  it("passes closedPickResults entries to ClosedPickResultsView", () => {
+    const entry = makeEntry("opt-1", "Movie Alpha", 1, 5);
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      closedPickResults: { topPicks: [entry], runnersUp: [] },
+    });
+
+    expect(screen.getByTestId("closed-pick-results-view")).toBeDefined();
   });
 });
 
-describe("closed state: reopen button for group members", () => {
-  it("shows reopen button for the pick creator", () => {
+describe("closed state: re-open wiring", () => {
+  it("passes onReopen to ClosedPickResultsView when closed", () => {
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      currentUserId: "user-1",
     });
 
-    expect(
-      screen.getByRole("button", {
-        name: CATEGORY_DETAIL_COPY.reopenPickButton,
-      }),
-    ).toBeDefined();
+    expect(capturedOnReopen).toBeDefined();
   });
 
-  it("shows reopen button for non-creator members", () => {
+  it("re-open button calls the reopen handler", async () => {
+    const { reopenPick: mockReopenPick } = await import("@/services/picks");
+
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      currentUserId: "user-2",
     });
 
-    expect(
-      screen.getByRole("button", {
-        name: CATEGORY_DETAIL_COPY.reopenPickButton,
+    // Navigate to the Top picks tab to make its content active
+    fireEvent.click(
+      screen.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
       }),
-    ).toBeDefined();
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: CLOSED_PICK_RESULTS_COPY.reopenCard.button,
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(mockReopenPick).toHaveBeenCalledWith("group-1", "cat-1", "pick-1");
+    });
+  });
+
+  it("passes isReopening=true to ClosedPickResultsView while the API call is in flight", async () => {
+    let resolveReopen: (() => void) | undefined;
+    const { reopenPick: mockReopenPick } = await import("@/services/picks");
+    vi.mocked(mockReopenPick).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveReopen = resolve;
+        }),
+    );
+
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: CLOSED_PICK_RESULTS_COPY.reopenCard.button,
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(
+        screen.getByTestId("closed-pick-results-view").dataset["isReopening"],
+      ).toBe("true");
+    });
+
+    act(() => {
+      resolveReopen?.();
+    });
+
+    await vi.waitFor(() => {
+      expect(
+        screen.getByTestId("closed-pick-results-view").dataset["isReopening"],
+      ).toBe("false");
+    });
+  });
+
+  it("surfaces the error message when reopenPick rejects", async () => {
+    const { reopenPick: mockReopenPick } = await import("@/services/picks");
+    vi.mocked(mockReopenPick).mockRejectedValueOnce(new Error("Network error"));
+
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+    });
+
+    fireEvent.click(
+      screen.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
+      }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: CLOSED_PICK_RESULTS_COPY.reopenCard.button,
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(screen.getByText("Network error")).toBeDefined();
+    });
   });
 });
 
@@ -540,53 +677,5 @@ describe("participant count", () => {
     });
 
     expect(screen.getByText("3")).toBeDefined();
-  });
-});
-
-describe("top picks results", () => {
-  it("renders option titles in the top picks tab when pick is closed", () => {
-    const option1 = makeOption({ id: "opt-1", title: "Option Alpha" });
-    const option2 = makeOption({ id: "opt-2", title: "Option Beta" });
-
-    renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        topCount: 2,
-      }),
-      topPicks: [option1, option2],
-    });
-
-    expect(screen.getByText("Option Alpha")).toBeDefined();
-    expect(screen.getByText("Option Beta")).toBeDefined();
-  });
-
-  it("renders only the provided topPicks in the top picks tab", () => {
-    const topOption = makeOption({ id: "opt-1", title: "Top Option" });
-    const excludedOption = makeOption({
-      id: "opt-2",
-      title: "Excluded Option",
-    });
-
-    renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        topCount: 1,
-      }),
-      topPicks: [topOption, excludedOption],
-    });
-
-    expect(screen.getByText("Top Option")).toBeDefined();
-    expect(screen.queryByText("Excluded Option")).toBeNull();
-  });
-
-  it("shows the results placeholder when closed pick has no top picks", () => {
-    renderView({
-      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      topPicks: [],
-    });
-
-    expect(
-      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
-    ).toBeDefined();
   });
 });
