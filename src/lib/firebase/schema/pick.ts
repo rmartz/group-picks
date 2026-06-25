@@ -20,6 +20,7 @@ export interface FirebasePickPublic {
   createdAt: number;
   creatorId: string;
   rankingMode?: string;
+  resultsVisible?: boolean;
 }
 
 const FirebasePickOptionSchema = z.object({
@@ -45,6 +46,7 @@ const FirebasePickPublicSchema = z.object({
   createdAt: z.number(),
   creatorId: z.string(),
   rankingMode: z.string().optional(),
+  resultsVisible: z.boolean().optional(),
 });
 
 function pickOptionToFirebase(option: PickOption): FirebasePickOption {
@@ -78,6 +80,7 @@ export function pickToFirebase(
     | "options"
     | "closedAt"
     | "closedManually"
+    | "resultsVisible"
   > & { rankingMode?: RankingMode },
 ): FirebasePickPublic {
   const options =
@@ -102,6 +105,7 @@ export function pickToFirebase(
     closedAt: pick.closedAt?.getTime(),
     closedManually: pick.closedManually,
     rankingMode: pick.rankingMode,
+    resultsVisible: pick.resultsVisible,
   };
 }
 
@@ -145,6 +149,7 @@ export function firebaseToPick(id: string, data: unknown): GroupPick {
         : undefined,
     closedManually: parsed.closedManually,
     rankingMode,
+    resultsVisible: parsed.resultsVisible !== false,
   };
 }
 

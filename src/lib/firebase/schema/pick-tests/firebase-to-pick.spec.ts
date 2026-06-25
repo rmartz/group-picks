@@ -130,6 +130,24 @@ describe("firebaseToPick", () => {
   });
 });
 
+describe("firebaseToPick resultsVisible", () => {
+  it("deserializes resultsVisible when false", () => {
+    const data = makeFirebasePickPublic({ resultsVisible: false });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.resultsVisible).toBe(false);
+  });
+
+  it("defaults resultsVisible to true when absent", () => {
+    const data = makeFirebasePickPublic({ resultsVisible: undefined });
+
+    const result = firebaseToPick("pick-xyz", data);
+
+    expect(result.resultsVisible).toBe(true);
+  });
+});
+
 describe("firebaseToPick rankingMode", () => {
   it("deserializes rankingMode when present", () => {
     const data = makeFirebasePickPublic({

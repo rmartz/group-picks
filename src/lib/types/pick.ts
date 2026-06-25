@@ -23,4 +23,5 @@ export interface GroupPick {
   creatorId: string;
   rankingMode: RankingMode;
   options?: PickOption[];
+  resultsVisible?: boolean;
 }
