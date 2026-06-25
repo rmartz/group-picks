@@ -66,10 +66,13 @@ export function OptionListView({
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{option.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {option.ownerIds.includes(currentUserId) ? 1 : 0}/
-                    {option.ownerIds.length} {PICK_DETAIL_COPY.interestedSuffix}
-                  </p>
+                  {option.ownerIds.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {option.ownerIds.includes(currentUserId) ? 1 : 0}/
+                      {option.ownerIds.length}{" "}
+                      {PICK_DETAIL_COPY.interestedSuffix}
+                    </p>
+                  )}
                 </div>
                 <HeartButton
                   hearted={option.ownerIds.includes(currentUserId)}
