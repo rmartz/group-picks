@@ -10,10 +10,12 @@ import {
   PickNotFoundError,
   PickWriteClosedError,
 } from "@/server/data/picks";
+import { getSnapPicksByCategory } from "@/server/data/snap-picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { CategoryDetailView } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
+import { SnapPickSection } from "./SnapPickSection";
 
 export default async function CategoryDetailPage({
   params,
@@ -34,7 +36,10 @@ export default async function CategoryDetailPage({
   if (!category) notFound();
   if (category.groupId !== id) notFound();
 
-  const picks = await getPicksByCategory(categoryId);
+  const [picks, snapPicks] = await Promise.all([
+    getPicksByCategory(categoryId),
+    getSnapPicksByCategory(categoryId),
+  ]);
 
   async function closePickAction(formData: FormData) {
     "use server";
@@ -79,10 +84,17 @@ export default async function CategoryDetailPage({
   }
 
   return (
-    <CategoryDetailView
-      category={category}
-      closePickAction={closePickAction}
-      picks={picks}
-    />
+    <>
+      <CategoryDetailView
+        category={category}
+        closePickAction={closePickAction}
+        picks={picks}
+      />
+      <SnapPickSection
+        categoryId={categoryId}
+        groupId={id}
+        snapPicks={snapPicks}
+      />
+    </>
   );
 }
