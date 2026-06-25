@@ -39,6 +39,7 @@ function renderForm(signInHref = "/sign-in?invite_token=abc123") {
     <JoinGroupForm
       token="abc123"
       groupName="Book Club"
+      groupEmoji="👥"
       signInHref={signInHref}
     />,
   );

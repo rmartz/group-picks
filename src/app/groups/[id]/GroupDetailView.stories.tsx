@@ -13,6 +13,7 @@ const noop = () => undefined;
 const mockGroup: Group = {
   id: "group-1",
   name: "Friday Night Picks",
+  emoji: "👥",
   createdAt: new Date("2025-01-15T12:00:00.000Z"),
   creatorId: "user-123",
   memberIds: ["user-123", "user-456", "user-789"],

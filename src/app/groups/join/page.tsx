@@ -93,6 +93,7 @@ export default async function JoinGroupPage({
     <JoinGroupForm
       token={token}
       groupName={group.name}
+      groupEmoji={group.emoji}
       memberCount={group.memberIds.length}
       signInHref={signInHref}
     />
