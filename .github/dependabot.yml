@@ -12,13 +12,22 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    # Group only minor and patch bumps into one PR per dependency type. Major
+    # bumps match no group and are raised as individual PRs, since they are the
+    # most likely to need a code change and warrant isolated review.
     groups:
       dev-dependencies:
         dependency-type: development
+        update-types:
+          - "minor"
+          - "patch"
         patterns:
           - "*"
       production-dependencies:
         dependency-type: production
+        update-types:
+          - "minor"
+          - "patch"
         patterns:
           - "*"
 
