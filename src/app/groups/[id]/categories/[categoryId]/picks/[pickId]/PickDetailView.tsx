@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
-import type { RankingTier } from "@/lib/types/ranking";
+import type { PriorPickBannerData, RankingTier } from "@/lib/types/ranking";
 
 import { ReopenPickButton } from "../../ReopenPickButton";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
@@ -27,6 +27,7 @@ interface PickDetailViewProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   initialTierAssignments?: Record<string, RankingTier>;
+  priorPickBannerData?: PriorPickBannerData;
   topPicks: Option[];
 }
 
@@ -39,6 +40,7 @@ export function PickDetailView({
   initialOptions,
   initialSuggestions,
   initialTierAssignments = {},
+  priorPickBannerData,
   topPicks,
 }: PickDetailViewProps) {
   const [options, setOptions] = useState<Option[]>(initialOptions);
@@ -184,8 +186,10 @@ export function PickDetailView({
           <TierRanking
             groupId={groupId}
             categoryId={categoryId}
+            categoryName={categoryName}
             pickId={pick.id}
             initialTierAssignments={initialTierAssignments}
+            priorPickBannerData={priorPickBannerData}
             options={options.filter((opt) =>
               opt.ownerIds.includes(currentUserId),
             )}
