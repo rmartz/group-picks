@@ -1,8 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
-import { computeTopPicks } from "@/lib/ranking-score";
+import {
+  computeOptionTierAttribution,
+  computeTopPicks,
+} from "@/lib/ranking-score";
+import type { RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
 import { getPickById, getPicksByCategory } from "@/server/data/picks";
 import {
@@ -34,13 +38,19 @@ export default async function PickDetailPage({
 
   const isClosed = pick.closedAt !== undefined;
 
-  const [currentOptions, allPicks, initialTierAssignments, allRankings] =
-    await Promise.all([
-      getOptionsByPick(pickId),
-      getPicksByCategory(categoryId),
-      getRankingByUser(pickId, uid),
-      isClosed ? getAllRankingsForPick(pickId) : Promise.resolve({}),
-    ]);
+  const [
+    currentOptions,
+    allPicks,
+    initialTierAssignments,
+    allRankings,
+    memberNames,
+  ] = await Promise.all([
+    getOptionsByPick(pickId),
+    getPicksByCategory(categoryId),
+    getRankingByUser(pickId, uid),
+    isClosed ? getAllRankingsForPick(pickId) : Promise.resolve({}),
+    isClosed ? getMemberDisplayNames(group.memberIds) : Promise.resolve([]),
+  ]);
 
   const priorPickIds = allPicks.filter((p) => p.id !== pickId).map((p) => p.id);
   const priorOptions = await getOptionsByCategory(priorPickIds);
@@ -62,7 +72,22 @@ export default async function PickDetailPage({
       return true;
     });
 
-  const topPicks = computeTopPicks(allRankings, currentOptions, pick.topCount);
+  const filteredRankings = Object.fromEntries(
+    Object.entries(allRankings).filter(([uid]) =>
+      group.memberIds.includes(uid),
+    ),
+  ) as Record<string, Record<string, RankingTier>>;
+
+  const topPicks = computeTopPicks(
+    filteredRankings,
+    currentOptions,
+    pick.topCount,
+  );
+  const topPickAttribution = computeOptionTierAttribution(
+    filteredRankings,
+    topPicks,
+    memberNames,
+  );
 
   return (
     <PickDetailView
@@ -75,6 +100,7 @@ export default async function PickDetailPage({
       initialSuggestions={suggestions}
       initialTierAssignments={initialTierAssignments}
       topPicks={topPicks}
+      topPickAttribution={topPickAttribution}
     />
   );
 }

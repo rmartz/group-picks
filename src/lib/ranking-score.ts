@@ -9,6 +9,24 @@ const TIER_SCORES: Record<RankingTier, number> = {
   [RankingTier.Unranked]: 0,
 };
 
+export interface MemberDisplayName {
+  uid: string;
+  name: string;
+}
+
+export interface AttributionMember {
+  uid: string;
+  firstName: string;
+}
+
+export interface OptionTierAttribution {
+  [RankingTier.LoveIt]: AttributionMember[];
+  [RankingTier.Yes]: AttributionMember[];
+  [RankingTier.Maybe]: AttributionMember[];
+  [RankingTier.NotForMe]: AttributionMember[];
+  noRank: AttributionMember[];
+}
+
 export function computeTopPicks(
   allRankings: Record<string, Record<string, RankingTier>>,
   options: Option[],
@@ -25,4 +43,55 @@ export function computeTopPicks(
   return [...options]
     .sort((a, b) => (scores[b.id] ?? 0) - (scores[a.id] ?? 0))
     .slice(0, topCount);
+}
+
+export function computeOptionTierAttribution(
+  allRankings: Record<string, Record<string, RankingTier>>,
+  options: Option[],
+  members: MemberDisplayName[],
+): Record<string, OptionTierAttribution> {
+  const result: Record<string, OptionTierAttribution> = {};
+
+  for (const option of options) {
+    const attribution: OptionTierAttribution = {
+      [RankingTier.LoveIt]: [],
+      [RankingTier.Yes]: [],
+      [RankingTier.Maybe]: [],
+      [RankingTier.NotForMe]: [],
+      noRank: [],
+    };
+
+    for (const member of members) {
+      const userTier = allRankings[member.uid]?.[option.id];
+      const trimmedName = member.name.trim();
+      const atIndex = trimmedName.indexOf("@");
+      const normalizedName = !trimmedName
+        ? "Unknown"
+        : atIndex > 0
+          ? trimmedName.slice(0, atIndex)
+          : trimmedName;
+      const [firstName] = normalizedName.split(/\s+/);
+      const resolvedFirstName =
+        firstName && firstName.length > 0 ? firstName : normalizedName;
+      const memberIdentity: AttributionMember = {
+        uid: member.uid,
+        firstName: resolvedFirstName,
+      };
+
+      if (
+        userTier === RankingTier.LoveIt ||
+        userTier === RankingTier.Yes ||
+        userTier === RankingTier.Maybe ||
+        userTier === RankingTier.NotForMe
+      ) {
+        attribution[userTier].push(memberIdentity);
+      } else {
+        attribution.noRank.push(memberIdentity);
+      }
+    }
+
+    result[option.id] = attribution;
+  }
+
+  return result;
 }
