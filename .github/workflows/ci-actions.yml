@@ -4,54 +4,157 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["main"]
 
 permissions:
   contents: read
 
 jobs:
+  # Classify the PR diff so heavy jobs can skip work that cannot affect them.
+  # Default-to-run: a file is "code" unless it is provably-inert documentation,
+  # so configs, lockfiles, assets and unknown types always run the suite (#332).
+  # On push (not a PR) everything runs. Stories are tracked separately so the
+  # screenshots job runs only when an intended visual change is made (#331).
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      code_changed: ${{ steps.classify.outputs.code_changed }}
+      stories_changed: ${{ steps.classify.outputs.stories_changed }}
+    steps:
+      - uses: actions/checkout@v7.0.0
+        with:
+          fetch-depth: 0
+      - id: classify
+        name: Classify changed files
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
+            echo "stories_changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.sha }}"
+          changed="$(git diff --name-only "$base"..."$head")"
+          printf 'Changed files:\n%s\n' "$changed"
+
+          # Inert documentation that cannot affect the build or tests. Anything
+          # not matching this denylist counts as code, so the suite runs by
+          # default and only provably-safe docs are skipped.
+          doc_regex='(^|/)LICENSE$|\.(md|txt)$'
+          if printf '%s\n' "$changed" | grep -Ev "$doc_regex" | grep -q .; then
+            code_changed=true
+          else
+            code_changed=false
+          fi
+
+          # A changed Storybook test/story implies intended visual behavior
+          # changed, so screenshots should validate the new result.
+          if printf '%s\n' "$changed" | grep -Eq '\.stories\.(ts|tsx|js|jsx|mdx)$'; then
+            stories_changed=true
+          else
+            stories_changed=false
+          fi
+
+          echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
+          echo "stories_changed=$stories_changed" >> "$GITHUB_OUTPUT"
+          printf 'Resolved: code_changed=%s stories_changed=%s\n' "$code_changed" "$stories_changed"
+
   tests:
     name: Tests
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm test
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm lint
 
   format:
     name: Format
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm run format:check
 
+  type-check:
+    name: Type Check
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/setup
+      - run: pnpm tsc
+
   storybook-tests:
     name: Storybook Tests
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
-      - run: pnpm exec playwright install --with-deps chromium
+      # Retry: `--with-deps` runs `apt-get update`, which fails hard if any
+      # preinstalled runner apt repo has a transient signing/403 hiccup (#283).
+      - name: Install Playwright Chromium
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
+            sleep 15
+          done
+          echo "Playwright install failed after 3 attempts." >&2
+          exit 1
       - run: pnpm storybook-tests
 
   storybook-screenshots:
     name: Storybook Screenshots
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    # Per-ref concurrency: serialize only same-branch runs, not across PRs. A
+    # single global group caused cross-PR eviction — GitHub keeps only the most
+    # recent pending run in a group and cancels the rest, so an unrelated PR's
+    # run would cancel this one at ~3s and report a blocking "cancelled". The
+    # global group originally existed to stop two PRs racing on the shared
+    # gh-screenshots push (#268); that race is now non-fatal because the capture
+    # step is advisory (continue-on-error, #329/#330), so a per-ref group is safe.
+    concurrency:
+      group: storybook-screenshots-push-${{ github.ref }}
+      cancel-in-progress: false
+    needs: detect-changes
+    # Only when a Storybook test/story actually changed (#331): a story change
+    # signals an intended visual change worth validating with a screenshot. The
+    # same-repo guard keeps the push-to-gh-screenshots step off fork PRs.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.detect-changes.outputs.stories_changed == 'true'
     runs-on: ubuntu-latest
+    # Backstop so the job can never run away (the screenshot action's browser
+    # download has hung for hours — see #329). The capture step has its own,
+    # shorter timeout below; this just caps the whole job.
+    timeout-minutes: 8
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -68,7 +171,18 @@ jobs:
             --github-output="$GITHUB_OUTPUT"
       - name: Install Playwright Chromium
         if: steps.screenshot-config.outputs.has_stories == 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        # Retry: `--with-deps` runs `apt-get update`, which fails hard if any
+        # preinstalled runner apt repo has a transient signing/403 hiccup (#283).
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
+            sleep 15
+          done
+          echo "Playwright install failed after 3 attempts." >&2
+          exit 1
       - name: Start Storybook
         if: steps.screenshot-config.outputs.has_stories == 'true'
         run: pnpm storybook --ci --port 6006 &
@@ -87,8 +201,16 @@ jobs:
           done
           echo "Storybook did not start in time." >&2
           exit 1
+      # Advisory: PR preview screenshots are best-effort, not a correctness
+      # gate. The beta action runs its own `npx playwright install`, whose
+      # Chromium download intermittently hangs on the CDN (#329). A step-level
+      # timeout (below the job timeout) bounds the hang, and continue-on-error
+      # lets a hung or failed capture report success so it never blocks the PR.
+      # Restoring reliable capture is tracked in #329.
       - name: Capture Storybook screenshots
         if: steps.screenshot-config.outputs.has_stories == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
         uses: yoavf/auto-pr-screenshots-action@v1.4.0-beta
         with:
           config-file: .github/screenshots.dynamic.yml
@@ -96,9 +218,12 @@ jobs:
 
   build:
     name: Build
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm build
         env:

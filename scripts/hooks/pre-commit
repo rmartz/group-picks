@@ -1,0 +1,9 @@
+#!/bin/sh
+# Pre-commit hook for agent worktrees (core.hooksPath=scripts/hooks).
+# .husky/pre-commit handles human commits in the root worktree and exits
+# immediately when run from a worktree, so this hook runs instead there.
+[ -d "node_modules" ] || pnpm install --frozen-lockfile --prefer-offline
+bash scripts/check-conflict-markers.sh --staged
+pnpm exec lint-staged
+pnpm run env:validate
+bash scripts/check-file-length.sh --staged
