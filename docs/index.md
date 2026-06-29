@@ -42,6 +42,7 @@ Every page declares one `type` in its frontmatter. The canonical vocabulary for 
 ### Workflows
 
 - [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and the `sync-env` deploy flow.
+- [Staging OAuth domain](staging-oauth-domain.md) — pin a stable staging alias and allowlist it in Firebase Authorized domains so Google/Apple OAuth works on previews.
 
 ## Authoring
 
