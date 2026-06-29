@@ -12,19 +12,19 @@ Public (non-secret) environment configuration lives in `deployment/{env}.yml` an
 
 ## Editing config
 
-- Set a value: `scripts/update-config.sh --env=<env> KEY=value`
-- Load from a Firebase console JSON download: `scripts/update-config.sh --env=<env> --firebase-config=path/to/config.json` (accepts strict JSON or the JS object-literal format the console produces)
+The `deployment/{env}.yml` files are edited by hand. Validate against the schema after editing:
+
 - Validate config files against the schema: `pnpm run env:validate`
 
-`scripts/update-config.sh` only writes and validates the local YAML.
+Validation also runs automatically in the pre-commit hook and in CI (`.github/workflows/validate-config.yml`).
 
 ## Deploying to Vercel
 
-The previous deploy tooling (`vercel-deploy-scripts`, providing `sync-env` / `generate-local-env`) has been removed. Pushing the YAML values to Vercel and pulling a local `.env.local` will be handled by a dedicated CLI, **`envctl`** (usage TBD) — a local-only env-management tool that is intentionally not wired into CI. Until it lands, manage env values directly with the `vercel` CLI (a devDependency).
+The previous deploy tooling (`vercel-deploy-scripts`, providing `sync-env` / `generate-local-env`) and the local config editor (`scripts/update-config.sh`) have been removed. Pushing the YAML values to Vercel and pulling a local `.env.local` will be handled by a dedicated CLI, **`envctl`** (usage TBD) — a local-only env-management tool that is intentionally not wired into CI. Until it lands, manage env values directly with the `vercel` CLI (a devDependency).
 
 ## Secret scanning
 
-Secret scanning runs in CI via `.github/workflows/secret-scan.yml`. There is no local pre-commit secret scan; the pre-commit hook validates the deployment config (`pnpm run env:validate`) but does not run gitleaks.
+There is no secret scanning at present. The VDS-based CI secret scan (and its `.gitleaks.toml` config) and the local pre-commit gitleaks scan have both been removed; secret scanning will return under the new env-management design.
 
 ## Related
 
