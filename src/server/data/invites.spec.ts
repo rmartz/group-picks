@@ -51,3 +51,30 @@ describe("addGroupMember writes both membership paths", () => {
     });
   });
 });
+
+describe("addGroupMember deactivates the consumed invite when given a revokeToken", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRef.mockReturnValue({ update: mockUpdate });
+    mockUpdate.mockResolvedValue(undefined);
+  });
+
+  it("marks the revoked invite token inactive", async () => {
+    await addGroupMember("group-7", "user-3", "token-xyz");
+
+    expect(mockUpdate.mock.calls[0]?.[0]).toMatchObject({
+      "invites/token-xyz/active": false,
+    });
+  });
+
+  it("writes membership and the invite deactivation in a single atomic update", async () => {
+    await addGroupMember("group-7", "user-3", "token-xyz");
+
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledWith({
+      "groups/group-7/members/user-3": true,
+      "users/user-3/groups/group-7": true,
+      "invites/token-xyz/active": false,
+    });
+  });
+});
