@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { computeTopPicks } from "@/lib/ranking-score";
+import { computeRankedResults } from "@/lib/ranking-score";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
@@ -62,7 +62,11 @@ export default async function PickDetailPage({
       return true;
     });
 
-  const topPicks = computeTopPicks(allRankings, currentOptions, pick.topCount);
+  const closedPickResults = computeRankedResults(
+    allRankings,
+    currentOptions,
+    pick.topCount,
+  );
 
   return (
     <PickDetailView
@@ -74,7 +78,7 @@ export default async function PickDetailPage({
       initialOptions={currentOptions}
       initialSuggestions={suggestions}
       initialTierAssignments={initialTierAssignments}
-      topPicks={topPicks}
+      closedPickResults={closedPickResults}
     />
   );
 }
