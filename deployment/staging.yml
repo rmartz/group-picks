@@ -5,9 +5,9 @@
 # will be rejected by the pre-commit hook and CI.
 #
 # Sensitive variables are managed directly in Vercel and are never committed.
-# Run `pnpm env:pull` to generate a local .env.local from Vercel's stored values.
+# Pulling a local .env.local from Vercel is handled by envctl (TBD).
 #
-# To update these values and sync them to Vercel: scripts/update-config.sh --env=staging
+# To update these public values, edit this file directly, then run `pnpm run env:validate`.
 
 environment: staging
 
