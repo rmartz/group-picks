@@ -127,13 +127,15 @@ jobs:
 
   storybook-screenshots:
     name: Storybook Screenshots
-    # Serialize this job across every PR run. The screenshots action pushes to
-    # the shared gh-screenshots branch, so two overlapping runs race and the
-    # loser fails with "Update is not a fast forward" (#268). A single global
-    # concurrency group with cancel-in-progress: false queues the runs so each
-    # push lands as a clean fast-forward instead of racing.
+    # Per-ref concurrency: serialize only same-branch runs, not across PRs. A
+    # single global group caused cross-PR eviction — GitHub keeps only the most
+    # recent pending run in a group and cancels the rest, so an unrelated PR's
+    # run would cancel this one at ~3s and report a blocking "cancelled". The
+    # global group originally existed to stop two PRs racing on the shared
+    # gh-screenshots push (#268); that race is now non-fatal because the capture
+    # step is advisory (continue-on-error, #329/#330), so a per-ref group is safe.
     concurrency:
-      group: storybook-screenshots-push
+      group: storybook-screenshots-push-${{ github.ref }}
       cancel-in-progress: false
     needs: detect-changes
     # Only when a Storybook test/story actually changed (#331): a story change
