@@ -15,10 +15,7 @@ pnpm test             # Run tests with Vitest
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
-pnpm run env:pull     # Pull .env.local from Vercel
-pnpm run env:deploy   # Deploy deployment YAML to Vercel (requires --env=<staging|production>)
 pnpm run env:validate # Validate deployment config files against schema
-pnpm run secrets-check # Config validation + gitleaks scan (also runs pre-commit)
 ```
 
 ## Worktree Setup
@@ -48,12 +45,9 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 
 - To update a public config value: `scripts/update-config.sh --env=<env> KEY=value`
 - To load public config from a Firebase console JSON download: `scripts/update-config.sh --env=<env> --firebase-config=path/to/config.json` (accepts both strict JSON and the JS object literal format produced by the Firebase console)
-- To update and immediately deploy to Vercel: add `--sync` to the above commands
-- To deploy the current YAML to Vercel without modifying it: `pnpm exec sync-env --env=<env>`
-- To deploy one env's config to a different Vercel target: `pnpm exec sync-env --env=production` then set `VERCEL_ENV=preview` (used while staging is disabled)
-- To rotate all secrets (Firebase + Sentry + Vercel): `pnpm exec sync-env --rotate-keys --env=<env>`
-- Secrets checks run automatically on every commit via `.husky/pre-commit`; also enforced in CI via `.github/workflows/secret-scan.yml`
-- All deployment tooling is provided by `vercel-deploy-scripts` (a devDependency); no global vercel install required
+- `scripts/update-config.sh` only writes and validates the local YAML; it does not push to Vercel. Validate explicitly with `pnpm run env:validate`.
+- Pushing config to Vercel and pulling a local `.env.local` will be handled by the `envctl` CLI (usage TBD) — a local-only tool, intentionally not wired into CI. Until it lands, use the `vercel` CLI directly. The previous `vercel-deploy-scripts` tooling (`sync-env` / `generate-local-env`) has been removed.
+- Secret scanning runs in CI via `.github/workflows/secret-scan.yml`. There is no local pre-commit secret scan; the pre-commit hook runs `pnpm run env:validate` (config validation) only.
 
 ## TypeScript
 
