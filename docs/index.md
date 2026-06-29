@@ -41,7 +41,7 @@ Every page declares one `type` in its frontmatter. The canonical vocabulary for 
 
 ### Workflows
 
-- [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and the `sync-env` deploy flow.
+- [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and schema validation.
 
 ## Authoring
 
