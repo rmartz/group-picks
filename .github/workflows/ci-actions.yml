@@ -79,7 +79,10 @@ jobs:
       cancel-in-progress: false
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Backstop so the job can never run away (the screenshot action's browser
+    # download has hung for hours — see #329). The capture step has its own,
+    # shorter timeout below; this just caps the whole job.
+    timeout-minutes: 8
     permissions:
       contents: write
       pull-requests: write
@@ -131,8 +134,16 @@ jobs:
           done
           echo "Storybook did not start in time." >&2
           exit 1
+      # Advisory: PR preview screenshots are best-effort, not a correctness
+      # gate. The beta action runs its own `npx playwright install`, whose
+      # Chromium download intermittently hangs on the CDN (#329). A step-level
+      # timeout (below the job timeout) bounds the hang, and continue-on-error
+      # lets a hung or failed capture report success so it never blocks the PR.
+      # Restoring reliable capture is tracked in #329.
       - name: Capture Storybook screenshots
         if: steps.screenshot-config.outputs.has_stories == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
         uses: yoavf/auto-pr-screenshots-action@v1.4.0-beta
         with:
           config-file: .github/screenshots.dynamic.yml
