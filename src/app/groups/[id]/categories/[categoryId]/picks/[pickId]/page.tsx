@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { computeTopPicks } from "@/lib/ranking-score";
+import { computeRankedResults } from "@/lib/ranking-score";
 import type { PriorPickBannerData, RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
@@ -64,7 +64,11 @@ export default async function PickDetailPage({
       return true;
     });
 
-  const topPicks = computeTopPicks(allRankings, currentOptions, pick.topCount);
+  const closedPickResults = computeRankedResults(
+    allRankings,
+    currentOptions,
+    pick.topCount,
+  );
 
   let priorPickBannerData: PriorPickBannerData | undefined;
   if (
@@ -122,7 +126,7 @@ export default async function PickDetailPage({
       initialSuggestions={suggestions}
       initialTierAssignments={initialTierAssignments}
       priorPickBannerData={priorPickBannerData}
-      topPicks={topPicks}
+      closedPickResults={closedPickResults}
     />
   );
 }
