@@ -15,10 +15,7 @@ pnpm test             # Run tests with Vitest
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
-pnpm run env:pull     # Pull .env.local from Vercel
-pnpm run env:deploy   # Deploy deployment YAML to Vercel (requires --env=<staging|production>)
 pnpm run env:validate # Validate deployment config files against schema
-pnpm run secrets-check # Config validation + gitleaks scan (also runs pre-commit)
 ```
 
 ## Worktree Setup
@@ -32,6 +29,8 @@ This repo uses a two-hook split, matching the pattern in `rmartz/dotfiles`:
 - **`.husky/pre-commit`** — runs for human commits in the root worktree only. Detects worktrees via `[ -f ".git" ]` (a worktree's `.git` is a file, not a directory) and exits immediately there, so Husky's `node_modules` dependency is never a problem in agent contexts.
 - **`scripts/hooks/pre-commit`** — runs for agent commits in `.git-worktrees/`. Contains the same checks as the Husky hook plus the `node_modules` self-healing guard (since new worktrees may not have had `pnpm install` run).
 
+Both hooks run `scripts/check-conflict-markers.sh --staged` before `lint-staged`, so a staged merge-conflict marker fails the commit before Prettier can reflow and mangle it. It flags only unambiguous angle markers (`<<<<<<<` / `>>>>>>>`), never a lone `=======`, so Markdown dividers and setext underlines are not false positives. Bypass with `git commit --no-verify` or `ALLOW_CONFLICT_MARKERS=1`.
+
 Agent worktrees use this hook via `core.hooksPath=scripts/hooks`. This is a shared git config value — set it once in the root repository and all linked worktrees inherit it automatically:
 
 ```sh
@@ -44,14 +43,9 @@ Run this after cloning or when setting up a fresh root checkout. `new-worktree.p
 
 Public (non-secret) environment config lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml`. Only `NEXT_PUBLIC_*` and explicitly allowlisted keys are permitted; patterns matching `*SECRET*`, `*_TOKEN*`, or `*PRIVATE_KEY*` are hard-denied.
 
-- To update a public config value: `scripts/update-config.sh --env=<env> KEY=value`
-- To load public config from a Firebase console JSON download: `scripts/update-config.sh --env=<env> --firebase-config=path/to/config.json` (accepts both strict JSON and the JS object literal format produced by the Firebase console)
-- To update and immediately deploy to Vercel: add `--sync` to the above commands
-- To deploy the current YAML to Vercel without modifying it: `pnpm exec sync-env --env=<env>`
-- To deploy one env's config to a different Vercel target: `pnpm exec sync-env --env=production` then set `VERCEL_ENV=preview` (used while staging is disabled)
-- To rotate all secrets (Firebase + Sentry + Vercel): `pnpm exec sync-env --rotate-keys --env=<env>`
-- Secrets checks run automatically on every commit via `.husky/pre-commit`; also enforced in CI via `.github/workflows/secret-scan.yml`
-- All deployment tooling is provided by `vercel-deploy-scripts` (a devDependency); no global vercel install required
+- Public config values in `deployment/{env}.yml` are edited by hand. Validate against the schema with `pnpm run env:validate` (also run by the pre-commit hook and in CI via `.github/workflows/validate-config.yml`).
+- Pushing config to Vercel and pulling a local `.env.local` will be handled by the `envctl` CLI (usage TBD) — a local-only tool, intentionally not wired into CI. Until it lands, use the `vercel` CLI directly. The previous `vercel-deploy-scripts` tooling (`sync-env` / `generate-local-env`) has been removed.
+- There is no secret scanning at present: the VDS-based CI secret scan and the local pre-commit gitleaks scan have both been removed. Secret scanning will return under the new env-management design.
 
 ## TypeScript
 
@@ -111,9 +105,6 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 ## Documentation
 
 - Keep documentation in sync with the code — outdated docs are worse than no docs.
-- **`docs/` is an [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)-conformant knowledge base** — curated reference background an agent retrieves before a task (architecture, data model, per-domain notes). It is _pull/retrieval_ reference, distinct from this file's always-in-context _policy_. Detailed explanatory background belongs in `docs/`; behavioral rules belong here. See [`docs/index.md`](docs/index.md).
-- **Every `docs/` page must carry OKF YAML frontmatter.** `type` is required and must be one of the canonical vocabulary — `Index`, `Architecture`, `DataModel`, `Domain`, `Workflow` (defined in [`docs/index.md`](docs/index.md)). `title`, `description`, `resource` (relative path to the primary source file/module the page documents), and `tags` are recommended. Cross-link related pages with normal markdown links.
-- **When adding or removing a `docs/` page, update [`docs/index.md`](docs/index.md)** so the directory listing stays in sync.
 
 ## React / Next.js Standards
 
