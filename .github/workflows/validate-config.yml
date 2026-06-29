@@ -1,0 +1,16 @@
+name: Validate Config
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate-config:
+    name: Validate deployment config
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/setup
+      - run: node scripts/validate-config.mjs
