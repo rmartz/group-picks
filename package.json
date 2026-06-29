@@ -21,6 +21,7 @@
     "env:pull": "generate-local-env",
     "env:deploy": "sync-env",
     "env:validate": "node scripts/validate-config.mjs",
+    "seed:debug": "node --env-file-if-exists=.env.local scripts/seed-debug-users.mjs",
     "secrets-check": "pnpm run env:validate && secrets-check --config .gitleaks.toml"
   },
   "pnpm": {
