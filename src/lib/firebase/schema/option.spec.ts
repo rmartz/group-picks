@@ -54,3 +54,15 @@ describe("firebaseToOption", () => {
     expect(result.ownerIds).toEqual([]);
   });
 });
+
+describe("firebaseToOption rejects malformed input", () => {
+  it("throws when title is missing", () => {
+    expect(() =>
+      firebaseToOption("opt-1", "pick-42", { ownerIds: { "user-1": true } }),
+    ).toThrow();
+  });
+
+  it("throws when title has the wrong type", () => {
+    expect(() => firebaseToOption("opt-1", "pick-42", { title: 42 })).toThrow();
+  });
+});
