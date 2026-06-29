@@ -9,8 +9,62 @@ permissions:
   contents: read
 
 jobs:
+  # Classify the PR diff so heavy jobs can skip work that cannot affect them.
+  # Default-to-run: a file is "code" unless it is provably-inert documentation,
+  # so configs, lockfiles, assets and unknown types always run the suite (#332).
+  # On push (not a PR) everything runs. Stories are tracked separately so the
+  # screenshots job runs only when an intended visual change is made (#331).
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      code_changed: ${{ steps.classify.outputs.code_changed }}
+      stories_changed: ${{ steps.classify.outputs.stories_changed }}
+    steps:
+      - uses: actions/checkout@v7.0.0
+        with:
+          fetch-depth: 0
+      - id: classify
+        name: Classify changed files
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
+            echo "stories_changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.sha }}"
+          changed="$(git diff --name-only "$base"..."$head")"
+          printf 'Changed files:\n%s\n' "$changed"
+
+          # Inert documentation that cannot affect the build or tests. Anything
+          # not matching this denylist counts as code, so the suite runs by
+          # default and only provably-safe docs are skipped.
+          doc_regex='(^|/)LICENSE$|\.(md|txt)$'
+          if printf '%s\n' "$changed" | grep -Ev "$doc_regex" | grep -q .; then
+            code_changed=true
+          else
+            code_changed=false
+          fi
+
+          # A changed Storybook test/story implies intended visual behavior
+          # changed, so screenshots should validate the new result.
+          if printf '%s\n' "$changed" | grep -Eq '\.stories\.(ts|tsx|js|jsx|mdx)$'; then
+            stories_changed=true
+          else
+            stories_changed=false
+          fi
+
+          echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
+          echo "stories_changed=$stories_changed" >> "$GITHUB_OUTPUT"
+          printf 'Resolved: code_changed=%s stories_changed=%s\n' "$code_changed" "$stories_changed"
+
   tests:
     name: Tests
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -38,6 +92,8 @@ jobs:
 
   type-check:
     name: Type Check
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -47,6 +103,8 @@ jobs:
 
   storybook-tests:
     name: Storybook Tests
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -77,7 +135,14 @@ jobs:
     concurrency:
       group: storybook-screenshots-push
       cancel-in-progress: false
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: detect-changes
+    # Only when a Storybook test/story actually changed (#331): a story change
+    # signals an intended visual change worth validating with a screenshot. The
+    # same-repo guard keeps the push-to-gh-screenshots step off fork PRs.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.detect-changes.outputs.stories_changed == 'true'
     runs-on: ubuntu-latest
     # Backstop so the job can never run away (the screenshot action's browser
     # download has hung for hours — see #329). The capture step has its own,
@@ -151,6 +216,8 @@ jobs:
 
   build:
     name: Build
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
