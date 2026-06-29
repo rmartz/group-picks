@@ -25,6 +25,23 @@ pnpm run secrets-check # Config validation + gitleaks scan (also runs pre-commit
 
 After creating a git worktree (`git worktree add .git-worktrees/<name> -b <branch> origin/main`), run `pnpm install --frozen-lockfile` inside the worktree before invoking any build, test, or lint command. pnpm's `node-modules` linker creates per-directory `node_modules` trees; a fresh worktree has none. The global store is already populated so this step only creates hardlinks — it takes a few seconds and requires no network access.
 
+### Pre-commit hook architecture
+
+This repo uses a two-hook split, matching the pattern in `rmartz/dotfiles`:
+
+- **`.husky/pre-commit`** — runs for human commits in the root worktree only. Detects worktrees via `[ -f ".git" ]` (a worktree's `.git` is a file, not a directory) and exits immediately there, so Husky's `node_modules` dependency is never a problem in agent contexts.
+- **`scripts/hooks/pre-commit`** — runs for agent commits in `.git-worktrees/`. Contains the same checks as the Husky hook plus the `node_modules` self-healing guard (since new worktrees may not have had `pnpm install` run).
+
+Both hooks run `scripts/check-conflict-markers.sh --staged` before `lint-staged`, so a staged merge-conflict marker fails the commit before Prettier can reflow and mangle it. It flags only unambiguous angle markers (`<<<<<<<` / `>>>>>>>`), never a lone `=======`, so Markdown dividers and setext underlines are not false positives. Bypass with `git commit --no-verify` or `ALLOW_CONFLICT_MARKERS=1`.
+
+Agent worktrees use this hook via `core.hooksPath=scripts/hooks`. This is a shared git config value — set it once in the root repository and all linked worktrees inherit it automatically:
+
+```sh
+git config core.hooksPath scripts/hooks
+```
+
+Run this after cloning or when setting up a fresh root checkout. `new-worktree.py` will automate this step once `rmartz/dotfiles` is updated to detect `scripts/hooks/pre-commit` as an alternative hook path alongside `claude/hooks/pre-commit`.
+
 ## Deployment Config
 
 Public (non-secret) environment config lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml`. Only `NEXT_PUBLIC_*` and explicitly allowlisted keys are permitted; patterns matching `*SECRET*`, `*_TOKEN*`, or `*PRIVATE_KEY*` are hard-denied.

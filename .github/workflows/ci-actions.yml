@@ -4,7 +4,6 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["main"]
 
 permissions:
   contents: read
@@ -13,45 +12,79 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm test
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm lint
 
   format:
     name: Format
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm run format:check
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/setup
+      - run: pnpm tsc
 
   storybook-tests:
     name: Storybook Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
-      - run: pnpm exec playwright install --with-deps chromium
+      # Retry: `--with-deps` runs `apt-get update`, which fails hard if any
+      # preinstalled runner apt repo has a transient signing/403 hiccup (#283).
+      - name: Install Playwright Chromium
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
+            sleep 15
+          done
+          echo "Playwright install failed after 3 attempts." >&2
+          exit 1
       - run: pnpm storybook-tests
 
   storybook-screenshots:
     name: Storybook Screenshots
+    # Serialize this job across every PR run. The screenshots action pushes to
+    # the shared gh-screenshots branch, so two overlapping runs race and the
+    # loser fails with "Update is not a fast forward" (#268). A single global
+    # concurrency group with cancel-in-progress: false queues the runs so each
+    # push lands as a clean fast-forward instead of racing.
+    concurrency:
+      group: storybook-screenshots-push
+      cancel-in-progress: false
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -68,7 +101,18 @@ jobs:
             --github-output="$GITHUB_OUTPUT"
       - name: Install Playwright Chromium
         if: steps.screenshot-config.outputs.has_stories == 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        # Retry: `--with-deps` runs `apt-get update`, which fails hard if any
+        # preinstalled runner apt repo has a transient signing/403 hiccup (#283).
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
+            sleep 15
+          done
+          echo "Playwright install failed after 3 attempts." >&2
+          exit 1
       - name: Start Storybook
         if: steps.screenshot-config.outputs.has_stories == 'true'
         run: pnpm storybook --ci --port 6006 &
@@ -97,8 +141,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm build
         env:
