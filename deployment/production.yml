@@ -7,7 +7,7 @@
 # Sensitive variables are managed directly in Vercel and are never committed.
 # Pulling a local .env.local from Vercel is handled by envctl (TBD).
 #
-# To update these public values: scripts/update-config.sh --env=production
+# To update these public values, edit this file directly, then run `pnpm run env:validate`.
 
 environment: production
 
