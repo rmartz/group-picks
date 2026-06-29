@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { GroupPick } from "@/lib/types/pick";
+import { type GroupPick, RankingMode } from "@/lib/types/pick";
 
 import {
   computeUnreadCount,
@@ -15,6 +15,7 @@ function makePick(overrides?: Partial<GroupPick>): GroupPick {
     categoryId: "cat-1",
     createdAt: new Date("2025-01-01T00:00:00.000Z"),
     creatorId: "user-1",
+    rankingMode: RankingMode.TierBuckets,
     ...overrides,
   };
 }

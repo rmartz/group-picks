@@ -1,6 +1,8 @@
 import { getDatabase } from "firebase-admin/database";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { RankingMode } from "@/lib/types/pick";
+
 vi.mock("firebase-admin/database", () => ({
   getDatabase: vi.fn(),
 }));
@@ -233,6 +235,7 @@ describe("deriveGroupActivity", () => {
         createdAt: new Date("2025-01-01T00:00:00.000Z"),
         creatorId: "uid-2",
         topCount: 1,
+        rankingMode: RankingMode.TierBuckets,
       },
       {
         id: "pick-2",
@@ -241,6 +244,7 @@ describe("deriveGroupActivity", () => {
         createdAt: new Date("2025-02-01T00:00:00.000Z"),
         creatorId: "uid-2",
         topCount: 1,
+        rankingMode: RankingMode.TierBuckets,
       },
     ]);
 
