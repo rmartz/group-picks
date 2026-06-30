@@ -392,13 +392,13 @@ describe("OptionListView", () => {
       ).toBeDefined();
     });
 
-    it("renders 0 interested for an option with no owners", () => {
+    it("does not render the interested count when an option has no owners", () => {
       const option = makeOption({ ownerIds: [] });
       render(<OptionListView {...defaultProps} options={[option]} />);
 
       expect(
-        screen.getByText(`0/0 ${PICK_DETAIL_COPY.interestedSuffix}`),
-      ).toBeDefined();
+        screen.queryByText(new RegExp(PICK_DETAIL_COPY.interestedSuffix)),
+      ).toBeNull();
     });
   });
 });
