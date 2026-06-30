@@ -3,6 +3,7 @@
 ## Package Manager
 
 - Always use `pnpm`. Never `npm` or `yarn`.
+- **Pin every `package.json` dependency to a full `major.minor.patch` version, even inside a range** (e.g. `^3.8.4`, not `^3`). A shorthand range like `^3` is already satisfied by newer 3.x releases, so a Dependabot minor/patch bump only updates `pnpm-lock.yaml` and leaves `package.json` untouched — making the upgrade invisible in the manifest (this is how a Prettier bump can land via a lockfile-only change and surface as an unexplained formatting failure). A full pin forces every bump to appear as a reviewable `package.json` change.
 
 ## Common Commands
 
