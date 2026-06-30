@@ -4,37 +4,18 @@ import {
   fireEvent,
   render,
   screen,
-  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Option } from "@/lib/types/option";
-import type { GroupPick } from "@/lib/types/pick";
-import { RankingMode } from "@/lib/types/pick";
 
-vi.mock("@/services/rankings", () => ({
-  saveRankings: vi.fn().mockResolvedValue(undefined),
-}));
-
-import { CATEGORY_DETAIL_COPY } from "../../copy";
-import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
-import { EMPTY_PICK_COPY } from "./EmptyPickView.copy";
-import { PickDetailView } from "./PickDetailView";
-import type { SuggestOptionSheetProps } from "./SuggestOptionSheet";
-import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
+import { PICK_DETAIL_SCAFFOLD_COPY } from "../copy";
+import { EMPTY_PICK_COPY } from "../EmptyPickView.copy";
+import { PickDetailView } from "../PickDetailView";
+import type { SuggestOptionSheetProps } from "../SuggestOptionSheet";
+import { makeOption, makePick, makeSuggestedOptionPayload } from "./helpers";
 
 let capturedOnOptionsChange: ((options: Option[]) => void) | undefined;
-
-function makeSuggestedOptionPayload(overrides?: {
-  optionId?: string;
-  title?: string;
-}) {
-  return {
-    optionId: "opt-new",
-    title: "New Option",
-    ...overrides,
-  };
-}
 
 let mockSuggestedOption = makeSuggestedOptionPayload();
 
@@ -44,7 +25,19 @@ afterEach(() => {
   mockSuggestedOption = makeSuggestedOptionPayload();
 });
 
-vi.mock("./OptionList", () => ({
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
+
+vi.mock("@/services/rankings", () => ({
+  saveRankings: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/services/picks", () => ({
+  reopenPick: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../OptionList", () => ({
   OptionList: ({
     onOptionsChange,
   }: {
@@ -55,7 +48,7 @@ vi.mock("./OptionList", () => ({
   },
 }));
 
-vi.mock("./SuggestOptionSheet", () => ({
+vi.mock("../SuggestOptionSheet", () => ({
   SuggestOptionSheet: ({ open, onOptionAdded }: SuggestOptionSheetProps) =>
     open ? (
       <div data-testid="suggest-option-sheet">
@@ -71,34 +64,9 @@ vi.mock("./SuggestOptionSheet", () => ({
     ) : null,
 }));
 
-vi.mock("../../ReopenPickButton", () => ({
-  ReopenPickButton: () => (
-    <button>{CATEGORY_DETAIL_COPY.reopenPickButton}</button>
-  ),
+vi.mock("../ClosedPickResultsView", () => ({
+  ClosedPickResultsView: () => <div data-testid="closed-pick-results-view" />,
 }));
-
-function makePick(overrides?: Partial<GroupPick>): GroupPick {
-  return {
-    id: "pick-1",
-    title: "Best Movie of 2025",
-    topCount: 3,
-    categoryId: "cat-1",
-    createdAt: new Date("2025-01-01T00:00:00.000Z"),
-    creatorId: "user-1",
-    rankingMode: RankingMode.TierBuckets,
-    ...overrides,
-  };
-}
-
-function makeOption(overrides: Partial<Option> = {}): Option {
-  return {
-    id: "opt-1",
-    title: "Option A",
-    pickId: "pick-1",
-    ownerIds: ["user-1"],
-    ...overrides,
-  };
-}
 
 function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
   return render(
@@ -109,190 +77,11 @@ function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
       currentUserId="user-1"
       initialOptions={[]}
       initialSuggestions={[]}
-      topPicks={[]}
+      closedPickResults={{ topPicks: [], runnersUp: [] }}
       {...overrides}
     />,
   );
 }
-
-describe("pick metadata", () => {
-  it("renders the pick title", () => {
-    const pick = makePick({ title: "Best Movie of 2025" });
-    renderView({ pick });
-
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
-      "Best Movie of 2025",
-    );
-  });
-
-  it("renders the top-N indicator", () => {
-    renderView({ pick: makePick({ topCount: 3 }) });
-
-    expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.topCountLabel),
-    ).toBeDefined();
-    expect(screen.getByText("3")).toBeDefined();
-  });
-});
-
-describe("tabs structure", () => {
-  it("renders the Options tab", () => {
-    renderView();
-
-    expect(
-      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.options }),
-    ).toBeDefined();
-  });
-
-  it("renders OptionList in the Options tab panel when options exist", () => {
-    renderView({ initialOptions: [makeOption()] });
-
-    expect(screen.getByTestId("option-list")).toBeDefined();
-  });
-
-  it("renders the Your ranking tab", () => {
-    renderView();
-
-    expect(
-      screen.getByRole("tab", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking,
-      }),
-    ).toBeDefined();
-  });
-
-  it("renders the Top picks tab", () => {
-    renderView();
-
-    expect(
-      screen.getByRole("tab", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
-      }),
-    ).toBeDefined();
-  });
-});
-
-describe("open state", () => {
-  it("renders the open status chip when pick is not closed", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
-
-    expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.openStatusChip),
-    ).toBeDefined();
-  });
-
-  it("renders the suggest option button when open", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
-
-    expect(
-      screen.getByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
-      }),
-    ).toBeDefined();
-  });
-
-  it("opens the suggest sheet when the header button is clicked", () => {
-    renderView();
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: PICK_DETAIL_SCAFFOLD_COPY.suggestOptionButton,
-      }),
-    );
-
-    expect(screen.getByTestId("suggest-option-sheet")).toBeDefined();
-  });
-
-  it("renders top picks tab as locked placeholder when open", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
-
-    expect(screen.getByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeDefined();
-  });
-
-  it("does not show the locked message in the options tab panel", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
-
-    const optionsPanel = screen.getByRole("tabpanel");
-    expect(
-      within(optionsPanel).queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
-    ).toBeNull();
-  });
-
-  it("does not show the locked message in the ranking tab panel", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
-
-    fireEvent.click(
-      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
-    );
-
-    const rankingPanel = screen.getByRole("tabpanel");
-    expect(
-      within(rankingPanel).queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
-    ).toBeNull();
-  });
-
-  it("does not render the reopen button when open", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
-
-    expect(
-      screen.queryByRole("button", {
-        name: CATEGORY_DETAIL_COPY.reopenPickButton,
-      }),
-    ).toBeNull();
-  });
-});
-
-describe("closed state: status chip shows Closed", () => {
-  it("renders the closed status chip when pick.closedAt is set", () => {
-    renderView({
-      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-    });
-
-    expect(
-      screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.closedStatusChip),
-    ).toBeDefined();
-  });
-});
-
-describe("closed state: top picks shows results placeholder", () => {
-  it("renders results placeholder instead of locked message when closed", () => {
-    renderView({
-      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-    });
-
-    expect(
-      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
-    ).toBeDefined();
-    expect(screen.queryByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeNull();
-  });
-});
-
-describe("closed state: reopen button for group members", () => {
-  it("shows reopen button for the pick creator", () => {
-    renderView({
-      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      currentUserId: "user-1",
-    });
-
-    expect(
-      screen.getByRole("button", {
-        name: CATEGORY_DETAIL_COPY.reopenPickButton,
-      }),
-    ).toBeDefined();
-  });
-
-  it("shows reopen button for non-creator members", () => {
-    renderView({
-      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      currentUserId: "user-2",
-    });
-
-    expect(
-      screen.getByRole("button", {
-        name: CATEGORY_DETAIL_COPY.reopenPickButton,
-      }),
-    ).toBeDefined();
-  });
-});
 
 describe("ranking tab live options sync", () => {
   it("reflects in-session options changes in the ranking tab", () => {
@@ -540,53 +329,5 @@ describe("participant count", () => {
     });
 
     expect(screen.getByText("3")).toBeDefined();
-  });
-});
-
-describe("top picks results", () => {
-  it("renders option titles in the top picks tab when pick is closed", () => {
-    const option1 = makeOption({ id: "opt-1", title: "Option Alpha" });
-    const option2 = makeOption({ id: "opt-2", title: "Option Beta" });
-
-    renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        topCount: 2,
-      }),
-      topPicks: [option1, option2],
-    });
-
-    expect(screen.getByText("Option Alpha")).toBeDefined();
-    expect(screen.getByText("Option Beta")).toBeDefined();
-  });
-
-  it("renders only the provided topPicks in the top picks tab", () => {
-    const topOption = makeOption({ id: "opt-1", title: "Top Option" });
-    const excludedOption = makeOption({
-      id: "opt-2",
-      title: "Excluded Option",
-    });
-
-    renderView({
-      pick: makePick({
-        closedAt: new Date("2025-06-01T00:00:00.000Z"),
-        topCount: 1,
-      }),
-      topPicks: [topOption, excludedOption],
-    });
-
-    expect(screen.getByText("Top Option")).toBeDefined();
-    expect(screen.queryByText("Excluded Option")).toBeNull();
-  });
-
-  it("shows the results placeholder when closed pick has no top picks", () => {
-    renderView({
-      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
-      topPicks: [],
-    });
-
-    expect(
-      screen.getByText(TOP_PICKS_VIEW_COPY.noResultsMessage),
-    ).toBeDefined();
   });
 });
