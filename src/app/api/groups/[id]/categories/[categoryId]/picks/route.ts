@@ -82,6 +82,7 @@ export async function POST(
     topCount: unknown;
     dueDate: unknown;
     rankingMode: unknown;
+    resultsVisible: unknown;
   };
   try {
     body = (await request.json()) as {
@@ -90,6 +91,7 @@ export async function POST(
       topCount: unknown;
       dueDate: unknown;
       rankingMode: unknown;
+      resultsVisible: unknown;
     };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -131,6 +133,18 @@ export async function POST(
     return NextResponse.json({ error: "Invalid rankingMode" }, { status: 400 });
   }
 
+  let resultsVisible: boolean;
+  if (body.resultsVisible === undefined) {
+    resultsVisible = true;
+  } else if (typeof body.resultsVisible === "boolean") {
+    resultsVisible = body.resultsVisible;
+  } else {
+    return NextResponse.json(
+      { error: "resultsVisible must be a boolean" },
+      { status: 400 },
+    );
+  }
+
   const { id: pickId, createdAt } = await createPick({
     title,
     description,
@@ -139,6 +153,7 @@ export async function POST(
     topCount,
     dueDate,
     rankingMode,
+    resultsVisible,
   });
 
   return NextResponse.json(

@@ -47,7 +47,7 @@ export async function POST(
     );
   }
 
-  const invite = await createGroupInvite(id, group.inviteToken, mode);
+  const invite = await createGroupInvite(id, group.inviteToken, mode, uid);
 
   return NextResponse.json(
     {

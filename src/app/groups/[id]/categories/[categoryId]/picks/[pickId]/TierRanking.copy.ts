@@ -11,6 +11,7 @@ export const TIER_ORDER = [
 ] as const;
 
 export const TIER_RANKING_COPY = {
+  fromPriorPickLabel: "↩ from prior pick",
   tiers: {
     [RankingTier.LoveIt]: "Love it",
     [RankingTier.Maybe]: "Maybe",

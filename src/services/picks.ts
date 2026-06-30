@@ -8,6 +8,7 @@ export async function createPick(
   topCount: number,
   dueDate?: string,
   rankingMode?: RankingMode,
+  resultsVisible?: boolean,
 ): Promise<{ pickId: string; createdAt: Date }> {
   const response = await fetch(
     `/api/groups/${groupId}/categories/${categoryId}/picks`,
@@ -20,6 +21,7 @@ export async function createPick(
         topCount,
         dueDate,
         rankingMode,
+        resultsVisible,
       }),
     },
   );

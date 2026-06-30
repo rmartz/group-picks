@@ -4,6 +4,7 @@ import type { ClosedPickResultEntry } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 import { RankingMode } from "@/lib/types/pick";
+import { RankingTier } from "@/lib/types/ranking";
 
 import { PickDetailView } from "./PickDetailView";
 
@@ -119,5 +120,20 @@ export const WithSuggestions: Story = {
         ownerIds: ["user-1"],
       },
     ],
+  },
+};
+
+export const WithPriorPickBanner: Story = {
+  args: {
+    categoryName: "Movies",
+    priorPickBannerData: {
+      pickTitle: "Best of 2024",
+      rankedAt: new Date("2024-06-01T00:00:00.000Z"),
+      overlappingCount: 2,
+      prefillAssignments: {
+        "opt-1": RankingTier.LoveIt,
+        "opt-3": RankingTier.Yes,
+      },
+    },
   },
 };

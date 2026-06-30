@@ -6,12 +6,14 @@ import { RankingTier, TIER_ORDER, TIER_RANKING_COPY } from "./TierRanking.copy";
 
 interface TierRankingViewProps {
   options: Option[];
+  prefillOptionIds?: ReadonlySet<string>;
   tierAssignments: Record<string, RankingTier>;
   onOptionClick: (optionId: string) => void;
 }
 
 export function TierRankingView({
   options,
+  prefillOptionIds,
   tierAssignments,
   onOptionClick,
 }: TierRankingViewProps) {
@@ -38,6 +40,11 @@ export function TierRankingView({
                   className="rounded-full border bg-background px-3 py-1 text-sm hover:bg-muted"
                 >
                   {opt.title}
+                  {prefillOptionIds?.has(opt.id) && (
+                    <span className="ml-1 text-xs text-muted-foreground">
+                      {TIER_RANKING_COPY.fromPriorPickLabel}
+                    </span>
+                  )}
                 </button>
               ))}
           </div>
