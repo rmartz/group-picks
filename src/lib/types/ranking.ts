@@ -5,10 +5,12 @@ export interface PriorPickBannerData {
   rankedAt: Date;
 }
 
-export enum RankingTier {
-  LoveIt = "love_it",
-  Maybe = "maybe",
-  NotForMe = "not_for_me",
-  Unranked = "unranked",
-  Yes = "yes",
-}
+export const RankingTier = {
+  LoveIt: "love_it",
+  Maybe: "maybe",
+  NotForMe: "not_for_me",
+  Unranked: "unranked",
+  Yes: "yes",
+} as const;
+
+export type RankingTier = (typeof RankingTier)[keyof typeof RankingTier];
