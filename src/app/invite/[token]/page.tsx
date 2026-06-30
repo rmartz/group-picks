@@ -130,6 +130,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
       <InviteLanding
         token={token}
         groupName={group.name}
+        groupEmoji={group.emoji}
         memberCount={group.memberIds.length}
         memberNames={memberNames}
         currentPick={currentPick}

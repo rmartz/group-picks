@@ -12,6 +12,7 @@ interface CurrentPick {
 
 interface InviteLandingViewProps {
   groupName: string;
+  groupEmoji: string;
   memberCount: number;
   memberNames: string[];
   currentPick?: CurrentPick;
@@ -27,6 +28,7 @@ interface InviteLandingViewProps {
 
 export function InviteLandingView({
   groupName,
+  groupEmoji,
   memberCount,
   memberNames,
   currentPick,
@@ -52,7 +54,9 @@ export function InviteLandingView({
         {INVITE_LANDING_COPY.heading}
       </p>
       <div className="rounded-lg border p-4 space-y-1">
-        <p className="font-semibold text-lg">{groupName}</p>
+        <p className="font-semibold text-lg">
+          <span aria-hidden="true">{groupEmoji}</span> {groupName}
+        </p>
         <p className="text-sm text-muted-foreground">{memberSubtitle}</p>
       </div>
 

@@ -1,15 +1,19 @@
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockGetVerifiedUid,
   mockGetGroupInviteByToken,
   mockGetGroupById,
+  mockGetMemberDisplayNames,
+  mockGetCategoriesByGroupId,
   mockRedirect,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupInviteByToken: vi.fn(),
   mockGetGroupById: vi.fn(),
+  mockGetMemberDisplayNames: vi.fn(),
+  mockGetCategoriesByGroupId: vi.fn(),
   mockRedirect: vi.fn(),
 }));
 
@@ -23,28 +27,37 @@ vi.mock("@/server/data/invites", () => ({
 
 vi.mock("@/server/data/groups", () => ({
   getGroupById: mockGetGroupById,
+  getMemberDisplayNames: mockGetMemberDisplayNames,
+}));
+
+vi.mock("@/server/data/categories", () => ({
+  getCategoriesByGroupId: mockGetCategoriesByGroupId,
 }));
 
 vi.mock("next/navigation", () => ({
   redirect: mockRedirect,
 }));
 
-vi.mock("@/app/groups/join/JoinGroupForm", () => ({
-  JoinGroupForm: ({
+vi.mock("./InviteLandingView", () => ({
+  InviteLandingView: ({
     groupName,
     groupEmoji,
   }: {
     groupName: string;
     groupEmoji: string;
-  }) => <div data-testid="join-group-form">{`${groupEmoji} ${groupName}`}</div>,
+  }) => (
+    <div data-testid="invite-landing-view">{`${groupEmoji} ${groupName}`}</div>
+  ),
 }));
 
 const { default: InvitePage } = await import("./page");
 
+afterEach(cleanup);
+
 describe("InvitePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetVerifiedUid.mockResolvedValue("user-1");
+    mockGetVerifiedUid.mockResolvedValue(undefined);
     mockGetGroupInviteByToken.mockResolvedValue({
       token: "invite-token",
       groupId: "group-1",
@@ -64,6 +77,8 @@ describe("InvitePage", () => {
       picksRestricted: false,
       inviteToken: "invite-token",
     });
+    mockGetMemberDisplayNames.mockResolvedValue([]);
+    mockGetCategoriesByGroupId.mockResolvedValue([]);
   });
 
   it("renders the invite landing card with the group emoji", async () => {
@@ -73,7 +88,7 @@ describe("InvitePage", () => {
 
     render(page);
 
-    expect(screen.getByTestId("join-group-form").textContent).toBe(
+    expect(screen.getByTestId("invite-landing-view").textContent).toBe(
       "🎬 Movie Night",
     );
   });

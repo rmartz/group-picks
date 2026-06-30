@@ -17,6 +17,7 @@ interface CurrentPick {
 interface InviteLandingProps {
   token: string;
   groupName: string;
+  groupEmoji: string;
   memberCount: number;
   memberNames: string[];
   currentPick?: CurrentPick;
@@ -27,6 +28,7 @@ interface InviteLandingProps {
 export function InviteLanding({
   token,
   groupName,
+  groupEmoji,
   memberCount,
   memberNames,
   currentPick,
@@ -70,6 +72,7 @@ export function InviteLanding({
   return (
     <InviteLandingView
       groupName={groupName}
+      groupEmoji={groupEmoji}
       memberCount={memberCount}
       memberNames={memberNames}
       currentPick={currentPick}
