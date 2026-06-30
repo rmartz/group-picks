@@ -8,6 +8,7 @@ import type { Group } from "@/lib/types/group";
 import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
 import {
+  deleteGroup,
   leaveGroup,
   LeaveGroupLastMemberError,
   promoteAdmin,
@@ -47,6 +48,10 @@ export function GroupDetailClient({
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsError, setSettingsError] = useState<string | undefined>();
   const [removeMemberError, setRemoveMemberError] = useState<
+    string | undefined
+  >();
+  const [isDeletingGroup, setIsDeletingGroup] = useState(false);
+  const [deleteGroupError, setDeleteGroupError] = useState<
     string | undefined
   >();
 
@@ -111,6 +116,19 @@ export function GroupDetailClient({
     }
   }
 
+  async function handleDeleteGroup() {
+    setDeleteGroupError(undefined);
+    setIsDeletingGroup(true);
+    try {
+      await deleteGroup(group.id);
+      router.push("/");
+    } catch {
+      setDeleteGroupError(GROUP_DETAIL_COPY.deleteGroupError);
+    } finally {
+      setIsDeletingGroup(false);
+    }
+  }
+
   return (
     <GroupDetailView
       group={{ ...group, picksRestricted }}
@@ -141,6 +159,11 @@ export function GroupDetailClient({
       }}
       isSavingSettings={isSavingSettings}
       settingsError={settingsError}
+      onDeleteGroup={() => {
+        void handleDeleteGroup();
+      }}
+      isDeletingGroup={isDeletingGroup}
+      deleteGroupError={deleteGroupError}
     />
   );
 }

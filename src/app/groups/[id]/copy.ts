@@ -30,6 +30,7 @@ export const GROUP_DETAIL_COPY = {
   personalModeLabel: "Personal (7 days, single-use)",
   regenerateButton: "Revoke & Regenerate",
   regeneratingButton: "Regenerating…",
+  deleteGroupError: "Failed to delete group. Please try again.",
   removeAction: "Remove from group",
   removeCancelButton: "Cancel",
   removeConfirmButton: "Remove",
