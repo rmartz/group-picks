@@ -1,21 +1,23 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { ClosedPickResultEntry } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 import type { RankingTier } from "@/lib/types/ranking";
+import { reopenPick } from "@/services/picks";
 
-import { ReopenPickButton } from "../../ReopenPickButton";
+import { ClosedPickResultsView } from "./ClosedPickResultsView";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EmptyPickView } from "./EmptyPickView";
 import { OptionList } from "./OptionList";
 import { SuggestOptionSheet } from "./SuggestOptionSheet";
 import { TierRanking } from "./TierRanking";
-import { TopPicksView } from "./TopPicksView";
 import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 
 interface PickDetailViewProps {
@@ -27,7 +29,10 @@ interface PickDetailViewProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   initialTierAssignments?: Record<string, RankingTier>;
-  topPicks: Option[];
+  closedPickResults: {
+    topPicks: ClosedPickResultEntry[];
+    runnersUp: ClosedPickResultEntry[];
+  };
 }
 
 export function PickDetailView({
@@ -39,12 +44,31 @@ export function PickDetailView({
   initialOptions,
   initialSuggestions,
   initialTierAssignments = {},
-  topPicks,
+  closedPickResults,
 }: PickDetailViewProps) {
+  const router = useRouter();
   const [options, setOptions] = useState<Option[]>(initialOptions);
   const [isSuggestSheetOpen, setIsSuggestSheetOpen] = useState(false);
-  const isOpen = pick.closedAt === undefined;
+  const [isReopening, setIsReopening] = useState(false);
+  const [reopenError, setReopenError] = useState<string | undefined>(undefined);
+  const closedAt = pick.closedAt;
+  const isOpen = closedAt === undefined;
   const uniqueOwnerCount = new Set(options.flatMap((opt) => opt.ownerIds)).size;
+
+  async function handleReopen() {
+    setIsReopening(true);
+    setReopenError(undefined);
+    try {
+      await reopenPick(groupId, categoryId, pick.id);
+      router.refresh();
+    } catch (err) {
+      setReopenError(
+        err instanceof Error ? err.message : "Failed to re-open pick",
+      );
+    } finally {
+      setIsReopening(false);
+    }
+  }
 
   function handleOptionAdded({
     optionId,
@@ -133,14 +157,6 @@ export function PickDetailView({
         </Button>
       )}
 
-      {!isOpen && (
-        <ReopenPickButton
-          groupId={groupId}
-          categoryId={categoryId}
-          pickId={pick.id}
-        />
-      )}
-
       <Tabs defaultValue="options">
         <TabsList>
           <TabsTrigger value="options">
@@ -193,15 +209,18 @@ export function PickDetailView({
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>
-          {isOpen ? (
+          {closedAt === undefined ? (
             <p className="text-sm text-muted-foreground">
               {TOP_PICKS_VIEW_COPY.lockedMessage}
             </p>
           ) : (
-            <TopPicksView
-              isOpen={isOpen}
-              topPicks={topPicks}
+            <ClosedPickResultsView
               topCount={pick.topCount}
+              topPicks={closedPickResults.topPicks}
+              runnersUp={closedPickResults.runnersUp}
+              onReopen={() => void handleReopen()}
+              isReopening={isReopening}
+              reopenError={reopenError}
             />
           )}
         </TabsContent>
