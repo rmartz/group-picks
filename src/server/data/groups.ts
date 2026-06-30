@@ -110,3 +110,37 @@ export async function revokeAdmin(groupId: string, uid: string): Promise<void> {
   const db = getDatabase(getAdminApp());
   await db.ref(`groups/${groupId}/public/adminIds/${uid}`).remove();
 }
+
+export async function deleteGroup(
+  groupId: string,
+  memberIds: string[],
+  inviteToken: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  const categorySnap = await db
+    .ref("categories")
+    .orderByChild("public/groupId")
+    .equalTo(groupId)
+    .get();
+
+  const updates: Record<string, null> = {
+    [`groups/${groupId}`]: null,
+    [`invites/${inviteToken}`]: null,
+  };
+  for (const uid of memberIds) {
+    updates[`users/${uid}/groups/${groupId}`] = null;
+  }
+  categorySnap.forEach((category) => {
+    const categoryKey = category.key;
+    if (!categoryKey) return;
+    const pickIds = Object.keys(
+      (category.child("picks").val() as Record<string, unknown> | null) ?? {},
+    );
+    for (const pickId of pickIds) {
+      updates[`picks/${pickId}`] = null;
+      updates[`rankings/${pickId}`] = null;
+    }
+    updates[`categories/${categoryKey}`] = null;
+  });
+  await db.ref("/").update(updates);
+}
