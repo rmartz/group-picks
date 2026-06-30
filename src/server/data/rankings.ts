@@ -42,6 +42,24 @@ export async function getRankingByUser(
   return snap.val() as Record<string, RankingTier>;
 }
 
+export async function getRankingsByUser(
+  pickIds: string[],
+  userId: string,
+): Promise<Record<string, Record<string, RankingTier>>> {
+  if (pickIds.length === 0) return {};
+
+  const entries = await Promise.all(
+    pickIds.map(async (pickId) => {
+      const rankings = await getRankingByUser(pickId, userId);
+      return [pickId, rankings] as const;
+    }),
+  );
+
+  return Object.fromEntries(
+    entries.filter(([, rankings]) => Object.keys(rankings).length > 0),
+  );
+}
+
 export async function saveRanking(
   pickId: string,
   userId: string,
