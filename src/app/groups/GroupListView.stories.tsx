@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { makeGroup } from "@/lib/fixtures/group";
+import { makeGroupWithActivity } from "@/lib/fixtures/groupActivity";
 
 import { GroupListView } from "./GroupListView";
 
@@ -21,15 +21,32 @@ export const Empty: Story = {
 export const WithGroups: Story = {
   args: {
     groups: [
-      makeGroup({ id: "g1", name: "Friday Night Picks" }),
-      makeGroup({ id: "g2", name: "Oscar Season 2024" }),
-      makeGroup({ id: "g3", name: "Super Bowl Squares" }),
+      makeGroupWithActivity(
+        { id: "g1", name: "Friday Night Picks" },
+        { activityPreview: 'New pick "Summer Blockbuster"', unreadCount: 2 },
+      ),
+      makeGroupWithActivity(
+        { id: "g2", name: "Oscar Season 2024" },
+        { activityPreview: "Closed: Best Picture", unreadCount: 0 },
+      ),
+      makeGroupWithActivity({ id: "g3", name: "Super Bowl Squares" }),
     ],
   },
 };
 
 export const SingleGroup: Story = {
   args: {
-    groups: [makeGroup({ id: "g1", name: "Friday Night Picks" })],
+    groups: [makeGroupWithActivity({ id: "g1", name: "Friday Night Picks" })],
+  },
+};
+
+export const WithUnreadBadge: Story = {
+  args: {
+    groups: [
+      makeGroupWithActivity(
+        { id: "g1", name: "Friday Night Picks" },
+        { activityPreview: 'New pick "Summer Blockbuster"', unreadCount: 5 },
+      ),
+    ],
   },
 };

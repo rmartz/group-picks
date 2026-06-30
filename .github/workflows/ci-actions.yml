@@ -134,9 +134,14 @@ jobs:
     # global group originally existed to stop two PRs racing on the shared
     # gh-screenshots push (#268); that race is now non-fatal because the capture
     # step is advisory (continue-on-error, #329/#330), so a per-ref group is safe.
+    # cancel-in-progress: true then supersedes stale same-branch runs — a new
+    # commit cancels the prior commit's run, since only the latest commit's
+    # screenshots matter (the per-ref key, not this flag, is what stops cross-PR
+    # cancellation; on a global group cancel-in-progress would instead kill
+    # another PR's in-progress run).
     concurrency:
       group: storybook-screenshots-push-${{ github.ref }}
-      cancel-in-progress: false
+      cancel-in-progress: true
     needs: detect-changes
     # Only when a Storybook test/story actually changed (#331): a story change
     # signals an intended visual change worth validating with a screenshot. The

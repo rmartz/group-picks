@@ -116,6 +116,7 @@ describe("POST /api/groups/[id]/invite", () => {
       "group-1",
       "active-token",
       "personal",
+      "user-1",
     );
   });
 
@@ -136,6 +137,7 @@ describe("POST /api/groups/[id]/invite", () => {
       "group-1",
       "active-token",
       "group",
+      "user-1",
     );
   });
 
