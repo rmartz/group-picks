@@ -12,7 +12,7 @@ import type {
 } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
-import type { RankingTier } from "@/lib/types/ranking";
+import type { PriorPickBannerData, RankingTier } from "@/lib/types/ranking";
 import { reopenPick } from "@/services/picks";
 
 import { ClosedPickResultsView } from "./ClosedPickResultsView";
@@ -32,6 +32,7 @@ interface PickDetailViewProps {
   initialOptions: Option[];
   initialSuggestions: Option[];
   initialTierAssignments?: Record<string, RankingTier>;
+  priorPickBannerData?: PriorPickBannerData;
   closedPickResults: {
     topPicks: ClosedPickResultEntry[];
     runnersUp: ClosedPickResultEntry[];
@@ -48,6 +49,7 @@ export function PickDetailView({
   initialOptions,
   initialSuggestions,
   initialTierAssignments = {},
+  priorPickBannerData,
   closedPickResults,
   topPickAttribution = {},
 }: PickDetailViewProps) {
@@ -205,8 +207,10 @@ export function PickDetailView({
           <TierRanking
             groupId={groupId}
             categoryId={categoryId}
+            categoryName={categoryName}
             pickId={pick.id}
             initialTierAssignments={initialTierAssignments}
+            priorPickBannerData={priorPickBannerData}
             options={options.filter((opt) =>
               opt.ownerIds.includes(currentUserId),
             )}

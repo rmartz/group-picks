@@ -4,7 +4,7 @@ import {
   computeOptionTierAttribution,
   computeRankedResults,
 } from "@/lib/ranking-score";
-import type { RankingTier } from "@/lib/types/ranking";
+import type { PriorPickBannerData, RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
@@ -12,6 +12,7 @@ import { getPickById, getPicksByCategory } from "@/server/data/picks";
 import {
   getAllRankingsForPick,
   getRankingByUser,
+  getRankingsByUser,
 } from "@/server/data/rankings";
 import { getVerifiedUid } from "@/server/utils/auth";
 
@@ -89,6 +90,51 @@ export default async function PickDetailPage({
     memberNames,
   );
 
+  let priorPickBannerData: PriorPickBannerData | undefined;
+  if (
+    Object.keys(initialTierAssignments).length === 0 &&
+    priorPickIds.length > 0
+  ) {
+    const priorRankings = await getRankingsByUser(priorPickIds, uid);
+    const currentOptionsByTitle = new Map(
+      currentOptions.map((o) => [o.title.toLowerCase(), o]),
+    );
+    const sortedPriorPicks = allPicks
+      .filter((p) => p.id !== pickId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    for (const priorPick of sortedPriorPicks) {
+      const userRankings = priorRankings[priorPick.id];
+      if (!userRankings) continue;
+
+      const pickOptions = priorOptions.filter((o) => o.pickId === priorPick.id);
+      const overlappingOptions = pickOptions.filter((o) =>
+        currentOptionsByTitle.has(o.title.toLowerCase()),
+      );
+      if (overlappingOptions.length === 0) continue;
+
+      const prefillAssignments: Record<string, RankingTier> = {};
+      for (const priorOpt of overlappingOptions) {
+        const tier = userRankings[priorOpt.id];
+        const currentOpt = currentOptionsByTitle.get(
+          priorOpt.title.toLowerCase(),
+        );
+        if (tier !== undefined && currentOpt !== undefined) {
+          prefillAssignments[currentOpt.id] = tier;
+        }
+      }
+      if (Object.keys(prefillAssignments).length === 0) continue;
+
+      priorPickBannerData = {
+        overlappingCount: overlappingOptions.length,
+        pickTitle: priorPick.title,
+        prefillAssignments,
+        rankedAt: priorPick.closedAt ?? priorPick.createdAt,
+      };
+      break;
+    }
+  }
+
   return (
     <PickDetailView
       pick={pick}
@@ -99,6 +145,7 @@ export default async function PickDetailPage({
       initialOptions={currentOptions}
       initialSuggestions={suggestions}
       initialTierAssignments={initialTierAssignments}
+      priorPickBannerData={priorPickBannerData}
       closedPickResults={closedPickResults}
       topPickAttribution={topPickAttribution}
     />
