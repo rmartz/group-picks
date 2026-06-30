@@ -1,0 +1,28 @@
+name: Package pins
+
+# Runs only when a package manifest or the lockfile changes — i.e. a PR that
+# updates packages. The check's only input is package.json, so a workflow-level
+# paths allowlist is the right gate (mirrors validate-config.yml).
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  check-pins:
+    name: Check package pins
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/setup
+      - run: pnpm pins:check
