@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import type { GroupWithActivity } from "@/lib/types/groupActivity";
+import { deriveGroupActivity } from "@/server/data/groupActivity";
 import { getGroupsByUserId } from "@/server/data/groups";
 import { getVerifiedUid } from "@/server/utils/auth";
 
@@ -11,5 +13,15 @@ export default async function GroupListPage() {
 
   const groups = await getGroupsByUserId(uid);
 
-  return <GroupListView groups={groups} />;
+  const groupsWithActivity: GroupWithActivity[] = await Promise.all(
+    groups.map(async (group) => {
+      const { activityPreview, unreadCount } = await deriveGroupActivity(
+        group.id,
+        uid,
+      );
+      return { ...group, activityPreview, unreadCount };
+    }),
+  );
+
+  return <GroupListView groups={groupsWithActivity} />;
 }

@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import type { Group } from "@/lib/types/group";
+import type { GroupWithActivity } from "@/lib/types/groupActivity";
 
 import { GROUP_LIST_COPY } from "./copy";
 import { NoGroupsView } from "./NoGroupsView";
 
 interface GroupListViewProps {
-  groups: Group[];
+  groups: GroupWithActivity[];
 }
 
 export function GroupListView({ groups }: GroupListViewProps) {
@@ -35,14 +35,29 @@ export function GroupListView({ groups }: GroupListViewProps) {
                   </span>
                   <div className="flex flex-1 items-center justify-between">
                     <span className="font-semibold">{group.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {group.memberIds.length}{" "}
-                      {group.memberIds.length === 1
-                        ? GROUP_LIST_COPY.memberSingular
-                        : GROUP_LIST_COPY.memberPlural}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {group.unreadCount > 0 && (
+                        <span
+                          aria-label={`${String(group.unreadCount)} unread`}
+                          className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs text-primary-foreground"
+                        >
+                          {group.unreadCount}
+                        </span>
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {group.memberIds.length}{" "}
+                        {group.memberIds.length === 1
+                          ? GROUP_LIST_COPY.memberSingular
+                          : GROUP_LIST_COPY.memberPlural}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                {group.activityPreview !== undefined && (
+                  <p className="mt-1 truncate text-sm text-muted-foreground">
+                    {group.activityPreview}
+                  </p>
+                )}
               </Link>
             </li>
           ))}
