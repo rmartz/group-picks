@@ -8,7 +8,9 @@ const meta: Meta<typeof CreateGroupFormView> = {
   component: CreateGroupFormView,
   args: {
     name: "",
+    emoji: "👥",
     onNameChange: () => undefined,
+    onEmojiChange: () => undefined,
     onSubmit: (e) => {
       e.preventDefault();
     },

@@ -138,7 +138,12 @@ export function GroupDetailView({
   return (
     <main className="mx-auto max-w-lg space-y-4 p-6">
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-semibold">{group.name}</h1>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl" aria-hidden="true">
+            {group.emoji}
+          </span>
+          <h1 className="text-2xl font-semibold">{group.name}</h1>
+        </div>
         <p className="text-sm text-muted-foreground">
           {group.memberIds.length}{" "}
           {group.memberIds.length === 1

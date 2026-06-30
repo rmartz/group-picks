@@ -28,6 +28,7 @@ export function CreatePickForm({
   const [rankingMode, setRankingMode] = useState<RankingMode>(
     RankingMode.TierBuckets,
   );
+  const [resultsVisible, setResultsVisible] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
@@ -48,6 +49,7 @@ export function CreatePickForm({
         topCount,
         dueDate || undefined,
         rankingMode,
+        resultsVisible,
       );
       router.push(
         `/groups/${groupId}/categories/${categoryId}/picks/${pickId}`,
@@ -71,6 +73,8 @@ export function CreatePickForm({
       onDueDateChange={setDueDate}
       rankingMode={rankingMode}
       onRankingModeChange={setRankingMode}
+      resultsVisible={resultsVisible}
+      onResultsVisibleChange={setResultsVisible}
       hasPriorPicks={hasPriorPicks}
       onSubmit={(e) => void handleSubmit(e)}
       onCancel={() => {

@@ -12,6 +12,7 @@ import { JoinGroupFormView } from "./JoinGroupFormView";
 interface JoinGroupFormProps {
   token: string;
   groupName: string;
+  groupEmoji: string;
   memberCount?: number;
   signInHref: string;
 }
@@ -19,6 +20,7 @@ interface JoinGroupFormProps {
 export function JoinGroupForm({
   token,
   groupName,
+  groupEmoji,
   memberCount,
   signInHref,
 }: JoinGroupFormProps) {
@@ -59,6 +61,7 @@ export function JoinGroupForm({
   return (
     <JoinGroupFormView
       groupName={groupName}
+      groupEmoji={groupEmoji}
       memberCount={memberCount}
       onJoin={() => void handleJoin()}
       isJoining={isJoining}

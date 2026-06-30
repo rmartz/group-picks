@@ -4,8 +4,26 @@ import { getAdminApp } from "@/lib/firebase/admin";
 import {
   firebaseToSnapPick,
   firebaseToSnapPickActivation,
+  snapPickToFirebase,
 } from "@/lib/firebase/schema/snap-pick";
 import type { SnapPick, SnapPickActivation } from "@/lib/types/snap-pick";
+
+export async function createSnapPick(
+  snapPick: Pick<
+    SnapPick,
+    "title" | "categoryId" | "creatorId" | "defaultDurationMs"
+  >,
+): Promise<{ id: string; createdAt: Date }> {
+  const db = getDatabase(getAdminApp());
+  const ref = db.ref(`snap-picks/${snapPick.categoryId}`).push();
+  const id = ref.key;
+  if (!id) throw new Error("Failed to generate snap pick ID");
+
+  const createdAt = new Date();
+  await ref.set(snapPickToFirebase({ ...snapPick, createdAt }));
+
+  return { id, createdAt };
+}
 
 export async function getSnapPickById(
   categoryId: string,

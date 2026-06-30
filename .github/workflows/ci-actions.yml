@@ -127,33 +127,23 @@ jobs:
 
   storybook-screenshots:
     name: Storybook Screenshots
-    # Per-ref concurrency: serialize only same-branch runs, not across PRs. A
-    # single global group caused cross-PR eviction — GitHub keeps only the most
-    # recent pending run in a group and cancels the rest, so an unrelated PR's
-    # run would cancel this one at ~3s and report a blocking "cancelled". The
-    # global group originally existed to stop two PRs racing on the shared
-    # gh-screenshots push (#268); that race is now non-fatal because the capture
-    # step is advisory (continue-on-error, #329/#330), so a per-ref group is safe.
-    # cancel-in-progress: true then supersedes stale same-branch runs — a new
-    # commit cancels the prior commit's run, since only the latest commit's
-    # screenshots matter (the per-ref key, not this flag, is what stops cross-PR
-    # cancellation; on a global group cancel-in-progress would instead kill
-    # another PR's in-progress run).
-    concurrency:
-      group: storybook-screenshots-push-${{ github.ref }}
-      cancel-in-progress: true
     needs: detect-changes
-    # Only when a Storybook test/story actually changed (#331): a story change
-    # signals an intended visual change worth validating with a screenshot. The
-    # same-repo guard keeps the push-to-gh-screenshots step off fork PRs.
+    # Only when a Storybook story/test changed (#331): a story change signals an
+    # intended visual change worth eyeballing. The same-repo guard keeps the
+    # branch push + PR comment off fork PRs (their GITHUB_TOKEN is read-only).
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       needs.detect-changes.outputs.stories_changed == 'true'
+    # Per-ref (same-branch) superseding only — a new commit cancels the prior
+    # run. Screenshots publish to a per-PR `gh-screenshots-pr-<N>` branch (#339),
+    # so there is no resource shared across PRs; this group can never evict an
+    # unrelated PR's run the way the old global group did (#336).
+    concurrency:
+      group: storybook-screenshots-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
-    # Backstop so the job can never run away (the screenshot action's browser
-    # download has hung for hours — see #329). The capture step has its own,
-    # shorter timeout below; this just caps the whole job.
+    # Backstop cap; the capture step has its own shorter, bounded timeout.
     timeout-minutes: 8
     permissions:
       contents: write
@@ -162,64 +152,49 @@ jobs:
       - uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
-          persist-credentials: false
       - uses: ./.github/actions/setup
-      - name: Generate changed files list
+      - name: List changed files
         run: |
           git diff --name-only "${{ github.event.pull_request.base.sha }}...${{ github.sha }}" > changed-files.txt
-      - id: screenshot-config
-        name: Generate screenshot config for changed stories
+      # Advisory acceptance aid, never a gate: continue-on-error + a bounded
+      # timeout mean a hang or capture failure reports neutral and cannot block
+      # merge (#339). Capture reuses the Chromium installed here — no separate
+      # pinned install owned by a third-party action (the old #329 hang).
+      - name: Capture and publish screenshots
+        continue-on-error: true
+        timeout-minutes: 6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          node scripts/generate-storybook-screenshots-config.mjs \
-            --changed-files=changed-files.txt \
-            --output=.github/screenshots.dynamic.yml \
-            --github-output="$GITHUB_OUTPUT"
-      - name: Install Playwright Chromium
-        if: steps.screenshot-config.outputs.has_stories == 'true'
-        # Retry: `--with-deps` runs `apt-get update`, which fails hard if any
-        # preinstalled runner apt repo has a transient signing/403 hiccup (#283).
-        run: |
+          set -euo pipefail
           for attempt in 1 2 3; do
-            if pnpm exec playwright install --with-deps chromium; then
-              exit 0
-            fi
-            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
+            pnpm exec playwright install --with-deps chromium && break
+            echo "playwright install attempt $attempt failed; retrying in 15s..." >&2
             sleep 15
           done
-          echo "Playwright install failed after 3 attempts." >&2
-          exit 1
-      - name: Start Storybook
-        if: steps.screenshot-config.outputs.has_stories == 'true'
-        run: pnpm storybook --ci --port 6006 &
-      - name: Wait for Storybook
-        if: steps.screenshot-config.outputs.has_stories == 'true'
-        run: |
-          TIMEOUT_SECONDS=120
-          RETRY_INTERVAL=2
-          MAX_ATTEMPTS=$((TIMEOUT_SECONDS / RETRY_INTERVAL))
-          for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
-            if curl --silent --show-error --fail http://127.0.0.1:6006 >/dev/null; then
-              echo "Storybook is ready."
-              exit 0
-            fi
-            sleep "$RETRY_INTERVAL"
-          done
-          echo "Storybook did not start in time." >&2
-          exit 1
-      # Advisory: PR preview screenshots are best-effort, not a correctness
-      # gate. The beta action runs its own `npx playwright install`, whose
-      # Chromium download intermittently hangs on the CDN (#329). A step-level
-      # timeout (below the job timeout) bounds the hang, and continue-on-error
-      # lets a hung or failed capture report success so it never blocks the PR.
-      # Restoring reliable capture is tracked in #329.
-      - name: Capture Storybook screenshots
-        if: steps.screenshot-config.outputs.has_stories == 'true'
-        continue-on-error: true
-        timeout-minutes: 5
-        uses: yoavf/auto-pr-screenshots-action@v1.4.0-beta
-        with:
-          config-file: .github/screenshots.dynamic.yml
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pnpm build-storybook
+          node scripts/capture-screenshots.mjs \
+            --static-dir=storybook-static \
+            --out=screenshots \
+            --changed-files=changed-files.txt
+          if ! ls screenshots/*.png >/dev/null 2>&1; then
+            echo "No screenshots captured; nothing to publish."
+            exit 0
+          fi
+          PR="${{ github.event.pull_request.number }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          SS_BRANCH="gh-screenshots-pr-${PR}"
+          PUBDIR="$(mktemp -d)"
+          cp screenshots/*.png "$PUBDIR"/
+          git -C "$PUBDIR" init -q -b "$SS_BRANCH"
+          git -C "$PUBDIR" config user.email "github-actions[bot]@users.noreply.github.com"
+          git -C "$PUBDIR" config user.name "github-actions[bot]"
+          git -C "$PUBDIR" add -A
+          git -C "$PUBDIR" commit -q -m "Storybook screenshots for PR #${PR} (${HEAD_SHA})"
+          git -C "$PUBDIR" push -f \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$SS_BRANCH"
+          node scripts/post-screenshots-comment.mjs \
+            --pr="$PR" --branch="$SS_BRANCH" --sha="$HEAD_SHA" --dir=screenshots
 
   build:
     name: Build
