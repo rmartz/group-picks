@@ -251,6 +251,52 @@ describe("POST /api/.../categories/[categoryId]/picks", () => {
     });
   });
 
+  describe("resultsVisible handling", () => {
+    it("defaults resultsVisible to true when omitted", async () => {
+      const response = await POST(
+        makeRequest({ title: "Best Pizza", topCount: 3 }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ resultsVisible: true }),
+      );
+    });
+
+    it("passes through resultsVisible: false", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          resultsVisible: false,
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(201);
+      expect(mockCreatePick).toHaveBeenCalledWith(
+        expect.objectContaining({ resultsVisible: false }),
+      );
+    });
+
+    it("returns 400 for a non-boolean resultsVisible", async () => {
+      const response = await POST(
+        makeRequest({
+          title: "Best Pizza",
+          topCount: 3,
+          resultsVisible: "yes",
+        }),
+        { params: Promise.resolve(baseParams) },
+      );
+
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe("resultsVisible must be a boolean");
+      expect(mockCreatePick).not.toHaveBeenCalled();
+    });
+  });
+
   describe("rankingMode handling", () => {
     it("defaults rankingMode to TierBuckets when omitted", async () => {
       const response = await POST(

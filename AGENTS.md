@@ -3,6 +3,7 @@
 ## Package Manager
 
 - Always use `pnpm`. Never `npm` or `yarn`.
+- **Pin every `package.json` dependency to a full `major.minor.patch` version, even inside a range** (e.g. `^3.8.4`, not `^3`). A shorthand range like `^3` is already satisfied by newer 3.x releases, so a Dependabot minor/patch bump only updates `pnpm-lock.yaml` and leaves `package.json` untouched — making the upgrade invisible in the manifest (this is how a Prettier bump can land via a lockfile-only change and surface as an unexplained formatting failure). A full pin forces every bump to appear as a reviewable `package.json` change.
 
 ## Common Commands
 
@@ -134,6 +135,11 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - When adding or modifying a UI component, add or update its Storybook story to cover key visual states.
 - Stories should use mock data fixtures — never import from Firebase or depend on runtime providers (QueryClient, Redux store, Next.js router).
 - Components that are too hook-dependent to render in isolation should use a presentational split: extract rendering into a `ComponentNameView` that accepts callbacks, and keep the original as a thin wrapper that wires up hooks.
+
+### Storybook screenshots in CI
+
+- When a PR changes a `*.stories.*` file, the `Storybook Screenshots` job captures a PNG per changed story and posts them inline in a single sticky PR comment — a **visual acceptance aid** to eyeball an intended UI change (it is **advisory**, never a merge gate; the always-on `Storybook Tests` suite is what catches regressions). View them directly in the PR comment; no download needed.
+- Mechanics (see #339): capture is self-hosted (`scripts/capture-screenshots.mjs` drives the Storybook static build in the Chromium the workflow already installs); images are published to a **per-PR** `gh-screenshots-pr-<N>` branch (deleted on PR close by `screenshots-cleanup.yml`) — never a branch shared across PRs, so concurrent PRs can never cancel each other.
 
 ## Component Tests
 

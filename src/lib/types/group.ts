@@ -1,6 +1,9 @@
+export const DEFAULT_GROUP_EMOJI = "👥";
+
 export interface Group {
   id: string;
   name: string;
+  emoji: string;
   createdAt: Date;
   creatorId: string;
   memberIds: string[];

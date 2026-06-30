@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockGet, mockRef } = vi.hoisted(() => ({
+const { mockGet, mockRef, mockPush, mockSet } = vi.hoisted(() => ({
   mockGet: vi.fn(),
   mockRef: vi.fn(),
+  mockPush: vi.fn(),
+  mockSet: vi.fn(),
 }));
 
 vi.mock("@/lib/firebase/admin", () => ({
@@ -15,8 +17,12 @@ vi.mock("firebase-admin/database", () => ({
   }),
 }));
 
-const { getSnapPickById, getSnapPicksByCategory, getSnapPickActivations } =
-  await import("./snap-picks");
+const {
+  createSnapPick,
+  getSnapPickById,
+  getSnapPicksByCategory,
+  getSnapPickActivations,
+} = await import("./snap-picks");
 
 function snapshot(value: unknown) {
   return {
@@ -98,5 +104,46 @@ describe("getSnapPickActivations", () => {
     mockGet.mockResolvedValue(snapshot(undefined));
 
     expect(await getSnapPickActivations("snap-1")).toEqual([]);
+  });
+});
+
+describe("createSnapPick", () => {
+  it("pushes a new container under snap-picks/{categoryId} and returns the id", async () => {
+    mockRef.mockReturnValue({ push: mockPush });
+    mockPush.mockReturnValue({ key: "snap-new", set: mockSet });
+    mockSet.mockResolvedValue(undefined);
+
+    const result = await createSnapPick({
+      title: "Lunch spot",
+      categoryId: "cat-9",
+      creatorId: "user-3",
+      defaultDurationMs: 300000,
+    });
+
+    expect(mockRef).toHaveBeenCalledWith("snap-picks/cat-9");
+    expect(result.id).toBe("snap-new");
+    expect(result.createdAt).toBeInstanceOf(Date);
+  });
+
+  it("persists the converted snap pick to the pushed ref", async () => {
+    mockRef.mockReturnValue({ push: mockPush });
+    mockPush.mockReturnValue({ key: "snap-new", set: mockSet });
+    mockSet.mockResolvedValue(undefined);
+
+    await createSnapPick({
+      title: "Lunch spot",
+      categoryId: "cat-9",
+      creatorId: "user-3",
+      defaultDurationMs: 300000,
+    });
+
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Lunch spot",
+        categoryId: "cat-9",
+        creatorId: "user-3",
+        defaultDurationMs: 300000,
+      }),
+    );
   });
 });
