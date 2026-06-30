@@ -1,9 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
-import { computeRankedResults } from "@/lib/ranking-score";
+import {
+  computeOptionTierAttribution,
+  computeRankedResults,
+} from "@/lib/ranking-score";
 import type { PriorPickBannerData, RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
+import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getOptionsByCategory, getOptionsByPick } from "@/server/data/options";
 import { getPickById, getPicksByCategory } from "@/server/data/picks";
 import {
@@ -36,13 +39,19 @@ export default async function PickDetailPage({
 
   const isClosed = pick.closedAt !== undefined;
 
-  const [currentOptions, allPicks, initialTierAssignments, allRankings] =
-    await Promise.all([
-      getOptionsByPick(pickId),
-      getPicksByCategory(categoryId),
-      getRankingByUser(pickId, uid),
-      isClosed ? getAllRankingsForPick(pickId) : Promise.resolve({}),
-    ]);
+  const [
+    currentOptions,
+    allPicks,
+    initialTierAssignments,
+    allRankings,
+    memberNames,
+  ] = await Promise.all([
+    getOptionsByPick(pickId),
+    getPicksByCategory(categoryId),
+    getRankingByUser(pickId, uid),
+    isClosed ? getAllRankingsForPick(pickId) : Promise.resolve({}),
+    isClosed ? getMemberDisplayNames(group.memberIds) : Promise.resolve([]),
+  ]);
 
   const priorPickIds = allPicks.filter((p) => p.id !== pickId).map((p) => p.id);
   const priorOptions = await getOptionsByCategory(priorPickIds);
@@ -64,10 +73,21 @@ export default async function PickDetailPage({
       return true;
     });
 
+  const filteredRankings = Object.fromEntries(
+    Object.entries(allRankings).filter(([uid]) =>
+      group.memberIds.includes(uid),
+    ),
+  ) as Record<string, Record<string, RankingTier>>;
+
   const closedPickResults = computeRankedResults(
-    allRankings,
+    filteredRankings,
     currentOptions,
     pick.topCount,
+  );
+  const topPickAttribution = computeOptionTierAttribution(
+    filteredRankings,
+    currentOptions,
+    memberNames,
   );
 
   let priorPickBannerData: PriorPickBannerData | undefined;
@@ -127,6 +147,7 @@ export default async function PickDetailPage({
       initialTierAssignments={initialTierAssignments}
       priorPickBannerData={priorPickBannerData}
       closedPickResults={closedPickResults}
+      topPickAttribution={topPickAttribution}
     />
   );
 }

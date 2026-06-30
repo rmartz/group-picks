@@ -124,6 +124,7 @@ export async function createPick(
     description?: string;
     dueDate?: Date;
     rankingMode?: RankingMode;
+    resultsVisible?: boolean;
   },
 ): Promise<{ id: string; createdAt: Date }> {
   const db = getDatabase(getAdminApp());

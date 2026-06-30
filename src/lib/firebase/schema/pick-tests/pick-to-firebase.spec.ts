@@ -141,6 +141,47 @@ describe("pickToFirebase", () => {
   });
 });
 
+describe("pickToFirebase resultsVisible", () => {
+  it("serializes resultsVisible when true", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      topCount: 1,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      resultsVisible: true,
+    });
+
+    expect(result.resultsVisible).toBe(true);
+  });
+
+  it("serializes resultsVisible when false", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      topCount: 1,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      resultsVisible: false,
+    });
+
+    expect(result.resultsVisible).toBe(false);
+  });
+
+  it("omits resultsVisible when undefined", () => {
+    const result = pickToFirebase({
+      title: "Movie",
+      topCount: 1,
+      categoryId: "cat-abc",
+      createdAt: FIXED_DATE,
+      creatorId: "user-abc",
+      resultsVisible: undefined,
+    });
+
+    expect(result.resultsVisible).toBeUndefined();
+  });
+});
+
 describe("pickToFirebase rankingMode", () => {
   it("serializes rankingMode when provided", () => {
     const result = pickToFirebase({

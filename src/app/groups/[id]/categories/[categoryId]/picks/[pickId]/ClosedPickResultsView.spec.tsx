@@ -1,8 +1,12 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { ClosedPickResultEntry } from "@/lib/ranking-score";
+import type {
+  ClosedPickResultEntry,
+  OptionTierAttribution,
+} from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
+import { RankingTier } from "@/lib/types/ranking";
 
 import { ClosedPickResultsView } from "./ClosedPickResultsView";
 import { CLOSED_PICK_RESULTS_COPY } from "./ClosedPickResultsView.copy";
@@ -209,5 +213,89 @@ describe("re-open action card", () => {
   it("does not render an error message when reopenError is absent", () => {
     renderView({ onReopen: vi.fn() });
     expect(screen.queryByTestId("reopen-error")).toBeNull();
+  });
+});
+
+describe("tier attribution", () => {
+  function makeAttribution(
+    overrides?: Partial<OptionTierAttribution>,
+  ): OptionTierAttribution {
+    return {
+      [RankingTier.LoveIt]: [],
+      [RankingTier.Yes]: [],
+      [RankingTier.Maybe]: [],
+      [RankingTier.NotForMe]: [],
+      noRank: [],
+      ...overrides,
+    };
+  }
+
+  const baseAttribution: Record<string, OptionTierAttribution> = {
+    "opt-1": makeAttribution({
+      [RankingTier.LoveIt]: [{ uid: "u-1", firstName: "Alice" }],
+    }),
+  };
+
+  it("renders the result row as a button with aria-expanded false when attribution is provided", () => {
+    renderView({ topPickAttribution: baseAttribution });
+    const btn = screen.getByRole("button", { name: /Movie Alpha/ });
+    expect(btn).toBeDefined();
+    expect(btn.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("toggles aria-expanded to true and shows the attribution heading on click", () => {
+    renderView({ topPickAttribution: baseAttribution });
+    const btn = screen.getByRole("button", { name: /Movie Alpha/ });
+    fireEvent.click(btn);
+    expect(btn.getAttribute("aria-expanded")).toBe("true");
+    expect(
+      screen.getByText(CLOSED_PICK_RESULTS_COPY.attributionHeading),
+    ).toBeDefined();
+  });
+
+  it("renders tier labels for the expanded row", () => {
+    renderView({ topPickAttribution: baseAttribution });
+    fireEvent.click(screen.getByRole("button", { name: /Movie Alpha/ }));
+    expect(
+      screen.getByText(CLOSED_PICK_RESULTS_COPY.tiers.loveIt),
+    ).toBeDefined();
+    expect(
+      screen.getByText(CLOSED_PICK_RESULTS_COPY.tiers.noRank),
+    ).toBeDefined();
+  });
+
+  it("renders first-name lists for non-empty tiers", () => {
+    renderView({ topPickAttribution: baseAttribution });
+    fireEvent.click(screen.getByRole("button", { name: /Movie Alpha/ }));
+    expect(screen.getByText("Alice")).toBeDefined();
+  });
+
+  it("renders avatar initials with aria-hidden true", () => {
+    renderView({ topPickAttribution: baseAttribution });
+    fireEvent.click(screen.getByRole("button", { name: /Movie Alpha/ }));
+    const hiddenSpans = document.querySelectorAll('[aria-hidden="true"]');
+    expect(hiddenSpans.length).toBeGreaterThan(0);
+  });
+
+  it("renders the overflow badge when a tier has more than six members", () => {
+    const members = Array.from({ length: 7 }, (_, i) => ({
+      uid: `u-${i}`,
+      firstName: `Member${i}`,
+    }));
+    const attribution: Record<string, OptionTierAttribution> = {
+      "opt-1": makeAttribution({ [RankingTier.LoveIt]: members }),
+    };
+    renderView({ topPickAttribution: attribution });
+    fireEvent.click(screen.getByRole("button", { name: /Movie Alpha/ }));
+    expect(screen.getByText("+1")).toBeDefined();
+  });
+
+  it("renders noMembersLabel for an empty tier", () => {
+    renderView({ topPickAttribution: baseAttribution });
+    fireEvent.click(screen.getByRole("button", { name: /Movie Alpha/ }));
+    const emptyLabels = screen.getAllByText(
+      CLOSED_PICK_RESULTS_COPY.noMembersLabel,
+    );
+    expect(emptyLabels.length).toBeGreaterThan(0);
   });
 });
