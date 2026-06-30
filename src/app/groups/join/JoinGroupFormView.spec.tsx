@@ -11,6 +11,7 @@ function renderView(
 ) {
   const defaults = {
     groupName: "Book Club",
+    groupEmoji: "👥",
     onJoin: vi.fn(),
     isJoining: false,
     isSigningIn: false,
@@ -33,6 +34,11 @@ describe("group preview", () => {
   it("renders the group name", () => {
     renderView({ groupName: "Hiking Friends" });
     expect(screen.getByText("Hiking Friends")).toBeDefined();
+  });
+
+  it("renders the group emoji next to the group name", () => {
+    renderView({ groupName: "Hiking Friends", groupEmoji: "🥾" });
+    expect(screen.getByText("🥾")).toBeDefined();
   });
 
   it("renders member count when provided", () => {

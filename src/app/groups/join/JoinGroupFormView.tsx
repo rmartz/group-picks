@@ -4,6 +4,7 @@ import { JOIN_GROUP_COPY } from "./copy";
 
 interface JoinGroupFormViewProps {
   groupName: string;
+  groupEmoji: string;
   memberCount?: number;
   onJoin: () => void;
   isJoining: boolean;
@@ -14,6 +15,7 @@ interface JoinGroupFormViewProps {
 
 export function JoinGroupFormView({
   groupName,
+  groupEmoji,
   memberCount,
   onJoin,
   isJoining,
@@ -25,7 +27,9 @@ export function JoinGroupFormView({
     <main className="mx-auto max-w-lg space-y-6 p-6">
       <h1 className="text-2xl font-semibold">{JOIN_GROUP_COPY.joinTitle}</h1>
       <div className="rounded-lg border p-4 space-y-1">
-        <p className="font-medium">{groupName}</p>
+        <p className="font-medium">
+          <span aria-hidden="true">{groupEmoji}</span> {groupName}
+        </p>
         {memberCount !== undefined && (
           <p className="text-sm text-muted-foreground">
             {memberCount}{" "}

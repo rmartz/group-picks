@@ -13,6 +13,7 @@ import type { GroupPick } from "@/lib/types/pick";
 
 import { CategoryList } from "./categories/CategoryList";
 import { GROUP_DETAIL_COPY } from "./copy";
+import { DeleteGroupButtonView } from "./DeleteGroupButtonView";
 import { GroupSettingsPanelView } from "./GroupSettingsPanelView";
 import { InviteSection } from "./InviteSection";
 import { LeaveGroupButtonView } from "./LeaveGroupButtonView";
@@ -38,6 +39,9 @@ interface GroupDetailViewProps {
   isSavingSettings?: boolean;
   settingsError?: string;
   onRemoveMember: (uid: string) => void;
+  onDeleteGroup?: () => void;
+  isDeletingGroup?: boolean;
+  deleteGroupError?: string;
 }
 
 interface PickListItemProps {
@@ -110,6 +114,9 @@ export function GroupDetailView({
   isSavingSettings = false,
   settingsError,
   onRemoveMember,
+  onDeleteGroup,
+  isDeletingGroup = false,
+  deleteGroupError,
 }: GroupDetailViewProps) {
   const isAdmin = group.adminIds.includes(currentUserId);
   const [confirmRemoveUid, setConfirmRemoveUid] = useState<string | undefined>(
@@ -131,7 +138,12 @@ export function GroupDetailView({
   return (
     <main className="mx-auto max-w-lg space-y-4 p-6">
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-semibold">{group.name}</h1>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl" aria-hidden="true">
+            {group.emoji}
+          </span>
+          <h1 className="text-2xl font-semibold">{group.name}</h1>
+        </div>
         <p className="text-sm text-muted-foreground">
           {group.memberIds.length}{" "}
           {group.memberIds.length === 1
@@ -295,6 +307,14 @@ export function GroupDetailView({
               onTogglePicksRestricted={onTogglePicksRestricted}
               isSaving={isSavingSettings}
               error={settingsError}
+            />
+          )}
+          {isCallerCreator && onDeleteGroup !== undefined && (
+            <DeleteGroupButtonView
+              groupName={group.name}
+              onDelete={onDeleteGroup}
+              isDeleting={isDeletingGroup}
+              error={deleteGroupError}
             />
           )}
           <InviteSection

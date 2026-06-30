@@ -1,0 +1,29 @@
+name: Screenshots cleanup
+
+# Delete the per-PR screenshots branch (gh-screenshots-pr-<N>) when its PR
+# closes, so the per-PR image host from the Storybook Screenshots job (#339)
+# does not accumulate unboundedly.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  delete-screenshots-branch:
+    name: Delete per-PR screenshots branch
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Delete branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="gh-screenshots-pr-${{ github.event.pull_request.number }}"
+          if gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${BRANCH}" 2>/dev/null; then
+            echo "Deleted ${BRANCH}."
+          else
+            echo "No ${BRANCH} branch to delete."
+          fi

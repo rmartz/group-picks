@@ -1,13 +1,20 @@
 "use client";
 
-import type { ClosedPickResultEntry } from "@/lib/ranking-score";
+import { useState } from "react";
+
+import type {
+  ClosedPickResultEntry,
+  OptionTierAttribution,
+} from "@/lib/ranking-score";
 
 import { CLOSED_PICK_RESULTS_COPY } from "./ClosedPickResultsView.copy";
+import { OptionAttributionPanel } from "./OptionAttributionPanel";
 
 interface ClosedPickResultsViewProps {
   topCount: number;
   topPicks: ClosedPickResultEntry[];
   runnersUp: ClosedPickResultEntry[];
+  topPickAttribution?: Record<string, OptionTierAttribution>;
   onReopen?: () => void;
   isReopening?: boolean;
   reopenError?: string;
@@ -28,11 +35,20 @@ function groupByRank(
 interface ResultRowProps {
   entry: ClosedPickResultEntry;
   showCrown: boolean;
+  attribution?: OptionTierAttribution;
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
-function ResultRow({ entry, showCrown }: ResultRowProps) {
-  return (
-    <div className="flex items-center gap-3 py-2">
+function ResultRow({
+  entry,
+  showCrown,
+  attribution,
+  isExpanded = false,
+  onToggle,
+}: ResultRowProps) {
+  const header = (
+    <>
       <span className="w-8 text-center text-sm font-semibold text-muted-foreground">
         #{entry.rank}
       </span>
@@ -41,6 +57,26 @@ function ResultRow({ entry, showCrown }: ResultRowProps) {
       <span className="text-sm tabular-nums text-muted-foreground">
         {entry.score}
       </span>
+    </>
+  );
+
+  return (
+    <div className="py-2">
+      {onToggle !== undefined ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isExpanded}
+          className="flex w-full items-center gap-3 text-left"
+        >
+          {header}
+        </button>
+      ) : (
+        <div className="flex items-center gap-3">{header}</div>
+      )}
+      {attribution !== undefined && isExpanded && (
+        <OptionAttributionPanel attribution={attribution} />
+      )}
     </div>
   );
 }
@@ -49,12 +85,22 @@ export function ClosedPickResultsView({
   topCount,
   topPicks,
   runnersUp,
+  topPickAttribution,
   onReopen,
   isReopening = false,
   reopenError,
 }: ClosedPickResultsViewProps) {
+  const [expandedOptionId, setExpandedOptionId] = useState<string | undefined>(
+    undefined,
+  );
   const isEmpty = topPicks.length === 0 && runnersUp.length === 0;
   const topPicksByRank = groupByRank(topPicks);
+
+  function toggleOption(optionId: string) {
+    setExpandedOptionId((current) =>
+      current === optionId ? undefined : optionId,
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -88,6 +134,15 @@ export function ClosedPickResultsView({
                       key={entry.option.id}
                       entry={entry}
                       showCrown={entry.rank === 1}
+                      attribution={topPickAttribution?.[entry.option.id]}
+                      isExpanded={expandedOptionId === entry.option.id}
+                      onToggle={
+                        topPickAttribution !== undefined
+                          ? () => {
+                              toggleOption(entry.option.id);
+                            }
+                          : undefined
+                      }
                     />
                   ))}
                 </div>
@@ -97,6 +152,15 @@ export function ClosedPickResultsView({
                     key={entries[0].option.id}
                     entry={entries[0]}
                     showCrown={entries[0].rank === 1}
+                    attribution={topPickAttribution?.[entries[0].option.id]}
+                    isExpanded={expandedOptionId === entries[0].option.id}
+                    onToggle={
+                      topPickAttribution !== undefined
+                        ? () => {
+                            toggleOption(entries[0]?.option.id ?? "");
+                          }
+                        : undefined
+                    }
                   />
                 )
               ),
@@ -114,6 +178,15 @@ export function ClosedPickResultsView({
                     key={entry.option.id}
                     entry={entry}
                     showCrown={false}
+                    attribution={topPickAttribution?.[entry.option.id]}
+                    isExpanded={expandedOptionId === entry.option.id}
+                    onToggle={
+                      topPickAttribution !== undefined
+                        ? () => {
+                            toggleOption(entry.option.id);
+                          }
+                        : undefined
+                    }
                   />
                 ))}
               </div>

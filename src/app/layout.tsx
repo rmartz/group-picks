@@ -4,6 +4,8 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { DebugUserSwitcher } from "@/components/debug/DebugUserSwitcher";
+
 import { Providers } from "./providers";
 
 const geistSans = Geist({
@@ -33,6 +35,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
+        <DebugUserSwitcher />
         <Analytics />
       </body>
     </html>

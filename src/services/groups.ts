@@ -25,11 +25,14 @@ export async function joinGroup(token: string): Promise<string> {
   return data.groupId;
 }
 
-export async function createGroup(name: string): Promise<string> {
+export async function createGroup(
+  name: string,
+  emoji: string,
+): Promise<string> {
   const response = await fetch("/api/groups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, emoji }),
   });
   if (!response.ok) throw new Error("Failed to create group");
 
@@ -94,6 +97,13 @@ export async function updateGroupSettings(
     body: JSON.stringify(settings),
   });
   if (!response.ok) throw new Error("Failed to update group settings");
+}
+
+export async function deleteGroup(groupId: string): Promise<void> {
+  const response = await fetch(`/api/groups/${groupId}/destroy`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete group");
 }
 
 export async function removeGroupMember(

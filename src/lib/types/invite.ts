@@ -10,4 +10,5 @@ export interface GroupInvite {
   expiresAt: Date | undefined;
   active: boolean;
   mode: InviteMode;
+  createdBy?: string;
 }
