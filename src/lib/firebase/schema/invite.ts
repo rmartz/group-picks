@@ -8,6 +8,7 @@ export interface FirebaseGroupInvite {
   expiresAt: number | null;
   active: boolean;
   mode?: InviteMode;
+  createdBy?: string;
 }
 
 // Runtime shape of a persisted invite node, parsed on read. `mode` is left
@@ -16,6 +17,7 @@ export interface FirebaseGroupInvite {
 export const FirebaseGroupInviteSchema = z.object({
   groupId: z.string(),
   createdAt: z.number(),
+  createdBy: z.string().optional(),
   expiresAt: z.number().nullable(),
   active: z.boolean(),
   mode: z.unknown().optional(),
@@ -31,7 +33,7 @@ function isInviteMode(value: unknown): value is InviteMode {
 export function groupInviteToFirebase(
   invite: Pick<
     GroupInvite,
-    "groupId" | "createdAt" | "expiresAt" | "active" | "mode"
+    "groupId" | "createdAt" | "expiresAt" | "active" | "mode" | "createdBy"
   >,
 ): FirebaseGroupInvite {
   return {
@@ -40,6 +42,7 @@ export function groupInviteToFirebase(
     expiresAt: invite.expiresAt?.getTime() ?? null,
     active: invite.active,
     mode: invite.mode,
+    createdBy: invite.createdBy,
   };
 }
 
@@ -56,5 +59,6 @@ export function firebaseToGroupInvite(
       parsed.expiresAt !== null ? new Date(parsed.expiresAt) : undefined,
     active: parsed.active,
     mode: isInviteMode(parsed.mode) ? parsed.mode : InviteMode.Group,
+    createdBy: parsed.createdBy,
   };
 }
