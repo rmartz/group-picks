@@ -83,6 +83,12 @@ export const WithError: Story = {
   },
 };
 
+export const OptionWithNoOwners: Story = {
+  args: {
+    options: [makeOption({ ownerIds: [] })],
+  },
+};
+
 export const ClosedPick: Story = {
   args: {
     pickClosed: true,
