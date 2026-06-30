@@ -75,7 +75,11 @@ describe("GroupListView", () => {
   });
 
   it("renders the group emoji on each card", () => {
-    const group = makeGroupWithActivity({ id: "g1", name: "Alpha", emoji: "🎬" });
+    const group = makeGroupWithActivity({
+      id: "g1",
+      name: "Alpha",
+      emoji: "🎬",
+    });
     render(<GroupListView groups={[group]} />);
 
     expect(screen.getByText("🎬")).toBeDefined();
