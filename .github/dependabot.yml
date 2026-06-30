@@ -40,3 +40,14 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    # Group minor and patch action bumps into one PR; major bumps match no
+    # group and are raised as individual PRs, since they are the most likely to
+    # need a workflow change and warrant isolated review (mirrors the npm
+    # groups above).
+    groups:
+      github-actions:
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"
