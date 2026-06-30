@@ -19,6 +19,7 @@
     "storybook-tests": "vitest --project=storybook",
     "prepare": "husky",
     "env:validate": "node scripts/validate-config.mjs",
+    "pins:check": "node scripts/check-package-pins.mjs",
     "seed:debug": "node --env-file-if-exists=.env.local scripts/seed-debug-users.mjs"
   },
   "pnpm": {
