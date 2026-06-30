@@ -17,6 +17,8 @@ export const CREATE_PICK_COPY = {
     tierBuckets: "Tier buckets",
   },
   rankingModesPostMvp: "(post-MVP)",
+  resultsVisibleHint: "Hide for 'surprise me' reveal at close.",
+  resultsVisibleLabel: "Show running results",
   submitButton: "Create pick",
   title: "Create a pick",
   titleLabel: "Pick name",

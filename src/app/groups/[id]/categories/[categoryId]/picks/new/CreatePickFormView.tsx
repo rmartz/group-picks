@@ -19,6 +19,8 @@ interface CreatePickFormViewProps {
   onDueDateChange: (dueDate: string) => void;
   rankingMode: RankingMode;
   onRankingModeChange: (mode: RankingMode) => void;
+  resultsVisible: boolean;
+  onResultsVisibleChange: (visible: boolean) => void;
   hasPriorPicks: boolean;
   onSubmit: (e: React.SyntheticEvent) => void;
   onCancel: () => void;
@@ -37,6 +39,8 @@ export function CreatePickFormView({
   onDueDateChange,
   rankingMode,
   onRankingModeChange,
+  resultsVisible,
+  onResultsVisibleChange,
   hasPriorPicks,
   onSubmit,
   onCancel,
@@ -175,6 +179,27 @@ export function CreatePickFormView({
             </label>
           </div>
         </fieldset>
+
+        <div className="flex items-start gap-3">
+          <input
+            id="pick-results-visible"
+            type="checkbox"
+            checked={resultsVisible}
+            onChange={(e) => {
+              onResultsVisibleChange(e.target.checked);
+            }}
+            disabled={loading}
+            className="mt-0.5"
+          />
+          <div>
+            <Label htmlFor="pick-results-visible">
+              {CREATE_PICK_COPY.resultsVisibleLabel}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {CREATE_PICK_COPY.resultsVisibleHint}
+            </p>
+          </div>
+        </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
