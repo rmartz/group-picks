@@ -42,6 +42,7 @@ function renderLanding(signInHref = "/sign-in?next=/invite/abc123") {
     <InviteLanding
       token="abc123"
       groupName="Book Club"
+      groupEmoji="📚"
       memberCount={3}
       memberNames={["Alice", "Bob", "Carol"]}
       signInHref={signInHref}

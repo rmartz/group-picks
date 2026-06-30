@@ -9,6 +9,7 @@ afterEach(cleanup);
 function makeDefaultProps() {
   return {
     groupName: "Book Club",
+    groupEmoji: "📚",
     memberCount: 3,
     memberNames: [] as string[],
   };

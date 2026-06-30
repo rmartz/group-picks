@@ -8,6 +8,7 @@ const meta: Meta<typeof JoinGroupFormView> = {
   component: JoinGroupFormView,
   args: {
     groupName: "Book Club",
+    groupEmoji: "👥",
     onJoin: () => undefined,
     isJoining: false,
     isSigningIn: false,

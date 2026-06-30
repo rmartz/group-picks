@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { Group } from "@/lib/types/group";
+import { DEFAULT_GROUP_EMOJI } from "@/lib/types/group";
 
 export interface FirebaseGroupPublic {
   name: string;
@@ -9,6 +10,7 @@ export interface FirebaseGroupPublic {
   inviteToken: string;
   adminIds?: Record<string, true>;
   picksRestricted?: boolean;
+  emoji?: string;
 }
 
 // Runtime shape of a persisted group's public node. Parsed on read so a
@@ -20,12 +22,14 @@ const FirebaseGroupPublicSchema = z.object({
   inviteToken: z.string(),
   adminIds: z.record(z.string(), z.literal(true)).optional(),
   picksRestricted: z.boolean().optional(),
+  emoji: z.string().optional(),
 });
 
 export function groupToFirebase(
   group: Pick<
     Group,
     | "name"
+    | "emoji"
     | "createdAt"
     | "creatorId"
     | "inviteToken"
@@ -35,6 +39,7 @@ export function groupToFirebase(
 ): FirebaseGroupPublic {
   return {
     name: group.name,
+    emoji: group.emoji,
     createdAt: group.createdAt.getTime(),
     creatorId: group.creatorId,
     inviteToken: group.inviteToken,
@@ -52,9 +57,14 @@ export function firebaseToGroup(
   const adminIds = parsed.adminIds
     ? Object.keys(parsed.adminIds)
     : [parsed.creatorId];
+  const emoji =
+    typeof parsed.emoji === "string" && parsed.emoji.trim()
+      ? parsed.emoji.trim()
+      : DEFAULT_GROUP_EMOJI;
   return {
     id,
     name: parsed.name,
+    emoji,
     createdAt: new Date(parsed.createdAt),
     creatorId: parsed.creatorId,
     memberIds,

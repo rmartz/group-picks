@@ -9,6 +9,7 @@ const meta: Meta<typeof InviteLandingView> = {
   component: InviteLandingView,
   args: {
     groupName: "Book Club",
+    groupEmoji: "📚",
     memberCount: 5,
     memberNames: ["Alice", "Bob", "Carol"],
     currentPick: undefined,

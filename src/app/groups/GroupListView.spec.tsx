@@ -73,6 +73,17 @@ describe("GroupListView", () => {
       screen.getByText(`1 ${GROUP_LIST_COPY.memberSingular}`),
     ).toBeDefined();
   });
+
+  it("renders the group emoji on each card", () => {
+    const group = makeGroupWithActivity({
+      id: "g1",
+      name: "Alpha",
+      emoji: "🎬",
+    });
+    render(<GroupListView groups={[group]} />);
+
+    expect(screen.getByText("🎬")).toBeDefined();
+  });
 });
 
 describe("activity preview", () => {
