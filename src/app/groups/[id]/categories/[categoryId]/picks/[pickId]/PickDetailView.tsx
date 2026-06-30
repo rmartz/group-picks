@@ -6,7 +6,10 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { ClosedPickResultEntry } from "@/lib/ranking-score";
+import type {
+  ClosedPickResultEntry,
+  OptionTierAttribution,
+} from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 import type { PriorPickBannerData, RankingTier } from "@/lib/types/ranking";
@@ -34,6 +37,7 @@ interface PickDetailViewProps {
     topPicks: ClosedPickResultEntry[];
     runnersUp: ClosedPickResultEntry[];
   };
+  topPickAttribution?: Record<string, OptionTierAttribution>;
 }
 
 export function PickDetailView({
@@ -47,6 +51,7 @@ export function PickDetailView({
   initialTierAssignments = {},
   priorPickBannerData,
   closedPickResults,
+  topPickAttribution = {},
 }: PickDetailViewProps) {
   const router = useRouter();
   const [options, setOptions] = useState<Option[]>(initialOptions);
@@ -225,6 +230,7 @@ export function PickDetailView({
               onReopen={() => void handleReopen()}
               isReopening={isReopening}
               reopenError={reopenError}
+              topPickAttribution={topPickAttribution}
             />
           )}
         </TabsContent>
