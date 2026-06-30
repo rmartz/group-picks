@@ -1,8 +1,10 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { OptionTierAttribution } from "@/lib/ranking-score";
-import type { Option } from "@/lib/types/option";
+import type {
+  ClosedPickResultEntry,
+  OptionTierAttribution,
+} from "@/lib/ranking-score";
 import { RankingTier } from "@/lib/types/ranking";
 
 const mockRedirect = vi.fn();
@@ -51,7 +53,10 @@ vi.mock("@/server/data/rankings", () => ({
 }));
 
 interface CapturedPickDetailProps {
-  topPicks: Option[];
+  closedPickResults: {
+    topPicks: ClosedPickResultEntry[];
+    runnersUp: ClosedPickResultEntry[];
+  };
   topPickAttribution: Record<string, OptionTierAttribution>;
 }
 
@@ -146,7 +151,9 @@ describe("PickDetailPage — former-member exclusion", () => {
     await renderPage();
 
     expect(capturedProps).toHaveLength(1);
-    expect(capturedProps[0]?.topPicks[0]?.id).toBe("opt-a");
+    expect(capturedProps[0]?.closedPickResults.topPicks[0]?.option.id).toBe(
+      "opt-a",
+    );
   });
 
   it("excludes former members from tier attribution for a closed pick", async () => {

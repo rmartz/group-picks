@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import {
   computeOptionTierAttribution,
-  computeTopPicks,
+  computeRankedResults,
 } from "@/lib/ranking-score";
 import type { RankingTier } from "@/lib/types/ranking";
 import { getCategoryById } from "@/server/data/categories";
@@ -78,14 +78,14 @@ export default async function PickDetailPage({
     ),
   ) as Record<string, Record<string, RankingTier>>;
 
-  const topPicks = computeTopPicks(
+  const closedPickResults = computeRankedResults(
     filteredRankings,
     currentOptions,
     pick.topCount,
   );
   const topPickAttribution = computeOptionTierAttribution(
     filteredRankings,
-    topPicks,
+    currentOptions,
     memberNames,
   );
 
@@ -99,7 +99,7 @@ export default async function PickDetailPage({
       initialOptions={currentOptions}
       initialSuggestions={suggestions}
       initialTierAssignments={initialTierAssignments}
-      topPicks={topPicks}
+      closedPickResults={closedPickResults}
       topPickAttribution={topPickAttribution}
     />
   );
