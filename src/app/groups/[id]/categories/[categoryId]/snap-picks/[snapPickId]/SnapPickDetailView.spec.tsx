@@ -11,7 +11,12 @@ afterEach(cleanup);
 describe("renders the Snap Pick detail shell", () => {
   it("shows the snap pick title as the heading", () => {
     render(
-      <SnapPickDetailView snapPick={makeSnapPick({ title: "Friday Lunch" })} />,
+      <SnapPickDetailView
+        snapPick={makeSnapPick({ title: "Friday Lunch" })}
+        groupId="group-1"
+        currentUserId="user-1"
+        options={[]}
+      />,
     );
 
     expect(
@@ -20,7 +25,14 @@ describe("renders the Snap Pick detail shell", () => {
   });
 
   it("renders slots for the option pool, activation, and voting sections", () => {
-    render(<SnapPickDetailView snapPick={makeSnapPick()} />);
+    render(
+      <SnapPickDetailView
+        snapPick={makeSnapPick()}
+        groupId="group-1"
+        currentUserId="user-1"
+        options={[]}
+      />,
+    );
 
     expect(
       screen.getByText(SNAP_PICK_DETAIL_COPY.optionPoolHeading),
@@ -29,5 +41,21 @@ describe("renders the Snap Pick detail shell", () => {
       screen.getByText(SNAP_PICK_DETAIL_COPY.activationHeading),
     ).toBeDefined();
     expect(screen.getByText(SNAP_PICK_DETAIL_COPY.votingHeading)).toBeDefined();
+  });
+
+  it("locks the option pool while an activation is in progress", () => {
+    render(
+      <SnapPickDetailView
+        snapPick={makeSnapPick()}
+        groupId="group-1"
+        currentUserId="user-1"
+        options={[]}
+        activationInProgress
+      />,
+    );
+
+    expect(
+      screen.getByText(SNAP_PICK_DETAIL_COPY.optionPoolActivationNotice),
+    ).toBeDefined();
   });
 });

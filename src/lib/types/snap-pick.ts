@@ -7,6 +7,14 @@ export interface SnapPick {
   defaultDurationMs: number;
 }
 
+export interface SnapPickOption {
+  id: string;
+  title: string;
+  addedBy: string;
+  addedAt: Date;
+  removedAt?: Date;
+}
+
 export interface SnapPickActivation {
   id: string;
   snapPickId: string;
