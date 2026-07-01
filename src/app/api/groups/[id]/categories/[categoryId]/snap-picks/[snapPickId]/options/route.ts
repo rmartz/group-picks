@@ -1,49 +1,14 @@
 import { NextResponse } from "next/server";
 
-import { getCategoryById } from "@/server/data/categories";
-import { getGroupById } from "@/server/data/groups";
 import {
   addSnapPickOption,
-  getSnapPickById,
   getSnapPickOptions,
 } from "@/server/data/snap-picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { authorizeSnapPickMember } from "@/server/utils/snap-pick-auth";
 
 interface RouteParams {
   params: Promise<{ id: string; categoryId: string; snapPickId: string }>;
-}
-
-// Confirms the caller is a member of the group and the snap pick exists under the
-// given category. Returns an error NextResponse on failure, or undefined on success.
-async function authorizeMember(
-  uid: string,
-  groupId: string,
-  categoryId: string,
-  snapPickId: string,
-): Promise<NextResponse | undefined> {
-  const [group, category, snapPick] = await Promise.all([
-    getGroupById(groupId),
-    getCategoryById(categoryId),
-    getSnapPickById(categoryId, snapPickId),
-  ]);
-
-  if (!group) {
-    return NextResponse.json({ error: "Group not found" }, { status: 404 });
-  }
-
-  if (!group.memberIds.includes(uid)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  if (category?.groupId !== groupId) {
-    return NextResponse.json({ error: "Category not found" }, { status: 404 });
-  }
-
-  if (!snapPick) {
-    return NextResponse.json({ error: "Snap pick not found" }, { status: 404 });
-  }
-
-  return undefined;
 }
 
 export async function GET(_request: Request, { params }: RouteParams) {
@@ -53,7 +18,12 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   const { id: groupId, categoryId, snapPickId } = await params;
-  const denied = await authorizeMember(uid, groupId, categoryId, snapPickId);
+  const denied = await authorizeSnapPickMember(
+    uid,
+    groupId,
+    categoryId,
+    snapPickId,
+  );
   if (denied) return denied;
 
   const options = await getSnapPickOptions(snapPickId);
@@ -68,7 +38,12 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   const { id: groupId, categoryId, snapPickId } = await params;
-  const denied = await authorizeMember(uid, groupId, categoryId, snapPickId);
+  const denied = await authorizeSnapPickMember(
+    uid,
+    groupId,
+    categoryId,
+    snapPickId,
+  );
   if (denied) return denied;
 
   let body: { title: unknown };

@@ -1,17 +1,14 @@
+import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockGetVerifiedUid,
-  mockGetGroupById,
-  mockGetCategoryById,
-  mockGetSnapPickById,
+  mockAuthorizeSnapPickMember,
   mockGetSnapPickOptions,
   mockAddSnapPickOption,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
-  mockGetGroupById: vi.fn(),
-  mockGetCategoryById: vi.fn(),
-  mockGetSnapPickById: vi.fn(),
+  mockAuthorizeSnapPickMember: vi.fn(),
   mockGetSnapPickOptions: vi.fn(),
   mockAddSnapPickOption: vi.fn(),
 }));
@@ -20,16 +17,11 @@ vi.mock("@/server/utils/auth", () => ({
   getVerifiedUid: mockGetVerifiedUid,
 }));
 
-vi.mock("@/server/data/groups", () => ({
-  getGroupById: mockGetGroupById,
-}));
-
-vi.mock("@/server/data/categories", () => ({
-  getCategoryById: mockGetCategoryById,
+vi.mock("@/server/utils/snap-pick-auth", () => ({
+  authorizeSnapPickMember: mockAuthorizeSnapPickMember,
 }));
 
 vi.mock("@/server/data/snap-picks", () => ({
-  getSnapPickById: mockGetSnapPickById,
   getSnapPickOptions: mockGetSnapPickOptions,
   addSnapPickOption: mockAddSnapPickOption,
 }));
@@ -56,12 +48,7 @@ function makeRequest(body: unknown) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockGetVerifiedUid.mockResolvedValue("user-1");
-  mockGetGroupById.mockResolvedValue({
-    id: "group-1",
-    memberIds: ["user-1"],
-  });
-  mockGetCategoryById.mockResolvedValue({ id: "cat-1", groupId: "group-1" });
-  mockGetSnapPickById.mockResolvedValue({ id: "snap-1", categoryId: "cat-1" });
+  mockAuthorizeSnapPickMember.mockResolvedValue(undefined);
   mockGetSnapPickOptions.mockResolvedValue([]);
   mockAddSnapPickOption.mockResolvedValue({
     id: "option-new",
@@ -88,8 +75,18 @@ describe("GET /api/.../snap-picks/[snapPickId]/options", () => {
     expect(mockGetSnapPickOptions).toHaveBeenCalledWith("snap-1");
   });
 
+  it("returns 401 when unauthenticated", async () => {
+    mockGetVerifiedUid.mockResolvedValue(undefined);
+
+    const response = await GET(new Request("http://localhost"), { params });
+
+    expect(response.status).toBe(401);
+  });
+
   it("returns 403 for a non-member", async () => {
-    mockGetGroupById.mockResolvedValue({ id: "group-1", memberIds: ["other"] });
+    mockAuthorizeSnapPickMember.mockResolvedValue(
+      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+    );
 
     const response = await GET(new Request("http://localhost"), { params });
 
@@ -97,7 +94,9 @@ describe("GET /api/.../snap-picks/[snapPickId]/options", () => {
   });
 
   it("returns 404 when the snap pick does not exist", async () => {
-    mockGetSnapPickById.mockResolvedValue(undefined);
+    mockAuthorizeSnapPickMember.mockResolvedValue(
+      NextResponse.json({ error: "Snap pick not found" }, { status: 404 }),
+    );
 
     const response = await GET(new Request("http://localhost"), { params });
 
