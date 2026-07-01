@@ -25,7 +25,7 @@ Because the value is baked in at build time, changing `NEXT_PUBLIC_DEBUG_AUTH` r
 
 ## Activating it on a Vercel preview
 
-1. **Set the flag on the deployment.** Add `NEXT_PUBLIC_DEBUG_AUTH=true` to the Preview (and/or a specific non-production) environment for the Vercel project, then trigger a redeploy so the value is compiled into the client bundle. Do **not** set it on Production — the `VERCEL_ENV` backstop disables the feature there regardless, but there is no reason to ship the flag to production.
+1. **Set the flag on the deployment.** Add `NEXT_PUBLIC_DEBUG_AUTH=true` to the Preview (and/or a specific non-production) environment for the Vercel project, then trigger a redeploy so the value is compiled into the client bundle. Do **not** set it on Production — the `VERCEL_ENV` backstop makes the server endpoint return `404` in production so sign-in will fail, but the panel itself would still render client-side (since `VERCEL_ENV` is undefined in the browser), showing a debug UI to real users.
 
 2. **Seed the debug users and data.** The switcher mints tokens for fixed uids (`debug-alice`, `debug-bob`, `debug-casey`); those Firebase Auth users and a small slice of group/category/pick data must exist for the app's membership checks to pass once a debug user signs in. Run the seed against the preview/staging Firebase project:
 
