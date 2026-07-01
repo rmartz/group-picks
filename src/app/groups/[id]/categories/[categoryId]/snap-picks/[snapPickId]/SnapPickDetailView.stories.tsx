@@ -11,6 +11,9 @@ import { SnapPickDetailView } from "./SnapPickDetailView";
 const meta = {
   title: "SnapPicks/SnapPickDetailView",
   component: SnapPickDetailView,
+  parameters: {
+    nextjs: { appDirectory: true },
+  },
   args: {
     snapPick: makeSnapPick({ title: "Friday Lunch" }),
     groupId: "group-1",
