@@ -13,8 +13,9 @@
 // Requires env: GITHUB_REPOSITORY (owner/repo) and GITHUB_TOKEN.
 
 import { readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
-const MARKER = "<!-- storybook-screenshots -->";
+export const MARKER = "<!-- storybook-screenshots -->";
 
 function parseArgs(argv) {
   const args = { dir: "screenshots" };
@@ -25,6 +26,14 @@ function parseArgs(argv) {
     else if (arg.startsWith("--dir=")) args.dir = arg.slice(6);
   }
   return args;
+}
+
+// Extract the `rel="next"` URL from a GitHub `Link` response header, or
+// undefined when no next page exists (last page, or header absent).
+export function parseNextLink(linkHeader) {
+  if (!linkHeader) return undefined;
+  const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+  return match ? match[1] : undefined;
 }
 
 async function gh(path, method = "GET", body) {
@@ -43,6 +52,36 @@ async function gh(path, method = "GET", body) {
     );
   }
   return res.json();
+}
+
+// Search every page of a PR's comments for the sticky marker, following the
+// `Link: rel="next"` header until exhausted (#342). Without this loop only the
+// first 100 comments were searched, so a marker beyond page 1 was missed and a
+// duplicate comment posted. `fetchFn` is injectable for testing.
+export async function findMarkerComment({
+  fetchFn = fetch,
+  repo,
+  pr,
+  token,
+  marker = MARKER,
+}) {
+  let url = `https://api.github.com/repos/${repo}/issues/${pr}/comments?per_page=100`;
+  while (url) {
+    const res = await fetchFn(url, {
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: "application/vnd.github+json",
+      },
+    });
+    if (!res.ok) {
+      throw new Error(`GitHub GET ${url} -> ${res.status} ${await res.text()}`);
+    }
+    const comments = await res.json();
+    const existing = comments.find((c) => c.body?.includes(marker));
+    if (existing) return existing;
+    url = parseNextLink(res.headers.get("link"));
+  }
+  return undefined;
 }
 
 function buildBody(repo, branch, sha, files) {
@@ -87,10 +126,11 @@ async function main() {
   }
 
   const body = buildBody(repo, args.branch, args.sha, files);
-  const comments = await gh(
-    `/repos/${repo}/issues/${args.pr}/comments?per_page=100`,
-  );
-  const existing = comments.find((c) => c.body?.includes(MARKER));
+  const existing = await findMarkerComment({
+    repo,
+    pr: args.pr,
+    token: process.env.GITHUB_TOKEN,
+  });
 
   if (existing) {
     await gh(`/repos/${repo}/issues/comments/${existing.id}`, "PATCH", {
@@ -103,7 +143,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
