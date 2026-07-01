@@ -17,10 +17,11 @@
 import { createReadStream, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { chromium } from "playwright";
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const args = { staticDir: "storybook-static", out: "screenshots" };
   for (const arg of argv) {
     if (arg.startsWith("--static-dir=")) args.staticDir = arg.slice(13);
@@ -72,23 +73,40 @@ function startStaticServer(rootDir) {
   });
 }
 
+// The `story`-typed entries of a Storybook `index.json` (docs entries and other
+// non-story types are dropped — only stories yield a screenshot).
+export function storiesFromIndex(index) {
+  return Object.values(index.entries).filter((e) => e.type === "story");
+}
+
+// Keep only stories whose source file appears in `changedFiles`. `importPath`
+// looks like "./src/foo/Bar.stories.tsx" while changed-files entries are
+// repo-relative ("src/foo/Bar.stories.tsx"), so the leading "./" is stripped
+// before comparison.
+export function filterStoriesByChangedFiles(stories, changedFiles) {
+  const changed = new Set(changedFiles);
+  return stories.filter((e) => changed.has(e.importPath.replace(/^\.\//, "")));
+}
+
+// Parse the newline-delimited changed-files list, trimming each line and
+// dropping blanks.
+export function parseChangedFiles(contents) {
+  return contents
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 function selectStories(staticDir, changedFilesPath) {
   const index = JSON.parse(readFileSync(join(staticDir, "index.json"), "utf8"));
-  const stories = Object.values(index.entries).filter(
-    (e) => e.type === "story",
-  );
+  const stories = storiesFromIndex(index);
 
   if (!changedFilesPath || !existsSync(changedFilesPath)) return stories;
 
-  const changed = new Set(
-    readFileSync(changedFilesPath, "utf8")
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean),
+  const changedFiles = parseChangedFiles(
+    readFileSync(changedFilesPath, "utf8"),
   );
-  // importPath looks like "./src/foo/Bar.stories.tsx"; changed-files entries are
-  // repo-relative ("src/foo/Bar.stories.tsx").
-  return stories.filter((e) => changed.has(e.importPath.replace(/^\.\//, "")));
+  return filterStoriesByChangedFiles(stories, changedFiles);
 }
 
 async function main() {
@@ -136,7 +154,9 @@ async function main() {
   );
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
