@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { makeSnapPick, makeSnapPickOption } from "@/lib/fixtures/snap-pick";
+import {
+  makeSnapPick,
+  makeSnapPickActivation,
+  makeSnapPickOption,
+} from "@/lib/fixtures/snap-pick";
 
 import { SnapPickDetailView } from "./SnapPickDetailView";
 
@@ -26,6 +30,16 @@ export const Default: Story = {};
 
 export const ActivationInProgress: Story = {
   args: {
-    activationInProgress: true,
+    activation: makeSnapPickActivation({ closedAt: undefined }),
+  },
+};
+
+export const ClosedWithWinner: Story = {
+  args: {
+    activation: makeSnapPickActivation({
+      closedAt: new Date("2025-03-22T00:00:00.000Z"),
+      winnerId: "option-2",
+    }),
+    winnerTitle: "Tacos",
   },
 };
