@@ -1,14 +1,11 @@
-import { beforeEach,describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  mockGetGroupById,
-  mockGetCategoryById,
-  mockGetSnapPickById,
-} = vi.hoisted(() => ({
-  mockGetGroupById: vi.fn(),
-  mockGetCategoryById: vi.fn(),
-  mockGetSnapPickById: vi.fn(),
-}));
+const { mockGetGroupById, mockGetCategoryById, mockGetSnapPickById } =
+  vi.hoisted(() => ({
+    mockGetGroupById: vi.fn(),
+    mockGetCategoryById: vi.fn(),
+    mockGetSnapPickById: vi.fn(),
+  }));
 
 vi.mock("@/server/data/groups", () => ({
   getGroupById: mockGetGroupById,
