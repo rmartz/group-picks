@@ -32,6 +32,7 @@ export async function createGroupInvite(
   groupId: string,
   oldToken: string | undefined,
   mode: InviteMode,
+  createdBy: string,
 ): Promise<CreatedGroupInvite> {
   const db = getDatabase(getAdminApp());
 
@@ -48,6 +49,7 @@ export async function createGroupInvite(
     expiresAt,
     active: true,
     mode,
+    createdBy,
   };
 
   const updates: Record<string, unknown> = {

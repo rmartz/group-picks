@@ -31,6 +31,7 @@ function makeGroup() {
   return {
     id: "group-1",
     name: "Friday Night Picks",
+    emoji: "👥",
     createdAt: new Date("2025-01-15T12:00:00.000Z"),
     creatorId: "user-123",
     memberIds: ["user-123", "user-456"],
@@ -544,5 +545,14 @@ describe("GroupDetailView — member trigger accessibility", () => {
     expect(trigger.getAttribute("aria-label")).toBe(
       GROUP_DETAIL_COPY.memberActionsLabel,
     );
+  });
+});
+
+describe("GroupDetailView — group emoji", () => {
+  it("renders the group emoji in the header", () => {
+    const group = { ...makeGroup(), emoji: "🎸" };
+    renderView({ group });
+
+    expect(screen.getByText("🎸")).toBeDefined();
   });
 });

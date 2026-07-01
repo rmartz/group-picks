@@ -16,6 +16,19 @@ updates:
     # bumps match no group and are raised as individual PRs, since they are the
     # most likely to need a code change and warrant isolated review.
     groups:
+      # Prettier (and its plugins) is special-cased: a minor bump can change
+      # formatting output and force code changes, so isolate major + minor bumps
+      # into their own PR for focused review. A trivial patch bump is not in this
+      # group's update-types, so it falls through to dev-dependencies and stays
+      # grouped with other low-risk bumps. Listed first to win group-assignment
+      # precedence (a dependency joins the first group whose patterns match).
+      prettier:
+        patterns:
+          - "prettier"
+          - "prettier-plugin-*"
+        update-types:
+          - "major"
+          - "minor"
       dev-dependencies:
         dependency-type: development
         update-types:
@@ -40,3 +53,14 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    # Group minor and patch action bumps into one PR; major bumps match no
+    # group and are raised as individual PRs, since they are the most likely to
+    # need a workflow change and warrant isolated review (mirrors the npm
+    # groups above).
+    groups:
+      github-actions:
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"

@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import type { ClosedPickResultEntry } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
 import type { GroupPick } from "@/lib/types/pick";
 import { RankingMode } from "@/lib/types/pick";
+import { RankingTier } from "@/lib/types/ranking";
 
 import { PickDetailView } from "./PickDetailView";
 
@@ -21,21 +23,36 @@ const mockClosedPick: GroupPick = {
   closedAt: new Date("2025-06-01T00:00:00.000Z"),
 };
 
-const mockOptions: Option[] = [
-  {
-    id: "opt-1",
-    title: "The Shawshank Redemption",
-    pickId: "pick-1",
-    ownerIds: ["user-1"],
-  },
-  { id: "opt-2", title: "Inception", pickId: "pick-1", ownerIds: ["user-2"] },
-  {
-    id: "opt-3",
-    title: "Interstellar",
-    pickId: "pick-1",
-    ownerIds: ["user-1"],
-  },
-];
+const optShawshank: Option = {
+  id: "opt-1",
+  title: "The Shawshank Redemption",
+  pickId: "pick-1",
+  ownerIds: ["user-1"],
+};
+const optInception: Option = {
+  id: "opt-2",
+  title: "Inception",
+  pickId: "pick-1",
+  ownerIds: ["user-2"],
+};
+const optInterstellar: Option = {
+  id: "opt-3",
+  title: "Interstellar",
+  pickId: "pick-1",
+  ownerIds: ["user-1"],
+};
+const mockOptions: Option[] = [optShawshank, optInception, optInterstellar];
+
+const mockClosedPickResults: {
+  topPicks: ClosedPickResultEntry[];
+  runnersUp: ClosedPickResultEntry[];
+} = {
+  topPicks: [
+    { option: optShawshank, rank: 1, score: 4 },
+    { option: optInterstellar, rank: 2, score: 3 },
+  ],
+  runnersUp: [{ option: optInception, rank: 3, score: 1 }],
+};
 
 const meta: Meta<typeof PickDetailView> = {
   title: "Picks/PickDetailView",
@@ -50,7 +67,7 @@ const meta: Meta<typeof PickDetailView> = {
     currentUserId: "user-1",
     initialOptions: mockOptions,
     initialSuggestions: [],
-    topPicks: [],
+    closedPickResults: { topPicks: [], runnersUp: [] },
   },
 };
 
@@ -63,6 +80,7 @@ export const ClosedPickNonCreator: Story = {
   args: {
     pick: mockClosedPick,
     currentUserId: "user-2",
+    closedPickResults: mockClosedPickResults,
   },
 };
 
@@ -70,6 +88,7 @@ export const ClosedPickCreator: Story = {
   args: {
     pick: mockClosedPick,
     currentUserId: "user-1",
+    closedPickResults: mockClosedPickResults,
   },
 };
 
@@ -101,5 +120,20 @@ export const WithSuggestions: Story = {
         ownerIds: ["user-1"],
       },
     ],
+  },
+};
+
+export const WithPriorPickBanner: Story = {
+  args: {
+    categoryName: "Movies",
+    priorPickBannerData: {
+      pickTitle: "Best of 2024",
+      rankedAt: new Date("2024-06-01T00:00:00.000Z"),
+      overlappingCount: 2,
+      prefillAssignments: {
+        "opt-1": RankingTier.LoveIt,
+        "opt-3": RankingTier.Yes,
+      },
+    },
   },
 };

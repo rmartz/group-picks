@@ -1,12 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DEFAULT_GROUP_EMOJI } from "@/lib/types/group";
 
 import { CREATE_GROUP_COPY } from "./copy";
 
+const NEXT_GROUP_EMOJI: Record<string, string> = {
+  "👥": "🎬",
+  "🎬": "🍽️",
+  "🍽️": "🎮",
+  "🎮": "🎵",
+  "🎵": "⚽",
+  "⚽": "👥",
+};
+
 interface CreateGroupFormViewProps {
   name: string;
+  emoji: string;
   onNameChange: (name: string) => void;
+  onEmojiChange: (emoji: string) => void;
   onSubmit: (e: React.SyntheticEvent) => void;
   onCancel: () => void;
   loading: boolean;
@@ -15,12 +27,18 @@ interface CreateGroupFormViewProps {
 
 export function CreateGroupFormView({
   name,
+  emoji,
   onNameChange,
+  onEmojiChange,
   onSubmit,
   onCancel,
   loading,
   error,
 }: CreateGroupFormViewProps) {
+  function handleEmojiButtonClick() {
+    onEmojiChange(NEXT_GROUP_EMOJI[emoji] ?? DEFAULT_GROUP_EMOJI);
+  }
+
   return (
     <div className="w-full max-w-sm space-y-6">
       <h1 className="text-2xl font-semibold">{CREATE_GROUP_COPY.title}</h1>
@@ -28,10 +46,11 @@ export function CreateGroupFormView({
         <button
           type="button"
           aria-label={CREATE_GROUP_COPY.emojiPickerLabel}
+          onClick={handleEmojiButtonClick}
           disabled={loading}
           className="flex h-24 w-24 items-center justify-center rounded-2xl bg-muted text-4xl disabled:pointer-events-none disabled:opacity-50"
         >
-          🏷️
+          {emoji}
         </button>
       </div>
       <form

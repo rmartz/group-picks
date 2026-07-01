@@ -3,6 +3,7 @@
 ## Package Manager
 
 - Always use `pnpm`. Never `npm` or `yarn`.
+- **Pin every `package.json` dependency to a full `major.minor.patch` version, even inside a range** (e.g. `^3.8.4`, not `^3`). A shorthand range like `^3` is already satisfied by newer 3.x releases, so a Dependabot minor/patch bump only updates `pnpm-lock.yaml` and leaves `package.json` untouched — making the upgrade invisible in the manifest (this is how a Prettier bump can land via a lockfile-only change and surface as an unexplained formatting failure). A full pin forces every bump to appear as a reviewable `package.json` change.
 
 ## Common Commands
 
@@ -43,11 +44,9 @@ Run this after cloning or when setting up a fresh root checkout. `new-worktree.p
 
 Public (non-secret) environment config lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml`. Only `NEXT_PUBLIC_*` and explicitly allowlisted keys are permitted; patterns matching `*SECRET*`, `*_TOKEN*`, or `*PRIVATE_KEY*` are hard-denied.
 
-- To update a public config value: `scripts/update-config.sh --env=<env> KEY=value`
-- To load public config from a Firebase console JSON download: `scripts/update-config.sh --env=<env> --firebase-config=path/to/config.json` (accepts both strict JSON and the JS object literal format produced by the Firebase console)
-- `scripts/update-config.sh` only writes and validates the local YAML; it does not push to Vercel. Validate explicitly with `pnpm run env:validate`.
+- Public config values in `deployment/{env}.yml` are edited by hand. Validate against the schema with `pnpm run env:validate` (also run by the pre-commit hook and in CI via `.github/workflows/validate-config.yml`).
 - Pushing config to Vercel and pulling a local `.env.local` will be handled by the `envctl` CLI (usage TBD) — a local-only tool, intentionally not wired into CI. Until it lands, use the `vercel` CLI directly. The previous `vercel-deploy-scripts` tooling (`sync-env` / `generate-local-env`) has been removed.
-- Secret scanning runs in CI via `.github/workflows/secret-scan.yml`. There is no local pre-commit secret scan; the pre-commit hook runs `pnpm run env:validate` (config validation) only.
+- There is no secret scanning at present: the VDS-based CI secret scan and the local pre-commit gitleaks scan have both been removed. Secret scanning will return under the new env-management design.
 
 ## TypeScript
 
@@ -78,7 +77,7 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - **No unnecessary helpers.** Do not extract logic into a helper function unless it separates significant logic or belongs in a different module. Three similar lines is better than a premature abstraction.
 - **Enums and constant objects** should be kept in alphabetical order to minimize merge conflicts.
 - **Import statements** must be sorted alphabetically within each group. This is enforced by ESLint (`simple-import-sort`); run `pnpm lint --fix` to auto-sort.
-- **Prefer enums over string literal unions** for any domain concept with two or more named states (e.g., use `enum Status { Active = "active", Inactive = "inactive" }` rather than `"active" | "inactive"`). String enum values must match the current serialized schema. Export new enums from the module barrel (the directory-level `index.ts` when one exists or is required by the barrel rule above).
+- **Value sets: default to a structural string union over an `enum`.** For a fixed set of named values use a string union (`type Status = "active" | "inactive"`), or an `as const` array when you also need the values at runtime for validation/iteration (`const STATUSES = ["active", "inactive"] as const; type Status = (typeof STATUSES)[number]`). Both stay **structural**, so serialized/wire strings (Firebase documents, API payloads, query params) assign without a cast and emit ~no runtime — whereas a string `enum` is **nominal** (it rejects the underlying literal, forcing an `as` cast at every serialization boundary) and a plain `enum` ships a runtime object (`const enum` is unavailable under `isolatedModules`). The deciding axis is the **serialization boundary**: a value that crosses a wire/persistence boundary → structural union / `as const`; internal-only state you iterate as a unit and never serialize raw → an `enum` is fine. Existing enums paired with a `{domain}ToFirebase()` / `firebaseTo{Domain}()` converter that centralizes the boundary (e.g. `InviteMode`, `RankingMode`) are deliberate — don't churn them. Export new value-set types/consts from the module barrel where the directory has one.
 
 ## Naming Conventions
 
@@ -136,6 +135,11 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - When adding or modifying a UI component, add or update its Storybook story to cover key visual states.
 - Stories should use mock data fixtures — never import from Firebase or depend on runtime providers (QueryClient, Redux store, Next.js router).
 - Components that are too hook-dependent to render in isolation should use a presentational split: extract rendering into a `ComponentNameView` that accepts callbacks, and keep the original as a thin wrapper that wires up hooks.
+
+### Storybook screenshots in CI
+
+- When a PR changes a `*.stories.*` file, the `Storybook Screenshots` job captures a PNG per changed story and posts them inline in a single sticky PR comment — a **visual acceptance aid** to eyeball an intended UI change (it is **advisory**, never a merge gate; the always-on `Storybook Tests` suite is what catches regressions). View them directly in the PR comment; no download needed.
+- Mechanics (see #339): capture is self-hosted (`scripts/capture-screenshots.mjs` drives the Storybook static build in the Chromium the workflow already installs); images are published to a **per-PR** `gh-screenshots-pr-<N>` branch (deleted on PR close by `screenshots-cleanup.yml`) — never a branch shared across PRs, so concurrent PRs can never cancel each other.
 
 ## Component Tests
 
