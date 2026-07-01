@@ -1,17 +1,14 @@
+import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockGetVerifiedUid,
-  mockGetGroupById,
-  mockGetCategoryById,
-  mockGetSnapPickById,
+  mockAuthorizeSnapPickMember,
   mockGetSnapPickOptions,
   mockRemoveSnapPickOption,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
-  mockGetGroupById: vi.fn(),
-  mockGetCategoryById: vi.fn(),
-  mockGetSnapPickById: vi.fn(),
+  mockAuthorizeSnapPickMember: vi.fn(),
   mockGetSnapPickOptions: vi.fn(),
   mockRemoveSnapPickOption: vi.fn(),
 }));
@@ -20,16 +17,11 @@ vi.mock("@/server/utils/auth", () => ({
   getVerifiedUid: mockGetVerifiedUid,
 }));
 
-vi.mock("@/server/data/groups", () => ({
-  getGroupById: mockGetGroupById,
-}));
-
-vi.mock("@/server/data/categories", () => ({
-  getCategoryById: mockGetCategoryById,
+vi.mock("@/server/utils/snap-pick-auth", () => ({
+  authorizeSnapPickMember: mockAuthorizeSnapPickMember,
 }));
 
 vi.mock("@/server/data/snap-picks", () => ({
-  getSnapPickById: mockGetSnapPickById,
   getSnapPickOptions: mockGetSnapPickOptions,
   removeSnapPickOption: mockRemoveSnapPickOption,
 }));
@@ -56,9 +48,7 @@ function makeOption(overrides?: Record<string, unknown>) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockGetVerifiedUid.mockResolvedValue("user-1");
-  mockGetGroupById.mockResolvedValue({ id: "group-1", memberIds: ["user-1"] });
-  mockGetCategoryById.mockResolvedValue({ id: "cat-1", groupId: "group-1" });
-  mockGetSnapPickById.mockResolvedValue({ id: "snap-1", categoryId: "cat-1" });
+  mockAuthorizeSnapPickMember.mockResolvedValue(undefined);
   mockGetSnapPickOptions.mockResolvedValue([makeOption()]);
   mockRemoveSnapPickOption.mockResolvedValue({
     removedAt: new Date("2025-01-20T00:00:00Z"),
@@ -109,5 +99,16 @@ describe("DELETE /api/.../snap-picks/[snapPickId]/options/[optionId]", () => {
     const response = await DELETE(new Request("http://localhost"), { params });
 
     expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when member authorization fails", async () => {
+    mockAuthorizeSnapPickMember.mockResolvedValue(
+      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+    );
+
+    const response = await DELETE(new Request("http://localhost"), { params });
+
+    expect(response.status).toBe(403);
+    expect(mockRemoveSnapPickOption).not.toHaveBeenCalled();
   });
 });
