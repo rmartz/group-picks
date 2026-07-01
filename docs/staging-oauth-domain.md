@@ -61,7 +61,7 @@ In the **staging** Firebase project (`group-picks-staging`):
 3. Save. Do **not** add `*.vercel.app` or individual ephemeral preview URLs —
    wildcards are unsupported and ephemeral URLs are unmanageable.
 
-> Confirm you are editing the **staging** project, not production. The project id
+> Confirm you are editing the **staging** project, not production. The project ID
 > is visible in `deployment/staging.yml` (`NEXT_PUBLIC_FIREBASE_PROJECT_ID`).
 
 ### 3. Verify
