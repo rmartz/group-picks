@@ -58,6 +58,7 @@ function renderView(
       onLeave={vi.fn()}
       memberNames={memberNames}
       picksByCategory={{}}
+      activeSnapPicks={[]}
       initialInviteMode={InviteMode.Group}
       onMakeAdmin={vi.fn()}
       onRevokeAdmin={vi.fn()}

@@ -6,6 +6,7 @@ import { markGroupSeen } from "@/server/data/groupActivity";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
 import { getPicksByCategoryIds } from "@/server/data/picks";
+import { getActiveSnapPickActivationsByCategories } from "@/server/data/snap-picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { GroupDetailClient } from "./GroupDetailClient";
@@ -27,14 +28,22 @@ export default async function GroupDetailPage({
 
   const categoriesPromise = getCategoriesByGroupId(id);
 
-  const [invite, categories, memberNames, picksByCategory] = await Promise.all([
-    getGroupInviteByToken(group.inviteToken),
-    categoriesPromise,
-    getMemberDisplayNames(group.memberIds),
-    categoriesPromise.then((resolvedCategories) =>
-      getPicksByCategoryIds(resolvedCategories.map((category) => category.id)),
-    ),
-  ]);
+  const [invite, categories, memberNames, picksByCategory, activeSnapPicks] =
+    await Promise.all([
+      getGroupInviteByToken(group.inviteToken),
+      categoriesPromise,
+      getMemberDisplayNames(group.memberIds),
+      categoriesPromise.then((resolvedCategories) =>
+        getPicksByCategoryIds(
+          resolvedCategories.map((category) => category.id),
+        ),
+      ),
+      categoriesPromise.then((resolvedCategories) =>
+        getActiveSnapPickActivationsByCategories(
+          resolvedCategories.map((category) => category.id),
+        ),
+      ),
+    ]);
 
   return (
     <GroupDetailClient
@@ -45,6 +54,7 @@ export default async function GroupDetailPage({
       initialInviteMode={invite?.mode ?? InviteMode.Group}
       memberNames={memberNames}
       picksByCategory={picksByCategory}
+      activeSnapPicks={activeSnapPicks}
     />
   );
 }

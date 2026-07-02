@@ -11,6 +11,8 @@ import type { Group } from "@/lib/types/group";
 import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
 
+import type { ActiveSnapPickActivationItem } from "./ActiveSnapPickList";
+import { ActiveSnapPickList } from "./ActiveSnapPickList";
 import { CategoryList } from "./categories/CategoryList";
 import { GROUP_DETAIL_COPY } from "./copy";
 import { DeleteGroupButtonView } from "./DeleteGroupButtonView";
@@ -33,6 +35,7 @@ interface GroupDetailViewProps {
   initialInviteMode: InviteMode;
   memberNames: MemberName[];
   picksByCategory: Record<string, GroupPick[]>;
+  activeSnapPicks: ActiveSnapPickActivationItem[];
   onMakeAdmin?: (uid: string) => void;
   onRevokeAdmin?: (uid: string) => void;
   onTogglePicksRestricted: () => void;
@@ -108,6 +111,7 @@ export function GroupDetailView({
   initialInviteMode,
   memberNames,
   picksByCategory,
+  activeSnapPicks,
   onMakeAdmin,
   onRevokeAdmin,
   onTogglePicksRestricted,
@@ -208,7 +212,14 @@ export function GroupDetailView({
         </TabsList>
 
         <TabsContent value="picks" className="mt-4 space-y-6">
-          {allPicks.length === 0 ? (
+          {activeSnapPicks.length > 0 && (
+            <ActiveSnapPickList
+              groupId={group.id}
+              activations={activeSnapPicks}
+              categories={categories}
+            />
+          )}
+          {allPicks.length === 0 && activeSnapPicks.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {GROUP_DETAIL_COPY.noPicksMessage}
             </p>
