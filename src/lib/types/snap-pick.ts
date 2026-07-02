@@ -25,6 +25,18 @@ export interface SnapPickActivation {
   startedBy: string;
 }
 
+// A resolved entry in a snap pick's history timeline: one past (closed)
+// activation with its winning option's title and how many members voted. The
+// winner title is resolved from the option pool at read time (options are
+// soft-deleted, so a historical winner stays nameable); winnerTitle is absent
+// when the run closed with no recorded winner (a tie or no votes).
+export interface SnapPickHistoryEntry {
+  activationId: string;
+  closedAt: Date;
+  winnerTitle?: string;
+  participantCount: number;
+}
+
 // A single head-to-head matchup result recorded during an activation. Votes are
 // stored under snap-pick-votes/{activationId}/{voteId} and are the source the
 // winner is computed from at close time. The head-to-head voting UI (#259) is

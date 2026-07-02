@@ -2,6 +2,7 @@ import { pairKey } from "@/lib/snap-pick-pairing";
 import type {
   SnapPick,
   SnapPickActivation,
+  SnapPickHistoryEntry,
   SnapPickOption,
   SnapPickVote,
 } from "@/lib/types/snap-pick";
@@ -39,6 +40,18 @@ export function makeSnapPickActivation(
     startedAt: new Date("2025-03-21T10:00:00.000Z"),
     closesAt: new Date("2025-03-22T00:00:00.000Z"),
     startedBy: "user-1",
+    ...overrides,
+  };
+}
+
+export function makeSnapPickHistoryEntry(
+  overrides?: Partial<SnapPickHistoryEntry>,
+): SnapPickHistoryEntry {
+  return {
+    activationId: "act-1",
+    closedAt: new Date("2025-03-22T00:00:00.000Z"),
+    winnerTitle: "Pizza",
+    participantCount: 3,
     ...overrides,
   };
 }

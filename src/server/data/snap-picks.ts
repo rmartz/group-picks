@@ -71,6 +71,20 @@ export async function getSnapPickActivations(
   );
 }
 
+// Past runs of this snap pick, newest first — the source of the history
+// timeline. An activation is "closed" once it has a closedAt; open runs are
+// excluded. Sorted by closedAt descending so the most recent pick is first.
+export async function getClosedActivations(
+  snapPickId: string,
+): Promise<SnapPickActivation[]> {
+  const activations = await getSnapPickActivations(snapPickId);
+  return activations
+    .filter((activation) => activation.closedAt !== undefined)
+    .sort(
+      (a, b) => (b.closedAt?.getTime() ?? 0) - (a.closedAt?.getTime() ?? 0),
+    );
+}
+
 export async function addSnapPickOption(
   snapPickId: string,
   option: Pick<SnapPickOption, "title" | "addedBy">,
