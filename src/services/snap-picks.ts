@@ -1,3 +1,24 @@
+import type { SnapPickOption } from "@/lib/types/snap-pick";
+
+interface WireSnapPickOption {
+  id: string;
+  title: string;
+  addedBy: string;
+  addedAt: string;
+  removedAt?: string;
+}
+
+function wireToSnapPickOption(wire: WireSnapPickOption): SnapPickOption {
+  return {
+    id: wire.id,
+    title: wire.title,
+    addedBy: wire.addedBy,
+    addedAt: new Date(wire.addedAt),
+    removedAt:
+      wire.removedAt !== undefined ? new Date(wire.removedAt) : undefined,
+  };
+}
+
 export async function createSnapPick(
   groupId: string,
   categoryId: string,
@@ -17,4 +38,49 @@ export async function createSnapPick(
     createdAt: string;
   };
   return { snapPickId: data.snapPickId, createdAt: new Date(data.createdAt) };
+}
+
+export async function getSnapPickOptions(
+  groupId: string,
+  categoryId: string,
+  snapPickId: string,
+): Promise<SnapPickOption[]> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}/snap-picks/${snapPickId}/options`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch snap pick options");
+  const data = (await response.json()) as { options: WireSnapPickOption[] };
+  return data.options.map(wireToSnapPickOption);
+}
+
+export async function addSnapPickOption(
+  groupId: string,
+  categoryId: string,
+  snapPickId: string,
+  title: string,
+): Promise<{ optionId: string; addedAt: Date }> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}/snap-picks/${snapPickId}/options`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    },
+  );
+  if (!response.ok) throw new Error("Failed to add snap pick option");
+  const data = (await response.json()) as { optionId: string; addedAt: string };
+  return { optionId: data.optionId, addedAt: new Date(data.addedAt) };
+}
+
+export async function removeSnapPickOption(
+  groupId: string,
+  categoryId: string,
+  snapPickId: string,
+  optionId: string,
+): Promise<void> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}/snap-picks/${snapPickId}/options/${optionId}`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) throw new Error("Failed to remove snap pick option");
 }
