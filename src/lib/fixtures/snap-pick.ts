@@ -1,4 +1,8 @@
-import type { SnapPick, SnapPickOption } from "@/lib/types/snap-pick";
+import type {
+  SnapPick,
+  SnapPickActivation,
+  SnapPickOption,
+} from "@/lib/types/snap-pick";
 
 export function makeSnapPick(overrides?: Partial<SnapPick>): SnapPick {
   return {
@@ -20,6 +24,19 @@ export function makeSnapPickOption(
     title: "Pizza",
     addedBy: "user-1",
     addedAt: new Date("2025-03-21T09:00:00.000Z"),
+    ...overrides,
+  };
+}
+
+export function makeSnapPickActivation(
+  overrides?: Partial<SnapPickActivation>,
+): SnapPickActivation {
+  return {
+    id: "act-1",
+    snapPickId: "snap-1",
+    startedAt: new Date("2025-03-21T10:00:00.000Z"),
+    closesAt: new Date("2025-03-22T00:00:00.000Z"),
+    startedBy: "user-1",
     ...overrides,
   };
 }

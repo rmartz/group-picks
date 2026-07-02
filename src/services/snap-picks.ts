@@ -1,3 +1,4 @@
+import type { SnapPickDurationChoice } from "@/lib/snap-pick-activation";
 import type { SnapPickOption } from "@/lib/types/snap-pick";
 
 interface WireSnapPickOption {
@@ -83,4 +84,26 @@ export async function removeSnapPickOption(
     { method: "DELETE" },
   );
   if (!response.ok) throw new Error("Failed to remove snap pick option");
+}
+
+export async function activateSnapPick(
+  groupId: string,
+  categoryId: string,
+  snapPickId: string,
+  duration: SnapPickDurationChoice,
+): Promise<{ activationId: string; closesAt: Date }> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}/snap-picks/${snapPickId}/activate`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ duration }),
+    },
+  );
+  if (!response.ok) throw new Error("Failed to activate snap pick");
+  const data = (await response.json()) as {
+    activationId: string;
+    closesAt: string;
+  };
+  return { activationId: data.activationId, closesAt: new Date(data.closesAt) };
 }

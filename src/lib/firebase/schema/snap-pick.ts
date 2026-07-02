@@ -18,6 +18,7 @@ import type {
   SnapPick,
   SnapPickActivation,
   SnapPickOption,
+  SnapPickVote,
 } from "@/lib/types/snap-pick";
 
 export interface FirebaseSnapPick {
@@ -44,6 +45,13 @@ export interface FirebaseSnapPickActivation {
   startedBy: string;
 }
 
+export interface FirebaseSnapPickVote {
+  winnerId: string;
+  loserId: string;
+  votedBy: string;
+  votedAt: number;
+}
+
 // Runtime shapes of the persisted nodes, parsed on read so a malformed document
 // fails loudly instead of producing silent undefined/null bugs.
 const FirebaseSnapPickSchema = z.object({
@@ -68,6 +76,13 @@ const FirebaseSnapPickActivationSchema = z.object({
   closedAt: z.number().optional(),
   winnerId: z.string().optional(),
   startedBy: z.string(),
+});
+
+const FirebaseSnapPickVoteSchema = z.object({
+  winnerId: z.string(),
+  loserId: z.string(),
+  votedBy: z.string(),
+  votedAt: z.number(),
 });
 
 export function snapPickToFirebase(
@@ -158,5 +173,30 @@ export function firebaseToSnapPickActivation(
       parsed.closedAt !== undefined ? new Date(parsed.closedAt) : undefined,
     winnerId: parsed.winnerId,
     startedBy: parsed.startedBy,
+  };
+}
+
+export function snapPickVoteToFirebase(
+  vote: Pick<SnapPickVote, "winnerId" | "loserId" | "votedBy" | "votedAt">,
+): FirebaseSnapPickVote {
+  return {
+    winnerId: vote.winnerId,
+    loserId: vote.loserId,
+    votedBy: vote.votedBy,
+    votedAt: vote.votedAt.getTime(),
+  };
+}
+
+export function firebaseToSnapPickVote(
+  id: string,
+  data: unknown,
+): SnapPickVote {
+  const parsed = FirebaseSnapPickVoteSchema.parse(data);
+  return {
+    id,
+    winnerId: parsed.winnerId,
+    loserId: parsed.loserId,
+    votedBy: parsed.votedBy,
+    votedAt: new Date(parsed.votedAt),
   };
 }
