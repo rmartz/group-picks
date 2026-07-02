@@ -115,6 +115,25 @@ jobs:
           playwright: chromium
       - run: pnpm storybook-tests
 
+  storybook-build:
+    name: Storybook Build
+    needs: detect-changes
+    # Gate on the broad code_changed signal (like storybook-tests and build), NOT
+    # stories_changed: a non-story change (a .storybook/ preset, a preview
+    # decorator, an addon/MDX config, a global CSS import) can break
+    # `pnpm build-storybook` without touching a *.stories.* file, and would ship
+    # green if this only ran on story changes (#372). This is a gating check with
+    # no continue-on-error — distinct from the advisory storybook-screenshots job,
+    # which also builds Storybook but reports its build neutral. Static build, so
+    # no browser: the setup action is called without the `playwright` input.
+    if: needs.detect-changes.outputs.code_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/setup
+      - run: pnpm build-storybook
+
   storybook-screenshots:
     name: Storybook Screenshots
     needs: detect-changes
