@@ -22,6 +22,9 @@ const {
   getSnapPickById,
   getSnapPicksByCategory,
   getSnapPickActivations,
+  addSnapPickOption,
+  removeSnapPickOption,
+  getSnapPickOptions,
 } = await import("./snap-picks");
 
 function snapshot(value: unknown) {
@@ -145,5 +148,100 @@ describe("createSnapPick", () => {
         defaultDurationMs: 300000,
       }),
     );
+  });
+});
+
+const FIREBASE_OPTION = {
+  title: "Pizza",
+  addedBy: "user-1",
+  addedAt: 1_700_000_200_000,
+};
+
+describe("addSnapPickOption", () => {
+  it("pushes a new option under snap-pick-options/{snapPickId} and returns the id", async () => {
+    mockRef.mockReturnValue({ push: mockPush });
+    mockPush.mockReturnValue({ key: "option-new", set: mockSet });
+    mockSet.mockResolvedValue(undefined);
+
+    const result = await addSnapPickOption("snap-1", {
+      title: "Pizza",
+      addedBy: "user-7",
+    });
+
+    expect(mockRef).toHaveBeenCalledWith("snap-pick-options/snap-1");
+    expect(result.id).toBe("option-new");
+    expect(result.addedAt).toBeInstanceOf(Date);
+  });
+
+  it("persists the converted option to the pushed ref", async () => {
+    mockRef.mockReturnValue({ push: mockPush });
+    mockPush.mockReturnValue({ key: "option-new", set: mockSet });
+    mockSet.mockResolvedValue(undefined);
+
+    await addSnapPickOption("snap-1", { title: "Pizza", addedBy: "user-7" });
+
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Pizza", addedBy: "user-7" }),
+    );
+  });
+});
+
+describe("removeSnapPickOption", () => {
+  it("soft-deletes by writing removedAt at the option's removedAt path", async () => {
+    mockRef.mockReturnValue({ set: mockSet });
+    mockSet.mockResolvedValue(undefined);
+
+    const result = await removeSnapPickOption("snap-1", "option-3");
+
+    expect(mockRef).toHaveBeenCalledWith(
+      "snap-pick-options/snap-1/option-3/removedAt",
+    );
+    expect(mockSet).toHaveBeenCalledWith(result.removedAt.getTime());
+  });
+});
+
+describe("getSnapPickOptions", () => {
+  it("reads snap-pick-options/{snapPickId} and converts each active entry", async () => {
+    mockGet.mockResolvedValue(snapshot({ "option-1": FIREBASE_OPTION }));
+
+    const result = await getSnapPickOptions("snap-1");
+
+    expect(mockRef).toHaveBeenCalledWith("snap-pick-options/snap-1");
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe("option-1");
+    expect(result[0]?.addedAt).toEqual(new Date(1_700_000_200_000));
+  });
+
+  it("excludes soft-removed options by default", async () => {
+    mockGet.mockResolvedValue(
+      snapshot({
+        "option-1": FIREBASE_OPTION,
+        "option-2": { ...FIREBASE_OPTION, removedAt: 1_700_000_300_000 },
+      }),
+    );
+
+    const result = await getSnapPickOptions("snap-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe("option-1");
+  });
+
+  it("includes soft-removed options when includeRemoved is true", async () => {
+    mockGet.mockResolvedValue(
+      snapshot({
+        "option-1": FIREBASE_OPTION,
+        "option-2": { ...FIREBASE_OPTION, removedAt: 1_700_000_300_000 },
+      }),
+    );
+
+    const result = await getSnapPickOptions("snap-1", true);
+
+    expect(result).toHaveLength(2);
+  });
+
+  it("returns an empty array when the snap pick has no options", async () => {
+    mockGet.mockResolvedValue(snapshot(undefined));
+
+    expect(await getSnapPickOptions("snap-1")).toEqual([]);
   });
 });

@@ -1,6 +1,7 @@
 export const SNAP_PICK_DETAIL_COPY = {
   optionPoolHeading: "Option pool",
-  optionPoolPlaceholder: "Option pool management is coming soon.",
+  optionPoolActivationNotice:
+    "A head-to-head run is in progress. The option pool is locked until it closes.",
   activationHeading: "Activation",
   activationPlaceholder: "Starting a head-to-head run is coming soon.",
   votingHeading: "Voting",
