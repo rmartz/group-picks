@@ -32,10 +32,10 @@ export function makeSnapPickActivation(
   overrides?: Partial<SnapPickActivation>,
 ): SnapPickActivation {
   return {
-    id: "activation-1",
+    id: "act-1",
     snapPickId: "snap-1",
-    startedAt: new Date("2025-03-22T10:00:00.000Z"),
-    closesAt: new Date("2025-03-22T23:59:00.000Z"),
+    startedAt: new Date("2025-03-21T10:00:00.000Z"),
+    closesAt: new Date("2025-03-22T00:00:00.000Z"),
     startedBy: "user-1",
     ...overrides,
   };

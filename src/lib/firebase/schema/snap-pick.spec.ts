@@ -7,9 +7,11 @@ import {
   firebaseToSnapPick,
   firebaseToSnapPickActivation,
   firebaseToSnapPickOption,
+  firebaseToSnapPickVote,
   snapPickActivationToFirebase,
   snapPickOptionToFirebase,
   snapPickToFirebase,
+  snapPickVoteToFirebase,
 } from "./snap-pick";
 
 const STARTED = new Date("2025-04-01T12:00:00.000Z");
@@ -250,5 +252,44 @@ describe("firebaseToSnapPickActivation rejects malformed input", () => {
     const data = { ...makeFirebaseSnapPickActivation(), startedAt: "nope" };
 
     expect(() => firebaseToSnapPickActivation("act-1", data)).toThrow();
+  });
+});
+
+describe("snapPickVoteToFirebase", () => {
+  it("converts votedAt to epoch millis and preserves ids", () => {
+    const result = snapPickVoteToFirebase({
+      winnerId: "opt-a",
+      loserId: "opt-b",
+      votedBy: "user-1",
+      votedAt: STARTED,
+    });
+
+    expect(result).toEqual({
+      winnerId: "opt-a",
+      loserId: "opt-b",
+      votedBy: "user-1",
+      votedAt: STARTED.getTime(),
+    });
+  });
+});
+
+describe("firebaseToSnapPickVote", () => {
+  it("converts votedAt millis back to a Date and carries the id", () => {
+    const result = firebaseToSnapPickVote("vote-9", {
+      winnerId: "opt-a",
+      loserId: "opt-b",
+      votedBy: "user-1",
+      votedAt: STARTED.getTime(),
+    });
+
+    expect(result.id).toBe("vote-9");
+    expect(result.winnerId).toBe("opt-a");
+    expect(result.votedAt).toEqual(STARTED);
+  });
+
+  it("throws when a required field is missing", () => {
+    expect(() =>
+      firebaseToSnapPickVote("vote-1", { winnerId: "opt-a" }),
+    ).toThrow();
   });
 });

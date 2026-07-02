@@ -1,10 +1,15 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { makeSnapPick } from "@/lib/fixtures/snap-pick";
+import { makeSnapPick, makeSnapPickActivation } from "@/lib/fixtures/snap-pick";
 
 import { SnapPickDetailView } from "./SnapPickDetailView";
 import { SNAP_PICK_DETAIL_COPY } from "./SnapPickDetailView.copy";
+
+// The activation panel calls useRouter; stub it so the detail shell renders.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: () => undefined }),
+}));
 
 afterEach(cleanup);
 
@@ -50,7 +55,7 @@ describe("renders the Snap Pick detail shell", () => {
         groupId="group-1"
         currentUserId="user-1"
         options={[]}
-        activationInProgress
+        activation={makeSnapPickActivation({ closedAt: undefined })}
       />,
     );
 
