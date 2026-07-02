@@ -63,7 +63,9 @@ const meta: Meta<typeof PickDetailView> = {
   args: {
     pick: mockPick,
     groupId: "group-1",
+    groupName: "Movie Night",
     categoryId: "cat-1",
+    categoryName: "Best Movies",
     currentUserId: "user-1",
     initialOptions: mockOptions,
     initialSuggestions: [],

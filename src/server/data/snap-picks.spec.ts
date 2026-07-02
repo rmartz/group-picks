@@ -19,10 +19,11 @@ vi.mock("firebase-admin/database", () => ({
 
 const {
   createSnapPick,
+  getActiveSnapPickActivationsByCategories,
+  getClosedActivations,
+  getSnapPickActivations,
   getSnapPickById,
   getSnapPicksByCategory,
-  getSnapPickActivations,
-  getActiveSnapPickActivationsByCategories,
   addSnapPickOption,
   removeSnapPickOption,
   getSnapPickOptions,
@@ -108,6 +109,60 @@ describe("getSnapPickActivations", () => {
     mockGet.mockResolvedValue(snapshot(undefined));
 
     expect(await getSnapPickActivations("snap-1")).toEqual([]);
+  });
+});
+
+describe("getClosedActivations", () => {
+  const CLOSED_EARLY = {
+    snapPickId: "snap-1",
+    startedAt: 1_700_000_100_000,
+    closesAt: 1_700_000_400_000,
+    closedAt: 1_700_000_500_000,
+    winnerId: "opt-a",
+    startedBy: "user-2",
+  };
+  const CLOSED_LATE = {
+    snapPickId: "snap-1",
+    startedAt: 1_700_001_100_000,
+    closesAt: 1_700_001_400_000,
+    closedAt: 1_700_001_500_000,
+    winnerId: "opt-b",
+    startedBy: "user-3",
+  };
+  const STILL_OPEN = {
+    snapPickId: "snap-1",
+    startedAt: 1_700_002_100_000,
+    closesAt: 1_700_002_400_000,
+    startedBy: "user-4",
+  };
+
+  it("returns only closed activations, newest first by closedAt", async () => {
+    mockGet.mockResolvedValue(
+      snapshot({
+        "act-early": CLOSED_EARLY,
+        "act-open": STILL_OPEN,
+        "act-late": CLOSED_LATE,
+      }),
+    );
+
+    const result = await getClosedActivations("snap-1");
+
+    expect(mockRef).toHaveBeenCalledWith("snap-pick-activations/snap-1");
+    expect(result).toHaveLength(2);
+    expect(result[0]?.id).toBe("act-late");
+    expect(result[1]?.id).toBe("act-early");
+  });
+
+  it("returns an empty array when no activations have closed", async () => {
+    mockGet.mockResolvedValue(snapshot({ "act-open": STILL_OPEN }));
+
+    expect(await getClosedActivations("snap-1")).toEqual([]);
+  });
+
+  it("returns an empty array when the snap pick has no activations", async () => {
+    mockGet.mockResolvedValue(snapshot(undefined));
+
+    expect(await getClosedActivations("snap-1")).toEqual([]);
   });
 });
 

@@ -1,9 +1,17 @@
 import { notFound, redirect } from "next/navigation";
 
+import type { SnapPickHistoryEntry } from "@/lib/types/snap-pick";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
-import { resolveActiveActivation } from "@/server/data/snap-pick-activations";
-import { getSnapPickById, getSnapPickOptions } from "@/server/data/snap-picks";
+import {
+  getSnapPickVotes,
+  resolveActiveActivation,
+} from "@/server/data/snap-pick-activations";
+import {
+  getClosedActivations,
+  getSnapPickById,
+  getSnapPickOptions,
+} from "@/server/data/snap-picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { SnapPickDetailView } from "./SnapPickDetailView";
@@ -32,7 +40,10 @@ export default async function SnapPickDetailPage({
   // resolveActiveActivation performs the lazy auto-close: if the open run's
   // deadline has passed, it computes and persists the winner before returning.
   // Called after auth guards so only authorized members trigger the side-effect.
-  const activation = await resolveActiveActivation(snapPickId);
+  const [activation, closedActivations] = await Promise.all([
+    resolveActiveActivation(snapPickId),
+    getClosedActivations(snapPickId),
+  ]);
 
   const winnerTitle =
     activation?.winnerId !== undefined
@@ -40,6 +51,45 @@ export default async function SnapPickDetailPage({
       : undefined;
   const activeOptions = options.filter(
     (option) => option.removedAt === undefined,
+  );
+
+  // While a run is open, load the current member's cast pairs so the voting
+  // screen resumes from their own remaining matchup queue rather than restarting.
+  const activationInProgress =
+    activation !== undefined && activation.closedAt === undefined;
+  const votes = activationInProgress
+    ? await getSnapPickVotes(activation.id)
+    : [];
+  const votedPairKeys = votes
+    .filter((vote) => vote.votedBy === uid)
+    .map((vote) => vote.pairKey);
+
+  // resolveActiveActivation may have just lazily closed the previously-open run
+  // on this read; getClosedActivations ran concurrently and would miss it, so
+  // fold it in (guarding against a duplicate) before building the timeline.
+  const justClosed =
+    activation?.closedAt !== undefined &&
+    !closedActivations.some((closed) => closed.id === activation.id)
+      ? [activation]
+      : [];
+  const timeline = [...justClosed, ...closedActivations];
+
+  // Each closed run's participant count is the number of distinct members who
+  // cast at least one vote during that activation.
+  const historyEntries: SnapPickHistoryEntry[] = await Promise.all(
+    timeline.map(async (closed) => {
+      const closedVotes = await getSnapPickVotes(closed.id);
+      const voters = new Set(closedVotes.map((vote) => vote.votedBy));
+      return {
+        activationId: closed.id,
+        closedAt: closed.closedAt ?? closed.closesAt,
+        winnerTitle:
+          closed.winnerId !== undefined
+            ? options.find((option) => option.id === closed.winnerId)?.title
+            : undefined,
+        participantCount: voters.size,
+      };
+    }),
   );
 
   return (
@@ -50,6 +100,8 @@ export default async function SnapPickDetailPage({
       options={activeOptions}
       activation={activation}
       winnerTitle={winnerTitle}
+      votedPairKeys={votedPairKeys}
+      historyEntries={historyEntries}
     />
   );
 }

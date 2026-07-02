@@ -73,6 +73,7 @@ function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
     <PickDetailView
       pick={makePick()}
       groupId="group-1"
+      groupName="Movie Night"
       categoryId="cat-1"
       currentUserId="user-1"
       initialOptions={[]}
@@ -281,7 +282,10 @@ describe("pick metadata — category name", () => {
   it("renders the category name when provided", () => {
     renderView({ categoryName: "Best Movies" });
 
-    expect(screen.getByText("Best Movies")).toBeDefined();
+    const categoryLabel = screen.getByText(
+      PICK_DETAIL_SCAFFOLD_COPY.categoryLabel,
+    );
+    expect(categoryLabel.parentElement?.textContent).toContain("Best Movies");
   });
 
   it("does not render the category label when category name is not provided", () => {

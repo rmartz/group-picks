@@ -52,8 +52,9 @@ export function ActiveSnapPickList({
 
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
 
-  const items: ActiveSnapPickListItem[] = activations.map(
-    ({ snapPick, activation }) => ({
+  const items: ActiveSnapPickListItem[] = activations
+    .filter(({ activation }) => activation.closesAt.getTime() > now.getTime())
+    .map(({ snapPick, activation }) => ({
       activationId: activation.id,
       title: snapPick.title,
       categoryName: categoryById[snapPick.categoryId]?.name,
@@ -61,8 +62,7 @@ export function ActiveSnapPickList({
       isClosingSoon:
         activation.closesAt.getTime() - now.getTime() <= 60 * 60 * 1000,
       href: `/groups/${groupId}/categories/${snapPick.categoryId}/snap-picks/${snapPick.id}`,
-    }),
-  );
+    }));
 
   return <ActiveSnapPickListView items={items} />;
 }

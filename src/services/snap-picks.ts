@@ -107,3 +107,23 @@ export async function activateSnapPick(
   };
   return { activationId: data.activationId, closesAt: new Date(data.closesAt) };
 }
+
+export async function recordSnapPickVote(
+  groupId: string,
+  categoryId: string,
+  snapPickId: string,
+  activationId: string,
+  vote: { winnerId: string; loserId: string },
+): Promise<{ voteId: string; votedAt: Date }> {
+  const response = await fetch(
+    `/api/groups/${groupId}/categories/${categoryId}/snap-picks/${snapPickId}/activations/${activationId}/vote`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vote),
+    },
+  );
+  if (!response.ok) throw new Error("Failed to record snap pick vote");
+  const data = (await response.json()) as { voteId: string; votedAt: string };
+  return { voteId: data.voteId, votedAt: new Date(data.votedAt) };
+}
