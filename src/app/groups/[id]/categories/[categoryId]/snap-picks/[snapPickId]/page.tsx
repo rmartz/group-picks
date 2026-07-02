@@ -2,7 +2,10 @@ import { notFound, redirect } from "next/navigation";
 
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
-import { resolveActiveActivation } from "@/server/data/snap-pick-activations";
+import {
+  getSnapPickVotes,
+  resolveActiveActivation,
+} from "@/server/data/snap-pick-activations";
 import { getSnapPickById, getSnapPickOptions } from "@/server/data/snap-picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
@@ -40,6 +43,17 @@ export default async function SnapPickDetailPage({
     (option) => option.removedAt === undefined,
   );
 
+  // While a run is open, load the current member's cast pairs so the voting
+  // screen resumes from their own remaining matchup queue rather than restarting.
+  const activationInProgress =
+    activation !== undefined && activation.closedAt === undefined;
+  const votes = activationInProgress
+    ? await getSnapPickVotes(activation.id)
+    : [];
+  const votedPairKeys = votes
+    .filter((vote) => vote.votedBy === uid)
+    .map((vote) => vote.pairKey);
+
   return (
     <SnapPickDetailView
       snapPick={snapPick}
@@ -48,6 +62,7 @@ export default async function SnapPickDetailPage({
       options={activeOptions}
       activation={activation}
       winnerTitle={winnerTitle}
+      votedPairKeys={votedPairKeys}
     />
   );
 }

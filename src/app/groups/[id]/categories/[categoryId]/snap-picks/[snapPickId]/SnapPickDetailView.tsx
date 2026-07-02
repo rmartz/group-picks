@@ -6,6 +6,7 @@ import type {
 
 import { SnapPickActivationPanel } from "./SnapPickActivationPanel";
 import { SNAP_PICK_DETAIL_COPY } from "./SnapPickDetailView.copy";
+import { SnapPickMatchup } from "./SnapPickMatchup";
 import { SnapPickOptionList } from "./SnapPickOptionList";
 
 interface SnapPickDetailViewProps {
@@ -18,6 +19,9 @@ interface SnapPickDetailViewProps {
   activation?: SnapPickActivation;
   // Resolved title of the winning option from the most recent closed run.
   winnerTitle?: string;
+  // Pair keys the current member has already voted on in the open activation, so
+  // the voting screen resumes from their remaining matchup queue.
+  votedPairKeys: string[];
 }
 
 // Shell for the Snap Pick detail page. The option-pool (#257) and activation
@@ -30,6 +34,7 @@ export function SnapPickDetailView({
   options,
   activation,
   winnerTitle,
+  votedPairKeys,
 }: SnapPickDetailViewProps) {
   const activationInProgress =
     activation !== undefined && activation.closedAt === undefined;
@@ -75,9 +80,20 @@ export function SnapPickDetailView({
         <h2 className="text-lg font-semibold">
           {SNAP_PICK_DETAIL_COPY.votingHeading}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          {SNAP_PICK_DETAIL_COPY.votingPlaceholder}
-        </p>
+        {activationInProgress ? (
+          <SnapPickMatchup
+            groupId={groupId}
+            categoryId={snapPick.categoryId}
+            snapPickId={snapPick.id}
+            activationId={activation.id}
+            options={options}
+            votedPairKeys={votedPairKeys}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {SNAP_PICK_DETAIL_COPY.votingPlaceholder}
+          </p>
+        )}
       </section>
     </main>
   );

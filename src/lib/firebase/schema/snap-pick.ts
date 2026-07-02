@@ -50,6 +50,7 @@ export interface FirebaseSnapPickVote {
   loserId: string;
   votedBy: string;
   votedAt: number;
+  pairKey: string;
 }
 
 // Runtime shapes of the persisted nodes, parsed on read so a malformed document
@@ -83,6 +84,7 @@ const FirebaseSnapPickVoteSchema = z.object({
   loserId: z.string(),
   votedBy: z.string(),
   votedAt: z.number(),
+  pairKey: z.string(),
 });
 
 export function snapPickToFirebase(
@@ -177,13 +179,17 @@ export function firebaseToSnapPickActivation(
 }
 
 export function snapPickVoteToFirebase(
-  vote: Pick<SnapPickVote, "winnerId" | "loserId" | "votedBy" | "votedAt">,
+  vote: Pick<
+    SnapPickVote,
+    "winnerId" | "loserId" | "votedBy" | "votedAt" | "pairKey"
+  >,
 ): FirebaseSnapPickVote {
   return {
     winnerId: vote.winnerId,
     loserId: vote.loserId,
     votedBy: vote.votedBy,
     votedAt: vote.votedAt.getTime(),
+    pairKey: vote.pairKey,
   };
 }
 
@@ -198,5 +204,6 @@ export function firebaseToSnapPickVote(
     loserId: parsed.loserId,
     votedBy: parsed.votedBy,
     votedAt: new Date(parsed.votedAt),
+    pairKey: parsed.pairKey,
   };
 }

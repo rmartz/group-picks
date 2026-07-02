@@ -19,6 +19,7 @@ function makeVote(
     id: "vote-1",
     votedBy: "user-1",
     votedAt: new Date("2025-03-20T12:00:00.000Z"),
+    pairKey: [overrides.winnerId, overrides.loserId].sort().join("_"),
     ...overrides,
   };
 }

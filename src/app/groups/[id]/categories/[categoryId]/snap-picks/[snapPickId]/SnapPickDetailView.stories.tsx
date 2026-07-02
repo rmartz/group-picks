@@ -18,6 +18,7 @@ const meta = {
     snapPick: makeSnapPick({ title: "Friday Lunch" }),
     groupId: "group-1",
     currentUserId: "user-1",
+    votedPairKeys: [],
     options: [
       makeSnapPickOption({ id: "option-1", title: "Pizza", addedBy: "user-1" }),
       makeSnapPickOption({ id: "option-2", title: "Tacos", addedBy: "user-2" }),

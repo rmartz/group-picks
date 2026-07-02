@@ -35,4 +35,8 @@ export interface SnapPickVote {
   loserId: string;
   votedBy: string;
   votedAt: Date;
+  // Deterministic key of the unordered {winnerId, loserId} pair (see
+  // snap-pick-pairing.pairKey). Identifies which matchup this vote decided so a
+  // member's cast pairs can be deduped and their remaining queue resumed.
+  pairKey: string;
 }
