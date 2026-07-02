@@ -33,7 +33,9 @@ function parseDuration(value: unknown): SnapPickDurationChoice | undefined {
 
   if (kind === "custom") {
     const durationMs = (value as { durationMs?: unknown }).durationMs;
-    return typeof durationMs === "number" && durationMs > 0
+    return typeof durationMs === "number" &&
+      Number.isFinite(durationMs) &&
+      durationMs > 0
       ? { kind: "custom", durationMs }
       : undefined;
   }
