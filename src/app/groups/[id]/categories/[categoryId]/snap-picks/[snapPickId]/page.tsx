@@ -18,19 +18,21 @@ export default async function SnapPickDetailPage({
 
   const { id, categoryId, snapPickId } = await params;
 
-  // resolveActiveActivation performs the lazy auto-close: if the open run's
-  // deadline has passed, it computes and persists the winner before returning.
-  const [group, category, snapPick, options, activation] = await Promise.all([
+  const [group, category, snapPick, options] = await Promise.all([
     getGroupById(id),
     getCategoryById(categoryId),
     getSnapPickById(categoryId, snapPickId),
     getSnapPickOptions(snapPickId, true),
-    resolveActiveActivation(snapPickId),
   ]);
 
   if (!group?.memberIds.includes(uid)) notFound();
   if (category?.groupId !== id) notFound();
   if (!snapPick) notFound();
+
+  // resolveActiveActivation performs the lazy auto-close: if the open run's
+  // deadline has passed, it computes and persists the winner before returning.
+  // Called after auth guards so only authorized members trigger the side-effect.
+  const activation = await resolveActiveActivation(snapPickId);
 
   const winnerTitle =
     activation?.winnerId !== undefined

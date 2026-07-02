@@ -101,6 +101,23 @@ describe("PUT /api/.../snap-picks/[snapPickId]/activate", () => {
     expect(mockCreateSnapPickActivation).not.toHaveBeenCalled();
   });
 
+  it("returns 400 for an Infinity custom duration", async () => {
+    // Use a raw JSON string so 1e309 parses to Infinity server-side without
+    // triggering the no-loss-of-precision lint rule on a JS numeric literal.
+    const request = new Request(
+      "http://localhost/api/groups/group-1/categories/cat-1/snap-picks/snap-1/activate",
+      {
+        method: "PUT",
+        body: '{"duration":{"kind":"custom","durationMs":1e309}}',
+        headers: { "content-type": "application/json" },
+      },
+    );
+    const response = await PUT(request, { params });
+
+    expect(response.status).toBe(400);
+    expect(mockCreateSnapPickActivation).not.toHaveBeenCalled();
+  });
+
   it("returns 409 when an activation is already in progress", async () => {
     mockGetOpenActivation.mockResolvedValue({ id: "act-open" });
 
