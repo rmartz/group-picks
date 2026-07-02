@@ -146,6 +146,7 @@ describe("getSnapPickVotes", () => {
           loserId: "opt-b",
           votedBy: "user-1",
           votedAt: 1_700_000_000_000,
+          pairKey: "opt-a_opt-b",
         },
       }),
     );
@@ -216,6 +217,7 @@ describe("resolveActiveActivation", () => {
           loserId: "opt-a",
           votedBy: "user-1",
           votedAt: 1_700_000_000_000,
+          pairKey: "opt-a_opt-b",
         },
       }),
     );

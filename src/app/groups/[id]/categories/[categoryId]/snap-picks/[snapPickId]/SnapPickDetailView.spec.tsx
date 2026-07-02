@@ -21,6 +21,7 @@ describe("renders the Snap Pick detail shell", () => {
         groupId="group-1"
         currentUserId="user-1"
         options={[]}
+        votedPairKeys={[]}
       />,
     );
 
@@ -36,6 +37,7 @@ describe("renders the Snap Pick detail shell", () => {
         groupId="group-1"
         currentUserId="user-1"
         options={[]}
+        votedPairKeys={[]}
       />,
     );
 
@@ -56,6 +58,7 @@ describe("renders the Snap Pick detail shell", () => {
         currentUserId="user-1"
         options={[]}
         activation={makeSnapPickActivation({ closedAt: undefined })}
+        votedPairKeys={[]}
       />,
     );
 

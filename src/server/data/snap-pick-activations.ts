@@ -7,6 +7,7 @@ import {
   snapPickVoteToFirebase,
 } from "@/lib/firebase/schema/snap-pick";
 import { computeSnapPickWinner } from "@/lib/snap-pick-activation";
+import { pairKey } from "@/lib/snap-pick-pairing";
 import type { SnapPickActivation, SnapPickVote } from "@/lib/types/snap-pick";
 
 import { getSnapPickActivations, getSnapPickOptions } from "./snap-picks";
@@ -45,16 +46,17 @@ export async function closeSnapPickActivation(
 export async function recordSnapPickVote(
   activationId: string,
   vote: Pick<SnapPickVote, "winnerId" | "loserId" | "votedBy">,
-): Promise<{ id: string; votedAt: Date }> {
+): Promise<{ id: string; votedAt: Date; pairKey: string }> {
   const db = getDatabase(getAdminApp());
   const ref = db.ref(`snap-pick-votes/${activationId}`).push();
   const id = ref.key;
   if (!id) throw new Error("Failed to generate snap pick vote ID");
 
   const votedAt = new Date();
-  await ref.set(snapPickVoteToFirebase({ ...vote, votedAt }));
+  const key = pairKey(vote.winnerId, vote.loserId);
+  await ref.set(snapPickVoteToFirebase({ ...vote, votedAt, pairKey: key }));
 
-  return { id, votedAt };
+  return { id, votedAt, pairKey: key };
 }
 
 export async function getSnapPickVotes(
