@@ -143,7 +143,11 @@ jobs:
         with:
           fetch-depth: 0
       # Playwright Chromium is installed (and cached) by the shared setup action.
+      # continue-on-error preserves advisory semantics: a transient apt/Playwright
+      # failure here should not block merge, matching the old behaviour where the
+      # install ran inside the continue-on-error capture step (#283).
       - uses: ./.github/actions/setup
+        continue-on-error: true
         with:
           playwright: chromium
       - name: List changed files
