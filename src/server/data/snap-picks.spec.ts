@@ -19,10 +19,11 @@ vi.mock("firebase-admin/database", () => ({
 
 const {
   createSnapPick,
+  getActiveSnapPickActivationsByCategories,
+  getClosedActivations,
+  getSnapPickActivations,
   getSnapPickById,
   getSnapPicksByCategory,
-  getSnapPickActivations,
-  getClosedActivations,
   addSnapPickOption,
   removeSnapPickOption,
   getSnapPickOptions,
@@ -298,5 +299,64 @@ describe("getSnapPickOptions", () => {
     mockGet.mockResolvedValue(snapshot(undefined));
 
     expect(await getSnapPickOptions("snap-1")).toEqual([]);
+  });
+});
+
+describe("getActiveSnapPickActivationsByCategories", () => {
+  // Routes each mocked db.ref(path).get() to a value keyed by path, so a single
+  // call can resolve both the container read and its activations read.
+  function routeByPath(valuesByPath: Record<string, unknown>) {
+    mockRef.mockImplementation((path: string) => ({
+      get: () => Promise.resolve(snapshot(valuesByPath[path])),
+    }));
+  }
+
+  const now = new Date(1_700_000_500_000);
+
+  it("returns only activations that are still open at the given time", async () => {
+    routeByPath({
+      "snap-picks/cat-1": { "snap-1": FIREBASE_SNAP_PICK },
+      "snap-pick-activations/snap-1": {
+        open: {
+          snapPickId: "snap-1",
+          startedAt: 1_700_000_100_000,
+          closesAt: 1_700_000_600_000,
+          startedBy: "user-2",
+        },
+        expired: {
+          snapPickId: "snap-1",
+          startedAt: 1_699_999_000_000,
+          closesAt: 1_700_000_400_000,
+          startedBy: "user-2",
+        },
+        closed: {
+          snapPickId: "snap-1",
+          startedAt: 1_700_000_100_000,
+          closesAt: 1_700_000_600_000,
+          closedAt: 1_700_000_450_000,
+          winnerId: "option-1",
+          startedBy: "user-2",
+        },
+      },
+    });
+
+    const result = await getActiveSnapPickActivationsByCategories(
+      ["cat-1"],
+      now,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.activation.id).toBe("open");
+    expect(result[0]?.snapPick.id).toBe("snap-1");
+  });
+
+  it("returns an empty array when no categories have active activations", async () => {
+    routeByPath({
+      "snap-picks/cat-1": undefined,
+    });
+
+    expect(
+      await getActiveSnapPickActivationsByCategories(["cat-1"], now),
+    ).toEqual([]);
   });
 });

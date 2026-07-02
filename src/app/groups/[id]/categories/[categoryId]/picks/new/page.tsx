@@ -5,7 +5,7 @@ import { getGroupById } from "@/server/data/groups";
 import { hasPicks } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
-import { CreatePickForm } from "./CreatePickForm";
+import { NewPickTypeSwitcher } from "./NewPickTypeSwitcher";
 
 export default async function CreatePickPage({
   params,
@@ -29,7 +29,7 @@ export default async function CreatePickPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <CreatePickForm
+      <NewPickTypeSwitcher
         groupId={groupId}
         categoryId={categoryId}
         hasPriorPicks={hasPriorPicks}

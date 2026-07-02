@@ -71,6 +71,45 @@ export async function getSnapPickActivations(
   );
 }
 
+// A Snap Pick together with one of its currently-running activations. Surfaced
+// on the group activity view so members can jump straight into an open vote.
+export interface ActiveSnapPickActivation {
+  snapPick: SnapPick;
+  activation: SnapPickActivation;
+}
+
+// An activation is "active" when it has not been explicitly closed and its
+// scheduled close time is still in the future.
+function isActivationActive(
+  activation: SnapPickActivation,
+  now: Date,
+): boolean {
+  return (
+    activation.closedAt === undefined &&
+    activation.closesAt.getTime() > now.getTime()
+  );
+}
+
+export async function getActiveSnapPickActivationsByCategories(
+  categoryIds: string[],
+  now: Date = new Date(),
+): Promise<ActiveSnapPickActivation[]> {
+  const snapPickArrays = await Promise.all(
+    categoryIds.map((categoryId) => getSnapPicksByCategory(categoryId)),
+  );
+  const snapPicks = snapPickArrays.flat();
+
+  const activationArrays = await Promise.all(
+    snapPicks.map((snapPick) => getSnapPickActivations(snapPick.id)),
+  );
+
+  return snapPicks.flatMap((snapPick, i) =>
+    (activationArrays[i] ?? [])
+      .filter((activation) => isActivationActive(activation, now))
+      .map((activation) => ({ snapPick, activation })),
+  );
+}
+
 // Past runs of this snap pick, newest first — the source of the history
 // timeline. An activation is "closed" once it has a closedAt; open runs are
 // excluded. Sorted by closedAt descending so the most recent pick is first.
