@@ -58,6 +58,8 @@ export function ActiveSnapPickList({
       title: snapPick.title,
       categoryName: categoryById[snapPick.categoryId]?.name,
       timeRemainingLabel: formatTimeRemaining(activation.closesAt, now),
+      isClosingSoon:
+        activation.closesAt.getTime() - now.getTime() <= 60 * 60 * 1000,
       href: `/groups/${groupId}/categories/${snapPick.categoryId}/snap-picks/${snapPick.id}`,
     }),
   );

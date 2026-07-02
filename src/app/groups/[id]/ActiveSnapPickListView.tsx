@@ -10,6 +10,7 @@ export interface ActiveSnapPickListItem {
   title: string;
   categoryName: string | undefined;
   timeRemainingLabel: string;
+  isClosingSoon: boolean;
   href: string;
 }
 
@@ -38,9 +39,11 @@ export function ActiveSnapPickListView({ items }: ActiveSnapPickListViewProps) {
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <Badge variant="default">
-                {ACTIVE_SNAP_PICK_LIST_COPY.closingSoonLabel}
-              </Badge>
+              {item.isClosingSoon && (
+                <Badge variant="default">
+                  {ACTIVE_SNAP_PICK_LIST_COPY.closingSoonLabel}
+                </Badge>
+              )}
               <Link href={item.href} className={buttonVariants({ size: "sm" })}>
                 {ACTIVE_SNAP_PICK_LIST_COPY.voteNowButton}
               </Link>
