@@ -7,7 +7,7 @@ export interface SnapPickHistoryViewProps {
   entries: SnapPickHistoryEntry[];
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
   year: "numeric",
   month: "short",
   day: "numeric",
