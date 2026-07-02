@@ -1,7 +1,9 @@
+import { pairKey } from "@/lib/snap-pick-pairing";
 import type {
   SnapPick,
   SnapPickActivation,
   SnapPickOption,
+  SnapPickVote,
 } from "@/lib/types/snap-pick";
 
 export function makeSnapPick(overrides?: Partial<SnapPick>): SnapPick {
@@ -37,6 +39,22 @@ export function makeSnapPickActivation(
     startedAt: new Date("2025-03-21T10:00:00.000Z"),
     closesAt: new Date("2025-03-22T00:00:00.000Z"),
     startedBy: "user-1",
+    ...overrides,
+  };
+}
+
+export function makeSnapPickVote(
+  overrides?: Partial<SnapPickVote>,
+): SnapPickVote {
+  const winnerId = overrides?.winnerId ?? "option-1";
+  const loserId = overrides?.loserId ?? "option-2";
+  return {
+    id: "vote-1",
+    winnerId,
+    loserId,
+    votedBy: "user-1",
+    votedAt: new Date("2025-03-21T11:00:00.000Z"),
+    pairKey: pairKey(winnerId, loserId),
     ...overrides,
   };
 }

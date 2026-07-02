@@ -262,6 +262,7 @@ describe("snapPickVoteToFirebase", () => {
       loserId: "opt-b",
       votedBy: "user-1",
       votedAt: STARTED,
+      pairKey: "opt-a_opt-b",
     });
 
     expect(result).toEqual({
@@ -269,6 +270,7 @@ describe("snapPickVoteToFirebase", () => {
       loserId: "opt-b",
       votedBy: "user-1",
       votedAt: STARTED.getTime(),
+      pairKey: "opt-a_opt-b",
     });
   });
 });
@@ -280,11 +282,13 @@ describe("firebaseToSnapPickVote", () => {
       loserId: "opt-b",
       votedBy: "user-1",
       votedAt: STARTED.getTime(),
+      pairKey: "opt-a_opt-b",
     });
 
     expect(result.id).toBe("vote-9");
     expect(result.winnerId).toBe("opt-a");
     expect(result.votedAt).toEqual(STARTED);
+    expect(result.pairKey).toBe("opt-a_opt-b");
   });
 
   it("throws when a required field is missing", () => {
