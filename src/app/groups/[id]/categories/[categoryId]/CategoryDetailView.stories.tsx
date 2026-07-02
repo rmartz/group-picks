@@ -49,6 +49,7 @@ const meta: Meta<typeof CategoryDetailView> = {
   },
   args: {
     category,
+    groupName: "Movie Night",
     picks,
   },
 };

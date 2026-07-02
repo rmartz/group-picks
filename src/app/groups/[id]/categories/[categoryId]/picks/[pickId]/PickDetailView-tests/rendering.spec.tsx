@@ -8,6 +8,8 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { BREADCRUMBS_COPY } from "@/components/breadcrumbs";
+
 import { CLOSED_PICK_RESULTS_COPY } from "../ClosedPickResultsView.copy";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "../copy";
 import { PickDetailView } from "../PickDetailView";
@@ -94,6 +96,7 @@ function renderView(overrides?: Partial<Parameters<typeof PickDetailView>[0]>) {
     <PickDetailView
       pick={makePick()}
       groupId="group-1"
+      groupName="Movie Night"
       categoryId="cat-1"
       currentUserId="user-1"
       initialOptions={[]}
@@ -121,6 +124,33 @@ describe("pick metadata", () => {
       screen.getByText(PICK_DETAIL_SCAFFOLD_COPY.topCountLabel),
     ).toBeDefined();
     expect(screen.getByText("3")).toBeDefined();
+  });
+});
+
+describe("breadcrumb trail", () => {
+  it("renders a Group → Category → Pick breadcrumb trail", () => {
+    renderView({
+      pick: makePick({ id: "pick-1", title: "Best Movie of 2025" }),
+      groupName: "Movie Night",
+      categoryName: "Best Movies",
+    });
+
+    const nav = screen.getByRole("navigation", {
+      name: BREADCRUMBS_COPY.navLabel,
+    });
+
+    const groupCrumb = within(nav).getByRole("link", { name: "Movie Night" });
+    expect(groupCrumb.getAttribute("href")).toBe("/groups/group-1");
+
+    const categoryCrumb = within(nav).getByRole("link", {
+      name: "Best Movies",
+    });
+    expect(categoryCrumb.getAttribute("href")).toBe(
+      "/groups/group-1/categories/cat-1",
+    );
+
+    const pickCrumb = within(nav).getByText("Best Movie of 2025");
+    expect(pickCrumb.getAttribute("aria-current")).toBe("page");
   });
 });
 

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,6 +27,7 @@ import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 interface PickDetailViewProps {
   pick: GroupPick;
   groupId: string;
+  groupName: string;
   categoryId: string;
   categoryName?: string;
   currentUserId: string;
@@ -43,6 +45,7 @@ interface PickDetailViewProps {
 export function PickDetailView({
   pick,
   groupId,
+  groupName,
   categoryId,
   categoryName,
   currentUserId,
@@ -61,6 +64,21 @@ export function PickDetailView({
   const closedAt = pick.closedAt;
   const isOpen = closedAt === undefined;
   const uniqueOwnerCount = new Set(options.flatMap((opt) => opt.ownerIds)).size;
+  const breadcrumbs = [
+    { label: groupName, href: `/groups/${groupId}` },
+    ...(categoryName
+      ? [
+          {
+            label: categoryName,
+            href: `/groups/${groupId}/categories/${categoryId}`,
+          },
+        ]
+      : []),
+    {
+      label: pick.title,
+      href: `/groups/${groupId}/categories/${categoryId}/picks/${pick.id}`,
+    },
+  ];
 
   async function handleReopen() {
     setIsReopening(true);
@@ -112,6 +130,7 @@ export function PickDetailView({
 
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
+      <Breadcrumbs crumbs={breadcrumbs} />
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{pick.title}</h1>
         {categoryName && (
