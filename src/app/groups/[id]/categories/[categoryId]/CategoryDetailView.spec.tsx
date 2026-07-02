@@ -1,11 +1,12 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { BREADCRUMBS_COPY } from "@/components/breadcrumbs";
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
 import { RankingMode } from "@/lib/types/pick";
 
-import { CategoryDetailView } from "./CategoryDetailView";
+import { CategoryDetailView as CategoryDetailViewBase } from "./CategoryDetailView";
 import { CATEGORY_DETAIL_COPY } from "./copy";
 
 afterEach(cleanup);
@@ -17,6 +18,20 @@ vi.mock("./ReopenPickButton", () => ({
     </button>
   ),
 }));
+
+type CategoryDetailViewProps = Omit<
+  Parameters<typeof CategoryDetailViewBase>[0],
+  "groupName"
+> & {
+  groupName?: string;
+};
+
+function CategoryDetailView({
+  groupName = "Movie Night",
+  ...props
+}: CategoryDetailViewProps) {
+  return <CategoryDetailViewBase groupName={groupName} {...props} />;
+}
 
 function makeCategory(overrides?: Partial<Category>): Category {
   return {
@@ -49,7 +64,9 @@ describe("CategoryDetailView — category metadata", () => {
   it("renders the category name as a heading", () => {
     render(<CategoryDetailView category={makeCategory()} picks={[]} />);
 
-    expect(screen.getByText("Best Movies")).toBeDefined();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Best Movies" }),
+    ).toBeDefined();
   });
 
   it("renders the created at label", () => {
@@ -252,5 +269,28 @@ describe("CategoryDetailView — due date", () => {
         new Date("2026-01-01T00:00:00.000Z").toLocaleDateString(),
       ),
     ).toBeNull();
+  });
+});
+
+describe("CategoryDetailView — breadcrumb trail", () => {
+  it("renders a Group → Category breadcrumb trail", () => {
+    const category = makeCategory({ name: "Best Movies", groupId: "group-1" });
+    render(
+      <CategoryDetailView
+        category={category}
+        groupName="Movie Night"
+        picks={[]}
+      />,
+    );
+
+    const nav = screen.getByRole("navigation", {
+      name: BREADCRUMBS_COPY.navLabel,
+    });
+
+    const groupCrumb = within(nav).getByRole("link", { name: "Movie Night" });
+    expect(groupCrumb.getAttribute("href")).toBe("/groups/group-1");
+
+    const categoryCrumb = within(nav).getByText("Best Movies");
+    expect(categoryCrumb.getAttribute("aria-current")).toBe("page");
   });
 });
