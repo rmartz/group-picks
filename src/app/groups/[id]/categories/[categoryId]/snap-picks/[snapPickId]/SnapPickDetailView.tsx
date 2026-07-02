@@ -1,11 +1,13 @@
 import type {
   SnapPick,
   SnapPickActivation,
+  SnapPickHistoryEntry,
   SnapPickOption,
 } from "@/lib/types/snap-pick";
 
 import { SnapPickActivationPanel } from "./SnapPickActivationPanel";
 import { SNAP_PICK_DETAIL_COPY } from "./SnapPickDetailView.copy";
+import { SnapPickHistoryView } from "./SnapPickHistoryView";
 import { SnapPickMatchup } from "./SnapPickMatchup";
 import { SnapPickOptionList } from "./SnapPickOptionList";
 
@@ -22,6 +24,8 @@ interface SnapPickDetailViewProps {
   // Pair keys the current member has already voted on in the open activation, so
   // the voting screen resumes from their remaining matchup queue.
   votedPairKeys: string[];
+  // Past (closed) runs with their winners and participant counts, newest first.
+  historyEntries: SnapPickHistoryEntry[];
 }
 
 // Shell for the Snap Pick detail page. The option-pool (#257) and activation
@@ -35,6 +39,7 @@ export function SnapPickDetailView({
   activation,
   winnerTitle,
   votedPairKeys,
+  historyEntries,
 }: SnapPickDetailViewProps) {
   const activationInProgress =
     activation !== undefined && activation.closedAt === undefined;
@@ -94,6 +99,13 @@ export function SnapPickDetailView({
             {SNAP_PICK_DETAIL_COPY.votingPlaceholder}
           </p>
         )}
+      </section>
+
+      <section className="mt-6" data-slot="history">
+        <h2 className="text-lg font-semibold">
+          {SNAP_PICK_DETAIL_COPY.historyHeading}
+        </h2>
+        <SnapPickHistoryView entries={historyEntries} />
       </section>
     </main>
   );

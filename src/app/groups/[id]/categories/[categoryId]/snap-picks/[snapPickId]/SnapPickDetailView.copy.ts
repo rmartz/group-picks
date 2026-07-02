@@ -5,4 +5,5 @@ export const SNAP_PICK_DETAIL_COPY = {
   activationHeading: "Activation",
   votingHeading: "Voting",
   votingPlaceholder: "Head-to-head voting is coming soon.",
+  historyHeading: "History",
 } as const;

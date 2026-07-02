@@ -1,12 +1,17 @@
 import { notFound, redirect } from "next/navigation";
 
+import type { SnapPickHistoryEntry } from "@/lib/types/snap-pick";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import {
   getSnapPickVotes,
   resolveActiveActivation,
 } from "@/server/data/snap-pick-activations";
-import { getSnapPickById, getSnapPickOptions } from "@/server/data/snap-picks";
+import {
+  getClosedActivations,
+  getSnapPickById,
+  getSnapPickOptions,
+} from "@/server/data/snap-picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { SnapPickDetailView } from "./SnapPickDetailView";
@@ -23,13 +28,15 @@ export default async function SnapPickDetailPage({
 
   // resolveActiveActivation performs the lazy auto-close: if the open run's
   // deadline has passed, it computes and persists the winner before returning.
-  const [group, category, snapPick, options, activation] = await Promise.all([
-    getGroupById(id),
-    getCategoryById(categoryId),
-    getSnapPickById(categoryId, snapPickId),
-    getSnapPickOptions(snapPickId, true),
-    resolveActiveActivation(snapPickId),
-  ]);
+  const [group, category, snapPick, options, activation, closedActivations] =
+    await Promise.all([
+      getGroupById(id),
+      getCategoryById(categoryId),
+      getSnapPickById(categoryId, snapPickId),
+      getSnapPickOptions(snapPickId, true),
+      resolveActiveActivation(snapPickId),
+      getClosedActivations(snapPickId),
+    ]);
 
   if (!group?.memberIds.includes(uid)) notFound();
   if (category?.groupId !== id) notFound();
@@ -54,6 +61,34 @@ export default async function SnapPickDetailPage({
     .filter((vote) => vote.votedBy === uid)
     .map((vote) => vote.pairKey);
 
+  // resolveActiveActivation may have just lazily closed the previously-open run
+  // on this read; getClosedActivations ran concurrently and would miss it, so
+  // fold it in (guarding against a duplicate) before building the timeline.
+  const justClosed =
+    activation?.closedAt !== undefined &&
+    !closedActivations.some((closed) => closed.id === activation.id)
+      ? [activation]
+      : [];
+  const timeline = [...justClosed, ...closedActivations];
+
+  // Each closed run's participant count is the number of distinct members who
+  // cast at least one vote during that activation.
+  const historyEntries: SnapPickHistoryEntry[] = await Promise.all(
+    timeline.map(async (closed) => {
+      const closedVotes = await getSnapPickVotes(closed.id);
+      const voters = new Set(closedVotes.map((vote) => vote.votedBy));
+      return {
+        activationId: closed.id,
+        closedAt: closed.closedAt ?? closed.closesAt,
+        winnerTitle:
+          closed.winnerId !== undefined
+            ? options.find((option) => option.id === closed.winnerId)?.title
+            : undefined,
+        participantCount: voters.size,
+      };
+    }),
+  );
+
   return (
     <SnapPickDetailView
       snapPick={snapPick}
@@ -63,6 +98,7 @@ export default async function SnapPickDetailPage({
       activation={activation}
       winnerTitle={winnerTitle}
       votedPairKeys={votedPairKeys}
+      historyEntries={historyEntries}
     />
   );
 }
