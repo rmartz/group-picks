@@ -124,15 +124,24 @@ jobs:
     # `pnpm build-storybook` without touching a *.stories.* file, and would ship
     # green if this only ran on story changes (#372). This is a gating check with
     # no continue-on-error — distinct from the advisory storybook-screenshots job,
-    # which also builds Storybook but reports its build neutral. Static build, so
-    # no browser: the setup action is called without the `playwright` input.
+    # which also builds Storybook but reports its build neutral.
+    #
+    # It also renders canary Redux-connected stories from the built bundle
+    # (check-storybook-render.mjs) to guard the Vite 8 / Rolldown reselect
+    # tree-shaking regression — a render break that a compile-only build can't
+    # catch. That watchdog keeps a Dependabot Vite 8 bump red until the bundler
+    # is fixed, which is why Chromium is installed here.
     if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7.0.0
       - uses: ./.github/actions/setup
+        with:
+          playwright: chromium
       - run: pnpm build-storybook
+      - name: Guard built-Storybook render (Vite 8 reselect regression)
+        run: node scripts/check-storybook-render.mjs
 
   storybook-screenshots:
     name: Storybook Screenshots
