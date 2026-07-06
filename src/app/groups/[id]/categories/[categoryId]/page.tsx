@@ -88,6 +88,7 @@ export default async function CategoryDetailPage({
       <CategoryDetailView
         category={category}
         closePickAction={closePickAction}
+        groupName={group.name}
         picks={picks}
       />
       <SnapPickSection

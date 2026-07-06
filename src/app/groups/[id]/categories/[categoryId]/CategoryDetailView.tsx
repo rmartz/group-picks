@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { Category } from "@/lib/types/category";
 import type { GroupPick } from "@/lib/types/pick";
 
@@ -7,16 +8,27 @@ import { ReopenPickButton } from "./ReopenPickButton";
 interface CategoryDetailViewProps {
   category: Category;
   closePickAction?: (formData: FormData) => void | Promise<void>;
+  groupName: string;
   picks: GroupPick[];
 }
 
 export function CategoryDetailView({
   category,
   closePickAction,
+  groupName,
   picks,
 }: CategoryDetailViewProps) {
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
+      <Breadcrumbs
+        crumbs={[
+          { label: groupName, href: `/groups/${category.groupId}` },
+          {
+            label: category.name,
+            href: `/groups/${category.groupId}/categories/${category.id}`,
+          },
+        ]}
+      />
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">{category.name}</h1>
         <dl className="space-y-2 text-sm">

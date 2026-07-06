@@ -1,17 +1,25 @@
 // Snap Pick schema boundary.
 //
-// A Snap Pick has two distinct entities at two Realtime Database paths:
+// A Snap Pick has three distinct entities at three Realtime Database paths:
 //   - the container:  snap-picks/{categoryId}/{snapPickId}        (FirebaseSnapPick)
+//   - an option:      snap-pick-options/{snapPickId}/{optionId}   (FirebaseSnapPickOption)
 //   - an activation:  snap-pick-activations/{snapPickId}/{activationId}
 //                                                                 (FirebaseSnapPickActivation)
-// The container is long-lived (holds the option pool and history); each activation
-// is one run of the head-to-head vote, with a start time, a close time, and a winner.
+// The container is long-lived (holds the option pool and history); an option is a
+// member-curated entry in that persistent pool (soft-deleted via removedAt so it
+// stays readable in historical activations); each activation is one run of the
+// head-to-head vote, with a start time, a close time, and a winner.
 //
 // Domain types use Date; the persisted shapes use epoch-millisecond numbers.
 
 import { z } from "zod";
 
-import type { SnapPick, SnapPickActivation } from "@/lib/types/snap-pick";
+import type {
+  SnapPick,
+  SnapPickActivation,
+  SnapPickOption,
+  SnapPickVote,
+} from "@/lib/types/snap-pick";
 
 export interface FirebaseSnapPick {
   title: string;
@@ -21,6 +29,13 @@ export interface FirebaseSnapPick {
   defaultDurationMs: number;
 }
 
+export interface FirebaseSnapPickOption {
+  title: string;
+  addedBy: string;
+  addedAt: number;
+  removedAt?: number;
+}
+
 export interface FirebaseSnapPickActivation {
   snapPickId: string;
   startedAt: number;
@@ -28,6 +43,14 @@ export interface FirebaseSnapPickActivation {
   closedAt?: number;
   winnerId?: string;
   startedBy: string;
+}
+
+export interface FirebaseSnapPickVote {
+  winnerId: string;
+  loserId: string;
+  votedBy: string;
+  votedAt: number;
+  pairKey: string;
 }
 
 // Runtime shapes of the persisted nodes, parsed on read so a malformed document
@@ -40,6 +63,13 @@ const FirebaseSnapPickSchema = z.object({
   defaultDurationMs: z.number(),
 });
 
+const FirebaseSnapPickOptionSchema = z.object({
+  title: z.string(),
+  addedBy: z.string(),
+  addedAt: z.number(),
+  removedAt: z.number().optional(),
+});
+
 const FirebaseSnapPickActivationSchema = z.object({
   snapPickId: z.string(),
   startedAt: z.number(),
@@ -47,6 +77,14 @@ const FirebaseSnapPickActivationSchema = z.object({
   closedAt: z.number().optional(),
   winnerId: z.string().optional(),
   startedBy: z.string(),
+});
+
+const FirebaseSnapPickVoteSchema = z.object({
+  winnerId: z.string(),
+  loserId: z.string(),
+  votedBy: z.string(),
+  votedAt: z.number(),
+  pairKey: z.string(),
 });
 
 export function snapPickToFirebase(
@@ -73,6 +111,32 @@ export function firebaseToSnapPick(id: string, data: unknown): SnapPick {
     createdAt: new Date(parsed.createdAt),
     creatorId: parsed.creatorId,
     defaultDurationMs: parsed.defaultDurationMs,
+  };
+}
+
+export function snapPickOptionToFirebase(
+  option: Pick<SnapPickOption, "title" | "addedBy" | "addedAt" | "removedAt">,
+): FirebaseSnapPickOption {
+  return {
+    title: option.title,
+    addedBy: option.addedBy,
+    addedAt: option.addedAt.getTime(),
+    removedAt: option.removedAt?.getTime(),
+  };
+}
+
+export function firebaseToSnapPickOption(
+  id: string,
+  data: unknown,
+): SnapPickOption {
+  const parsed = FirebaseSnapPickOptionSchema.parse(data);
+  return {
+    id,
+    title: parsed.title,
+    addedBy: parsed.addedBy,
+    addedAt: new Date(parsed.addedAt),
+    removedAt:
+      parsed.removedAt !== undefined ? new Date(parsed.removedAt) : undefined,
   };
 }
 
@@ -111,5 +175,35 @@ export function firebaseToSnapPickActivation(
       parsed.closedAt !== undefined ? new Date(parsed.closedAt) : undefined,
     winnerId: parsed.winnerId,
     startedBy: parsed.startedBy,
+  };
+}
+
+export function snapPickVoteToFirebase(
+  vote: Pick<
+    SnapPickVote,
+    "winnerId" | "loserId" | "votedBy" | "votedAt" | "pairKey"
+  >,
+): FirebaseSnapPickVote {
+  return {
+    winnerId: vote.winnerId,
+    loserId: vote.loserId,
+    votedBy: vote.votedBy,
+    votedAt: vote.votedAt.getTime(),
+    pairKey: vote.pairKey,
+  };
+}
+
+export function firebaseToSnapPickVote(
+  id: string,
+  data: unknown,
+): SnapPickVote {
+  const parsed = FirebaseSnapPickVoteSchema.parse(data);
+  return {
+    id,
+    winnerId: parsed.winnerId,
+    loserId: parsed.loserId,
+    votedBy: parsed.votedBy,
+    votedAt: new Date(parsed.votedAt),
+    pairKey: parsed.pairKey,
   };
 }

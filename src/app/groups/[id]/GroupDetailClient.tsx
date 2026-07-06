@@ -17,6 +17,7 @@ import {
   updateGroupSettings,
 } from "@/services/groups";
 
+import type { ActiveSnapPickActivationItem } from "./ActiveSnapPickList";
 import { GROUP_DETAIL_COPY } from "./copy";
 import { GroupDetailView } from "./GroupDetailView";
 import type { MemberName } from "./MemberRow";
@@ -29,6 +30,7 @@ interface GroupDetailClientProps {
   initialInviteMode: InviteMode;
   memberNames: MemberName[];
   picksByCategory: Record<string, GroupPick[]>;
+  activeSnapPicks: ActiveSnapPickActivationItem[];
 }
 
 export function GroupDetailClient({
@@ -39,6 +41,7 @@ export function GroupDetailClient({
   initialInviteMode,
   memberNames,
   picksByCategory,
+  activeSnapPicks,
 }: GroupDetailClientProps) {
   const router = useRouter();
   const [isLeaving, setIsLeaving] = useState(false);
@@ -154,6 +157,7 @@ export function GroupDetailClient({
       initialInviteMode={initialInviteMode}
       memberNames={memberNames}
       picksByCategory={picksByCategory}
+      activeSnapPicks={activeSnapPicks}
       onTogglePicksRestricted={() => {
         void handleTogglePicksRestricted();
       }}

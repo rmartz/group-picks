@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { makeSnapPick, makeSnapPickActivation } from "@/lib/fixtures/snap-pick";
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
 import { InviteMode } from "@/lib/types/invite";
@@ -90,6 +91,7 @@ const meta: Meta<typeof GroupDetailView> = {
     onLeave: noop,
     memberNames: mockMemberNames,
     picksByCategory: {},
+    activeSnapPicks: [],
     initialInviteMode: InviteMode.Group,
   },
 };
@@ -106,6 +108,26 @@ export const WithPicks: Story = {
       "cat-1": [mockFridayFlick, mockDateNightFilm],
       "cat-2": [mockBeachWeekRead],
     },
+  },
+};
+
+export const WithActiveSnapPicks: Story = {
+  args: {
+    categories: mockCategories,
+    activeSnapPicks: [
+      {
+        snapPick: makeSnapPick({
+          id: "snap-1",
+          title: "Where should we eat tonight?",
+          categoryId: "cat-1",
+        }),
+        activation: makeSnapPickActivation({
+          id: "activation-1",
+          snapPickId: "snap-1",
+          closesAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        }),
+      },
+    ],
   },
 };
 

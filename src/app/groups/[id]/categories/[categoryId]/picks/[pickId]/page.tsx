@@ -139,6 +139,7 @@ export default async function PickDetailPage({
     <PickDetailView
       pick={pick}
       groupId={groupId}
+      groupName={group.name}
       categoryId={categoryId}
       categoryName={category.name}
       currentUserId={uid}
