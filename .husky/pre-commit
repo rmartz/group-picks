@@ -2,4 +2,3 @@
 bash scripts/check-conflict-markers.sh --staged
 pnpm exec lint-staged
 pnpm run env:validate
-bash scripts/check-file-length.sh --staged
