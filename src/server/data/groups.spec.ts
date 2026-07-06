@@ -46,8 +46,7 @@ describe("removeMember last-member transaction", () => {
 
   it("aborts the transaction (returns undefined) when the calling user is the only member", async () => {
     let capturedUpdate:
-      | ((m: Record<string, unknown> | null) => unknown)
-      | undefined;
+      ((m: Record<string, unknown> | null) => unknown) | undefined;
     mockTransaction.mockImplementation(
       (update: (m: Record<string, unknown> | null) => unknown) => {
         capturedUpdate = update;
@@ -63,8 +62,7 @@ describe("removeMember last-member transaction", () => {
 
   it("returns members minus the calling uid when there are multiple members", async () => {
     let capturedUpdate:
-      | ((m: Record<string, unknown> | null) => unknown)
-      | undefined;
+      ((m: Record<string, unknown> | null) => unknown) | undefined;
     mockTransaction.mockImplementation(
       (update: (m: Record<string, unknown> | null) => unknown) => {
         capturedUpdate = update;
@@ -81,8 +79,7 @@ describe("removeMember last-member transaction", () => {
 
   it("aborts the transaction (returns undefined) when the snapshot is null", async () => {
     let capturedUpdate:
-      | ((m: Record<string, unknown> | null) => unknown)
-      | undefined;
+      ((m: Record<string, unknown> | null) => unknown) | undefined;
     mockTransaction.mockImplementation(
       (update: (m: Record<string, unknown> | null) => unknown) => {
         capturedUpdate = update;
@@ -97,8 +94,7 @@ describe("removeMember last-member transaction", () => {
 
   it("returns members map unchanged when uid is not in a single-member map", async () => {
     let capturedUpdate:
-      | ((m: Record<string, unknown> | null) => unknown)
-      | undefined;
+      ((m: Record<string, unknown> | null) => unknown) | undefined;
     mockTransaction.mockImplementation(
       (update: (m: Record<string, unknown> | null) => unknown) => {
         capturedUpdate = update;
