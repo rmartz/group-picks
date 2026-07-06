@@ -24,3 +24,7 @@ export declare function filterStoriesByChangedFiles(
 ): StoryEntry[];
 
 export declare function parseChangedFiles(contents: string): string[];
+
+export declare function resolveDeadlineMs(env: {
+  CAPTURE_DEADLINE_MS?: string;
+}): number;

@@ -109,6 +109,44 @@ function selectStories(staticDir, changedFilesPath) {
   return filterStoriesByChangedFiles(stories, changedFiles);
 }
 
+// Wall-clock budget for the whole capture, kept below the job's timeout-minutes
+// so an overrun exits non-zero (a FAILURE routed to fix-review) rather than
+// letting the job hit its timeout and be CANCELLED (which requires human
+// escalation). Overridable via CAPTURE_DEADLINE_MS for local testing.
+const DEFAULT_DEADLINE_MS = 240_000;
+// Per-story budgets: navigate to first paint (not networkidle, which can hang on
+// a page that keeps requesting), then give the story a short window to mount. A
+// story that crashes on render leaves #storybook-root empty and fails within
+// RENDER_TIMEOUT_MS instead of dragging the whole run toward the job timeout.
+const NAV_TIMEOUT_MS = 15_000;
+const RENDER_TIMEOUT_MS = 4_000;
+const CONCURRENCY = 4;
+
+// Resolve the wall-clock deadline from the environment, falling back to the
+// default when unset or not a positive number.
+export function resolveDeadlineMs(env) {
+  const parsed = Number(env?.CAPTURE_DEADLINE_MS);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_DEADLINE_MS;
+}
+
+async function captureStory(context, port, outDir, story) {
+  const url = `http://127.0.0.1:${port}/iframe.html?id=${story.id}&viewMode=story`;
+  const page = await context.newPage();
+  try {
+    await page.goto(url, {
+      waitUntil: "domcontentloaded",
+      timeout: NAV_TIMEOUT_MS,
+    });
+    await page
+      .locator("#storybook-root > *")
+      .first()
+      .waitFor({ state: "attached", timeout: RENDER_TIMEOUT_MS });
+    await page.screenshot({ path: join(outDir, `${story.id}.png`) });
+  } finally {
+    await page.close();
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const stories = selectStories(args.staticDir, args.changedFiles);
@@ -119,31 +157,41 @@ async function main() {
   }
   mkdirSync(args.out, { recursive: true });
 
+  const deadlineMs = resolveDeadlineMs(process.env);
+  const startedAt = Date.now();
   const { server, port } = await startStaticServer(args.staticDir);
   const browser = await chromium.launch();
-  const page = await browser.newPage({
+  const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
   });
 
+  const queue = [...stories];
+  const failed = [];
   let captured = 0;
-  try {
-    for (const story of stories) {
-      const url = `http://127.0.0.1:${port}/iframe.html?id=${story.id}&viewMode=story`;
-      // One flaky story must not abort the whole (advisory) capture.
+  let deadlineHit = false;
+
+  async function worker() {
+    while (queue.length > 0) {
+      if (Date.now() - startedAt > deadlineMs) {
+        deadlineHit = true;
+        return;
+      }
+      const story = queue.shift();
       try {
-        await page.goto(url, { waitUntil: "networkidle", timeout: 20_000 });
-        // Wait for the story root to actually render content.
-        await page
-          .locator("#storybook-root > *")
-          .first()
-          .waitFor({ state: "attached", timeout: 15_000 });
-        await page.screenshot({ path: join(args.out, `${story.id}.png`) });
+        await captureStory(context, port, args.out, story);
         captured += 1;
         console.log(`captured ${story.id}`);
       } catch (err) {
-        console.warn(`skipped ${story.id}: ${err.message}`);
+        failed.push(story.id);
+        console.warn(`FAILED ${story.id}: ${err.message}`);
       }
     }
+  }
+
+  try {
+    await Promise.all(
+      Array.from({ length: Math.min(CONCURRENCY, stories.length) }, worker),
+    );
   } finally {
     await browser.close();
     server.close();
@@ -152,6 +200,23 @@ async function main() {
   console.log(
     `Captured ${captured}/${stories.length} screenshot(s) to ${args.out}/`,
   );
+
+  // Exit non-zero on a deadline overrun or any render failure, so the problem is
+  // surfaced as a job FAILURE (→ fix-review) rather than silently skipped or left
+  // to time out and be cancelled. The job is advisory (job-level
+  // continue-on-error), so this failure is non-blocking for the run.
+  if (deadlineHit) {
+    console.error(
+      `Capture exceeded its ${deadlineMs}ms deadline with ${queue.length} unrendered — failing fast instead of timing out.`,
+    );
+    process.exit(1);
+  }
+  if (failed.length > 0) {
+    console.error(
+      `${failed.length} stor${failed.length === 1 ? "y" : "ies"} failed to render: ${failed.join(", ")}`,
+    );
+    process.exit(1);
+  }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
