@@ -48,9 +48,11 @@ export default tseslint.config(
     },
   },
   // File-length cap — enforced by eslint's max-lines, replacing the bespoke
-  // file-length CI job + check-file-length.sh. Hard cap mirrors that script:
-  // 400 for source, 600 for tests (2× the ~200/~300 CLAUDE.md guidance). Counts
-  // every line (blanks + comments) so the cap can't be padded out.
+  // file-length CI job + check-file-length.sh. Caps: 400 for source, 600 for
+  // tests (2× the ~200/~300 AGENTS.md guidance). ESLint fails at > max, so
+  // files at exactly 400/600 lines pass (the old >= check would have failed
+  // them — intentional 1-line relaxation; no files are within that margin).
+  // Counts every line (blanks + comments) so the cap can't be padded out.
   {
     files: ["src/**/*.{ts,tsx}", "*.{ts,tsx}"],
     rules: {
