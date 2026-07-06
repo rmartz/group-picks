@@ -64,8 +64,7 @@ describe("unjoinOption atomic transaction", () => {
   describe("criterion 2: transaction update fn aborts when calling uid is the only owner", () => {
     it("returns undefined when the calling uid is the sole owner", async () => {
       let capturedUpdate:
-        | ((owners: Record<string, true> | null) => unknown)
-        | undefined;
+        ((owners: Record<string, true> | null) => unknown) | undefined;
       mockTransaction.mockImplementation(
         (update: (owners: Record<string, true> | null) => unknown) => {
           capturedUpdate = update;
@@ -80,8 +79,7 @@ describe("unjoinOption atomic transaction", () => {
 
     it("returns undefined when ownerIds snapshot is null", async () => {
       let capturedUpdate:
-        | ((owners: Record<string, true> | null) => unknown)
-        | undefined;
+        ((owners: Record<string, true> | null) => unknown) | undefined;
       mockTransaction.mockImplementation(
         (update: (owners: Record<string, true> | null) => unknown) => {
           capturedUpdate = update;
@@ -96,8 +94,7 @@ describe("unjoinOption atomic transaction", () => {
 
     it("returns undefined when ownerIds snapshot is an empty object", async () => {
       let capturedUpdate:
-        | ((owners: Record<string, true> | null) => unknown)
-        | undefined;
+        ((owners: Record<string, true> | null) => unknown) | undefined;
       mockTransaction.mockImplementation(
         (update: (owners: Record<string, true> | null) => unknown) => {
           capturedUpdate = update;
@@ -112,8 +109,7 @@ describe("unjoinOption atomic transaction", () => {
 
     it("returns owners unchanged when calling uid is not in ownerIds", async () => {
       let capturedUpdate:
-        | ((owners: Record<string, true> | null) => unknown)
-        | undefined;
+        ((owners: Record<string, true> | null) => unknown) | undefined;
       mockTransaction.mockImplementation(
         (update: (owners: Record<string, true> | null) => unknown) => {
           capturedUpdate = update;
@@ -131,8 +127,7 @@ describe("unjoinOption atomic transaction", () => {
   describe("criterion 3: transaction update fn removes uid when other owners remain", () => {
     it("returns ownerIds minus the calling uid when multiple owners exist", async () => {
       let capturedUpdate:
-        | ((owners: Record<string, true> | null) => unknown)
-        | undefined;
+        ((owners: Record<string, true> | null) => unknown) | undefined;
       mockTransaction.mockImplementation(
         (update: (owners: Record<string, true> | null) => unknown) => {
           capturedUpdate = update;
