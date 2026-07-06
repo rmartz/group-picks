@@ -161,7 +161,16 @@ jobs:
       group: storybook-screenshots-${{ github.ref }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
-    # Backstop cap; the capture step has its own shorter, bounded timeout.
+    # Job-level continue-on-error keeps this advisory job non-blocking while
+    # letting the capture step report a real `failure` (→ routed to fix-review)
+    # instead of being swallowed to neutral. A bad/hung story is usually
+    # agent-fixable, so it should surface as a failure, not a job timeout →
+    # cancellation (which requires human escalation). The capture script fails
+    # fast (its own wall-clock deadline, below) so the timeout path is a last
+    # resort, not the only way the job goes non-green.
+    continue-on-error: true
+    # Backstop cap; the capture script's deadline and the step timeout both fire
+    # first, as failures rather than a job cancellation.
     timeout-minutes: 8
     permissions:
       contents: write
@@ -181,11 +190,13 @@ jobs:
       - name: List changed files
         run: |
           git diff --name-only "${{ github.event.pull_request.base.sha }}...${{ github.sha }}" > changed-files.txt
-      # Advisory acceptance aid, never a gate: continue-on-error + a bounded
-      # timeout mean a hang or capture failure reports neutral and cannot block
-      # merge (#339). Capture reuses the Chromium installed by the setup action.
+      # No step-level continue-on-error here (unlike the setup step): a non-zero
+      # exit from the capture script must surface as a `failure` so it routes to
+      # fix-review. The job-level continue-on-error above keeps that failure
+      # non-blocking (advisory, never a merge gate — #339). The step timeout is a
+      # backstop; the script's own wall-clock deadline exits non-zero first.
+      # Capture reuses the Chromium installed by the setup action.
       - name: Capture and publish screenshots
-        continue-on-error: true
         timeout-minutes: 6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -4,6 +4,7 @@ import {
   filterStoriesByChangedFiles,
   parseArgs,
   parseChangedFiles,
+  resolveDeadlineMs,
   storiesFromIndex,
   type StorybookIndex,
   type StoryEntry,
@@ -113,5 +114,21 @@ describe("filterStoriesByChangedFiles: match stories to changed files", () => {
         "src/components/Other.stories.tsx",
       ]),
     ).toEqual([]);
+  });
+});
+
+describe("resolveDeadlineMs: wall-clock budget from the environment", () => {
+  it("uses the default when CAPTURE_DEADLINE_MS is unset", () => {
+    expect(resolveDeadlineMs({})).toBe(240_000);
+  });
+
+  it("reads a positive numeric override", () => {
+    expect(resolveDeadlineMs({ CAPTURE_DEADLINE_MS: "5000" })).toBe(5000);
+  });
+
+  it("falls back to the default for non-positive or non-numeric values", () => {
+    expect(resolveDeadlineMs({ CAPTURE_DEADLINE_MS: "0" })).toBe(240_000);
+    expect(resolveDeadlineMs({ CAPTURE_DEADLINE_MS: "-1" })).toBe(240_000);
+    expect(resolveDeadlineMs({ CAPTURE_DEADLINE_MS: "abc" })).toBe(240_000);
   });
 });

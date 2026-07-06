@@ -47,6 +47,35 @@ export default tseslint.config(
       "react-hooks/exhaustive-deps": "error",
     },
   },
+  // File-length cap — enforced by eslint's max-lines, replacing the bespoke
+  // file-length CI job + check-file-length.sh. Caps: 400 for source, 600 for
+  // tests (2× the ~200/~300 AGENTS.md guidance). ESLint fails at > max, so
+  // files at exactly 400/600 lines pass (the old >= check would have failed
+  // them — intentional 1-line relaxation; no files are within that margin).
+  // Counts every line (blanks + comments) so the cap can't be padded out.
+  {
+    files: ["src/**/*.{ts,tsx}", "*.{ts,tsx}"],
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 400, skipBlankLines: false, skipComments: false },
+      ],
+    },
+  },
+  // Test files get the higher 600 cap (last-match-wins over the 400 above).
+  {
+    files: [
+      "**/*.spec.{ts,tsx}",
+      "**/*.test.{ts,tsx}",
+      "**/*-tests/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 600, skipBlankLines: false, skipComments: false },
+      ],
+    },
+  },
   {
     files: ["**/*.{ts,tsx,js,mjs,cjs}"],
     plugins: {
