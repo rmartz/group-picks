@@ -41,8 +41,9 @@ Every page declares one `type` in its frontmatter. The canonical vocabulary for 
 
 ### Workflows
 
-- [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and schema validation.
 - [Debug login switcher](debug-login.md) — activating the preview-only debug user switcher: the `NEXT_PUBLIC_DEBUG_AUTH` flag, seeding, and verification.
+- [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and schema validation.
+- [Staging OAuth domain](staging-oauth-domain.md) — pin a stable staging alias and allowlist it in Firebase Authorized domains so Google/Apple OAuth works on previews.
 
 ## Authoring
 
