@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 concurrency:
@@ -39,7 +40,7 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: ./.github/actions/setup
@@ -52,7 +53,12 @@ jobs:
       - name: Deploy prebuilt preview
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt --json --token="$VERCEL_TOKEN" | jq -r '.url')
+          url=$(vercel deploy --prebuilt --json --token="$VERCEL_TOKEN" \
+            | jq -r 'select(.url != null) | .url' | tail -1)
+          if [ -z "$url" ]; then
+            echo "Error: failed to extract deployment URL from vercel output" >&2
+            exit 1
+          fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Preview deployed to: $url"
       - name: Post or update sticky PR comment
