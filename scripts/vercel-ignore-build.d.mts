@@ -1,3 +1,1 @@
-export declare function isDeployableTitle(
-  title: string | null | undefined,
-): boolean;
+export declare function shouldBuild(env: { VERCEL_ENV?: string }): boolean;
