@@ -28,7 +28,7 @@ describe("findUnpinnedActions: flags tag-pinned third-party actions", () => {
   });
 });
 
-describe("findUnpinnedActions: requires a version comment for Dependabot", () => {
+describe("findUnpinnedActions: requires a full major.minor.patch comment", () => {
   it("flags a SHA pin with no trailing comment", () => {
     const offenders = findUnpinnedActions(`- uses: actions/checkout@${SHA}`);
     expect(offenders).toHaveLength(1);
@@ -38,6 +38,18 @@ describe("findUnpinnedActions: requires a version comment for Dependabot", () =>
   it("flags a SHA pin whose comment is not a version", () => {
     expect(
       findUnpinnedActions(`- uses: actions/checkout@${SHA} # pinned`),
+    ).toHaveLength(1);
+  });
+
+  it("flags a major-only version comment (Dependabot is inconsistent on these)", () => {
+    expect(
+      findUnpinnedActions(`- uses: actions/checkout@${SHA} # v7`),
+    ).toHaveLength(1);
+  });
+
+  it("flags a major.minor version comment (no patch)", () => {
+    expect(
+      findUnpinnedActions(`- uses: actions/checkout@${SHA} # v7.0`),
     ).toHaveLength(1);
   });
 });

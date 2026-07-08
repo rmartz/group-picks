@@ -14,9 +14,11 @@ import { fileURLToPath } from "node:url";
 
 const SHA = /^[0-9a-f]{40}$/;
 const USES = /^\s*-?\s*uses:\s*["']?([^"'\s#]+)/;
-// A version comment Dependabot can track: `# v7.0.0`, `# v6`, `# 4.2.2`, … —
-// a `#` followed by an optional `v` and a dotted version number.
-const VERSION_COMMENT = /#\s*v?\d+(\.\d+)*/;
+// A version comment Dependabot can reliably track: a full `major.minor.patch`,
+// e.g. `# v7.0.0` (optional leading `v`, optional prerelease/build suffix).
+// Partial versions like `# v6` or `# v7.0` are rejected — Dependabot's handling
+// of non-full-semver comments is inconsistent, so we require the full triple.
+const VERSION_COMMENT = /#\s*v?\d+\.\d+\.\d+/;
 
 // A `uses:` value is exempt from SHA-pinning when it is a local action
 // (`./…` / `../…`), a Docker image ref (`docker://…`), or has no `@ref` at all
@@ -51,7 +53,7 @@ export function findUnpinnedActions(content) {
         line,
         uses: value,
         reason:
-          "SHA pin needs a trailing version comment (e.g. `# v7.0.0`) for Dependabot",
+          "SHA pin needs a trailing full major.minor.patch version comment (e.g. `# v7.0.0`) for Dependabot",
       });
     }
   });
@@ -74,12 +76,12 @@ function main() {
   }
   if (failures.length === 0) {
     console.log(
-      `${root}: all third-party actions are pinned to a commit SHA with a version comment.`,
+      `${root}: all third-party actions are pinned to a commit SHA with a full-semver version comment.`,
     );
     return;
   }
   console.error(
-    `${root}: pin third-party actions to a 40-char commit SHA with a version comment (e.g. "actions/checkout@9c091bb… # v7.0.0", not "@v7"):`,
+    `${root}: pin third-party actions to a 40-char commit SHA with a full major.minor.patch version comment (e.g. "actions/checkout@9c091bb… # v7.0.0", not "@v7" or "# v7"):`,
   );
   for (const { file, line, uses, reason } of failures) {
     console.error(`  ${file}:${line}: ${uses} — ${reason}`);
