@@ -1,0 +1,28 @@
+name: Action pins
+
+# Runs only when a workflow or composite action changes. Enforces that every
+# third-party GitHub Action is pinned to a commit SHA (not a mutable tag), the
+# supply-chain hardening from #385 — a ratchet so a later PR can't reintroduce a
+# tag-pinned action. Mirrors package-pins.yml (which enforces full-semver
+# package.json pins).
+on:
+  pull_request:
+    paths:
+      - ".github/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/**"
+
+permissions:
+  contents: read
+
+jobs:
+  check-action-pins:
+    name: Check action pins
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: ./.github/actions/setup
+      - run: pnpm pins:actions

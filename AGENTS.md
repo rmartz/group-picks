@@ -48,6 +48,10 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - Pushing config to Vercel and pulling a local `.env.local` will be handled by the `envctl` CLI (usage TBD) — a local-only tool, intentionally not wired into CI. Until it lands, use the `vercel` CLI directly. The previous `vercel-deploy-scripts` tooling (`sync-env` / `generate-local-env`) has been removed.
 - There is no secret scanning at present: the VDS-based CI secret scan and the local pre-commit gitleaks scan have both been removed. Secret scanning will return under the new env-management design.
 
+## Continuous Integration
+
+- **Pin every third-party GitHub Action to a full 40-char commit SHA, not a mutable tag** (e.g. `actions/checkout@9c091bb… # v7.0.0`, not `@v7`). A tag can be repointed at attacker code (supply-chain attack); a SHA is immutable. The trailing `# vX.Y.Z` comment lets Dependabot keep the SHA current. Enforced in CI by `.github/workflows/action-pins.yml` (`pnpm pins:actions` → `scripts/check-action-pins.mjs`), the parallel to the full-semver `package.json` pin check. Local `./…` composite actions need no pin.
+
 ## TypeScript
 
 - Strict mode throughout. No `any` types. No `@ts-ignore`.
