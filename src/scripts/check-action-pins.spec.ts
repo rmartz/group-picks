@@ -7,7 +7,8 @@ const SHA = "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0";
 describe("findUnpinnedActions: flags tag-pinned third-party actions", () => {
   it("flags a bare major tag", () => {
     const offenders = findUnpinnedActions("      - uses: actions/checkout@v7");
-    expect(offenders).toEqual([{ line: 1, uses: "actions/checkout@v7" }]);
+    expect(offenders).toHaveLength(1);
+    expect(offenders[0]?.uses).toBe("actions/checkout@v7");
   });
 
   it("flags a full-semver tag (still mutable, still flagged)", () => {
@@ -27,16 +28,32 @@ describe("findUnpinnedActions: flags tag-pinned third-party actions", () => {
   });
 });
 
-describe("findUnpinnedActions: accepts SHA-pinned actions", () => {
+describe("findUnpinnedActions: requires a version comment for Dependabot", () => {
+  it("flags a SHA pin with no trailing comment", () => {
+    const offenders = findUnpinnedActions(`- uses: actions/checkout@${SHA}`);
+    expect(offenders).toHaveLength(1);
+    expect(offenders[0]?.reason).toMatch(/version comment/);
+  });
+
+  it("flags a SHA pin whose comment is not a version", () => {
+    expect(
+      findUnpinnedActions(`- uses: actions/checkout@${SHA} # pinned`),
+    ).toHaveLength(1);
+  });
+});
+
+describe("findUnpinnedActions: accepts SHA-pinned actions with a version comment", () => {
   it("accepts a 40-char SHA with a version comment", () => {
     expect(
       findUnpinnedActions(`      - uses: actions/checkout@${SHA} # v7.0.0`),
     ).toEqual([]);
   });
 
-  it("accepts a SHA on a reusable-workflow ref", () => {
+  it("accepts a SHA on a reusable-workflow ref with a version comment", () => {
     expect(
-      findUnpinnedActions(`- uses: owner/repo/.github/workflows/x.yml@${SHA}`),
+      findUnpinnedActions(
+        `- uses: owner/repo/.github/workflows/x.yml@${SHA} # v1.2.3`,
+      ),
     ).toEqual([]);
   });
 });
