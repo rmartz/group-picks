@@ -16,12 +16,49 @@ updates:
     # bumps match no group and are raised as individual PRs, since they are the
     # most likely to need a code change and warrant isolated review.
     groups:
+      # Version-locked families — packages whose versions move together, so an
+      # update to one is broken without the rest (a `react` bump without
+      # `react-dom`, one `@storybook/*` without the others). Grouped with
+      # *unrestricted* update-types (major AND minor AND patch) so the whole
+      # family always bumps atomically in one PR. Listed first, and ordered so
+      # first-match precedence resolves the overlaps: storybook before eslint
+      # (catches `eslint-plugin-storybook`) and before vite (catches
+      # `@storybook/*-vite*`); prettier's `prettier-plugin-*` still catches
+      # `prettier-plugin-tailwindcss` (the tailwind patterns don't match it).
+      storybook:
+        patterns:
+          - "storybook"
+          - "@storybook/*"
+          - "eslint-plugin-storybook"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      vite:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vitest"
+          - "@vitest/*"
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/js"
+          - "typescript-eslint"
+          - "eslint-plugin-react-hooks"
+          - "eslint-plugin-simple-import-sort"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
       # Prettier (and its plugins) is special-cased: a minor bump can change
       # formatting output and force code changes, so isolate major + minor bumps
       # into their own PR for focused review. A trivial patch bump is not in this
       # group's update-types, so it falls through to dev-dependencies and stays
-      # grouped with other low-risk bumps. Listed first to win group-assignment
-      # precedence (a dependency joins the first group whose patterns match).
+      # grouped with other low-risk bumps. After the version-locked families
+      # above so those win precedence, but before the catch-alls below.
       prettier:
         patterns:
           - "prettier"
