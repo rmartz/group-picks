@@ -16,21 +16,32 @@ updates:
     # bumps match no group and are raised as individual PRs, since they are the
     # most likely to need a code change and warrant isolated review.
     groups:
-      # Version-locked families — packages whose versions move together, so an
-      # update to one is broken without the rest (a `react` bump without
-      # `react-dom`, one `@storybook/*` without the others). Grouped with
-      # *unrestricted* update-types (major AND minor AND patch) so the whole
-      # family always bumps atomically in one PR. Listed first, and ordered so
-      # first-match precedence resolves the overlaps: storybook before eslint
-      # (catches `eslint-plugin-storybook`) and before vite (catches
+      # Version-locked families — packages whose versions move together, so a
+      # major to one is broken without the rest (a `react` major without
+      # `react-dom`, one `@storybook/*` without the others). Listed first, and
+      # ordered so first-match precedence resolves the overlaps: storybook before
+      # eslint (catches `eslint-plugin-storybook`) and before vite (catches
       # `@storybook/*-vite*`); prettier's `prettier-plugin-*` still catches
       # `prettier-plugin-tailwindcss` (the tailwind patterns don't match it).
+      #
+      # Same-scope families (all dev, or all prod) restrict to `major`: their
+      # minor/patch bumps already move in lockstep inside the dev-dependencies /
+      # production-dependencies catch-alls below, so a major is the only bump the
+      # catch-alls exclude — i.e. the only case that would fragment the family
+      # into standalone PRs. Restricting to `major` keeps majors atomic while
+      # letting minor/patch rejoin the big weekly batch (fewer PRs). Only react
+      # *crosses* dev↔prod, so it keeps all update-types (see its note).
       storybook:
         patterns:
           - "storybook"
           - "@storybook/*"
           - "eslint-plugin-storybook"
+        update-types:
+          - "major"
       react:
+        # Unrestricted (major + minor + patch): react spans prod (`react`,
+        # `react-dom`) and dev (`@types/react*`), so its minor/patch would
+        # otherwise scatter across the two catch-alls instead of staying atomic.
         patterns:
           - "react"
           - "react-dom"
@@ -42,6 +53,8 @@ updates:
           - "@vitejs/*"
           - "vitest"
           - "@vitest/*"
+        update-types:
+          - "major"
       eslint:
         patterns:
           - "eslint"
@@ -49,10 +62,14 @@ updates:
           - "typescript-eslint"
           - "eslint-plugin-react-hooks"
           - "eslint-plugin-simple-import-sort"
+        update-types:
+          - "major"
       tailwind:
         patterns:
           - "tailwindcss"
           - "@tailwindcss/*"
+        update-types:
+          - "major"
       # Prettier (and its plugins) is special-cased: a minor bump can change
       # formatting output and force code changes, so isolate major + minor bumps
       # into their own PR for focused review. A trivial patch bump is not in this
