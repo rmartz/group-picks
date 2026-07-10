@@ -83,6 +83,18 @@ updates:
         update-types:
           - "major"
           - "minor"
+      # TypeScript (the language) is a more significant change than an ordinary
+      # dependency bump — a major or minor can shift type-checking behaviour
+      # repo-wide — so isolate its major + minor into their own PR for
+      # visibility. A patch falls through to dev-dependencies with the low-risk
+      # batch. `typescript` is an exact match, so it never catches
+      # `typescript-eslint` (that stays in the eslint family).
+      typescript:
+        patterns:
+          - "typescript"
+        update-types:
+          - "major"
+          - "minor"
       dev-dependencies:
         dependency-type: development
         update-types:
