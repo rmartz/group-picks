@@ -18,6 +18,8 @@ const meta = {
   args: {
     snapPick: makeSnapPick({ title: "Friday Lunch" }),
     groupId: "group-1",
+    groupName: "Lunch Crew",
+    categoryName: "Weekday Meals",
     currentUserId: "user-1",
     votedPairKeys: [],
     historyEntries: [

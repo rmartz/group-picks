@@ -96,6 +96,8 @@ export default async function SnapPickDetailPage({
     <SnapPickDetailView
       snapPick={snapPick}
       groupId={id}
+      groupName={group.name}
+      categoryName={category.name}
       currentUserId={uid}
       options={activeOptions}
       activation={activation}
