@@ -4,10 +4,13 @@
 // member still needs to vote on. Kept free of Firebase and React so it can be
 // unit-tested in isolation and shared by the API route and the voting UI.
 //
-// The seeding is intentionally simple for #259: options are compared in pool
-// order (round-robin), which surfaces every pair exactly once. The preference
-// inference engine (#260) will later reorder this queue to prioritise the most
-// informative matchups; this module exposes the queue it will refine.
+// The base seeding is intentionally simple: options are compared in pool order
+// (round-robin), which surfaces every pair exactly once. The #260 preference
+// engine layers on top via relevantMatchups, which focuses the pool on the
+// contested set (pruning clearly-low-relevance options) before pairing.
+
+import { focusRelevantOptions } from "@/lib/snap-pick-inference";
+import type { SnapPickRatings } from "@/lib/types/snap-pick";
 
 // An unordered pairing of two options. `a` is always the option that sorts first
 // so a pair has one canonical representation regardless of presentation order.
@@ -50,5 +53,22 @@ export function remainingMatchups(
   const cast = new Set(castPairKeys);
   return allMatchups(optionIds).filter(
     (pair) => !cast.has(pairKey(pair.a, pair.b)),
+  );
+}
+
+// The member's remaining queue focused by their global preference model: the
+// #260 relevance layer prunes clearly-low-relevance options and orders the rest
+// most-relevant first, so matchups concentrate on the contested set rather than
+// spending votes on options the member broadly doesn't care about. Cold-start
+// options (no history) fall back to neutral and stay eligible. With an empty
+// model every option is neutral, so this reduces to remainingMatchups.
+export function relevantMatchups(
+  optionIds: string[],
+  ratings: SnapPickRatings,
+  castPairKeys: Iterable<string>,
+): SnapPickPair[] {
+  return remainingMatchups(
+    focusRelevantOptions(optionIds, ratings),
+    castPairKeys,
   );
 }
