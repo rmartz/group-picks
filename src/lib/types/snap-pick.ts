@@ -25,6 +25,13 @@ export interface SnapPickActivation {
   startedBy: string;
 }
 
+// A Snap Pick together with one of its currently-running activations. Surfaced
+// on the group activity view so members can jump straight into an open vote.
+export interface ActiveSnapPickActivation {
+  snapPick: SnapPick;
+  activation: SnapPickActivation;
+}
+
 // A resolved entry in a snap pick's history timeline: one past (closed)
 // activation with its winning option's title and how many members voted. The
 // winner title is resolved from the option pool at read time (options are
