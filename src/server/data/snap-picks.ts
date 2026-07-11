@@ -170,3 +170,17 @@ export async function getSnapPickOptions(
     ? options
     : options.filter((option) => option.removedAt === undefined);
 }
+
+export async function getSnapPickOptionById(
+  snapPickId: string,
+  optionId: string,
+): Promise<SnapPickOption | undefined> {
+  const db = getDatabase(getAdminApp());
+  const snap = await db
+    .ref(`snap-pick-options/${snapPickId}/${optionId}`)
+    .get();
+
+  if (!snap.exists()) return undefined;
+
+  return firebaseToSnapPickOption(optionId, snap.val());
+}

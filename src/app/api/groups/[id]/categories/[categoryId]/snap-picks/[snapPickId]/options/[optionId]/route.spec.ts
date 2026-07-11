@@ -4,12 +4,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockGetVerifiedUid,
   mockAuthorizeSnapPickMember,
-  mockGetSnapPickOptions,
+  mockGetSnapPickOptionById,
   mockRemoveSnapPickOption,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockAuthorizeSnapPickMember: vi.fn(),
-  mockGetSnapPickOptions: vi.fn(),
+  mockGetSnapPickOptionById: vi.fn(),
   mockRemoveSnapPickOption: vi.fn(),
 }));
 
@@ -22,7 +22,7 @@ vi.mock("@/server/utils/snap-pick-auth", () => ({
 }));
 
 vi.mock("@/server/data/snap-picks", () => ({
-  getSnapPickOptions: mockGetSnapPickOptions,
+  getSnapPickOptionById: mockGetSnapPickOptionById,
   removeSnapPickOption: mockRemoveSnapPickOption,
 }));
 
@@ -49,7 +49,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockGetVerifiedUid.mockResolvedValue("user-1");
   mockAuthorizeSnapPickMember.mockResolvedValue(undefined);
-  mockGetSnapPickOptions.mockResolvedValue([makeOption()]);
+  mockGetSnapPickOptionById.mockResolvedValue(makeOption());
   mockRemoveSnapPickOption.mockResolvedValue({
     removedAt: new Date("2025-01-20T00:00:00Z"),
   });
@@ -60,13 +60,17 @@ describe("DELETE /api/.../snap-picks/[snapPickId]/options/[optionId]", () => {
     const response = await DELETE(new Request("http://localhost"), { params });
 
     expect(response.status).toBe(200);
+    expect(mockGetSnapPickOptionById).toHaveBeenCalledWith(
+      "snap-1",
+      "option-1",
+    );
     expect(mockRemoveSnapPickOption).toHaveBeenCalledWith("snap-1", "option-1");
   });
 
   it("returns 403 when the caller does not own the option", async () => {
-    mockGetSnapPickOptions.mockResolvedValue([
+    mockGetSnapPickOptionById.mockResolvedValue(
       makeOption({ addedBy: "someone-else" }),
-    ]);
+    );
 
     const response = await DELETE(new Request("http://localhost"), { params });
 
@@ -75,7 +79,7 @@ describe("DELETE /api/.../snap-picks/[snapPickId]/options/[optionId]", () => {
   });
 
   it("returns 404 when the option does not exist", async () => {
-    mockGetSnapPickOptions.mockResolvedValue([]);
+    mockGetSnapPickOptionById.mockResolvedValue(undefined);
 
     const response = await DELETE(new Request("http://localhost"), { params });
 
@@ -83,9 +87,9 @@ describe("DELETE /api/.../snap-picks/[snapPickId]/options/[optionId]", () => {
   });
 
   it("returns 404 when the option is already removed", async () => {
-    mockGetSnapPickOptions.mockResolvedValue([
+    mockGetSnapPickOptionById.mockResolvedValue(
       makeOption({ removedAt: new Date("2025-01-15T00:00:00Z") }),
-    ]);
+    );
 
     const response = await DELETE(new Request("http://localhost"), { params });
 
