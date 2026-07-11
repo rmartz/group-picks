@@ -10,8 +10,8 @@ import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
 import { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
+import type { ActiveSnapPickActivation } from "@/lib/types/snap-pick";
 
-import type { ActiveSnapPickActivationItem } from "./ActiveSnapPickList";
 import { ActiveSnapPickList } from "./ActiveSnapPickList";
 import { CategoryList } from "./categories/CategoryList";
 import { GROUP_DETAIL_COPY } from "./copy";
@@ -35,7 +35,7 @@ interface GroupDetailViewProps {
   initialInviteMode: InviteMode;
   memberNames: MemberName[];
   picksByCategory: Record<string, GroupPick[]>;
-  activeSnapPicks: ActiveSnapPickActivationItem[];
+  activeSnapPicks: ActiveSnapPickActivation[];
   onMakeAdmin?: (uid: string) => void;
   onRevokeAdmin?: (uid: string) => void;
   onTogglePicksRestricted: () => void;

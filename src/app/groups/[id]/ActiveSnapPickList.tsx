@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { Category } from "@/lib/types/category";
-import type { SnapPick, SnapPickActivation } from "@/lib/types/snap-pick";
+import type { ActiveSnapPickActivation } from "@/lib/types/snap-pick";
 
 import { ACTIVE_SNAP_PICK_LIST_COPY } from "./ActiveSnapPickList.copy";
 import {
@@ -11,14 +11,9 @@ import {
   ActiveSnapPickListView,
 } from "./ActiveSnapPickListView";
 
-export interface ActiveSnapPickActivationItem {
-  snapPick: SnapPick;
-  activation: SnapPickActivation;
-}
-
 interface ActiveSnapPickListProps {
   groupId: string;
-  activations: ActiveSnapPickActivationItem[];
+  activations: ActiveSnapPickActivation[];
   categories: Category[];
 }
 
