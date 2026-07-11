@@ -98,6 +98,18 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
     );
   });
 
+  it("returns 201 even when the preference model update throws", async () => {
+    mockUpdateSnapPickPreference.mockRejectedValue(new Error("Firebase error"));
+
+    const response = await POST(
+      makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),
+      { params },
+    );
+
+    expect(response.status).toBe(201);
+    expect(mockRecordSnapPickVote).toHaveBeenCalled();
+  });
+
   it("does not touch the preference model when the vote is rejected", async () => {
     mockGetOpenActivation.mockResolvedValue(undefined);
 
