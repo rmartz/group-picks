@@ -9,6 +9,7 @@ import {
   snapPickToFirebase,
 } from "@/lib/firebase/schema/snap-pick";
 import type {
+  ActiveSnapPickActivation,
   SnapPick,
   SnapPickActivation,
   SnapPickOption,
@@ -69,13 +70,6 @@ export async function getSnapPickActivations(
   return Object.entries(data).map(([id, activationData]) =>
     firebaseToSnapPickActivation(id, activationData),
   );
-}
-
-// A Snap Pick together with one of its currently-running activations. Surfaced
-// on the group activity view so members can jump straight into an open vote.
-export interface ActiveSnapPickActivation {
-  snapPick: SnapPick;
-  activation: SnapPickActivation;
 }
 
 // An activation is "active" when it has not been explicitly closed and its
