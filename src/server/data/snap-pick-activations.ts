@@ -98,6 +98,24 @@ export async function getSnapPickVotesByMember(
   return snapshotToVotes(snap);
 }
 
+// Reads the votes for many activations in a single query, keyed by activation
+// id. Backs the history timeline's per-activation participant counts without
+// fanning out to one read per closed activation: the whole snap-pick-votes node
+// is fetched once and grouped in memory. An empty input skips the read (a snap
+// pick with no closed runs needs no votes at all).
+export async function getSnapPickVotesByActivations(
+  activationIds: string[],
+): Promise<Map<string, SnapPickVote[]>> {
+  if (activationIds.length === 0) return new Map();
+
+  const db = getDatabase(getAdminApp());
+  const snap = await db.ref("snap-pick-votes").get();
+
+  return new Map(
+    activationIds.map((id) => [id, snapshotToVotes(snap.child(id))]),
+  );
+}
+
 // Returns the single open (not-yet-closed) activation for a snap pick, if any.
 export async function getOpenActivation(
   snapPickId: string,
