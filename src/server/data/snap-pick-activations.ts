@@ -81,7 +81,7 @@ export async function getSnapPickVotes(
 }
 
 // Reads only the votes a single member cast in an activation, filtering at the
-// Firestore query layer so only their votes cross the network. Used for the
+// Realtime Database query layer so only their votes cross the network. Used for the
 // member's own resume queue and the duplicate-vote guard, which never need any
 // other member's votes.
 export async function getSnapPickVotesByMember(
