@@ -1,4 +1,4 @@
-import { getDatabase } from "firebase-admin/database";
+import { type DataSnapshot, getDatabase } from "firebase-admin/database";
 
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
@@ -59,18 +59,43 @@ export async function recordSnapPickVote(
   return { id, votedAt, pairKey: key };
 }
 
-export async function getSnapPickVotes(
-  activationId: string,
-): Promise<SnapPickVote[]> {
-  const db = getDatabase(getAdminApp());
-  const snap = await db.ref(`snap-pick-votes/${activationId}`).get();
-
+function snapshotToVotes(snap: DataSnapshot): SnapPickVote[] {
   if (!snap.exists()) return [];
 
   const data = snap.val() as Record<string, unknown>;
   return Object.entries(data).map(([id, voteData]) =>
     firebaseToSnapPickVote(id, voteData),
   );
+}
+
+// Reads every vote cast in an activation. Used where the full set is needed —
+// winner computation and per-activation participant counts — since those must
+// aggregate across all members.
+export async function getSnapPickVotes(
+  activationId: string,
+): Promise<SnapPickVote[]> {
+  const db = getDatabase(getAdminApp());
+  const snap = await db.ref(`snap-pick-votes/${activationId}`).get();
+
+  return snapshotToVotes(snap);
+}
+
+// Reads only the votes a single member cast in an activation, filtering at the
+// Firestore query layer so only their votes cross the network. Used for the
+// member's own resume queue and the duplicate-vote guard, which never need any
+// other member's votes.
+export async function getSnapPickVotesByMember(
+  activationId: string,
+  votedBy: string,
+): Promise<SnapPickVote[]> {
+  const db = getDatabase(getAdminApp());
+  const snap = await db
+    .ref(`snap-pick-votes/${activationId}`)
+    .orderByChild("votedBy")
+    .equalTo(votedBy)
+    .get();
+
+  return snapshotToVotes(snap);
 }
 
 // Returns the single open (not-yet-closed) activation for a snap pick, if any.
