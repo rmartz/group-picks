@@ -67,12 +67,16 @@ export function isPastDeadline(closesAt: Date, now: Date): boolean {
 
 // Tallies head-to-head wins per option and returns the option id with the most
 // wins. `optionIds` establishes a stable order used to break ties (earliest
-// option wins) and to keep the result deterministic. Returns undefined when
-// there are no votes and no options to fall back on.
+// option wins) and to keep the result deterministic. Returns undefined when no
+// votes were cast: a run that closed without a single vote has no winner, and
+// returning the first option by tie-break order would misrepresent that unvoted
+// run as a decided one.
 export function computeSnapPickWinner(
   votes: SnapPickVote[],
   optionIds: string[],
 ): string | undefined {
+  if (votes.length === 0) return undefined;
+
   // Preserve option order for deterministic tie-breaking: options not present in
   // `optionIds` (e.g. removed after voting) are appended in first-seen vote order.
   const orderedIds = [...optionIds];

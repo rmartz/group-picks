@@ -12,6 +12,6 @@ export const SNAP_PICK_ACTIVATION_COPY = {
   inProgressHeading: "Voting is open",
   closesAtPrefix: "Closes",
   winnerHeading: "Winner",
-  noWinnerMessage: "No winner was recorded for the last run.",
+  noVotesMessage: "No votes cast — no winner this round.",
   errorDefault: "Something went wrong. Please try again.",
 } as const;
