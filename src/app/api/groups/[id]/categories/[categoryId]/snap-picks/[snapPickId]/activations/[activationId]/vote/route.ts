@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { pairKey } from "@/lib/snap-pick-pairing";
 import {
   getOpenActivation,
-  getSnapPickVotes,
+  getSnapPickVotesByMember,
   recordSnapPickVote,
 } from "@/server/data/snap-pick-activations";
 import { getVerifiedUid } from "@/server/utils/auth";
@@ -73,10 +73,8 @@ export async function POST(request: Request, { params }: RouteParams) {
   // Reject a second vote on the same matchup from the same member: the pair is
   // already decided for them, so accepting another would double-count it.
   const key = pairKey(parsed.winnerId, parsed.loserId);
-  const votes = await getSnapPickVotes(activationId);
-  const alreadyVoted = votes.some(
-    (vote) => vote.votedBy === uid && vote.pairKey === key,
-  );
+  const memberVotes = await getSnapPickVotesByMember(activationId, uid);
+  const alreadyVoted = memberVotes.some((vote) => vote.pairKey === key);
   if (alreadyVoted) {
     return NextResponse.json(
       { error: "You have already voted on this matchup" },

@@ -5,6 +5,7 @@ import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import {
   getSnapPickVotes,
+  getSnapPickVotesByMember,
   resolveActiveActivation,
 } from "@/server/data/snap-pick-activations";
 import {
@@ -57,12 +58,10 @@ export default async function SnapPickDetailPage({
   // screen resumes from their own remaining matchup queue rather than restarting.
   const activationInProgress =
     activation !== undefined && activation.closedAt === undefined;
-  const votes = activationInProgress
-    ? await getSnapPickVotes(activation.id)
+  const memberVotes = activationInProgress
+    ? await getSnapPickVotesByMember(activation.id, uid)
     : [];
-  const votedPairKeys = votes
-    .filter((vote) => vote.votedBy === uid)
-    .map((vote) => vote.pairKey);
+  const votedPairKeys = memberVotes.map((vote) => vote.pairKey);
 
   // resolveActiveActivation may have just lazily closed the previously-open run
   // on this read; getClosedActivations ran concurrently and would miss it, so
