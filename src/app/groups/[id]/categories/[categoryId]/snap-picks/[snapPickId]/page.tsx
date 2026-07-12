@@ -8,6 +8,7 @@ import {
   getSnapPickVotesByMember,
   resolveActiveActivation,
 } from "@/server/data/snap-pick-activations";
+import { getSnapPickPreferences } from "@/server/data/snap-pick-preferences";
 import {
   getClosedActivations,
   getSnapPickById,
@@ -54,13 +55,16 @@ export default async function SnapPickDetailPage({
     (option) => option.removedAt === undefined,
   );
 
-  // While a run is open, load the current member's cast pairs so the voting
-  // screen resumes from their own remaining matchup queue rather than restarting.
   const activationInProgress =
     activation !== undefined && activation.closedAt === undefined;
-  const memberVotes = activationInProgress
-    ? await getSnapPickVotesByMember(activation.id, uid)
-    : [];
+  // While a run is open, load the member's cast pairs (to resume their queue) and
+  // their global preference model (to focus the matchup pool on relevant options).
+  const [memberVotes, ratings] = activationInProgress
+    ? await Promise.all([
+        getSnapPickVotesByMember(activation.id, uid),
+        getSnapPickPreferences(snapPickId, uid),
+      ])
+    : [[], {}];
   const votedPairKeys = memberVotes.map((vote) => vote.pairKey);
 
   // resolveActiveActivation may have just lazily closed the previously-open run
@@ -100,6 +104,7 @@ export default async function SnapPickDetailPage({
       activation={activation}
       winnerTitle={winnerTitle}
       votedPairKeys={votedPairKeys}
+      ratings={ratings}
       historyEntries={historyEntries}
     />
   );
