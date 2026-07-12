@@ -100,11 +100,19 @@ describe("Winner display after close", () => {
     expect(screen.getByText("Tacos")).toBeDefined();
   });
 
-  it("shows a no-winner message when a closed run recorded none", () => {
+  it("shows an explicit no-votes message when a closed run had no winner", () => {
     renderView({ hasClosedRun: true, lastWinnerTitle: undefined });
 
     expect(
-      screen.getByText(SNAP_PICK_ACTIVATION_COPY.noWinnerMessage),
+      screen.getByText(SNAP_PICK_ACTIVATION_COPY.noVotesMessage),
     ).toBeDefined();
+  });
+
+  it("omits the winner heading when a closed run had no votes", () => {
+    renderView({ hasClosedRun: true, lastWinnerTitle: undefined });
+
+    expect(
+      screen.queryByText(SNAP_PICK_ACTIVATION_COPY.winnerHeading),
+    ).toBeNull();
   });
 });

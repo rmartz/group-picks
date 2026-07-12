@@ -115,8 +115,8 @@ describe("computeSnapPickWinner", () => {
     );
   });
 
-  it("returns the first option when there are no votes", () => {
-    expect(computeSnapPickWinner([], ["opt-x", "opt-y"])).toBe("opt-x");
+  it("returns undefined when there are no votes even if options exist", () => {
+    expect(computeSnapPickWinner([], ["opt-x", "opt-y"])).toBeUndefined();
   });
 
   it("returns undefined when there are no votes and no options", () => {
