@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { allMatchups, pairKey, remainingMatchups } from "./snap-pick-pairing";
+import {
+  allMatchups,
+  pairKey,
+  relevantMatchups,
+  remainingMatchups,
+} from "./snap-pick-pairing";
 
 describe("pairKey", () => {
   it("is identical regardless of argument order", () => {
@@ -60,5 +65,42 @@ describe("remainingMatchups", () => {
     const remaining = remainingMatchups(["a", "b"], [pairKey("a", "gone")]);
 
     expect(remaining).toEqual([{ a: "a", b: "b" }]);
+  });
+});
+
+describe("relevantMatchups", () => {
+  it("drops matchups for a clearly-low-relevance option", () => {
+    const ratings = {
+      a: { rating: 1200, games: 8 },
+      b: { rating: 1150, games: 8 },
+      c: { rating: 850, games: 8 },
+    };
+
+    const matchups = relevantMatchups(["a", "b", "c"], ratings, []);
+
+    expect(matchups).toEqual([{ a: "a", b: "b" }]);
+  });
+
+  it("keeps a cold-start option in the queue alongside rated ones", () => {
+    const ratings = { a: { rating: 1300, games: 8 } };
+
+    const matchups = relevantMatchups(["a", "b"], ratings, []);
+
+    expect(matchups).toEqual([{ a: "a", b: "b" }]);
+  });
+
+  it("falls back to the full round-robin when the model is empty", () => {
+    expect(relevantMatchups(["a", "b", "c"], {}, [])).toEqual(
+      allMatchups(["a", "b", "c"]),
+    );
+  });
+
+  it("still excludes pairs the member has already voted on", () => {
+    const matchups = relevantMatchups(["a", "b", "c"], {}, [pairKey("a", "b")]);
+
+    expect(matchups).toEqual([
+      { a: "a", b: "c" },
+      { a: "b", b: "c" },
+    ]);
   });
 });

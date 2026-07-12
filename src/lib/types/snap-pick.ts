@@ -25,6 +25,13 @@ export interface SnapPickActivation {
   startedBy: string;
 }
 
+// A Snap Pick together with one of its currently-running activations. Surfaced
+// on the group activity view so members can jump straight into an open vote.
+export interface ActiveSnapPickActivation {
+  snapPick: SnapPick;
+  activation: SnapPickActivation;
+}
+
 // A resolved entry in a snap pick's history timeline: one past (closed)
 // activation with its winning option's title and how many members voted. The
 // winner title is resolved from the option pool at read time (options are
@@ -36,6 +43,21 @@ export interface SnapPickHistoryEntry {
   winnerTitle?: string;
   participantCount: number;
 }
+
+// One option's learned strength in a user's global preference model for a Snap
+// Pick (see snap-pick-inference). `rating` is the Elo-style scalar — higher means
+// the user broadly prefers this option across every past activation; `games` is
+// how many votes have touched it, the uncertainty signal (0 = cold-start, no
+// history, so the rating is the neutral default and carries no evidence yet).
+export interface SnapPickRating {
+  rating: number;
+  games: number;
+}
+
+// A user's whole global preference model for one Snap Pick: one rating per
+// option, keyed by optionId. Stored O(N) at snap-pick-preferences/{snapPickId}/
+// {userId} — not the O(N²) pairwise matrix. Absent keys are cold-start (neutral).
+export type SnapPickRatings = Record<string, SnapPickRating>;
 
 // A single head-to-head matchup result recorded during an activation. Votes are
 // stored under snap-pick-votes/{activationId}/{voteId} and are the source the

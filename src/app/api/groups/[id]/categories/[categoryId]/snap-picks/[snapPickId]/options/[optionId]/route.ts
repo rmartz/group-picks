@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
-  getSnapPickOptions,
+  getSnapPickOptionById,
   removeSnapPickOption,
 } from "@/server/data/snap-picks";
 import { getVerifiedUid } from "@/server/utils/auth";
@@ -31,8 +31,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   );
   if (denied) return denied;
 
-  const options = await getSnapPickOptions(snapPickId, true);
-  const option = options.find((o) => o.id === optionId);
+  const option = await getSnapPickOptionById(snapPickId, optionId);
 
   if (!option || option.removedAt !== undefined) {
     return NextResponse.json({ error: "Option not found" }, { status: 404 });
