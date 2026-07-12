@@ -4,14 +4,16 @@ const {
   mockGetVerifiedUid,
   mockAuthorizeSnapPickMember,
   mockGetOpenActivation,
-  mockGetSnapPickVotes,
+  mockGetSnapPickVotesByMember,
   mockRecordSnapPickVote,
+  mockUpdateSnapPickPreference,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockAuthorizeSnapPickMember: vi.fn(),
   mockGetOpenActivation: vi.fn(),
-  mockGetSnapPickVotes: vi.fn(),
+  mockGetSnapPickVotesByMember: vi.fn(),
   mockRecordSnapPickVote: vi.fn(),
+  mockUpdateSnapPickPreference: vi.fn(),
 }));
 
 vi.mock("@/server/utils/auth", () => ({
@@ -24,8 +26,12 @@ vi.mock("@/server/utils/snap-pick-auth", () => ({
 
 vi.mock("@/server/data/snap-pick-activations", () => ({
   getOpenActivation: mockGetOpenActivation,
-  getSnapPickVotes: mockGetSnapPickVotes,
+  getSnapPickVotesByMember: mockGetSnapPickVotesByMember,
   recordSnapPickVote: mockRecordSnapPickVote,
+}));
+
+vi.mock("@/server/data/snap-pick-preferences", () => ({
+  updateSnapPickPreference: mockUpdateSnapPickPreference,
 }));
 
 const { POST } = await import("./route");
@@ -53,12 +59,13 @@ beforeEach(() => {
   mockGetVerifiedUid.mockResolvedValue("user-1");
   mockAuthorizeSnapPickMember.mockResolvedValue(undefined);
   mockGetOpenActivation.mockResolvedValue({ id: "act-1" });
-  mockGetSnapPickVotes.mockResolvedValue([]);
+  mockGetSnapPickVotesByMember.mockResolvedValue([]);
   mockRecordSnapPickVote.mockResolvedValue({
     id: "vote-new",
     votedAt: new Date("2025-03-21T11:00:00.000Z"),
     pairKey: "opt-a_opt-b",
   });
+  mockUpdateSnapPickPreference.mockResolvedValue(undefined);
 });
 
 describe("POST /api/.../activations/[activationId]/vote", () => {
@@ -76,6 +83,41 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
       loserId: "opt-b",
       votedBy: "user-1",
     });
+  });
+
+  it("folds the cast vote into the member's global preference model", async () => {
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockUpdateSnapPickPreference).toHaveBeenCalledWith(
+      "snap-1",
+      "user-1",
+      "opt-a",
+      "opt-b",
+    );
+  });
+
+  it("returns 201 even when the preference model update throws", async () => {
+    mockUpdateSnapPickPreference.mockRejectedValue(new Error("Firebase error"));
+
+    const response = await POST(
+      makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),
+      { params },
+    );
+
+    expect(response.status).toBe(201);
+    expect(mockRecordSnapPickVote).toHaveBeenCalled();
+  });
+
+  it("does not touch the preference model when the vote is rejected", async () => {
+    mockGetOpenActivation.mockResolvedValue(undefined);
+
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockUpdateSnapPickPreference).not.toHaveBeenCalled();
   });
 
   it("returns 400 when winnerId and loserId are the same option", async () => {
@@ -112,8 +154,8 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
   });
 
   it("returns 409 when the member has already voted on the matchup", async () => {
-    mockGetSnapPickVotes.mockResolvedValue([
-      { votedBy: "user-1", pairKey: "opt-a_opt-b" },
+    mockGetSnapPickVotesByMember.mockResolvedValue([
+      { pairKey: "opt-a_opt-b" },
     ]);
 
     const response = await POST(
@@ -125,10 +167,8 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
     expect(mockRecordSnapPickVote).not.toHaveBeenCalled();
   });
 
-  it("allows a different member to vote on a pair another member decided", async () => {
-    mockGetSnapPickVotes.mockResolvedValue([
-      { votedBy: "user-2", pairKey: "opt-a_opt-b" },
-    ]);
+  it("scopes the duplicate-vote check to the current member's votes only", async () => {
+    mockGetSnapPickVotesByMember.mockResolvedValue([]);
 
     const response = await POST(
       makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),
@@ -136,6 +176,10 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
     );
 
     expect(response.status).toBe(201);
+    expect(mockGetSnapPickVotesByMember).toHaveBeenCalledWith(
+      "act-1",
+      "user-1",
+    );
   });
 
   it("returns 403 when authorization is denied", async () => {

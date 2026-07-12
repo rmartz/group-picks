@@ -5,8 +5,10 @@ import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import {
   getSnapPickVotes,
+  getSnapPickVotesByMember,
   resolveActiveActivation,
 } from "@/server/data/snap-pick-activations";
+import { getSnapPickPreferences } from "@/server/data/snap-pick-preferences";
 import {
   getClosedActivations,
   getSnapPickById,
@@ -53,16 +55,17 @@ export default async function SnapPickDetailPage({
     (option) => option.removedAt === undefined,
   );
 
-  // While a run is open, load the current member's cast pairs so the voting
-  // screen resumes from their own remaining matchup queue rather than restarting.
   const activationInProgress =
     activation !== undefined && activation.closedAt === undefined;
-  const votes = activationInProgress
-    ? await getSnapPickVotes(activation.id)
-    : [];
-  const votedPairKeys = votes
-    .filter((vote) => vote.votedBy === uid)
-    .map((vote) => vote.pairKey);
+  // While a run is open, load the member's cast pairs (to resume their queue) and
+  // their global preference model (to focus the matchup pool on relevant options).
+  const [memberVotes, ratings] = activationInProgress
+    ? await Promise.all([
+        getSnapPickVotesByMember(activation.id, uid),
+        getSnapPickPreferences(snapPickId, uid),
+      ])
+    : [[], {}];
+  const votedPairKeys = memberVotes.map((vote) => vote.pairKey);
 
   // resolveActiveActivation may have just lazily closed the previously-open run
   // on this read; getClosedActivations ran concurrently and would miss it, so
@@ -103,6 +106,7 @@ export default async function SnapPickDetailPage({
       activation={activation}
       winnerTitle={winnerTitle}
       votedPairKeys={votedPairKeys}
+      ratings={ratings}
       historyEntries={historyEntries}
     />
   );

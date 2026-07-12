@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 import { pairKey } from "@/lib/snap-pick-pairing";
 import {
   getOpenActivation,
-  getSnapPickVotes,
+  getSnapPickVotesByMember,
   recordSnapPickVote,
 } from "@/server/data/snap-pick-activations";
+import { updateSnapPickPreference } from "@/server/data/snap-pick-preferences";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { authorizeSnapPickMember } from "@/server/utils/snap-pick-auth";
 
@@ -73,10 +74,8 @@ export async function POST(request: Request, { params }: RouteParams) {
   // Reject a second vote on the same matchup from the same member: the pair is
   // already decided for them, so accepting another would double-count it.
   const key = pairKey(parsed.winnerId, parsed.loserId);
-  const votes = await getSnapPickVotes(activationId);
-  const alreadyVoted = votes.some(
-    (vote) => vote.votedBy === uid && vote.pairKey === key,
-  );
+  const memberVotes = await getSnapPickVotesByMember(activationId, uid);
+  const alreadyVoted = memberVotes.some((vote) => vote.pairKey === key);
   if (alreadyVoted) {
     return NextResponse.json(
       { error: "You have already voted on this matchup" },
@@ -89,6 +88,21 @@ export async function POST(request: Request, { params }: RouteParams) {
     loserId: parsed.loserId,
     votedBy: uid,
   });
+
+  // Fold the cast vote into the member's global preference model (O(1) Elo
+  // update) so future activations focus matchups on the options they care about.
+  // Errors are swallowed — the preference model is a soft derived signal and a
+  // transient failure must not return 500 after the vote is already committed.
+  try {
+    await updateSnapPickPreference(
+      snapPickId,
+      uid,
+      parsed.winnerId,
+      parsed.loserId,
+    );
+  } catch {
+    // non-critical
+  }
 
   return NextResponse.json(
     { voteId: id, votedAt: votedAt.toISOString(), pairKey: key },

@@ -4,6 +4,7 @@ import type {
   SnapPickActivation,
   SnapPickHistoryEntry,
   SnapPickOption,
+  SnapPickRatings,
 } from "@/lib/types/snap-pick";
 
 import { SnapPickActivationPanel } from "./SnapPickActivationPanel";
@@ -27,6 +28,10 @@ interface SnapPickDetailViewProps {
   // Pair keys the current member has already voted on in the open activation, so
   // the voting screen resumes from their remaining matchup queue.
   votedPairKeys: string[];
+  // The current member's global preference model for this snap pick, used to
+  // focus the matchup queue on relevant options. Absent for a member with no
+  // vote history (every option is then treated as neutral / cold-start).
+  ratings?: SnapPickRatings;
   // Past (closed) runs with their winners and participant counts, newest first.
   historyEntries: SnapPickHistoryEntry[];
 }
@@ -44,6 +49,7 @@ export function SnapPickDetailView({
   activation,
   winnerTitle,
   votedPairKeys,
+  ratings,
   historyEntries,
 }: SnapPickDetailViewProps) {
   const activationInProgress =
@@ -114,6 +120,7 @@ export function SnapPickDetailView({
             activationId={activation.id}
             options={options}
             votedPairKeys={votedPairKeys}
+            ratings={ratings}
           />
         ) : (
           <p className="text-sm text-muted-foreground">

@@ -59,16 +59,21 @@ export function SnapPickActivationPanelView({
         </div>
       ) : (
         <div className="space-y-3">
-          {hasClosedRun && (
-            <div className="rounded-md border border-primary/40 bg-primary/5 p-3">
-              <p className="text-sm font-semibold">
-                {SNAP_PICK_ACTIVATION_COPY.winnerHeading}
-              </p>
-              <p className="text-lg font-bold">
-                {lastWinnerTitle ?? SNAP_PICK_ACTIVATION_COPY.noWinnerMessage}
-              </p>
-            </div>
-          )}
+          {hasClosedRun &&
+            (lastWinnerTitle !== undefined ? (
+              <div className="rounded-md border border-primary/40 bg-primary/5 p-3">
+                <p className="text-sm font-semibold">
+                  {SNAP_PICK_ACTIVATION_COPY.winnerHeading}
+                </p>
+                <p className="text-lg font-bold">{lastWinnerTitle}</p>
+              </div>
+            ) : (
+              <div className="rounded-md border p-3">
+                <p className="text-sm text-muted-foreground">
+                  {SNAP_PICK_ACTIVATION_COPY.noVotesMessage}
+                </p>
+              </div>
+            ))}
 
           <div className="space-y-2">
             <Label htmlFor="snap-pick-duration">

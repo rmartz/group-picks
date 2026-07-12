@@ -1,17 +1,14 @@
+import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockGetVerifiedUid,
-  mockGetGroupById,
-  mockGetCategoryById,
-  mockGetSnapPickById,
+  mockAuthorizeSnapPickMember,
   mockGetOpenActivation,
   mockCreateSnapPickActivation,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
-  mockGetGroupById: vi.fn(),
-  mockGetCategoryById: vi.fn(),
-  mockGetSnapPickById: vi.fn(),
+  mockAuthorizeSnapPickMember: vi.fn(),
   mockGetOpenActivation: vi.fn(),
   mockCreateSnapPickActivation: vi.fn(),
 }));
@@ -20,16 +17,8 @@ vi.mock("@/server/utils/auth", () => ({
   getVerifiedUid: mockGetVerifiedUid,
 }));
 
-vi.mock("@/server/data/groups", () => ({
-  getGroupById: mockGetGroupById,
-}));
-
-vi.mock("@/server/data/categories", () => ({
-  getCategoryById: mockGetCategoryById,
-}));
-
-vi.mock("@/server/data/snap-picks", () => ({
-  getSnapPickById: mockGetSnapPickById,
+vi.mock("@/server/utils/snap-pick-auth", () => ({
+  authorizeSnapPickMember: mockAuthorizeSnapPickMember,
 }));
 
 vi.mock("@/server/data/snap-pick-activations", () => ({
@@ -59,9 +48,7 @@ function makeRequest(body: unknown) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockGetVerifiedUid.mockResolvedValue("user-1");
-  mockGetGroupById.mockResolvedValue({ id: "group-1", memberIds: ["user-1"] });
-  mockGetCategoryById.mockResolvedValue({ id: "cat-1", groupId: "group-1" });
-  mockGetSnapPickById.mockResolvedValue({ id: "snap-1", categoryId: "cat-1" });
+  mockAuthorizeSnapPickMember.mockResolvedValue(undefined);
   mockGetOpenActivation.mockResolvedValue(undefined);
   mockCreateSnapPickActivation.mockResolvedValue({ id: "act-new" });
 });
@@ -131,7 +118,9 @@ describe("PUT /api/.../snap-picks/[snapPickId]/activate", () => {
   });
 
   it("returns 403 for a non-member", async () => {
-    mockGetGroupById.mockResolvedValue({ id: "group-1", memberIds: ["other"] });
+    mockAuthorizeSnapPickMember.mockResolvedValue(
+      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+    );
 
     const response = await PUT(
       makeRequest({ duration: { kind: "preset", preset: "1-hour" } }),
@@ -139,6 +128,7 @@ describe("PUT /api/.../snap-picks/[snapPickId]/activate", () => {
     );
 
     expect(response.status).toBe(403);
+    expect(mockCreateSnapPickActivation).not.toHaveBeenCalled();
   });
 
   it("returns 401 when unauthenticated", async () => {

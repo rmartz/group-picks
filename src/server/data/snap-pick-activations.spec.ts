@@ -1,11 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRef, mockGet, mockPush, mockSet, mockUpdate } = vi.hoisted(() => ({
+const {
+  mockRef,
+  mockGet,
+  mockPush,
+  mockSet,
+  mockUpdate,
+  mockOrderByChild,
+  mockEqualTo,
+} = vi.hoisted(() => ({
   mockRef: vi.fn(),
   mockGet: vi.fn(),
   mockPush: vi.fn(),
   mockSet: vi.fn(),
   mockUpdate: vi.fn(),
+  mockOrderByChild: vi.fn(),
+  mockEqualTo: vi.fn(),
 }));
 
 const { mockGetSnapPickActivations, mockGetSnapPickOptions } = vi.hoisted(
@@ -33,6 +43,7 @@ const {
   closeSnapPickActivation,
   recordSnapPickVote,
   getSnapPickVotes,
+  getSnapPickVotesByMember,
   getOpenActivation,
   resolveActiveActivation,
 } = await import("./snap-pick-activations");
@@ -162,6 +173,42 @@ describe("getSnapPickVotes", () => {
     mockGet.mockResolvedValue(snapshot(undefined));
 
     expect(await getSnapPickVotes("act-1")).toEqual([]);
+  });
+});
+
+describe("getSnapPickVotesByMember", () => {
+  beforeEach(() => {
+    mockRef.mockReturnValue({ orderByChild: mockOrderByChild });
+    mockOrderByChild.mockReturnValue({ equalTo: mockEqualTo });
+    mockEqualTo.mockReturnValue({ get: mockGet });
+  });
+
+  it("queries only the given member's votes at the votedBy index", async () => {
+    mockGet.mockResolvedValue(
+      snapshot({
+        "vote-1": {
+          winnerId: "opt-a",
+          loserId: "opt-b",
+          votedBy: "user-1",
+          votedAt: 1_700_000_000_000,
+          pairKey: "opt-a_opt-b",
+        },
+      }),
+    );
+
+    const result = await getSnapPickVotesByMember("act-1", "user-1");
+
+    expect(mockRef).toHaveBeenCalledWith("snap-pick-votes/act-1");
+    expect(mockOrderByChild).toHaveBeenCalledWith("votedBy");
+    expect(mockEqualTo).toHaveBeenCalledWith("user-1");
+    expect(result).toHaveLength(1);
+    expect(result[0]?.pairKey).toBe("opt-a_opt-b");
+  });
+
+  it("returns an empty array when the member has cast no votes", async () => {
+    mockGet.mockResolvedValue(snapshot(undefined));
+
+    expect(await getSnapPickVotesByMember("act-1", "user-1")).toEqual([]);
   });
 });
 
