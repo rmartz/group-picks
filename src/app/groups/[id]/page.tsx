@@ -26,23 +26,20 @@ export default async function GroupDetailPage({
 
   void markGroupSeen(uid, id);
 
-  const categoriesPromise = getCategoriesByGroupId(id);
+  // Kick off the category-independent fetches, then await categories so the
+  // category-dependent fetches (picks, snap picks) can start — all resolve
+  // together in the Promise.all below.
+  const invitePromise = getGroupInviteByToken(group.inviteToken);
+  const memberNamesPromise = getMemberDisplayNames(group.memberIds);
+  const categories = await getCategoriesByGroupId(id);
+  const categoryIds = categories.map((category) => category.id);
 
-  const [invite, categories, memberNames, picksByCategory, activeSnapPicks] =
+  const [invite, memberNames, picksByCategory, activeSnapPicks] =
     await Promise.all([
-      getGroupInviteByToken(group.inviteToken),
-      categoriesPromise,
-      getMemberDisplayNames(group.memberIds),
-      categoriesPromise.then((resolvedCategories) =>
-        getPicksByCategoryIds(
-          resolvedCategories.map((category) => category.id),
-        ),
-      ),
-      categoriesPromise.then((resolvedCategories) =>
-        getActiveSnapPickActivationsByCategories(
-          resolvedCategories.map((category) => category.id),
-        ),
-      ),
+      invitePromise,
+      memberNamesPromise,
+      getPicksByCategoryIds(categoryIds),
+      getActiveSnapPickActivationsByCategories(categoryIds),
     ]);
 
   return (

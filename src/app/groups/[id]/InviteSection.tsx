@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { InviteMode } from "@/lib/types/invite";
+import type { InviteMode } from "@/lib/types/invite";
 import { regenerateInvite } from "@/services/groups";
 
 import { GROUP_DETAIL_COPY } from "./copy";
