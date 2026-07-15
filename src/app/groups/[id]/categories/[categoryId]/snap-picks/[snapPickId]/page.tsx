@@ -4,7 +4,7 @@ import type { SnapPickHistoryEntry } from "@/lib/types/snap-pick";
 import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import {
-  getSnapPickVotes,
+  getSnapPickVotesByActivations,
   getSnapPickVotesByMember,
   resolveActiveActivation,
 } from "@/server/data/snap-pick-activations";
@@ -78,22 +78,25 @@ export default async function SnapPickDetailPage({
   const timeline = [...justClosed, ...closedActivations];
 
   // Each closed run's participant count is the number of distinct members who
-  // cast at least one vote during that activation.
-  const historyEntries: SnapPickHistoryEntry[] = await Promise.all(
-    timeline.map(async (closed) => {
-      const closedVotes = await getSnapPickVotes(closed.id);
-      const voters = new Set(closedVotes.map((vote) => vote.votedBy));
-      return {
-        activationId: closed.id,
-        closedAt: closed.closedAt ?? closed.closesAt,
-        winnerTitle:
-          closed.winnerId !== undefined
-            ? options.find((option) => option.id === closed.winnerId)?.title
-            : undefined,
-        participantCount: voters.size,
-      };
-    }),
+  // cast at least one vote during that activation. Batch every run's votes in
+  // one read rather than fanning out to a read per activation, then group in
+  // memory to derive the distinct-voter counts.
+  const votesByActivation = await getSnapPickVotesByActivations(
+    timeline.map((closed) => closed.id),
   );
+  const historyEntries: SnapPickHistoryEntry[] = timeline.map((closed) => {
+    const closedVotes = votesByActivation.get(closed.id) ?? [];
+    const voters = new Set(closedVotes.map((vote) => vote.votedBy));
+    return {
+      activationId: closed.id,
+      closedAt: closed.closedAt ?? closed.closesAt,
+      winnerTitle:
+        closed.winnerId !== undefined
+          ? options.find((option) => option.id === closed.winnerId)?.title
+          : undefined,
+      participantCount: voters.size,
+    };
+  });
 
   return (
     <SnapPickDetailView
