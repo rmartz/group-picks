@@ -1,8 +1,10 @@
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import type {
   SnapPick,
   SnapPickActivation,
   SnapPickHistoryEntry,
   SnapPickOption,
+  SnapPickRatings,
 } from "@/lib/types/snap-pick";
 
 import { SnapPickActivationPanel } from "./SnapPickActivationPanel";
@@ -14,6 +16,8 @@ import { SnapPickOptionList } from "./SnapPickOptionList";
 interface SnapPickDetailViewProps {
   snapPick: SnapPick;
   groupId: string;
+  groupName: string;
+  categoryName?: string;
   currentUserId: string;
   options: SnapPickOption[];
   // The most recent activation for this snap pick, if one has ever run. Open
@@ -24,6 +28,10 @@ interface SnapPickDetailViewProps {
   // Pair keys the current member has already voted on in the open activation, so
   // the voting screen resumes from their remaining matchup queue.
   votedPairKeys: string[];
+  // The current member's global preference model for this snap pick, used to
+  // focus the matchup queue on relevant options. Absent for a member with no
+  // vote history (every option is then treated as neutral / cold-start).
+  ratings?: SnapPickRatings;
   // Past (closed) runs with their winners and participant counts, newest first.
   historyEntries: SnapPickHistoryEntry[];
 }
@@ -34,19 +42,38 @@ interface SnapPickDetailViewProps {
 export function SnapPickDetailView({
   snapPick,
   groupId,
+  groupName,
+  categoryName,
   currentUserId,
   options,
   activation,
   winnerTitle,
   votedPairKeys,
+  ratings,
   historyEntries,
 }: SnapPickDetailViewProps) {
   const activationInProgress =
     activation !== undefined && activation.closedAt === undefined;
   const activeClosesAt = activationInProgress ? activation.closesAt : undefined;
+  const breadcrumbs = [
+    { label: groupName, href: `/groups/${groupId}` },
+    ...(categoryName
+      ? [
+          {
+            label: categoryName,
+            href: `/groups/${groupId}/categories/${snapPick.categoryId}`,
+          },
+        ]
+      : []),
+    {
+      label: snapPick.title,
+      href: `/groups/${groupId}/categories/${snapPick.categoryId}/snap-picks/${snapPick.id}`,
+    },
+  ];
   return (
     <main className="mx-auto max-w-2xl p-4">
-      <h1 className="text-2xl font-bold">{snapPick.title}</h1>
+      <Breadcrumbs crumbs={breadcrumbs} />
+      <h1 className="mt-4 text-2xl font-bold">{snapPick.title}</h1>
 
       <section className="mt-6" data-slot="option-pool">
         <h2 className="text-lg font-semibold">
@@ -93,6 +120,7 @@ export function SnapPickDetailView({
             activationId={activation.id}
             options={options}
             votedPairKeys={votedPairKeys}
+            ratings={ratings}
           />
         ) : (
           <p className="text-sm text-muted-foreground">

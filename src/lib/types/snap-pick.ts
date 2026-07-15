@@ -44,6 +44,21 @@ export interface SnapPickHistoryEntry {
   participantCount: number;
 }
 
+// One option's learned strength in a user's global preference model for a Snap
+// Pick (see snap-pick-inference). `rating` is the Elo-style scalar — higher means
+// the user broadly prefers this option across every past activation; `games` is
+// how many votes have touched it, the uncertainty signal (0 = cold-start, no
+// history, so the rating is the neutral default and carries no evidence yet).
+export interface SnapPickRating {
+  rating: number;
+  games: number;
+}
+
+// A user's whole global preference model for one Snap Pick: one rating per
+// option, keyed by optionId. Stored O(N) at snap-pick-preferences/{snapPickId}/
+// {userId} — not the O(N²) pairwise matrix. Absent keys are cold-start (neutral).
+export type SnapPickRatings = Record<string, SnapPickRating>;
+
 // A single head-to-head matchup result recorded during an activation. Votes are
 // stored under snap-pick-votes/{activationId}/{voteId} and are the source the
 // winner is computed from at close time. The head-to-head voting UI (#259) is

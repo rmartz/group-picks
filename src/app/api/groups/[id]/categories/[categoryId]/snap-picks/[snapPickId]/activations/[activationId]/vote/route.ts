@@ -6,6 +6,7 @@ import {
   getSnapPickVotesByMember,
   recordSnapPickVote,
 } from "@/server/data/snap-pick-activations";
+import { updateSnapPickPreference } from "@/server/data/snap-pick-preferences";
 import { getVerifiedUid } from "@/server/utils/auth";
 import { authorizeSnapPickMember } from "@/server/utils/snap-pick-auth";
 
@@ -87,6 +88,21 @@ export async function POST(request: Request, { params }: RouteParams) {
     loserId: parsed.loserId,
     votedBy: uid,
   });
+
+  // Fold the cast vote into the member's global preference model (O(1) Elo
+  // update) so future activations focus matchups on the options they care about.
+  // Errors are swallowed — the preference model is a soft derived signal and a
+  // transient failure must not return 500 after the vote is already committed.
+  try {
+    await updateSnapPickPreference(
+      snapPickId,
+      uid,
+      parsed.winnerId,
+      parsed.loserId,
+    );
+  } catch {
+    // non-critical
+  }
 
   return NextResponse.json(
     { voteId: id, votedAt: votedAt.toISOString(), pairKey: key },

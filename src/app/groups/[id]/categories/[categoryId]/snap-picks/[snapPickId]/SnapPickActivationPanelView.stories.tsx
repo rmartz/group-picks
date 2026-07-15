@@ -45,7 +45,7 @@ export const ClosedWithWinner: Story = {
   },
 };
 
-export const ClosedNoWinner: Story = {
+export const ClosedNoVotes: Story = {
   args: {
     hasClosedRun: true,
     lastWinnerTitle: undefined,

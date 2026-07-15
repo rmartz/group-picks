@@ -6,12 +6,14 @@ const {
   mockGetOpenActivation,
   mockGetSnapPickVotesByMember,
   mockRecordSnapPickVote,
+  mockUpdateSnapPickPreference,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockAuthorizeSnapPickMember: vi.fn(),
   mockGetOpenActivation: vi.fn(),
   mockGetSnapPickVotesByMember: vi.fn(),
   mockRecordSnapPickVote: vi.fn(),
+  mockUpdateSnapPickPreference: vi.fn(),
 }));
 
 vi.mock("@/server/utils/auth", () => ({
@@ -26,6 +28,10 @@ vi.mock("@/server/data/snap-pick-activations", () => ({
   getOpenActivation: mockGetOpenActivation,
   getSnapPickVotesByMember: mockGetSnapPickVotesByMember,
   recordSnapPickVote: mockRecordSnapPickVote,
+}));
+
+vi.mock("@/server/data/snap-pick-preferences", () => ({
+  updateSnapPickPreference: mockUpdateSnapPickPreference,
 }));
 
 const { POST } = await import("./route");
@@ -59,6 +65,7 @@ beforeEach(() => {
     votedAt: new Date("2025-03-21T11:00:00.000Z"),
     pairKey: "opt-a_opt-b",
   });
+  mockUpdateSnapPickPreference.mockResolvedValue(undefined);
 });
 
 describe("POST /api/.../activations/[activationId]/vote", () => {
@@ -76,6 +83,41 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
       loserId: "opt-b",
       votedBy: "user-1",
     });
+  });
+
+  it("folds the cast vote into the member's global preference model", async () => {
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockUpdateSnapPickPreference).toHaveBeenCalledWith(
+      "snap-1",
+      "user-1",
+      "opt-a",
+      "opt-b",
+    );
+  });
+
+  it("returns 201 even when the preference model update throws", async () => {
+    mockUpdateSnapPickPreference.mockRejectedValue(new Error("Firebase error"));
+
+    const response = await POST(
+      makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),
+      { params },
+    );
+
+    expect(response.status).toBe(201);
+    expect(mockRecordSnapPickVote).toHaveBeenCalled();
+  });
+
+  it("does not touch the preference model when the vote is rejected", async () => {
+    mockGetOpenActivation.mockResolvedValue(undefined);
+
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockUpdateSnapPickPreference).not.toHaveBeenCalled();
   });
 
   it("returns 400 when winnerId and loserId are the same option", async () => {

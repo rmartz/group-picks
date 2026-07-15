@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Category } from "@/lib/types/category";
 import type { Group } from "@/lib/types/group";
-import { InviteMode } from "@/lib/types/invite";
+import type { InviteMode } from "@/lib/types/invite";
 import type { GroupPick } from "@/lib/types/pick";
 import type { ActiveSnapPickActivation } from "@/lib/types/snap-pick";
 

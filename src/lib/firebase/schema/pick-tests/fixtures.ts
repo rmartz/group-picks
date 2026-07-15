@@ -1,4 +1,4 @@
-import { type FirebasePickPublic } from "../pick";
+import type { FirebasePickPublic } from "../pick";
 
 export const FIXED_DATE = new Date("2025-01-15T12:00:00.000Z");
 export const FIXED_TIMESTAMP = FIXED_DATE.getTime();
