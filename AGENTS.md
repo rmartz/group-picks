@@ -143,7 +143,8 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 ### Storybook screenshots in CI
 
 - When a PR changes a `*.stories.*` file, the `Storybook Screenshots` job captures a PNG per changed story and posts them inline in a single sticky PR comment — a **visual acceptance aid** to eyeball an intended UI change (it is **advisory**, never a merge gate; the always-on `Storybook Tests` suite is what catches regressions). View them directly in the PR comment; no download needed.
-- Mechanics (see #339): capture is self-hosted (`scripts/capture-screenshots.mjs` drives the Storybook static build in the Chromium the workflow already installs); images are published to a **per-PR** `gh-screenshots-pr-<N>` branch (deleted on PR close by `screenshots-cleanup.yml`) — never a branch shared across PRs, so concurrent PRs can never cancel each other.
+- **Before / After (see #403):** the job renders each changed story twice — the PR version (`after/`) and the base/`main` version (`before/`, built from the PR's base SHA in a throwaway worktree) — and the comment shows them side by side. A story new in this PR (absent from the base index) shows After-only; a deleted story shows Before-only. The base render is best-effort: if it fails, the comment degrades to After-only and the job stays green. No baselines are committed to `main`; both renders are ephemeral, computed per PR. The tradeoff is that the job builds Storybook twice, so its wall-clock roughly doubles (job timeout raised 8→14 min to match).
+- Mechanics (see #339): capture is self-hosted (`scripts/capture-screenshots.mjs` drives the Storybook static build in the Chromium the workflow already installs); images are published to a **per-PR** `gh-screenshots-pr-<N>` branch under `before/` and `after/` (deleted on PR close by `screenshots-cleanup.yml`) — never a branch shared across PRs, so concurrent PRs can never cancel each other.
 
 ## Component Tests
 
