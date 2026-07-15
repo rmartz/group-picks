@@ -133,6 +133,21 @@ describe("buildBody: render Before/After pairs", () => {
     expect(body).not.toContain("/after/c--gone.png");
   });
 
+  it("labels an after-only story as 'after-only' when base render was unavailable", () => {
+    const body = buildBody(repo, branch, sha, [], ["b--modified.png"], false);
+    expect(body).toContain("<code>b--modified</code> — after-only");
+    expect(body).toContain(
+      `https://raw.githubusercontent.com/${repo}/${branch}/after/b--modified.png?v=${sha}`,
+    );
+    expect(body).not.toContain("— new");
+  });
+
+  it("uses the unavailable-base description when beforeAvailable is false", () => {
+    const body = buildBody(repo, branch, sha, [], ["a.png"], false);
+    expect(body).toContain("base render was unavailable");
+    expect(body).not.toContain('"Before" is');
+  });
+
   it("includes the sticky marker so the comment can be upserted", () => {
     const body = buildBody(repo, branch, sha, ["a.png"], ["a.png"]);
     expect(body.startsWith(MARKER)).toBe(true);

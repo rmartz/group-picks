@@ -194,6 +194,13 @@ jobs:
       - name: List changed files
         run: |
           git diff --name-only "${{ github.event.pull_request.base.sha }}...${{ github.sha }}" > changed-files.txt
+          # For the base render, also emit the *old* path of any renamed story file so
+          # capture-screenshots.mjs can match it against the base index.json (which
+          # still references the old path before the rename).
+          { cat changed-files.txt; \
+            git diff --name-status "${{ github.event.pull_request.base.sha }}...${{ github.sha }}" \
+              | awk 'BEGIN{FS="\t"} /^R/ { print $2 }'; } \
+            | sort -u > changed-files-base.txt
       # No step-level continue-on-error here (unlike the setup step): a non-zero
       # exit from the head capture must surface as a `failure` so it routes to
       # fix-review. The job-level continue-on-error above keeps that failure
@@ -222,15 +229,19 @@ jobs:
           # in the base index, so it is simply absent from before/ (After-only in
           # the comment). Any failure here degrades to After-only; it must never
           # fail the advisory job or lose the head screenshots.
+          # changed-files-base.txt includes the old paths of renamed story files
+          # so they match the base index.json (which uses pre-rename paths).
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          BEFORE_AVAILABLE=false
           if git worktree add --detach ../sb-base "$BASE_SHA" \
             && pnpm -C ../sb-base install --frozen-lockfile \
             && pnpm -C ../sb-base build-storybook \
             && node scripts/capture-screenshots.mjs \
                  --static-dir=../sb-base/storybook-static \
                  --out=before \
-                 --changed-files=changed-files.txt; then
+                 --changed-files=changed-files-base.txt; then
             echo "Base render captured $(ls before/*.png 2>/dev/null | wc -l) before image(s)."
+            BEFORE_AVAILABLE=true
           else
             echo "Base render failed; posting After-only."
             rm -rf before
@@ -254,7 +265,8 @@ jobs:
             "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$SS_BRANCH"
           node scripts/post-screenshots-comment.mjs \
             --pr="$PR" --branch="$SS_BRANCH" --sha="$HEAD_SHA" \
-            --before-dir=before --after-dir=after
+            --before-dir=before --after-dir=after \
+            --before-available="$BEFORE_AVAILABLE"
 
   build:
     name: Build

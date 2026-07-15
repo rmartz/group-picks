@@ -39,4 +39,5 @@ export declare function buildBody(
   sha: string,
   beforeFiles: string[],
   afterFiles: string[],
+  beforeAvailable?: boolean,
 ): string;

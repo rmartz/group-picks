@@ -25,13 +25,15 @@ import { fileURLToPath } from "node:url";
 export const MARKER = "<!-- storybook-screenshots -->";
 
 function parseArgs(argv) {
-  const args = { beforeDir: "before", afterDir: "after" };
+  const args = { beforeDir: "before", afterDir: "after", beforeAvailable: true };
   for (const arg of argv) {
     if (arg.startsWith("--pr=")) args.pr = arg.slice(5);
     else if (arg.startsWith("--branch=")) args.branch = arg.slice(9);
     else if (arg.startsWith("--sha=")) args.sha = arg.slice(6);
     else if (arg.startsWith("--before-dir=")) args.beforeDir = arg.slice(13);
     else if (arg.startsWith("--after-dir=")) args.afterDir = arg.slice(12);
+    else if (arg.startsWith("--before-available="))
+      args.beforeAvailable = arg.slice(19) !== "false";
   }
   return args;
 }
@@ -108,7 +110,13 @@ export function pairScreenshots(beforeFiles, afterFiles) {
   }));
 }
 
-function renderStory(repo, branch, sha, { file, name, hasBefore, hasAfter }) {
+function renderStory(
+  repo,
+  branch,
+  sha,
+  { file, name, hasBefore, hasAfter },
+  beforeAvailable,
+) {
   const beforeUrl = `https://raw.githubusercontent.com/${repo}/${branch}/before/${file}?v=${sha}`;
   const afterUrl = `https://raw.githubusercontent.com/${repo}/${branch}/after/${file}?v=${sha}`;
 
@@ -125,7 +133,14 @@ function renderStory(repo, branch, sha, { file, name, hasBefore, hasAfter }) {
     ].join("\n");
   }
 
-  const label = hasAfter ? "new" : "removed";
+  // When the base render was unavailable, after-only stories may be modified
+  // stories whose before image is simply missing — label them "after-only" to
+  // distinguish from stories that are genuinely new in this PR.
+  const label = hasAfter
+    ? beforeAvailable
+      ? "new"
+      : "after-only"
+    : "removed";
   const alt = hasAfter ? "after" : "before";
   const url = hasAfter ? afterUrl : beforeUrl;
   return [
@@ -138,23 +153,24 @@ function renderStory(repo, branch, sha, { file, name, hasBefore, hasAfter }) {
   ].join("\n");
 }
 
-export function buildBody(repo, branch, sha, beforeFiles, afterFiles) {
+export function buildBody(
+  repo,
+  branch,
+  sha,
+  beforeFiles,
+  afterFiles,
+  beforeAvailable = true,
+) {
   const shortSha = sha.slice(0, 7);
   const blocks = pairScreenshots(beforeFiles, afterFiles)
-    .map((story) => renderStory(repo, branch, sha, story))
+    .map((story) => renderStory(repo, branch, sha, story, beforeAvailable))
     .join("\n\n");
 
-  return [
-    MARKER,
-    "## 📸 Storybook screenshots",
-    "",
-    `Before / after of the changed stories at commit \`${shortSha}\` — advisory, not a gate. "Before" is \`main\`'s render; a story new in this PR shows After only.`,
-    "",
-    blocks,
-    "",
-    "---",
-    "_Updated by the Storybook Screenshots job (see #339)._",
-  ].join("\n");
+  const desc = beforeAvailable
+    ? `Before / after of the changed stories at commit \`${shortSha}\` — advisory, not a gate. "Before" is \`main\`'s render; a story new in this PR shows After only.`
+    : `After-only screenshots at commit \`${shortSha}\` — advisory, not a gate. The base render was unavailable; modified stories show the PR version only.`;
+
+  return [MARKER, "## 📸 Storybook screenshots", "", desc, "", blocks, "", "---", "_Updated by the Storybook Screenshots job (see #339)._"].join("\n");
 }
 
 function readPngs(dir) {
@@ -181,7 +197,14 @@ async function main() {
     return;
   }
 
-  const body = buildBody(repo, args.branch, args.sha, beforeFiles, afterFiles);
+  const body = buildBody(
+    repo,
+    args.branch,
+    args.sha,
+    beforeFiles,
+    afterFiles,
+    args.beforeAvailable,
+  );
   const existing = await findMarkerComment({
     repo,
     pr: args.pr,
