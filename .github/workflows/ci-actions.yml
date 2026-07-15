@@ -170,8 +170,12 @@ jobs:
     # resort, not the only way the job goes non-green.
     continue-on-error: true
     # Backstop cap; the capture script's deadline and the step timeout both fire
-    # first, as failures rather than a job cancellation.
-    timeout-minutes: 8
+    # first, as failures rather than a job cancellation. Raised from 8→14 for
+    # the Before/After feature (#403): the job now builds Storybook twice (the
+    # PR render plus the base/`main` render), so it needs roughly double the
+    # wall-clock. This is a capacity increase matched to deliberately-added
+    # work, not a timeout masking a slow operation.
+    timeout-minutes: 14
     permissions:
       contents: write
       pull-requests: write
@@ -190,32 +194,68 @@ jobs:
       - name: List changed files
         run: |
           git diff --name-only "${{ github.event.pull_request.base.sha }}...${{ github.sha }}" > changed-files.txt
+          # For the base render, also emit the *old* path of any renamed story file so
+          # capture-screenshots.mjs can match it against the base index.json (which
+          # still references the old path before the rename).
+          { cat changed-files.txt; \
+            git diff --name-status "${{ github.event.pull_request.base.sha }}...${{ github.sha }}" \
+              | awk 'BEGIN{FS="\t"} /^R/ { print $2 }'; } \
+            | sort -u > changed-files-base.txt
       # No step-level continue-on-error here (unlike the setup step): a non-zero
-      # exit from the capture script must surface as a `failure` so it routes to
+      # exit from the head capture must surface as a `failure` so it routes to
       # fix-review. The job-level continue-on-error above keeps that failure
       # non-blocking (advisory, never a merge gate — #339). The step timeout is a
       # backstop; the script's own wall-clock deadline exits non-zero first.
       # Capture reuses the Chromium installed by the setup action.
-      - name: Capture and publish screenshots
-        timeout-minutes: 6
+      - name: Capture and publish before/after screenshots
+        timeout-minutes: 12
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          # Head (PR) render — the authoritative capture. A failure here must
+          # surface as a job failure, so it is not guarded.
           pnpm build-storybook
           node scripts/capture-screenshots.mjs \
             --static-dir=storybook-static \
-            --out=screenshots \
+            --out=after \
             --changed-files=changed-files.txt
-          if ! ls screenshots/*.png >/dev/null 2>&1; then
+          if ! ls after/*.png >/dev/null 2>&1; then
             echo "No screenshots captured; nothing to publish."
             exit 0
+          fi
+          # Base (`main`) render — best-effort "before" (#403). Built from the
+          # PR's base SHA in a detached worktree. A story new in this PR is not
+          # in the base index, so it is simply absent from before/ (After-only in
+          # the comment). Any failure here degrades to After-only; it must never
+          # fail the advisory job or lose the head screenshots.
+          # changed-files-base.txt includes the old paths of renamed story files
+          # so they match the base index.json (which uses pre-rename paths).
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          BEFORE_AVAILABLE=false
+          if git worktree add --detach ../sb-base "$BASE_SHA" \
+            && pnpm -C ../sb-base install --frozen-lockfile \
+            && pnpm -C ../sb-base build-storybook \
+            && node scripts/capture-screenshots.mjs \
+                 --static-dir=../sb-base/storybook-static \
+                 --out=before \
+                 --changed-files=changed-files-base.txt; then
+            echo "Base render captured $(ls before/*.png 2>/dev/null | wc -l) before image(s)."
+            BEFORE_AVAILABLE=true
+          else
+            echo "Base render failed; posting After-only."
+            rm -rf before
           fi
           PR="${{ github.event.pull_request.number }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha }}"
           SS_BRANCH="gh-screenshots-pr-${PR}"
           PUBDIR="$(mktemp -d)"
-          cp screenshots/*.png "$PUBDIR"/
+          mkdir -p "$PUBDIR/after"
+          cp after/*.png "$PUBDIR/after"/
+          if ls before/*.png >/dev/null 2>&1; then
+            mkdir -p "$PUBDIR/before"
+            cp before/*.png "$PUBDIR/before"/
+          fi
           git -C "$PUBDIR" init -q -b "$SS_BRANCH"
           git -C "$PUBDIR" config user.email "github-actions[bot]@users.noreply.github.com"
           git -C "$PUBDIR" config user.name "github-actions[bot]"
@@ -224,7 +264,9 @@ jobs:
           git -C "$PUBDIR" push -f \
             "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$SS_BRANCH"
           node scripts/post-screenshots-comment.mjs \
-            --pr="$PR" --branch="$SS_BRANCH" --sha="$HEAD_SHA" --dir=screenshots
+            --pr="$PR" --branch="$SS_BRANCH" --sha="$HEAD_SHA" \
+            --before-dir=before --after-dir=after \
+            --before-available="$BEFORE_AVAILABLE"
 
   build:
     name: Build

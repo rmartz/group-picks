@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  buildBody,
   findMarkerComment,
   MARKER,
+  pairScreenshots,
   parseNextLink,
 } from "../../scripts/post-screenshots-comment.mjs";
 
@@ -49,6 +51,106 @@ describe("parseNextLink: extract the rel=next URL", () => {
 
   it("returns undefined for a missing header", () => {
     expect(parseNextLink(null)).toBeUndefined();
+  });
+});
+
+describe("pairScreenshots: match before/after renders by story id", () => {
+  it("flags a story present in both renders as having before and after", () => {
+    const pairs = pairScreenshots(["a--modified.png"], ["a--modified.png"]);
+    expect(pairs).toEqual([
+      {
+        file: "a--modified.png",
+        name: "a--modified",
+        hasBefore: true,
+        hasAfter: true,
+      },
+    ]);
+  });
+
+  it("flags a story only in after (new in this PR) as after-only", () => {
+    const pairs = pairScreenshots([], ["b--new.png"]);
+    expect(pairs).toEqual([
+      { file: "b--new.png", name: "b--new", hasBefore: false, hasAfter: true },
+    ]);
+  });
+
+  it("flags a story only in before (deleted) as before-only", () => {
+    const pairs = pairScreenshots(["c--gone.png"], []);
+    expect(pairs).toEqual([
+      {
+        file: "c--gone.png",
+        name: "c--gone",
+        hasBefore: true,
+        hasAfter: false,
+      },
+    ]);
+  });
+
+  it("sorts the union of before and after story ids", () => {
+    const pairs = pairScreenshots(["z--old.png"], ["a--new.png", "m--mid.png"]);
+    expect(pairs.map((p) => p.name)).toEqual(["a--new", "m--mid", "z--old"]);
+  });
+});
+
+describe("buildBody: render Before/After pairs", () => {
+  const repo = "o/r";
+  const branch = "gh-screenshots-pr-7";
+  const sha = "abcdef1234567890";
+
+  it("renders a two-column Before | After table for a modified story", () => {
+    const body = buildBody(
+      repo,
+      branch,
+      sha,
+      ["a--modified.png"],
+      ["a--modified.png"],
+    );
+    expect(body).toContain("| Before | After |");
+    expect(body).toContain(
+      `https://raw.githubusercontent.com/${repo}/${branch}/before/a--modified.png?v=${sha}`,
+    );
+    expect(body).toContain(
+      `https://raw.githubusercontent.com/${repo}/${branch}/after/a--modified.png?v=${sha}`,
+    );
+  });
+
+  it("renders a new story as After-only with no before image", () => {
+    const body = buildBody(repo, branch, sha, [], ["b--new.png"]);
+    expect(body).toContain("<code>b--new</code> — new");
+    expect(body).toContain(
+      `https://raw.githubusercontent.com/${repo}/${branch}/after/b--new.png?v=${sha}`,
+    );
+    expect(body).not.toContain("/before/b--new.png");
+    expect(body).not.toContain("| Before | After |");
+  });
+
+  it("renders a deleted story as Before-only", () => {
+    const body = buildBody(repo, branch, sha, ["c--gone.png"], []);
+    expect(body).toContain("<code>c--gone</code> — removed");
+    expect(body).toContain(
+      `https://raw.githubusercontent.com/${repo}/${branch}/before/c--gone.png?v=${sha}`,
+    );
+    expect(body).not.toContain("/after/c--gone.png");
+  });
+
+  it("labels an after-only story as 'after-only' when base render was unavailable", () => {
+    const body = buildBody(repo, branch, sha, [], ["b--modified.png"], false);
+    expect(body).toContain("<code>b--modified</code> — after-only");
+    expect(body).toContain(
+      `https://raw.githubusercontent.com/${repo}/${branch}/after/b--modified.png?v=${sha}`,
+    );
+    expect(body).not.toContain("— new");
+  });
+
+  it("uses the unavailable-base description when beforeAvailable is false", () => {
+    const body = buildBody(repo, branch, sha, [], ["a.png"], false);
+    expect(body).toContain("base render was unavailable");
+    expect(body).not.toContain('"Before" is');
+  });
+
+  it("includes the sticky marker so the comment can be upserted", () => {
+    const body = buildBody(repo, branch, sha, ["a.png"], ["a.png"]);
+    expect(body.startsWith(MARKER)).toBe(true);
   });
 });
 
