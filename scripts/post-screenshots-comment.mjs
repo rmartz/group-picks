@@ -25,7 +25,11 @@ import { fileURLToPath } from "node:url";
 export const MARKER = "<!-- storybook-screenshots -->";
 
 function parseArgs(argv) {
-  const args = { beforeDir: "before", afterDir: "after", beforeAvailable: true };
+  const args = {
+    beforeDir: "before",
+    afterDir: "after",
+    beforeAvailable: true,
+  };
   for (const arg of argv) {
     if (arg.startsWith("--pr=")) args.pr = arg.slice(5);
     else if (arg.startsWith("--branch=")) args.branch = arg.slice(9);
@@ -136,11 +140,7 @@ function renderStory(
   // When the base render was unavailable, after-only stories may be modified
   // stories whose before image is simply missing — label them "after-only" to
   // distinguish from stories that are genuinely new in this PR.
-  const label = hasAfter
-    ? beforeAvailable
-      ? "new"
-      : "after-only"
-    : "removed";
+  const label = hasAfter ? (beforeAvailable ? "new" : "after-only") : "removed";
   const alt = hasAfter ? "after" : "before";
   const url = hasAfter ? afterUrl : beforeUrl;
   return [
@@ -170,7 +170,17 @@ export function buildBody(
     ? `Before / after of the changed stories at commit \`${shortSha}\` — advisory, not a gate. "Before" is \`main\`'s render; a story new in this PR shows After only.`
     : `After-only screenshots at commit \`${shortSha}\` — advisory, not a gate. The base render was unavailable; modified stories show the PR version only.`;
 
-  return [MARKER, "## 📸 Storybook screenshots", "", desc, "", blocks, "", "---", "_Updated by the Storybook Screenshots job (see #339)._"].join("\n");
+  return [
+    MARKER,
+    "## 📸 Storybook screenshots",
+    "",
+    desc,
+    "",
+    blocks,
+    "",
+    "---",
+    "_Updated by the Storybook Screenshots job (see #339)._",
+  ].join("\n");
 }
 
 function readPngs(dir) {
