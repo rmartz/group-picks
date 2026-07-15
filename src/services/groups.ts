@@ -1,4 +1,4 @@
-import { InviteMode } from "@/lib/types/invite";
+import type { InviteMode } from "@/lib/types/invite";
 
 export class LeaveGroupLastMemberError extends Error {}
 

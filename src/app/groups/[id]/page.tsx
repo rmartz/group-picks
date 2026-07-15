@@ -26,24 +26,17 @@ export default async function GroupDetailPage({
 
   void markGroupSeen(uid, id);
 
-  const categoriesPromise = getCategoriesByGroupId(id);
+  const [invite, categories, memberNames] = await Promise.all([
+    getGroupInviteByToken(group.inviteToken),
+    getCategoriesByGroupId(id),
+    getMemberDisplayNames(group.memberIds),
+  ]);
+  const categoryIds = categories.map((category) => category.id);
 
-  const [invite, categories, memberNames, picksByCategory, activeSnapPicks] =
-    await Promise.all([
-      getGroupInviteByToken(group.inviteToken),
-      categoriesPromise,
-      getMemberDisplayNames(group.memberIds),
-      categoriesPromise.then((resolvedCategories) =>
-        getPicksByCategoryIds(
-          resolvedCategories.map((category) => category.id),
-        ),
-      ),
-      categoriesPromise.then((resolvedCategories) =>
-        getActiveSnapPickActivationsByCategories(
-          resolvedCategories.map((category) => category.id),
-        ),
-      ),
-    ]);
+  const [picksByCategory, activeSnapPicks] = await Promise.all([
+    getPicksByCategoryIds(categoryIds),
+    getActiveSnapPickActivationsByCategories(categoryIds),
+  ]);
 
   return (
     <GroupDetailClient
