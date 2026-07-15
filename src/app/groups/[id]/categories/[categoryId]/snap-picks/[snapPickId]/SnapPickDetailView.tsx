@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import type {
   SnapPick,
   SnapPickActivation,
@@ -15,6 +16,8 @@ import { SnapPickOptionList } from "./SnapPickOptionList";
 interface SnapPickDetailViewProps {
   snapPick: SnapPick;
   groupId: string;
+  groupName: string;
+  categoryName?: string;
   currentUserId: string;
   options: SnapPickOption[];
   // The most recent activation for this snap pick, if one has ever run. Open
@@ -39,6 +42,8 @@ interface SnapPickDetailViewProps {
 export function SnapPickDetailView({
   snapPick,
   groupId,
+  groupName,
+  categoryName,
   currentUserId,
   options,
   activation,
@@ -50,9 +55,25 @@ export function SnapPickDetailView({
   const activationInProgress =
     activation !== undefined && activation.closedAt === undefined;
   const activeClosesAt = activationInProgress ? activation.closesAt : undefined;
+  const breadcrumbs = [
+    { label: groupName, href: `/groups/${groupId}` },
+    ...(categoryName
+      ? [
+          {
+            label: categoryName,
+            href: `/groups/${groupId}/categories/${snapPick.categoryId}`,
+          },
+        ]
+      : []),
+    {
+      label: snapPick.title,
+      href: `/groups/${groupId}/categories/${snapPick.categoryId}/snap-picks/${snapPick.id}`,
+    },
+  ];
   return (
     <main className="mx-auto max-w-2xl p-4">
-      <h1 className="text-2xl font-bold">{snapPick.title}</h1>
+      <Breadcrumbs crumbs={breadcrumbs} />
+      <h1 className="mt-4 text-2xl font-bold">{snapPick.title}</h1>
 
       <section className="mt-6" data-slot="option-pool">
         <h2 className="text-lg font-semibold">
