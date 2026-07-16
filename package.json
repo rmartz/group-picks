@@ -21,6 +21,7 @@
     "env:validate": "node scripts/validate-config.mjs",
     "pins:actions": "node scripts/check-action-pins.mjs",
     "pins:check": "node scripts/check-package-pins.mjs",
+    "deps:release-age": "node scripts/check-release-age.mjs",
     "seed:debug": "node --env-file-if-exists=.env.local scripts/seed-debug-users.mjs"
   },
   "pnpm": {
