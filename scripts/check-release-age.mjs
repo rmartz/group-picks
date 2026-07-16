@@ -30,8 +30,14 @@
 import { execFileSync } from "child_process";
 import { readFileSync } from "fs";
 
-const baseRef = process.argv[2] ?? "origin/main";
+const baseRef = process.argv[2] || "origin/main";
 const minDays = Number(process.env.RELEASE_AGE_MIN_DAYS ?? "7");
+if (!Number.isFinite(minDays) || minDays <= 0) {
+  console.error(
+    `RELEASE_AGE_MIN_DAYS must be a positive number; got: ${process.env.RELEASE_AGE_MIN_DAYS ?? "(unset)"}`,
+  );
+  process.exit(2);
+}
 const minMs = minDays * 24 * 60 * 60 * 1000;
 
 const SEMVER_VERSION = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
@@ -73,7 +79,12 @@ function parseKey(key) {
 async function publishedAt(name, version) {
   const url = `https://registry.npmjs.org/${name.replace("/", "%2F")}`;
   const res = await fetch(url);
-  if (!res.ok) return undefined;
+  if (!res.ok) {
+    console.warn(
+      `  warning: could not check ${name}@${version}: HTTP ${res.status} from registry`,
+    );
+    return undefined;
+  }
   const time = (await res.json()).time?.[version];
   return time ? Date.parse(time) : undefined;
 }
