@@ -12,8 +12,11 @@
 environment: production
 
 variables:
-  # Firebase Client SDK — safe to expose; access control is enforced by Firebase security rules
-  NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyByPe_aFNea6TWv1MY77agwSVyuE7Ze0RM"
+  # Firebase Client SDK — safe to expose; access control is enforced by Firebase security rules.
+  # NEXT_PUBLIC_FIREBASE_API_KEY is a public Firebase Web API key (not a secret), but its "AIza…"
+  # shape trips GitHub secret scanning, so its value is set directly in Vercel and left blank here.
+  # The remaining values are plain identifiers with no secret-pattern shape and stay committed.
+  NEXT_PUBLIC_FIREBASE_API_KEY: ""
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "group-picks.firebaseapp.com"
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: "group-picks"
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "group-picks.firebasestorage.app"
