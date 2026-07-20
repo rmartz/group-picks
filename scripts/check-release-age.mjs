@@ -6,13 +6,14 @@
  * layer we control — independent of Dependabot's own `cooldown`, which is
  * advisory at PR-creation time and has documented reliability gaps for npm.
  *
- * Why this shape and not pnpm's `minimum-release-age`: putting that setting in
- * committed pnpm config makes Dependabot's own lockfile regeneration honor it,
- * which forces pnpm to fetch publish-time metadata for the whole candidate tree
- * on every update — the full-metadata storm that causes multi-minute/hour
- * Dependabot timeouts on large repos. This gate never touches Dependabot's
- * resolver: it inspects the *result* (the lockfile diff) and queries the
- * registry for only the handful of newly-introduced versions.
+ * Relationship to pnpm's `minimumReleaseAge`: `pnpm-workspace.yaml` sets
+ * `minimumReleaseAge: 10080` (7 days) so Dependabot and manual `pnpm update`
+ * only resolve transitive deps to versions ≥ 7 days old — the pnpm-native layer
+ * Dependabot's own `cooldown` can't provide. This gate is the backstop: it catches
+ * anything that slips through (a manual lockfile edit, a context where the setting
+ * isn't honored). The two enforce one policy from complementary angles. This gate
+ * never touches the resolver: it inspects the *result* (the lockfile diff) and
+ * queries the registry for only the handful of newly-introduced versions.
  *
  * Usage:  node scripts/check-release-age.mjs [baseRef]
  *   baseRef  git ref to diff against (default: origin/main). The base
