@@ -4,9 +4,9 @@ name: Release Age
 # younger than the cooldown window (default 7 days). Enforces our "let releases
 # age before we adopt them" supply-chain policy at the layer we control, rather
 # than relying on Dependabot's own `cooldown` (advisory, with documented npm
-# reliability gaps). See scripts/check-release-age.mjs for why this inspects the
-# lockfile diff instead of setting pnpm's `minimum-release-age` (which would slow
-# Dependabot's own resolution to a crawl).
+# reliability gaps). `pnpm-workspace.yaml` sets `minimumReleaseAge: 10080` (7 days)
+# as the primary layer; this gate is the backstop for anything that slips through.
+# See scripts/check-release-age.mjs for the relationship between the two.
 #
 # pull_request only: the gate blocks a hot version from *landing*. Running it on
 # push-to-main would only fail an already-merged commit. Gated to runs that
