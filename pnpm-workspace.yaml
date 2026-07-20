@@ -1,3 +1,13 @@
+# Supply-chain cooldown: refuse any package version — direct OR transitive —
+# published less than 7 days (10080 minutes) ago. Dependabot honors this during
+# its own lockfile regeneration, so incidentally-refreshed transitive deps float
+# only to aged versions. This is the pnpm-native layer that Dependabot's own
+# `cooldown` can't provide (cooldown gates only the direct dep it bumps); the
+# release-age CI gate (scripts/check-release-age.mjs, same 7-day window) stays as
+# the backstop. CI installs are --frozen-lockfile, so this affects only
+# resolution (Dependabot / manual `pnpm update`), never CI install time.
+minimumReleaseAge: 10080
+
 allowBuilds:
   "@firebase/util": true
   "@sentry/cli": true
