@@ -44,6 +44,5 @@ export async function getMostRecentOpenPick(
 
   return pickArrays
     .flat()
-    .filter((p) => p.closedAt === undefined)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
 }
