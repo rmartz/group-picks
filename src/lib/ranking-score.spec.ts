@@ -171,3 +171,49 @@ describe("computeOptionTierAttribution", () => {
     ]);
   });
 });
+
+describe("computeOptionTierAttribution across multiple options", () => {
+  it("buckets each member per option with identical first-name normalization", () => {
+    const allRankings = {
+      "user-1": { "opt-a": RankingTier.LoveIt, "opt-b": RankingTier.Maybe },
+      "user-2": { "opt-a": RankingTier.NotForMe, "opt-b": RankingTier.Yes },
+    };
+
+    const attribution = computeOptionTierAttribution(
+      allRankings,
+      [optA, optB],
+      [
+        { uid: "user-1", name: "Alice Johnson" },
+        { uid: "user-2", name: "bob@example.com" },
+      ],
+    );
+
+    expect(attribution["opt-a"]?.[RankingTier.LoveIt]).toEqual([
+      { uid: "user-1", firstName: "Alice" },
+    ]);
+    expect(attribution["opt-a"]?.[RankingTier.NotForMe]).toEqual([
+      { uid: "user-2", firstName: "bob" },
+    ]);
+    expect(attribution["opt-b"]?.[RankingTier.Maybe]).toEqual([
+      { uid: "user-1", firstName: "Alice" },
+    ]);
+    expect(attribution["opt-b"]?.[RankingTier.Yes]).toEqual([
+      { uid: "user-2", firstName: "bob" },
+    ]);
+  });
+});
+
+describe("computeOptionTierAttribution precomputes the member list once", () => {
+  it("reuses the same AttributionMember instance across every option", () => {
+    const attribution = computeOptionTierAttribution(
+      {},
+      [optA, optB],
+      [{ uid: "user-1", name: "Alice Johnson" }],
+    );
+
+    const fromA = attribution["opt-a"]?.noRank[0];
+    const fromB = attribution["opt-b"]?.noRank[0];
+    expect(fromA).toBeDefined();
+    expect(fromA).toBe(fromB);
+  });
+});
