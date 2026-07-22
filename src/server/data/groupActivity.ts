@@ -5,17 +5,32 @@ import {
   deriveActivityPreview,
 } from "@/lib/deriveGroupActivity";
 import { getAdminApp } from "@/lib/firebase/admin";
+import { firebaseToPick } from "@/lib/firebase/schema/pick";
 import type { GroupPick } from "@/lib/types/pick";
 
-import { getCategoriesByGroupId } from "./categories";
-import { getPicksByCategory } from "./picks";
-
 export async function getPicksForGroup(groupId: string): Promise<GroupPick[]> {
-  const categories = await getCategoriesByGroupId(groupId);
-  const pickArrays = await Promise.all(
-    categories.map((c) => getPicksByCategory(c.id)),
-  );
-  return pickArrays.flat();
+  // The indexed group query returns each matching `categories/{id}` node in
+  // full — including its nested `picks` — so every pick is derived from this
+  // single round-trip. Re-reading picks per category (the prior N+1) is
+  // redundant: the picks are already present in this snapshot.
+  const db = getDatabase(getAdminApp());
+  const snap = await db
+    .ref("categories")
+    .orderByChild("public/groupId")
+    .equalTo(groupId)
+    .get();
+
+  if (!snap.exists()) return [];
+
+  const picks: GroupPick[] = [];
+  snap.forEach((categorySnap) => {
+    categorySnap.child("picks").forEach((pickSnap) => {
+      const pickId = pickSnap.key;
+      if (pickId) picks.push(firebaseToPick(pickId, pickSnap.val()));
+    });
+  });
+
+  return picks;
 }
 
 export async function getLastSeenAt(
