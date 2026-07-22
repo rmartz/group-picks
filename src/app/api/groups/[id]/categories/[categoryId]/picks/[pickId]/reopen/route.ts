@@ -4,6 +4,7 @@ import { getCategoryById } from "@/server/data/categories";
 import { getGroupById } from "@/server/data/groups";
 import { getPickById, reopenPick } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { isGroupAdmin } from "@/server/utils/permissions";
 
 export async function POST(
   _request: Request,
@@ -24,6 +25,10 @@ export async function POST(
   }
 
   if (!group.memberIds.includes(uid)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (!isGroupAdmin(uid, group)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
