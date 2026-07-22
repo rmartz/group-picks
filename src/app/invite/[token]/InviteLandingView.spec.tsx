@@ -74,6 +74,40 @@ describe("who's in section", () => {
   });
 });
 
+describe("who's in overflow count", () => {
+  it("derives the +N more count from memberCount, not the names array length", () => {
+    render(
+      <InviteLandingView
+        {...makeDefaultProps()}
+        memberCount={10}
+        memberNames={["Alex", "Jamie", "Sam"]}
+        signInHref="/sign-in"
+      />,
+    );
+    expect(
+      screen.getByText(
+        new RegExp(`\\+7${INVITE_LANDING_COPY.memberOverflowSuffix}`),
+      ),
+    ).toBeDefined();
+  });
+
+  it("shows no overflow when memberCount equals the number of preview names", () => {
+    render(
+      <InviteLandingView
+        {...makeDefaultProps()}
+        memberCount={2}
+        memberNames={["Alex", "Jamie"]}
+        signInHref="/sign-in"
+      />,
+    );
+    expect(
+      screen.queryByText(
+        new RegExp(INVITE_LANDING_COPY.memberOverflowSuffix.trim()),
+      ),
+    ).toBeNull();
+  });
+});
+
 describe("currently picking section", () => {
   it("renders the pick title when a current pick is provided", () => {
     render(
