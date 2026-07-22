@@ -5,6 +5,9 @@ const {
   mockCategoriesGet,
   mockCategoriesOrderByChild,
   mockGetUsers,
+  mockInvitesEqualTo,
+  mockInvitesGet,
+  mockInvitesOrderByChild,
   mockRef,
   mockTransaction,
   mockUpdate,
@@ -13,6 +16,9 @@ const {
   mockCategoriesGet: vi.fn(),
   mockCategoriesOrderByChild: vi.fn(),
   mockGetUsers: vi.fn(),
+  mockInvitesEqualTo: vi.fn(),
+  mockInvitesGet: vi.fn(),
+  mockInvitesOrderByChild: vi.fn(),
   mockTransaction: vi.fn(),
   mockUpdate: vi.fn(),
   mockRef: vi.fn(),
@@ -145,24 +151,48 @@ describe("removeMember last-member transaction", () => {
   });
 });
 
+interface MockCategory {
+  child: (path: string) => { val: () => Record<string, unknown> | null };
+  key: string | null;
+}
+
+// Builds a Firebase-query-style snapshot whose forEach yields the given
+// children, mirroring the RTDB `.forEach()` contract deleteGroup consumes.
+function makeSnapshot<T>(children: T[]): {
+  forEach: (callback: (child: T) => void) => void;
+} {
+  return {
+    forEach: (callback: (child: T) => void) => {
+      for (const child of children) callback(child);
+    },
+  };
+}
+
+// Each invite node retains its `groupId` field for its whole lifetime;
+// createGroupInvite only flips `active` to false on regeneration, so the
+// groupId-keyed query returns active and inactive tokens alike.
+function makeInviteChild(token: string): { key: string | null } {
+  return { key: token };
+}
+
 describe("deleteGroup", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    const query = {
-      get: mockCategoriesGet,
-    };
-
-    mockCategoriesEqualTo.mockReturnValue(query);
+    mockCategoriesEqualTo.mockReturnValue({ get: mockCategoriesGet });
     mockCategoriesOrderByChild.mockReturnValue({
       equalTo: mockCategoriesEqualTo,
     });
+    mockInvitesEqualTo.mockReturnValue({ get: mockInvitesGet });
+    mockInvitesOrderByChild.mockReturnValue({ equalTo: mockInvitesEqualTo });
+    mockInvitesGet.mockResolvedValue(makeSnapshot([]));
 
     mockRef.mockImplementation((path: string) => {
       if (path === "categories") {
-        return {
-          orderByChild: mockCategoriesOrderByChild,
-        };
+        return { orderByChild: mockCategoriesOrderByChild };
+      }
+      if (path === "invites") {
+        return { orderByChild: mockInvitesOrderByChild };
       }
       if (path === "/") {
         return { update: mockUpdate };
@@ -172,111 +202,154 @@ describe("deleteGroup", () => {
     mockUpdate.mockResolvedValue(undefined);
   });
 
-  it("deletes group, invite, member indexes, and all matching categories in one update", async () => {
-    mockCategoriesGet.mockResolvedValue({
-      forEach: (
-        callback: (child: {
-          child: (path: string) => {
-            val: () => Record<string, unknown> | null;
-          };
-          key: string | null;
-        }) => void,
-      ) => {
-        callback({
-          child: () => ({ val: () => ({ "pick-1": true, "pick-2": true }) }),
-          key: "category-1",
-        });
-        callback({
-          child: () => ({ val: () => ({ "pick-3": true }) }),
-          key: "category-2",
-        });
-      },
+  describe("removing all invite tokens for the group", () => {
+    it("removes every invite token for the group, active and inactive alike", async () => {
+      mockInvitesGet.mockResolvedValue(
+        makeSnapshot([
+          makeInviteChild("active-token"),
+          makeInviteChild("stale-token-1"),
+          makeInviteChild("stale-token-2"),
+        ]),
+      );
+      mockCategoriesGet.mockResolvedValue(makeSnapshot<MockCategory>([]));
+
+      await deleteGroup("group-1", ["user-1"]);
+
+      expect(mockUpdate).toHaveBeenCalledWith({
+        "groups/group-1": null,
+        "invites/active-token": null,
+        "invites/stale-token-1": null,
+        "invites/stale-token-2": null,
+        "users/user-1/groups/group-1": null,
+      });
     });
 
-    await deleteGroup("group-1", ["user-1", "user-2"], "invite-token-1");
+    it("queries invites by their groupId to find historical regenerations", async () => {
+      mockCategoriesGet.mockResolvedValue(makeSnapshot<MockCategory>([]));
 
-    expect(mockCategoriesOrderByChild).toHaveBeenCalledWith("public/groupId");
-    expect(mockCategoriesEqualTo).toHaveBeenCalledWith("group-1");
-    expect(mockUpdate).toHaveBeenCalledWith({
-      "categories/category-1": null,
-      "categories/category-2": null,
-      "groups/group-1": null,
-      "invites/invite-token-1": null,
-      "picks/pick-1": null,
-      "picks/pick-2": null,
-      "picks/pick-3": null,
-      "rankings/pick-1": null,
-      "rankings/pick-2": null,
-      "rankings/pick-3": null,
-      "users/user-1/groups/group-1": null,
-      "users/user-2/groups/group-1": null,
-    });
-  });
+      await deleteGroup("group-1", ["user-1"]);
 
-  it("still deletes group, invite, and member indexes when no categories match", async () => {
-    mockCategoriesGet.mockResolvedValue({
-      forEach: () => undefined,
+      expect(mockInvitesOrderByChild).toHaveBeenCalledWith("groupId");
+      expect(mockInvitesEqualTo).toHaveBeenCalledWith("group-1");
     });
 
-    await deleteGroup("group-1", ["user-1"], "invite-token-1");
+    it("skips invite children with a null key", async () => {
+      mockInvitesGet.mockResolvedValue(
+        makeSnapshot([makeInviteChild("active-token"), { key: null }]),
+      );
+      mockCategoriesGet.mockResolvedValue(makeSnapshot<MockCategory>([]));
 
-    expect(mockUpdate).toHaveBeenCalledWith({
-      "groups/group-1": null,
-      "invites/invite-token-1": null,
-      "users/user-1/groups/group-1": null,
-    });
-  });
+      await deleteGroup("group-1", ["user-1"]);
 
-  it("deletes categories without writing picks paths when category has no picks", async () => {
-    mockCategoriesGet.mockResolvedValue({
-      forEach: (
-        callback: (child: {
-          child: (path: string) => {
-            val: () => Record<string, unknown> | null;
-          };
-          key: string | null;
-        }) => void,
-      ) => {
-        callback({
-          child: () => ({ val: () => null }),
-          key: "category-1",
-        });
-      },
+      expect(mockUpdate).toHaveBeenCalledWith({
+        "groups/group-1": null,
+        "invites/active-token": null,
+        "users/user-1/groups/group-1": null,
+      });
     });
 
-    await deleteGroup("group-1", ["user-1"], "invite-token-1");
+    it("still deletes the group when there are no invite tokens", async () => {
+      mockCategoriesGet.mockResolvedValue(makeSnapshot<MockCategory>([]));
 
-    expect(mockUpdate).toHaveBeenCalledWith({
-      "categories/category-1": null,
-      "groups/group-1": null,
-      "invites/invite-token-1": null,
-      "users/user-1/groups/group-1": null,
+      await deleteGroup("group-1", ["user-1"]);
+
+      expect(mockUpdate).toHaveBeenCalledWith({
+        "groups/group-1": null,
+        "users/user-1/groups/group-1": null,
+      });
     });
   });
 
-  it("skips categories with a null key", async () => {
-    mockCategoriesGet.mockResolvedValue({
-      forEach: (
-        callback: (child: {
-          child: (path: string) => {
-            val: () => Record<string, unknown> | null;
-          };
-          key: string | null;
-        }) => void,
-      ) => {
-        callback({
-          child: () => ({ val: () => ({ "pick-1": true }) }),
-          key: null,
-        });
-      },
+  describe("removing group, member indexes, and categories", () => {
+    it("deletes group, member indexes, and all matching categories in one update", async () => {
+      mockInvitesGet.mockResolvedValue(
+        makeSnapshot([makeInviteChild("invite-token-1")]),
+      );
+      mockCategoriesGet.mockResolvedValue(
+        makeSnapshot<MockCategory>([
+          {
+            child: () => ({ val: () => ({ "pick-1": true, "pick-2": true }) }),
+            key: "category-1",
+          },
+          {
+            child: () => ({ val: () => ({ "pick-3": true }) }),
+            key: "category-2",
+          },
+        ]),
+      );
+
+      await deleteGroup("group-1", ["user-1", "user-2"]);
+
+      expect(mockCategoriesOrderByChild).toHaveBeenCalledWith("public/groupId");
+      expect(mockCategoriesEqualTo).toHaveBeenCalledWith("group-1");
+      expect(mockUpdate).toHaveBeenCalledWith({
+        "categories/category-1": null,
+        "categories/category-2": null,
+        "groups/group-1": null,
+        "invites/invite-token-1": null,
+        "picks/pick-1": null,
+        "picks/pick-2": null,
+        "picks/pick-3": null,
+        "rankings/pick-1": null,
+        "rankings/pick-2": null,
+        "rankings/pick-3": null,
+        "users/user-1/groups/group-1": null,
+        "users/user-2/groups/group-1": null,
+      });
     });
 
-    await deleteGroup("group-1", ["user-1"], "invite-token-1");
+    it("still deletes group and member indexes when no categories match", async () => {
+      mockInvitesGet.mockResolvedValue(
+        makeSnapshot([makeInviteChild("invite-token-1")]),
+      );
+      mockCategoriesGet.mockResolvedValue(makeSnapshot<MockCategory>([]));
 
-    expect(mockUpdate).toHaveBeenCalledWith({
-      "groups/group-1": null,
-      "invites/invite-token-1": null,
-      "users/user-1/groups/group-1": null,
+      await deleteGroup("group-1", ["user-1"]);
+
+      expect(mockUpdate).toHaveBeenCalledWith({
+        "groups/group-1": null,
+        "invites/invite-token-1": null,
+        "users/user-1/groups/group-1": null,
+      });
+    });
+
+    it("deletes categories without writing picks paths when category has no picks", async () => {
+      mockInvitesGet.mockResolvedValue(
+        makeSnapshot([makeInviteChild("invite-token-1")]),
+      );
+      mockCategoriesGet.mockResolvedValue(
+        makeSnapshot<MockCategory>([
+          { child: () => ({ val: () => null }), key: "category-1" },
+        ]),
+      );
+
+      await deleteGroup("group-1", ["user-1"]);
+
+      expect(mockUpdate).toHaveBeenCalledWith({
+        "categories/category-1": null,
+        "groups/group-1": null,
+        "invites/invite-token-1": null,
+        "users/user-1/groups/group-1": null,
+      });
+    });
+
+    it("skips categories with a null key", async () => {
+      mockInvitesGet.mockResolvedValue(
+        makeSnapshot([makeInviteChild("invite-token-1")]),
+      );
+      mockCategoriesGet.mockResolvedValue(
+        makeSnapshot<MockCategory>([
+          { child: () => ({ val: () => ({ "pick-1": true }) }), key: null },
+        ]),
+      );
+
+      await deleteGroup("group-1", ["user-1"]);
+
+      expect(mockUpdate).toHaveBeenCalledWith({
+        "groups/group-1": null,
+        "invites/invite-token-1": null,
+        "users/user-1/groups/group-1": null,
+      });
     });
   });
 });

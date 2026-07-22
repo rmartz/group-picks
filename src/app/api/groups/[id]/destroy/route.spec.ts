@@ -75,20 +75,19 @@ describe("DELETE /api/groups/[id]/destroy", () => {
     expect(res.status).toBe(403);
   });
 
-  it("calls deleteGroup with group id, member ids, and invite token on success", async () => {
+  it("calls deleteGroup with group id and member ids on success", async () => {
     const group = makeGroup({
-      inviteToken: "invite-token-123",
       memberIds: ["user-1", "user-2", "user-3"],
     });
     mockGetGroupById.mockResolvedValue(group);
 
     await DELETE(makeRequest(), { params: Promise.resolve(baseParams) });
 
-    expect(mockDeleteGroup).toHaveBeenCalledWith(
-      "group-1",
-      ["user-1", "user-2", "user-3"],
-      "invite-token-123",
-    );
+    expect(mockDeleteGroup).toHaveBeenCalledWith("group-1", [
+      "user-1",
+      "user-2",
+      "user-3",
+    ]);
   });
 
   it("returns 204 on success", async () => {
