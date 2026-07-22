@@ -90,9 +90,9 @@ export async function getSnapPickVotesByMember(
 ): Promise<SnapPickVote[]> {
   const db = getDatabase(getAdminApp());
   // Requires a Firebase Realtime Database index on "votedBy" at the
-  // "snap-pick-votes/$activationId" path so this per-member query filters
-  // server-side (O(matching_votes)) instead of scanning every vote in the
-  // activation and filtering on the client. Add to database rules:
+  // "snap-pick-votes/$activationId" path so this per-member query uses a
+  // server-side index (O(matching_votes)) instead of a full server-side scan
+  // of every vote in the activation (O(total_votes)). Add to database rules:
   //   "snap-pick-votes": { "$activationId": { ".indexOn": ["votedBy"] } }
   const snap = await db
     .ref(`snap-pick-votes/${activationId}`)
