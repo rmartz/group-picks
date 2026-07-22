@@ -6,14 +6,14 @@ const {
   mockGetGroupInviteByToken,
   mockGetGroupById,
   mockGetMemberDisplayNames,
-  mockGetCategoriesByGroupId,
+  mockGetMostRecentOpenPick,
   mockRedirect,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
   mockGetGroupInviteByToken: vi.fn(),
   mockGetGroupById: vi.fn(),
   mockGetMemberDisplayNames: vi.fn(),
-  mockGetCategoriesByGroupId: vi.fn(),
+  mockGetMostRecentOpenPick: vi.fn(),
   mockRedirect: vi.fn(),
 }));
 
@@ -30,8 +30,8 @@ vi.mock("@/server/data/groups", () => ({
   getMemberDisplayNames: mockGetMemberDisplayNames,
 }));
 
-vi.mock("@/server/data/categories", () => ({
-  getCategoriesByGroupId: mockGetCategoriesByGroupId,
+vi.mock("@/server/data/current-pick", () => ({
+  getMostRecentOpenPick: mockGetMostRecentOpenPick,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -42,11 +42,16 @@ vi.mock("./InviteLandingView", () => ({
   InviteLandingView: ({
     groupName,
     groupEmoji,
+    currentPick,
   }: {
     groupName: string;
     groupEmoji: string;
+    currentPick?: { title: string };
   }) => (
-    <div data-testid="invite-landing-view">{`${groupEmoji} ${groupName}`}</div>
+    <div data-testid="invite-landing-view">
+      <span>{`${groupEmoji} ${groupName}`}</span>
+      <span data-testid="current-pick-title">{currentPick?.title ?? ""}</span>
+    </div>
   ),
 }));
 
@@ -78,7 +83,7 @@ describe("InvitePage", () => {
       inviteToken: "invite-token",
     });
     mockGetMemberDisplayNames.mockResolvedValue([]);
-    mockGetCategoriesByGroupId.mockResolvedValue([]);
+    mockGetMostRecentOpenPick.mockResolvedValue(undefined);
   });
 
   it("renders the invite landing card with the group emoji", async () => {
@@ -90,6 +95,34 @@ describe("InvitePage", () => {
 
     expect(screen.getByTestId("invite-landing-view").textContent).toBe(
       "🎬 Movie Night",
+    );
+  });
+
+  it("passes the group's current open pick title to the landing view", async () => {
+    mockGetMostRecentOpenPick.mockResolvedValue({
+      title: "Friday Movie Night",
+      dueDate: new Date("2026-02-01T00:00:00.000Z"),
+    });
+
+    const page = await InvitePage({
+      params: Promise.resolve({ token: "invite-token" }),
+    });
+
+    render(page);
+
+    expect(screen.getByTestId("current-pick-title").textContent).toBe(
+      "Friday Movie Night",
+    );
+  });
+
+  it("resolves only the member preview subset rather than every member", async () => {
+    await InvitePage({
+      params: Promise.resolve({ token: "invite-token" }),
+    });
+
+    expect(mockGetMemberDisplayNames).toHaveBeenCalledWith(
+      ["user-1", "user-2"],
+      3,
     );
   });
 });

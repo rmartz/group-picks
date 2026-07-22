@@ -15,6 +15,7 @@ import {
   getRankingsByUser,
 } from "@/server/data/rankings";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { isGroupAdmin } from "@/server/utils/permissions";
 
 import { PickDetailView } from "./PickDetailView";
 
@@ -79,11 +80,9 @@ export default async function PickDetailPage({
     ),
   ) as Record<string, Record<string, RankingTier>>;
 
-  const closedPickResults = computeRankedResults(
-    filteredRankings,
-    currentOptions,
-    pick.topCount,
-  );
+  const closedPickResults = isClosed
+    ? computeRankedResults(filteredRankings, currentOptions, pick.topCount)
+    : { topPicks: [], runnersUp: [] };
   const topPickAttribution = computeOptionTierAttribution(
     filteredRankings,
     currentOptions,
@@ -149,6 +148,7 @@ export default async function PickDetailPage({
       priorPickBannerData={priorPickBannerData}
       closedPickResults={closedPickResults}
       topPickAttribution={topPickAttribution}
+      isAdmin={isGroupAdmin(uid, group)}
     />
   );
 }

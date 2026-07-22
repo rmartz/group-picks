@@ -99,6 +99,22 @@ export function computeOptionTierAttribution(
 ): Record<string, OptionTierAttribution> {
   const result: Record<string, OptionTierAttribution> = {};
 
+  if (options.length === 0) return result;
+
+  const attributionMembers = members.map((member) => {
+    const trimmedName = member.name.trim();
+    const atIndex = trimmedName.indexOf("@");
+    const normalizedName = !trimmedName
+      ? "Unknown"
+      : atIndex > 0
+        ? trimmedName.slice(0, atIndex)
+        : trimmedName;
+    const [firstName] = normalizedName.split(/\s+/);
+    const resolvedFirstName =
+      firstName && firstName.length > 0 ? firstName : normalizedName;
+    return { uid: member.uid, firstName: resolvedFirstName };
+  });
+
   for (const option of options) {
     const attribution: OptionTierAttribution = {
       [RankingTier.LoveIt]: [],
@@ -108,22 +124,8 @@ export function computeOptionTierAttribution(
       noRank: [],
     };
 
-    for (const member of members) {
-      const userTier = allRankings[member.uid]?.[option.id];
-      const trimmedName = member.name.trim();
-      const atIndex = trimmedName.indexOf("@");
-      const normalizedName = !trimmedName
-        ? "Unknown"
-        : atIndex > 0
-          ? trimmedName.slice(0, atIndex)
-          : trimmedName;
-      const [firstName] = normalizedName.split(/\s+/);
-      const resolvedFirstName =
-        firstName && firstName.length > 0 ? firstName : normalizedName;
-      const memberIdentity: AttributionMember = {
-        uid: member.uid,
-        firstName: resolvedFirstName,
-      };
+    for (const memberIdentity of attributionMembers) {
+      const userTier = allRankings[memberIdentity.uid]?.[option.id];
 
       if (
         userTier === RankingTier.LoveIt ||

@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { JOIN_GROUP_COPY } from "@/app/groups/join/copy";
-import { getCategoriesByGroupId } from "@/server/data/categories";
+import { getMostRecentOpenPick } from "@/server/data/current-pick";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
-import { getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { InviteLanding } from "./InviteLanding";
@@ -30,6 +29,10 @@ function InviteErrorPage({ title, description }: InviteErrorPageProps) {
 
 const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
 
+// The landing page only previews a handful of members ("Who's in"), so resolve
+// just those display names rather than the whole roster. See issue #249.
+const MEMBER_PREVIEW_LIMIT = 3;
+
 interface CurrentPick {
   title: string;
   dueDate?: Date;
@@ -38,15 +41,7 @@ interface CurrentPick {
 async function getCurrentPick(
   groupId: string,
 ): Promise<CurrentPick | undefined> {
-  const categories = await getCategoriesByGroupId(groupId);
-  const pickArrays = await Promise.all(
-    categories.map((c) => getPicksByCategory(c.id)),
-  );
-  const openPicks = pickArrays
-    .flat()
-    .filter((p) => p.closedAt === undefined)
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  const pick = openPicks[0];
+  const pick = await getMostRecentOpenPick(groupId);
   if (!pick) return undefined;
   return { title: pick.title, dueDate: pick.dueDate };
 }
@@ -114,7 +109,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
   const inviterUids = invite.createdBy ? [invite.createdBy] : [];
   const [memberNameRecords, currentPick, inviterNameRecords] =
     await Promise.all([
-      getMemberDisplayNames(group.memberIds),
+      getMemberDisplayNames(group.memberIds, MEMBER_PREVIEW_LIMIT),
       getCurrentPick(invite.groupId),
       getMemberDisplayNames(inviterUids),
     ]);

@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { after } from "next/server";
 
 import { InviteMode } from "@/lib/types/invite";
 import { getCategoriesByGroupId } from "@/server/data/categories";
@@ -24,7 +25,11 @@ export default async function GroupDetailPage({
 
   if (!group?.memberIds.includes(uid)) notFound();
 
-  void markGroupSeen(uid, id);
+  // Defer the lastSeenAt write until after the response is sent. On Vercel
+  // Fluid Compute a fire-and-forget promise may not flush before the function
+  // instance is recycled; after() extends the function lifetime so the write
+  // reliably completes without blocking the page render.
+  after(() => markGroupSeen(uid, id));
 
   const [invite, categories, memberNames] = await Promise.all([
     getGroupInviteByToken(group.inviteToken),

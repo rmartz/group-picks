@@ -36,13 +36,19 @@ export async function getGroupsByUserId(uid: string): Promise<Group[]> {
 
 export async function getMemberDisplayNames(
   uids: string[],
+  limit?: number,
 ): Promise<{ uid: string; name: string }[]> {
-  if (uids.length === 0) return [];
-  const { users } = await getAdminAuth().getUsers(uids.map((uid) => ({ uid })));
+  // Opt-in cap: when a limit is provided, only the first N members are
+  // resolved. Callers that need the full roster omit it and are unaffected.
+  const targetUids = limit === undefined ? uids : uids.slice(0, limit);
+  if (targetUids.length === 0) return [];
+  const { users } = await getAdminAuth().getUsers(
+    targetUids.map((uid) => ({ uid })),
+  );
   const nameByUid = new Map(
     users.map((u) => [u.uid, u.displayName ?? u.email ?? u.uid]),
   );
-  return uids.map((uid) => ({ uid, name: nameByUid.get(uid) ?? uid }));
+  return targetUids.map((uid) => ({ uid, name: nameByUid.get(uid) ?? uid }));
 }
 
 export async function updatePicksRestricted(
@@ -120,6 +126,9 @@ export async function deleteGroup(
   // whole lifetime (createGroupInvite only flips `active` on regeneration), so
   // querying by groupId captures the current token plus every historical
   // regeneration, leaving no orphaned invites/ nodes behind.
+  // Requires a Firebase Realtime Database index on "groupId" at the
+  // "invites" path. Add to database rules:
+  //   "invites": { ".indexOn": ["groupId"] }
   const [categorySnap, inviteSnap] = await Promise.all([
     db.ref("categories").orderByChild("public/groupId").equalTo(groupId).get(),
     db.ref("invites").orderByChild("groupId").equalTo(groupId).get(),
