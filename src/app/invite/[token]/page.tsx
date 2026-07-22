@@ -30,6 +30,10 @@ function InviteErrorPage({ title, description }: InviteErrorPageProps) {
 
 const INVITE_TOKEN_FORMAT = /^[A-Za-z0-9_-]+$/;
 
+// The landing page only previews a handful of members ("Who's in"), so resolve
+// just those display names rather than the whole roster. See issue #249.
+const MEMBER_PREVIEW_LIMIT = 3;
+
 interface CurrentPick {
   title: string;
   dueDate?: Date;
@@ -114,7 +118,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
   const inviterUids = invite.createdBy ? [invite.createdBy] : [];
   const [memberNameRecords, currentPick, inviterNameRecords] =
     await Promise.all([
-      getMemberDisplayNames(group.memberIds),
+      getMemberDisplayNames(group.memberIds, MEMBER_PREVIEW_LIMIT),
       getCurrentPick(invite.groupId),
       getMemberDisplayNames(inviterUids),
     ]);

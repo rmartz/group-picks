@@ -4,6 +4,7 @@ const {
   mockCategoriesEqualTo,
   mockCategoriesGet,
   mockCategoriesOrderByChild,
+  mockGetUsers,
   mockRef,
   mockTransaction,
   mockUpdate,
@@ -11,6 +12,7 @@ const {
   mockCategoriesEqualTo: vi.fn(),
   mockCategoriesGet: vi.fn(),
   mockCategoriesOrderByChild: vi.fn(),
+  mockGetUsers: vi.fn(),
   mockTransaction: vi.fn(),
   mockUpdate: vi.fn(),
   mockRef: vi.fn(),
@@ -18,7 +20,7 @@ const {
 
 vi.mock("@/lib/firebase/admin", () => ({
   getAdminApp: () => ({}),
-  getAdminAuth: () => ({}),
+  getAdminAuth: () => ({ getUsers: mockGetUsers }),
 }));
 
 vi.mock("firebase-admin/database", () => ({
@@ -27,7 +29,8 @@ vi.mock("firebase-admin/database", () => ({
   }),
 }));
 
-const { deleteGroup, removeMember } = await import("./groups");
+const { deleteGroup, getMemberDisplayNames, removeMember } =
+  await import("./groups");
 
 describe("removeMember last-member transaction", () => {
   beforeEach(() => {
@@ -275,5 +278,61 @@ describe("deleteGroup", () => {
       "invites/invite-token-1": null,
       "users/user-1/groups/group-1": null,
     });
+  });
+});
+
+describe("getMemberDisplayNames with a limit", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetUsers.mockResolvedValue({
+      users: [
+        { uid: "user-1", displayName: "Alex" },
+        { uid: "user-2", displayName: "Jamie" },
+      ],
+    });
+  });
+
+  it("resolves only the first N uids when a limit is provided", async () => {
+    await getMemberDisplayNames(["user-1", "user-2", "user-3", "user-4"], 2);
+
+    expect(mockGetUsers).toHaveBeenCalledWith([
+      { uid: "user-1" },
+      { uid: "user-2" },
+    ]);
+  });
+
+  it("returns only the limited subset of name records", async () => {
+    const result = await getMemberDisplayNames(
+      ["user-1", "user-2", "user-3", "user-4"],
+      2,
+    );
+
+    expect(result).toEqual([
+      { uid: "user-1", name: "Alex" },
+      { uid: "user-2", name: "Jamie" },
+    ]);
+  });
+});
+
+describe("getMemberDisplayNames without a limit", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetUsers.mockResolvedValue({
+      users: [
+        { uid: "user-1", displayName: "Alex" },
+        { uid: "user-2", displayName: "Jamie" },
+      ],
+    });
+  });
+
+  it("resolves every uid when no limit is provided", async () => {
+    await getMemberDisplayNames(["user-1", "user-2", "user-3", "user-4"]);
+
+    expect(mockGetUsers).toHaveBeenCalledWith([
+      { uid: "user-1" },
+      { uid: "user-2" },
+      { uid: "user-3" },
+      { uid: "user-4" },
+    ]);
   });
 });
