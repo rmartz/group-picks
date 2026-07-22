@@ -114,4 +114,15 @@ describe("InvitePage", () => {
       "Friday Movie Night",
     );
   });
+
+  it("resolves only the member preview subset rather than every member", async () => {
+    await InvitePage({
+      params: Promise.resolve({ token: "invite-token" }),
+    });
+
+    expect(mockGetMemberDisplayNames).toHaveBeenCalledWith(
+      ["user-1", "user-2"],
+      3,
+    );
+  });
 });
