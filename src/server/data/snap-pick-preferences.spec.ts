@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRef, mockGet, mockChild, mockUpdate } = vi.hoisted(() => ({
+const { mockRef, mockGet, mockTransaction } = vi.hoisted(() => ({
   mockRef: vi.fn(),
   mockGet: vi.fn(),
-  mockChild: vi.fn(),
-  mockUpdate: vi.fn(),
+  mockTransaction: vi.fn(),
 }));
 
 vi.mock("@/lib/firebase/admin", () => ({
@@ -22,6 +21,30 @@ function snapshot(value: unknown) {
   return {
     exists: () => value !== undefined,
     val: () => value,
+  };
+}
+
+interface Rating {
+  rating: number;
+  games: number;
+}
+type Preferences = Record<string, Rating>;
+type TransactionUpdate = (
+  current: Preferences | null,
+) => Preferences | undefined;
+
+// Capture the read-modify-write function handed to ref.transaction() so tests
+// can exercise the pure Elo computation directly, the way the concurrency-safe
+// implementation runs it against whatever the node currently holds.
+function captureTransactionUpdate(): () => TransactionUpdate {
+  let captured: TransactionUpdate | undefined;
+  mockTransaction.mockImplementation((update: TransactionUpdate) => {
+    captured = update;
+    return Promise.resolve({ committed: true });
+  });
+  return () => {
+    if (!captured) throw new Error("transaction update was never captured");
+    return captured;
   };
 }
 
@@ -58,45 +81,74 @@ describe("getSnapPickPreferences", () => {
   });
 });
 
-describe("updateSnapPickPreference", () => {
+describe("updateSnapPickPreference atomicity", () => {
   beforeEach(() => {
-    mockRef.mockReturnValue({ child: mockChild, update: mockUpdate });
-    mockUpdate.mockResolvedValue(undefined);
+    mockRef.mockReturnValue({ transaction: mockTransaction });
   });
 
-  it("applies an even matchup as a half-K Elo swing from cold-start", async () => {
-    mockChild.mockReturnValue({
-      get: () => Promise.resolve(snapshot(undefined)),
-    });
+  it("runs a single transaction on the user's preference node", async () => {
+    mockTransaction.mockResolvedValue({ committed: true });
 
     await updateSnapPickPreference("snap-1", "user-1", "opt-a", "opt-b");
 
     expect(mockRef).toHaveBeenCalledWith("snap-pick-preferences/snap-1/user-1");
-    expect(mockUpdate).toHaveBeenCalledWith({
+    expect(mockTransaction).toHaveBeenCalledOnce();
+  });
+});
+
+describe("updateSnapPickPreference Elo math", () => {
+  beforeEach(() => {
+    mockRef.mockReturnValue({ transaction: mockTransaction });
+  });
+
+  it("applies an even matchup as a half-K Elo swing from cold-start", async () => {
+    const getUpdate = captureTransactionUpdate();
+
+    await updateSnapPickPreference("snap-1", "user-1", "opt-a", "opt-b");
+
+    expect(getUpdate()(null)).toEqual({
       "opt-a": { rating: 1016, games: 1 },
       "opt-b": { rating: 984, games: 1 },
     });
   });
 
-  it("reads only the two contested options and folds their prior ratings in", async () => {
-    mockChild.mockImplementation((optionId: string) => ({
-      get: () =>
-        Promise.resolve(
-          snapshot(
-            optionId === "opt-a"
-              ? { rating: 1000, games: 5 }
-              : { rating: 1000, games: 5 },
-          ),
-        ),
-    }));
+  it("folds the two contested options' prior ratings into the swing", async () => {
+    const getUpdate = captureTransactionUpdate();
 
     await updateSnapPickPreference("snap-1", "user-1", "opt-a", "opt-b");
 
-    expect(mockChild).toHaveBeenCalledWith("opt-a");
-    expect(mockChild).toHaveBeenCalledWith("opt-b");
-    expect(mockUpdate).toHaveBeenCalledWith({
+    expect(
+      getUpdate()({
+        "opt-a": { rating: 1000, games: 5 },
+        "opt-b": { rating: 1000, games: 5 },
+      }),
+    ).toEqual({
       "opt-a": { rating: 1016, games: 6 },
       "opt-b": { rating: 984, games: 6 },
+    });
+  });
+});
+
+describe("updateSnapPickPreference preservation", () => {
+  beforeEach(() => {
+    mockRef.mockReturnValue({ transaction: mockTransaction });
+  });
+
+  it("carries untouched options through the transaction unchanged", async () => {
+    const getUpdate = captureTransactionUpdate();
+
+    await updateSnapPickPreference("snap-1", "user-1", "opt-a", "opt-b");
+
+    expect(
+      getUpdate()({
+        "opt-a": { rating: 1000, games: 0 },
+        "opt-b": { rating: 1000, games: 0 },
+        "opt-c": { rating: 1300, games: 9 },
+      }),
+    ).toEqual({
+      "opt-a": { rating: 1016, games: 1 },
+      "opt-b": { rating: 984, games: 1 },
+      "opt-c": { rating: 1300, games: 9 },
     });
   });
 });
