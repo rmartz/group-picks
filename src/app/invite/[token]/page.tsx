@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { JOIN_GROUP_COPY } from "@/app/groups/join/copy";
-import { getCategoriesByGroupId } from "@/server/data/categories";
+import { getMostRecentOpenPick } from "@/server/data/current-pick";
 import { getGroupById, getMemberDisplayNames } from "@/server/data/groups";
 import { getGroupInviteByToken } from "@/server/data/invites";
-import { getPicksByCategory } from "@/server/data/picks";
 import { getVerifiedUid } from "@/server/utils/auth";
 
 import { InviteLanding } from "./InviteLanding";
@@ -38,15 +37,7 @@ interface CurrentPick {
 async function getCurrentPick(
   groupId: string,
 ): Promise<CurrentPick | undefined> {
-  const categories = await getCategoriesByGroupId(groupId);
-  const pickArrays = await Promise.all(
-    categories.map((c) => getPicksByCategory(c.id)),
-  );
-  const openPicks = pickArrays
-    .flat()
-    .filter((p) => p.closedAt === undefined)
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  const pick = openPicks[0];
+  const pick = await getMostRecentOpenPick(groupId);
   if (!pick) return undefined;
   return { title: pick.title, dueDate: pick.dueDate };
 }
