@@ -12,5 +12,6 @@ export const INVITE_LANDING_COPY = {
   memberSingular: "member",
   pickOpen: "Open",
   signInDifferentAccount: "Sign in to a different account",
+  whoIsInAvatarGroupLabel: "Group members",
   whoIsInHeading: "Who's in",
 } as const;
