@@ -117,6 +117,15 @@ describe("computeRankedResults", () => {
 });
 
 describe("computeOptionTierAttribution", () => {
+  it("returns empty result for no options without processing members", () => {
+    const attribution = computeOptionTierAttribution(
+      {},
+      [],
+      [{ uid: "user-1", name: "Alice Johnson" }],
+    );
+    expect(attribution).toEqual({});
+  });
+
   it("buckets members into option tiers and noRank by option", () => {
     const allRankings = {
       "user-1": { "opt-a": RankingTier.LoveIt, "opt-b": RankingTier.Yes },

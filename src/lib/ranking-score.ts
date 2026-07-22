@@ -99,6 +99,8 @@ export function computeOptionTierAttribution(
 ): Record<string, OptionTierAttribution> {
   const result: Record<string, OptionTierAttribution> = {};
 
+  if (options.length === 0) return result;
+
   const attributionMembers = members.map((member) => {
     const trimmedName = member.name.trim();
     const atIndex = trimmedName.indexOf("@");
