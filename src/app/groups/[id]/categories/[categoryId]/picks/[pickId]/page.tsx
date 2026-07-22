@@ -80,11 +80,9 @@ export default async function PickDetailPage({
     ),
   ) as Record<string, Record<string, RankingTier>>;
 
-  const closedPickResults = computeRankedResults(
-    filteredRankings,
-    currentOptions,
-    pick.topCount,
-  );
+  const closedPickResults = isClosed
+    ? computeRankedResults(filteredRankings, currentOptions, pick.topCount)
+    : { topPicks: [], runnersUp: [] };
   const topPickAttribution = computeOptionTierAttribution(
     filteredRankings,
     currentOptions,

@@ -35,7 +35,7 @@ export const UnauthenticatedWithCurrentPick: Story = {
 export const UnauthenticatedWithManyMembers: Story = {
   args: {
     memberCount: 12,
-    memberNames: ["Alice", "Bob", "Carol", "David", "Eve"],
+    memberNames: ["Alice", "Bob", "Carol"],
   },
 };
 

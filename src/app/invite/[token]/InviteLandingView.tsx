@@ -84,9 +84,9 @@ export function InviteLandingView({
             {INVITE_LANDING_COPY.whoIsInHeading}
           </p>
           <p className="text-sm text-muted-foreground">
-            {memberNames.slice(0, 3).join(", ")}
-            {memberNames.length > 3 &&
-              `, +${String(memberNames.length - 3)}${INVITE_LANDING_COPY.memberOverflowSuffix}`}
+            {memberNames.join(", ")}
+            {memberCount > memberNames.length &&
+              `, +${String(memberCount - memberNames.length)}${INVITE_LANDING_COPY.memberOverflowSuffix}`}
           </p>
         </div>
       )}
