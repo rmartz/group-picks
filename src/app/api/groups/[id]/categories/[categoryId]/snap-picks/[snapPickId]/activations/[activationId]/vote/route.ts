@@ -4,6 +4,7 @@ import { pairKey } from "@/lib/snap-pick-pairing";
 import {
   getOpenActivation,
   getSnapPickVotesByMember,
+  incrementSnapPickActivationParticipantCount,
   recordSnapPickVote,
 } from "@/server/data/snap-pick-activations";
 import { updateSnapPickPreference } from "@/server/data/snap-pick-preferences";
@@ -83,11 +84,30 @@ export async function POST(request: Request, { params }: RouteParams) {
     );
   }
 
+  // An empty vote history for this member in this run means this is their first
+  // vote, so they become a new participant. Captured before recording the vote,
+  // which would otherwise make the history non-empty.
+  const isFirstVote = memberVotes.length === 0;
+
   const { id, votedAt } = await recordSnapPickVote(activationId, {
     winnerId: parsed.winnerId,
     loserId: parsed.loserId,
     votedBy: uid,
   });
+
+  // Denormalize the participant count onto the activation on the member's first
+  // vote (see #399). Errors are swallowed — the count is a derived display value
+  // and a transient failure must not return 500 after the vote is committed.
+  if (isFirstVote) {
+    try {
+      await incrementSnapPickActivationParticipantCount(
+        snapPickId,
+        activationId,
+      );
+    } catch {
+      // non-critical
+    }
+  }
 
   // Fold the cast vote into the member's global preference model (O(1) Elo
   // update) so future activations focus matchups on the options they care about.

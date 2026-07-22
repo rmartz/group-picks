@@ -197,6 +197,29 @@ describe("snapPickActivationToFirebase", () => {
     expect(result.closedAt).toBeUndefined();
     expect(result.winnerId).toBeUndefined();
   });
+
+  it("serializes participantCount", () => {
+    const result = snapPickActivationToFirebase({
+      snapPickId: "snap-1",
+      startedAt: STARTED,
+      closesAt: CLOSES,
+      startedBy: "user-2",
+      participantCount: 4,
+    });
+
+    expect(result.participantCount).toBe(4);
+  });
+
+  it("defaults participantCount to 0 when omitted (a freshly-created run)", () => {
+    const result = snapPickActivationToFirebase({
+      snapPickId: "snap-1",
+      startedAt: STARTED,
+      closesAt: CLOSES,
+      startedBy: "user-2",
+    });
+
+    expect(result.participantCount).toBe(0);
+  });
 });
 
 describe("firebaseToSnapPickActivation", () => {
@@ -226,6 +249,24 @@ describe("firebaseToSnapPickActivation", () => {
 
     expect(result.closedAt).toBeUndefined();
     expect(result.winnerId).toBeUndefined();
+  });
+
+  it("reads the denormalized participantCount", () => {
+    const result = firebaseToSnapPickActivation(
+      "act-5",
+      makeFirebaseSnapPickActivation({ participantCount: 7 }),
+    );
+
+    expect(result.participantCount).toBe(7);
+  });
+
+  it("defaults participantCount to 0 for a legacy doc missing the field", () => {
+    const result = firebaseToSnapPickActivation(
+      "act-6",
+      makeFirebaseSnapPickActivation({ participantCount: undefined }),
+    );
+
+    expect(result.participantCount).toBe(0);
   });
 });
 

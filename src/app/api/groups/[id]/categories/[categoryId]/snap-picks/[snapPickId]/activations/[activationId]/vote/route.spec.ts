@@ -6,6 +6,7 @@ const {
   mockGetOpenActivation,
   mockGetSnapPickVotesByMember,
   mockRecordSnapPickVote,
+  mockIncrementParticipantCount,
   mockUpdateSnapPickPreference,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
@@ -13,6 +14,7 @@ const {
   mockGetOpenActivation: vi.fn(),
   mockGetSnapPickVotesByMember: vi.fn(),
   mockRecordSnapPickVote: vi.fn(),
+  mockIncrementParticipantCount: vi.fn(),
   mockUpdateSnapPickPreference: vi.fn(),
 }));
 
@@ -28,6 +30,7 @@ vi.mock("@/server/data/snap-pick-activations", () => ({
   getOpenActivation: mockGetOpenActivation,
   getSnapPickVotesByMember: mockGetSnapPickVotesByMember,
   recordSnapPickVote: mockRecordSnapPickVote,
+  incrementSnapPickActivationParticipantCount: mockIncrementParticipantCount,
 }));
 
 vi.mock("@/server/data/snap-pick-preferences", () => ({
@@ -65,6 +68,7 @@ beforeEach(() => {
     votedAt: new Date("2025-03-21T11:00:00.000Z"),
     pairKey: "opt-a_opt-b",
   });
+  mockIncrementParticipantCount.mockResolvedValue(undefined);
   mockUpdateSnapPickPreference.mockResolvedValue(undefined);
 });
 
@@ -100,6 +104,45 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
 
   it("returns 201 even when the preference model update throws", async () => {
     mockUpdateSnapPickPreference.mockRejectedValue(new Error("Firebase error"));
+
+    const response = await POST(
+      makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),
+      { params },
+    );
+
+    expect(response.status).toBe(201);
+    expect(mockRecordSnapPickVote).toHaveBeenCalled();
+  });
+
+  it("increments the activation participant count on the member's first vote", async () => {
+    mockGetSnapPickVotesByMember.mockResolvedValue([]);
+
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockIncrementParticipantCount).toHaveBeenCalledWith(
+      "snap-1",
+      "act-1",
+    );
+  });
+
+  it("does not increment the participant count on a repeat voter's next vote", async () => {
+    mockGetSnapPickVotesByMember.mockResolvedValue([
+      { pairKey: "opt-c_opt-d" },
+    ]);
+
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockIncrementParticipantCount).not.toHaveBeenCalled();
+  });
+
+  it("returns 201 even when the participant-count increment throws", async () => {
+    mockIncrementParticipantCount.mockRejectedValue(
+      new Error("Firebase error"),
+    );
 
     const response = await POST(
       makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),

@@ -1,4 +1,8 @@
-import { type DataSnapshot, getDatabase } from "firebase-admin/database";
+import {
+  type DataSnapshot,
+  getDatabase,
+  ServerValue,
+} from "firebase-admin/database";
 
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
@@ -41,6 +45,22 @@ export async function closeSnapPickActivation(
     closedAt: result.closedAt.getTime(),
     winnerId: result.winnerId ?? null,
   });
+}
+
+// Bumps the denormalized participant count on an activation by one. Called when
+// a member casts their first vote in the run so the history timeline can report
+// participation without reading every vote (see #399). ServerValue.increment is
+// an atomic server-side counter, so concurrent first-votes from different
+// members each apply without clobbering one another (and it treats an absent
+// field as 0, keeping legacy activations correct).
+export async function incrementSnapPickActivationParticipantCount(
+  snapPickId: string,
+  activationId: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  await db
+    .ref(`snap-pick-activations/${snapPickId}/${activationId}/participantCount`)
+    .set(ServerValue.increment(1));
 }
 
 export async function recordSnapPickVote(
@@ -101,24 +121,6 @@ export async function getSnapPickVotesByMember(
     .get();
 
   return snapshotToVotes(snap);
-}
-
-// Reads the votes for many activations in a single query, keyed by activation
-// id. Backs the history timeline's per-activation participant counts without
-// fanning out to one read per closed activation: the whole snap-pick-votes node
-// is fetched once and grouped in memory. An empty input skips the read (a snap
-// pick with no closed runs needs no votes at all).
-export async function getSnapPickVotesByActivations(
-  activationIds: string[],
-): Promise<Map<string, SnapPickVote[]>> {
-  if (activationIds.length === 0) return new Map();
-
-  const db = getDatabase(getAdminApp());
-  const snap = await db.ref("snap-pick-votes").get();
-
-  return new Map(
-    activationIds.map((id) => [id, snapshotToVotes(snap.child(id))]),
-  );
 }
 
 // Returns the single open (not-yet-closed) activation for a snap pick, if any.

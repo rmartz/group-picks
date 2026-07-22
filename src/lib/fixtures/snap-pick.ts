@@ -40,6 +40,7 @@ export function makeSnapPickActivation(
     startedAt: new Date("2025-03-21T10:00:00.000Z"),
     closesAt: new Date("2025-03-22T00:00:00.000Z"),
     startedBy: "user-1",
+    participantCount: 3,
     ...overrides,
   };
 }
