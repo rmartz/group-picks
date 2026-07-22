@@ -40,6 +40,7 @@ interface PickDetailViewProps {
     runnersUp: ClosedPickResultEntry[];
   };
   topPickAttribution?: Record<string, OptionTierAttribution>;
+  isAdmin?: boolean;
 }
 
 export function PickDetailView({
@@ -55,6 +56,7 @@ export function PickDetailView({
   priorPickBannerData,
   closedPickResults,
   topPickAttribution = {},
+  isAdmin = false,
 }: PickDetailViewProps) {
   const router = useRouter();
   const [options, setOptions] = useState<Option[]>(initialOptions);
@@ -246,7 +248,7 @@ export function PickDetailView({
               topCount={pick.topCount}
               topPicks={closedPickResults.topPicks}
               runnersUp={closedPickResults.runnersUp}
-              onReopen={() => void handleReopen()}
+              onReopen={isAdmin ? () => void handleReopen() : undefined}
               isReopening={isReopening}
               reopenError={reopenError}
               topPickAttribution={topPickAttribution}

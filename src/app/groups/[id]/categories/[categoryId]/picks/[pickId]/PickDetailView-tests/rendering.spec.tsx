@@ -302,10 +302,31 @@ describe("closed state: renders ClosedPickResultsView", () => {
   });
 });
 
+describe("closed state: re-open card admin gating", () => {
+  it("passes onReopen to ClosedPickResultsView when the user is an admin", () => {
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      isAdmin: true,
+    });
+
+    expect(capturedOnReopen).toBeDefined();
+  });
+
+  it("does not pass onReopen to ClosedPickResultsView when the user is not an admin", () => {
+    renderView({
+      pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      isAdmin: false,
+    });
+
+    expect(capturedOnReopen).toBeUndefined();
+  });
+});
+
 describe("closed state: re-open wiring", () => {
   it("passes onReopen to ClosedPickResultsView when closed", () => {
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      isAdmin: true,
     });
 
     expect(capturedOnReopen).toBeDefined();
@@ -316,6 +337,7 @@ describe("closed state: re-open wiring", () => {
 
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      isAdmin: true,
     });
 
     // Navigate to the Top picks tab to make its content active
@@ -348,6 +370,7 @@ describe("closed state: re-open wiring", () => {
 
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      isAdmin: true,
     });
 
     fireEvent.click(
@@ -384,6 +407,7 @@ describe("closed state: re-open wiring", () => {
 
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
+      isAdmin: true,
     });
 
     fireEvent.click(

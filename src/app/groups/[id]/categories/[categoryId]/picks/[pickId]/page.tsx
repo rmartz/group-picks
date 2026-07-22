@@ -15,6 +15,7 @@ import {
   getRankingsByUser,
 } from "@/server/data/rankings";
 import { getVerifiedUid } from "@/server/utils/auth";
+import { isGroupAdmin } from "@/server/utils/permissions";
 
 import { PickDetailView } from "./PickDetailView";
 
@@ -149,6 +150,7 @@ export default async function PickDetailPage({
       priorPickBannerData={priorPickBannerData}
       closedPickResults={closedPickResults}
       topPickAttribution={topPickAttribution}
+      isAdmin={isGroupAdmin(uid, group)}
     />
   );
 }
