@@ -114,22 +114,28 @@ export async function revokeAdmin(groupId: string, uid: string): Promise<void> {
 export async function deleteGroup(
   groupId: string,
   memberIds: string[],
-  inviteToken: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  const categorySnap = await db
-    .ref("categories")
-    .orderByChild("public/groupId")
-    .equalTo(groupId)
-    .get();
+  // Every invite node — active or inactive — carries the group's id for its
+  // whole lifetime (createGroupInvite only flips `active` on regeneration), so
+  // querying by groupId captures the current token plus every historical
+  // regeneration, leaving no orphaned invites/ nodes behind.
+  const [categorySnap, inviteSnap] = await Promise.all([
+    db.ref("categories").orderByChild("public/groupId").equalTo(groupId).get(),
+    db.ref("invites").orderByChild("groupId").equalTo(groupId).get(),
+  ]);
 
   const updates: Record<string, null> = {
     [`groups/${groupId}`]: null,
-    [`invites/${inviteToken}`]: null,
   };
   for (const uid of memberIds) {
     updates[`users/${uid}/groups/${groupId}`] = null;
   }
+  inviteSnap.forEach((invite) => {
+    const inviteKey = invite.key;
+    if (!inviteKey) return;
+    updates[`invites/${inviteKey}`] = null;
+  });
   categorySnap.forEach((category) => {
     const categoryKey = category.key;
     if (!categoryKey) return;
