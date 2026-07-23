@@ -43,6 +43,7 @@ export interface FirebaseSnapPickActivation {
   closedAt?: number;
   winnerId?: string;
   startedBy: string;
+  participantCount?: number;
 }
 
 export interface FirebaseSnapPickVote {
@@ -77,6 +78,7 @@ const FirebaseSnapPickActivationSchema = z.object({
   closedAt: z.number().optional(),
   winnerId: z.string().optional(),
   startedBy: z.string(),
+  participantCount: z.number().optional(),
 });
 
 const FirebaseSnapPickVoteSchema = z.object({
@@ -149,7 +151,8 @@ export function snapPickActivationToFirebase(
     | "closedAt"
     | "winnerId"
     | "startedBy"
-  >,
+  > &
+    Partial<Pick<SnapPickActivation, "participantCount">>,
 ): FirebaseSnapPickActivation {
   return {
     snapPickId: activation.snapPickId,
@@ -158,6 +161,7 @@ export function snapPickActivationToFirebase(
     closedAt: activation.closedAt?.getTime(),
     winnerId: activation.winnerId,
     startedBy: activation.startedBy,
+    participantCount: activation.participantCount ?? 0,
   };
 }
 
@@ -175,6 +179,7 @@ export function firebaseToSnapPickActivation(
       parsed.closedAt !== undefined ? new Date(parsed.closedAt) : undefined,
     winnerId: parsed.winnerId,
     startedBy: parsed.startedBy,
+    participantCount: parsed.participantCount ?? 0,
   };
 }
 

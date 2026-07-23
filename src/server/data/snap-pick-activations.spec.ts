@@ -8,6 +8,8 @@ const {
   mockUpdate,
   mockOrderByChild,
   mockEqualTo,
+  mockIncrement,
+  mockTransaction,
 } = vi.hoisted(() => ({
   mockRef: vi.fn(),
   mockGet: vi.fn(),
@@ -16,6 +18,8 @@ const {
   mockUpdate: vi.fn(),
   mockOrderByChild: vi.fn(),
   mockEqualTo: vi.fn(),
+  mockIncrement: vi.fn(),
+  mockTransaction: vi.fn(),
 }));
 
 const { mockGetSnapPickActivations, mockGetSnapPickOptions } = vi.hoisted(
@@ -31,6 +35,7 @@ vi.mock("@/lib/firebase/admin", () => ({
 
 vi.mock("firebase-admin/database", () => ({
   getDatabase: () => ({ ref: mockRef }),
+  ServerValue: { increment: mockIncrement },
 }));
 
 vi.mock("./snap-picks", () => ({
@@ -41,9 +46,9 @@ vi.mock("./snap-picks", () => ({
 const {
   createSnapPickActivation,
   closeSnapPickActivation,
+  recordSnapPickActivationParticipant,
   recordSnapPickVote,
   getSnapPickVotes,
-  getSnapPickVotesByActivations,
   getSnapPickVotesByMember,
   getOpenActivation,
   resolveActiveActivation,
@@ -53,25 +58,6 @@ function snapshot(value: unknown) {
   return {
     exists: () => value !== undefined,
     val: () => value,
-  };
-}
-
-// A snapshot of the whole snap-pick-votes node, whose child(id) yields the
-// per-activation vote snapshot the batched reader converts.
-function votesRootSnapshot(byActivation: Record<string, unknown>) {
-  return {
-    child: (id: string) => snapshot(byActivation[id]),
-  };
-}
-
-function makeVote(overrides?: Record<string, unknown>) {
-  return {
-    winnerId: "opt-a",
-    loserId: "opt-b",
-    votedBy: "user-1",
-    votedAt: 1_700_000_000_000,
-    pairKey: "opt-a_opt-b",
-    ...overrides,
   };
 }
 
@@ -196,47 +182,41 @@ describe("getSnapPickVotes", () => {
   });
 });
 
-describe("getSnapPickVotesByActivations", () => {
-  it("reads snap-pick-votes once and groups votes by activation id", async () => {
-    mockGet.mockResolvedValue(
-      votesRootSnapshot({
-        "act-1": {
-          "vote-1": makeVote({ votedBy: "user-1" }),
-          "vote-2": makeVote({ votedBy: "user-2" }),
-        },
-        "act-2": {
-          "vote-3": makeVote({ votedBy: "user-3" }),
-        },
-      }),
+describe("recordSnapPickActivationParticipant", () => {
+  it("writes the marker and atomically increments participantCount for a new participant", async () => {
+    const sentinel = { ".sv": { increment: 1 } };
+    mockIncrement.mockReturnValue(sentinel);
+    let callCount = 0;
+    mockRef.mockImplementation(() => {
+      callCount += 1;
+      return callCount === 1
+        ? { transaction: mockTransaction }
+        : { set: mockSet };
+    });
+    mockTransaction.mockResolvedValue({ committed: true });
+    mockSet.mockResolvedValue(undefined);
+
+    await recordSnapPickActivationParticipant("snap-1", "act-1", "user-1");
+
+    expect(mockRef).toHaveBeenCalledWith(
+      "snap-pick-activation-participants/snap-1/act-1/user-1",
     );
-
-    const result = await getSnapPickVotesByActivations(["act-1", "act-2"]);
-
-    expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockRef).toHaveBeenCalledWith("snap-pick-votes");
-    expect(result.get("act-1")).toHaveLength(2);
-    expect(result.get("act-2")).toHaveLength(1);
-    expect(result.get("act-2")?.[0]?.votedBy).toBe("user-3");
+    expect(mockTransaction).toHaveBeenCalled();
+    expect(mockRef).toHaveBeenCalledWith(
+      "snap-pick-activations/snap-1/act-1/participantCount",
+    );
+    expect(mockIncrement).toHaveBeenCalledWith(1);
+    expect(mockSet).toHaveBeenCalledWith(sentinel);
   });
 
-  it("returns an empty vote list for an activation with no votes", async () => {
-    mockGet.mockResolvedValue(
-      votesRootSnapshot({
-        "act-1": { "vote-1": makeVote() },
-      }),
-    );
+  it("does not increment participantCount when the member is already registered", async () => {
+    mockRef.mockReturnValue({ transaction: mockTransaction });
+    mockTransaction.mockResolvedValue({ committed: false });
 
-    const result = await getSnapPickVotesByActivations(["act-1", "act-2"]);
+    await recordSnapPickActivationParticipant("snap-1", "act-1", "user-1");
 
-    expect(result.get("act-2")).toEqual([]);
-  });
-
-  it("skips the read entirely when given no activation ids", async () => {
-    const result = await getSnapPickVotesByActivations([]);
-
-    expect(result.size).toBe(0);
-    expect(mockGet).not.toHaveBeenCalled();
-    expect(mockRef).not.toHaveBeenCalled();
+    expect(mockTransaction).toHaveBeenCalled();
+    expect(mockSet).not.toHaveBeenCalled();
   });
 });
 

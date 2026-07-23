@@ -1,4 +1,8 @@
-import { type DataSnapshot, getDatabase } from "firebase-admin/database";
+import {
+  type DataSnapshot,
+  getDatabase,
+  ServerValue,
+} from "firebase-admin/database";
 
 import { getAdminApp } from "@/lib/firebase/admin";
 import {
@@ -41,6 +45,35 @@ export async function closeSnapPickActivation(
     closedAt: result.closedAt.getTime(),
     winnerId: result.winnerId ?? null,
   });
+}
+
+// Records a member's participation in an activation run (see #399). Writes a
+// presence marker at snap-pick-activation-participants/{snapPickId}/{activationId}/{uid}
+// via a transaction that aborts when the marker already exists, so concurrent
+// first-votes from the same member race atomically — only the winner increments
+// participantCount. Safe to call unconditionally on every vote; subsequent calls
+// for the same member are no-ops. ServerValue.increment treats an absent field
+// as 0, keeping legacy activations correct.
+export async function recordSnapPickActivationParticipant(
+  snapPickId: string,
+  activationId: string,
+  uid: string,
+): Promise<void> {
+  const db = getDatabase(getAdminApp());
+  const markerRef = db.ref(
+    `snap-pick-activation-participants/${snapPickId}/${activationId}/${uid}`,
+  );
+  const result = await markerRef.transaction((current: unknown) => {
+    if (current === null) return true;
+    return undefined; // abort — member already registered
+  });
+  if (result.committed) {
+    await db
+      .ref(
+        `snap-pick-activations/${snapPickId}/${activationId}/participantCount`,
+      )
+      .set(ServerValue.increment(1));
+  }
 }
 
 export async function recordSnapPickVote(
@@ -101,24 +134,6 @@ export async function getSnapPickVotesByMember(
     .get();
 
   return snapshotToVotes(snap);
-}
-
-// Reads the votes for many activations in a single query, keyed by activation
-// id. Backs the history timeline's per-activation participant counts without
-// fanning out to one read per closed activation: the whole snap-pick-votes node
-// is fetched once and grouped in memory. An empty input skips the read (a snap
-// pick with no closed runs needs no votes at all).
-export async function getSnapPickVotesByActivations(
-  activationIds: string[],
-): Promise<Map<string, SnapPickVote[]>> {
-  if (activationIds.length === 0) return new Map();
-
-  const db = getDatabase(getAdminApp());
-  const snap = await db.ref("snap-pick-votes").get();
-
-  return new Map(
-    activationIds.map((id) => [id, snapshotToVotes(snap.child(id))]),
-  );
 }
 
 // Returns the single open (not-yet-closed) activation for a snap pick, if any.
