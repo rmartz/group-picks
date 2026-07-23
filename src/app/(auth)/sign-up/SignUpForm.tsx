@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { firebaseAuthErrorMessage } from "@/lib/firebase/auth-error";
 import { createSession, signUp } from "@/services/auth";
 
 import { SIGN_UP_COPY } from "./copy";
@@ -38,8 +39,7 @@ export default function SignUpForm() {
       router.push(inviteToken ? `/invite/${inviteToken}` : "/");
     } catch (err) {
       const code = (err as FirebaseError).code;
-      const messages = SIGN_UP_COPY.errors;
-      setError((messages as Record<string, string>)[code] ?? messages.default);
+      setError(firebaseAuthErrorMessage(code, SIGN_UP_COPY.errors));
     } finally {
       setLoading(false);
     }

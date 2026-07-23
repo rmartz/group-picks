@@ -143,4 +143,46 @@ describe("SignUpForm", () => {
     const signInLink = screen.getByText(SIGN_UP_COPY.signInLink).closest("a");
     expect(signInLink?.getAttribute("href")).toBe("/sign-in");
   });
+
+  it("shows the email-already-exists message for the SDK auth/email-already-in-use code", async () => {
+    vi.mocked(signUp).mockRejectedValue({ code: "auth/email-already-in-use" });
+
+    render(<SignUpForm />);
+    fireEvent.change(screen.getByLabelText(SIGN_UP_COPY.emailLabel), {
+      target: { value: "taken@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(SIGN_UP_COPY.passwordLabel), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }),
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(SIGN_UP_COPY.errors["auth/email-already-in-use"]),
+      ).toBeDefined();
+    });
+  });
+
+  it("shows the email-already-exists message for the raw EMAIL_EXISTS code", async () => {
+    vi.mocked(signUp).mockRejectedValue({ code: "EMAIL_EXISTS" });
+
+    render(<SignUpForm />);
+    fireEvent.change(screen.getByLabelText(SIGN_UP_COPY.emailLabel), {
+      target: { value: "taken@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(SIGN_UP_COPY.passwordLabel), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: SIGN_UP_COPY.submitButton }),
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(SIGN_UP_COPY.errors["auth/email-already-in-use"]),
+      ).toBeDefined();
+    });
+  });
 });

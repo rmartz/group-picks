@@ -4,6 +4,7 @@ import type { FirebaseError } from "firebase/app";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { firebaseAuthErrorMessage } from "@/lib/firebase/auth-error";
 import {
   createSession,
   signIn,
@@ -49,8 +50,7 @@ export default function SignInForm() {
       router.push(getRedirectPath());
     } catch (err) {
       const code = (err as FirebaseError).code;
-      const messages = SIGN_IN_COPY.errors;
-      setError((messages as Record<string, string>)[code] ?? messages.default);
+      setError(firebaseAuthErrorMessage(code, SIGN_IN_COPY.errors));
     } finally {
       setLoading(false);
     }
@@ -70,8 +70,7 @@ export default function SignInForm() {
       ) {
         return;
       }
-      const messages = SIGN_IN_COPY.errors;
-      setError((messages as Record<string, string>)[code] ?? messages.default);
+      setError(firebaseAuthErrorMessage(code, SIGN_IN_COPY.errors));
     } finally {
       setLoading(false);
     }

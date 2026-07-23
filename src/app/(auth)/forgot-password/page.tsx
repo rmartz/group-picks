@@ -7,6 +7,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  firebaseAuthErrorMessage,
+  normalizeFirebaseAuthCode,
+} from "@/lib/firebase/auth-error";
 import { sendPasswordReset } from "@/services/auth";
 
 import { FORGOT_PASSWORD_COPY } from "./copy";
@@ -26,8 +30,13 @@ export default function ForgotPasswordPage() {
       setSubmitted(true);
     } catch (err) {
       const code = (err as FirebaseError).code;
-      const messages = FORGOT_PASSWORD_COPY.errors;
-      setError((messages as Record<string, string>)[code] ?? messages.default);
+      // Enumeration-safe: a missing account is reported as success so the
+      // response never reveals whether an account exists for the email.
+      if (normalizeFirebaseAuthCode(code) === "auth/user-not-found") {
+        setSubmitted(true);
+      } else {
+        setError(firebaseAuthErrorMessage(code, FORGOT_PASSWORD_COPY.errors));
+      }
     } finally {
       setLoading(false);
     }
