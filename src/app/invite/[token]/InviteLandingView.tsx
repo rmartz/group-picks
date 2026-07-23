@@ -90,7 +90,10 @@ export function InviteLandingView({
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {INVITE_LANDING_COPY.whoIsInHeading}
           </p>
-          <AvatarGroup aria-label={INVITE_LANDING_COPY.whoIsInAvatarGroupLabel}>
+          <AvatarGroup
+            role="group"
+            aria-label={INVITE_LANDING_COPY.whoIsInAvatarGroupLabel}
+          >
             {memberNames.map((name, index) => (
               <Avatar key={`${name}-${String(index)}`} aria-label={name}>
                 <AvatarFallback>
