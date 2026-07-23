@@ -24,10 +24,13 @@ variables:
   NEXT_PUBLIC_FIREBASE_APP_ID: "1:602500582991:web:1d46a0cf7e8ec3a31c243a"
   NEXT_PUBLIC_FIREBASE_DATABASE_URL: "https://group-picks-default-rtdb.firebaseio.com"
 
-  # Firebase Admin SDK — project identifiers only, not credentials
+  # Firebase Admin SDK — project identifiers only, not credentials.
+  # The service account itself (FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY) is
+  # a Vercel-managed secret and is never committed here (the schema denies
+  # FIREBASE_CLIENT_EMAIL). FIREBASE_SA_EMAIL used to duplicate the SA email
+  # under a non-denied alias but was read by no code, so it has been removed.
   FIREBASE_PROJECT_ID: "group-picks"
   FIREBASE_DATABASE_URL: "https://group-picks-default-rtdb.firebaseio.com"
-  FIREBASE_SA_EMAIL: "firebase-adminsdk-fbsvc@group-picks.iam.gserviceaccount.com"
 
   # Sentry — slugs and public DSN (NEXT_PUBLIC_SENTRY_DSN is bundled into client JS; not a secret)
   # SENTRY_DSN (server-side) and SENTRY_AUTH_TOKEN are managed as Vercel secrets — not committed here
