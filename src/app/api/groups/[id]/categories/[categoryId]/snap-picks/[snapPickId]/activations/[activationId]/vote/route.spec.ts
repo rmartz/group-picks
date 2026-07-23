@@ -6,7 +6,7 @@ const {
   mockGetOpenActivation,
   mockGetSnapPickVotesByMember,
   mockRecordSnapPickVote,
-  mockIncrementParticipantCount,
+  mockRecordParticipant,
   mockUpdateSnapPickPreference,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
@@ -14,7 +14,7 @@ const {
   mockGetOpenActivation: vi.fn(),
   mockGetSnapPickVotesByMember: vi.fn(),
   mockRecordSnapPickVote: vi.fn(),
-  mockIncrementParticipantCount: vi.fn(),
+  mockRecordParticipant: vi.fn(),
   mockUpdateSnapPickPreference: vi.fn(),
 }));
 
@@ -30,7 +30,7 @@ vi.mock("@/server/data/snap-pick-activations", () => ({
   getOpenActivation: mockGetOpenActivation,
   getSnapPickVotesByMember: mockGetSnapPickVotesByMember,
   recordSnapPickVote: mockRecordSnapPickVote,
-  incrementSnapPickActivationParticipantCount: mockIncrementParticipantCount,
+  recordSnapPickActivationParticipant: mockRecordParticipant,
 }));
 
 vi.mock("@/server/data/snap-pick-preferences", () => ({
@@ -68,7 +68,7 @@ beforeEach(() => {
     votedAt: new Date("2025-03-21T11:00:00.000Z"),
     pairKey: "opt-a_opt-b",
   });
-  mockIncrementParticipantCount.mockResolvedValue(undefined);
+  mockRecordParticipant.mockResolvedValue(undefined);
   mockUpdateSnapPickPreference.mockResolvedValue(undefined);
 });
 
@@ -114,20 +114,15 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
     expect(mockRecordSnapPickVote).toHaveBeenCalled();
   });
 
-  it("increments the activation participant count on the member's first vote", async () => {
-    mockGetSnapPickVotesByMember.mockResolvedValue([]);
-
+  it("records the member as a participant after a successful vote", async () => {
     await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
       params,
     });
 
-    expect(mockIncrementParticipantCount).toHaveBeenCalledWith(
-      "snap-1",
-      "act-1",
-    );
+    expect(mockRecordParticipant).toHaveBeenCalledWith("snap-1", "act-1", "user-1");
   });
 
-  it("does not increment the participant count on a repeat voter's next vote", async () => {
+  it("records the member as a participant even when they have prior votes", async () => {
     mockGetSnapPickVotesByMember.mockResolvedValue([
       { pairKey: "opt-c_opt-d" },
     ]);
@@ -136,13 +131,11 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
       params,
     });
 
-    expect(mockIncrementParticipantCount).not.toHaveBeenCalled();
+    expect(mockRecordParticipant).toHaveBeenCalledWith("snap-1", "act-1", "user-1");
   });
 
-  it("returns 201 even when the participant-count increment throws", async () => {
-    mockIncrementParticipantCount.mockRejectedValue(
-      new Error("Firebase error"),
-    );
+  it("returns 201 even when participant recording throws", async () => {
+    mockRecordParticipant.mockRejectedValue(new Error("Firebase error"));
 
     const response = await POST(
       makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),

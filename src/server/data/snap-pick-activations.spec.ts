@@ -9,6 +9,7 @@ const {
   mockOrderByChild,
   mockEqualTo,
   mockIncrement,
+  mockTransaction,
 } = vi.hoisted(() => ({
   mockRef: vi.fn(),
   mockGet: vi.fn(),
@@ -18,6 +19,7 @@ const {
   mockOrderByChild: vi.fn(),
   mockEqualTo: vi.fn(),
   mockIncrement: vi.fn(),
+  mockTransaction: vi.fn(),
 }));
 
 const { mockGetSnapPickActivations, mockGetSnapPickOptions } = vi.hoisted(
@@ -44,7 +46,7 @@ vi.mock("./snap-picks", () => ({
 const {
   createSnapPickActivation,
   closeSnapPickActivation,
-  incrementSnapPickActivationParticipantCount,
+  recordSnapPickActivationParticipant,
   recordSnapPickVote,
   getSnapPickVotes,
   getSnapPickVotesByMember,
@@ -180,20 +182,41 @@ describe("getSnapPickVotes", () => {
   });
 });
 
-describe("incrementSnapPickActivationParticipantCount", () => {
-  it("atomically increments participantCount on the activation node", async () => {
+describe("recordSnapPickActivationParticipant", () => {
+  it("writes the marker and atomically increments participantCount for a new participant", async () => {
     const sentinel = { ".sv": { increment: 1 } };
     mockIncrement.mockReturnValue(sentinel);
-    mockRef.mockReturnValue({ set: mockSet });
+    let callCount = 0;
+    mockRef.mockImplementation(() => {
+      callCount += 1;
+      return callCount === 1
+        ? { transaction: mockTransaction }
+        : { set: mockSet };
+    });
+    mockTransaction.mockResolvedValue({ committed: true });
     mockSet.mockResolvedValue(undefined);
 
-    await incrementSnapPickActivationParticipantCount("snap-1", "act-1");
+    await recordSnapPickActivationParticipant("snap-1", "act-1", "user-1");
 
+    expect(mockRef).toHaveBeenCalledWith(
+      "snap-pick-activation-participants/snap-1/act-1/user-1",
+    );
+    expect(mockTransaction).toHaveBeenCalled();
     expect(mockRef).toHaveBeenCalledWith(
       "snap-pick-activations/snap-1/act-1/participantCount",
     );
     expect(mockIncrement).toHaveBeenCalledWith(1);
     expect(mockSet).toHaveBeenCalledWith(sentinel);
+  });
+
+  it("does not increment participantCount when the member is already registered", async () => {
+    mockRef.mockReturnValue({ transaction: mockTransaction });
+    mockTransaction.mockResolvedValue({ committed: false });
+
+    await recordSnapPickActivationParticipant("snap-1", "act-1", "user-1");
+
+    expect(mockTransaction).toHaveBeenCalled();
+    expect(mockSet).not.toHaveBeenCalled();
   });
 });
 

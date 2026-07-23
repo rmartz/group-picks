@@ -47,20 +47,33 @@ export async function closeSnapPickActivation(
   });
 }
 
-// Bumps the denormalized participant count on an activation by one. Called when
-// a member casts their first vote in the run so the history timeline can report
-// participation without reading every vote (see #399). ServerValue.increment is
-// an atomic server-side counter, so concurrent first-votes from different
-// members each apply without clobbering one another (and it treats an absent
-// field as 0, keeping legacy activations correct).
-export async function incrementSnapPickActivationParticipantCount(
+// Records a member's participation in an activation run (see #399). Writes a
+// presence marker at snap-pick-activation-participants/{snapPickId}/{activationId}/{uid}
+// via a transaction that aborts when the marker already exists, so concurrent
+// first-votes from the same member race atomically — only the winner increments
+// participantCount. Safe to call unconditionally on every vote; subsequent calls
+// for the same member are no-ops. ServerValue.increment treats an absent field
+// as 0, keeping legacy activations correct.
+export async function recordSnapPickActivationParticipant(
   snapPickId: string,
   activationId: string,
+  uid: string,
 ): Promise<void> {
   const db = getDatabase(getAdminApp());
-  await db
-    .ref(`snap-pick-activations/${snapPickId}/${activationId}/participantCount`)
-    .set(ServerValue.increment(1));
+  const markerRef = db.ref(
+    `snap-pick-activation-participants/${snapPickId}/${activationId}/${uid}`,
+  );
+  const result = await markerRef.transaction((current: unknown) => {
+    if (current === null) return true;
+    return undefined; // abort — member already registered
+  });
+  if (result.committed) {
+    await db
+      .ref(
+        `snap-pick-activations/${snapPickId}/${activationId}/participantCount`,
+      )
+      .set(ServerValue.increment(1));
+  }
 }
 
 export async function recordSnapPickVote(
