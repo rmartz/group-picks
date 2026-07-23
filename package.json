@@ -32,7 +32,7 @@
       "protobufjs"
     ],
     "overrides": {
-      "jose": "^5.10.0"
+      "jwks-rsa>jose": "^5.10.0"
     }
   },
   "dependencies": {
