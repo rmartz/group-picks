@@ -119,7 +119,11 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
       params,
     });
 
-    expect(mockRecordParticipant).toHaveBeenCalledWith("snap-1", "act-1", "user-1");
+    expect(mockRecordParticipant).toHaveBeenCalledWith(
+      "snap-1",
+      "act-1",
+      "user-1",
+    );
   });
 
   it("records the member as a participant even when they have prior votes", async () => {
@@ -131,7 +135,11 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
       params,
     });
 
-    expect(mockRecordParticipant).toHaveBeenCalledWith("snap-1", "act-1", "user-1");
+    expect(mockRecordParticipant).toHaveBeenCalledWith(
+      "snap-1",
+      "act-1",
+      "user-1",
+    );
   });
 
   it("returns 201 even when participant recording throws", async () => {
