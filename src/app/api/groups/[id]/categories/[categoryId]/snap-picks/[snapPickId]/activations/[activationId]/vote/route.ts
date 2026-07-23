@@ -4,6 +4,7 @@ import { pairKey } from "@/lib/snap-pick-pairing";
 import {
   getOpenActivation,
   getSnapPickVotesByMember,
+  recordSnapPickActivationParticipant,
   recordSnapPickVote,
 } from "@/server/data/snap-pick-activations";
 import { updateSnapPickPreference } from "@/server/data/snap-pick-preferences";
@@ -88,6 +89,17 @@ export async function POST(request: Request, { params }: RouteParams) {
     loserId: parsed.loserId,
     votedBy: uid,
   });
+
+  // Denormalize the participant count onto the activation (see #399). The
+  // function uses a transaction on a per-member marker so concurrent requests
+  // from the same member cannot double-increment the count. Errors are swallowed
+  // — the count is a derived display value and a transient failure must not
+  // return 500 after the vote is committed.
+  try {
+    await recordSnapPickActivationParticipant(snapPickId, activationId, uid);
+  } catch {
+    // non-critical
+  }
 
   // Fold the cast vote into the member's global preference model (O(1) Elo
   // update) so future activations focus matchups on the options they care about.

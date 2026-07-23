@@ -6,6 +6,7 @@ const {
   mockGetOpenActivation,
   mockGetSnapPickVotesByMember,
   mockRecordSnapPickVote,
+  mockRecordParticipant,
   mockUpdateSnapPickPreference,
 } = vi.hoisted(() => ({
   mockGetVerifiedUid: vi.fn(),
@@ -13,6 +14,7 @@ const {
   mockGetOpenActivation: vi.fn(),
   mockGetSnapPickVotesByMember: vi.fn(),
   mockRecordSnapPickVote: vi.fn(),
+  mockRecordParticipant: vi.fn(),
   mockUpdateSnapPickPreference: vi.fn(),
 }));
 
@@ -28,6 +30,7 @@ vi.mock("@/server/data/snap-pick-activations", () => ({
   getOpenActivation: mockGetOpenActivation,
   getSnapPickVotesByMember: mockGetSnapPickVotesByMember,
   recordSnapPickVote: mockRecordSnapPickVote,
+  recordSnapPickActivationParticipant: mockRecordParticipant,
 }));
 
 vi.mock("@/server/data/snap-pick-preferences", () => ({
@@ -65,6 +68,7 @@ beforeEach(() => {
     votedAt: new Date("2025-03-21T11:00:00.000Z"),
     pairKey: "opt-a_opt-b",
   });
+  mockRecordParticipant.mockResolvedValue(undefined);
   mockUpdateSnapPickPreference.mockResolvedValue(undefined);
 });
 
@@ -100,6 +104,46 @@ describe("POST /api/.../activations/[activationId]/vote", () => {
 
   it("returns 201 even when the preference model update throws", async () => {
     mockUpdateSnapPickPreference.mockRejectedValue(new Error("Firebase error"));
+
+    const response = await POST(
+      makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),
+      { params },
+    );
+
+    expect(response.status).toBe(201);
+    expect(mockRecordSnapPickVote).toHaveBeenCalled();
+  });
+
+  it("records the member as a participant after a successful vote", async () => {
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockRecordParticipant).toHaveBeenCalledWith(
+      "snap-1",
+      "act-1",
+      "user-1",
+    );
+  });
+
+  it("records the member as a participant even when they have prior votes", async () => {
+    mockGetSnapPickVotesByMember.mockResolvedValue([
+      { pairKey: "opt-c_opt-d" },
+    ]);
+
+    await POST(makeRequest({ winnerId: "opt-a", loserId: "opt-b" }), {
+      params,
+    });
+
+    expect(mockRecordParticipant).toHaveBeenCalledWith(
+      "snap-1",
+      "act-1",
+      "user-1",
+    );
+  });
+
+  it("returns 201 even when participant recording throws", async () => {
+    mockRecordParticipant.mockRejectedValue(new Error("Firebase error"));
 
     const response = await POST(
       makeRequest({ winnerId: "opt-a", loserId: "opt-b" }),

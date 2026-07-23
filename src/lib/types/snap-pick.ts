@@ -23,6 +23,11 @@ export interface SnapPickActivation {
   closedAt?: Date;
   winnerId?: string;
   startedBy: string;
+  // Denormalized count of distinct members who have cast at least one vote in
+  // this run. Incremented on a member's first vote so the history timeline can
+  // show participation without reading every vote (see #399). Legacy documents
+  // written before this field default to 0 on read.
+  participantCount: number;
 }
 
 // A Snap Pick together with one of its currently-running activations. Surfaced
