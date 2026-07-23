@@ -40,7 +40,7 @@ export function normalizeFirebaseAuthCode(code: string): string {
 
 interface AuthErrorMessages {
   readonly default: string;
-  readonly [code: string]: string;
+  readonly [code: string]: string | undefined;
 }
 
 /**

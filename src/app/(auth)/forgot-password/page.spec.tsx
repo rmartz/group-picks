@@ -45,6 +45,21 @@ describe("ForgotPasswordPage enumeration safety", () => {
       ).toBeDefined();
     });
   });
+
+  it("shows the neutral success message for raw EMAIL_NOT_FOUND code", async () => {
+    vi.mocked(sendPasswordReset).mockRejectedValue({
+      code: "EMAIL_NOT_FOUND",
+    });
+
+    render(<ForgotPasswordPage />);
+    submitEmail("missing@example.com");
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(FORGOT_PASSWORD_COPY.successMessage),
+      ).toBeDefined();
+    });
+  });
 });
 
 describe("ForgotPasswordPage error mapping", () => {
