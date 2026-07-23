@@ -39,6 +39,13 @@ export const UnauthenticatedWithManyMembers: Story = {
   },
 };
 
+export const UnauthenticatedExactMembers: Story = {
+  args: {
+    memberCount: 3,
+    memberNames: ["Alice", "Bob", "Carol"],
+  },
+};
+
 export const UnauthenticatedSingleMember: Story = {
   args: {
     memberCount: 1,

@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -47,6 +53,7 @@ export function InviteLandingView({
   const memberSubtitle = invitedByName
     ? `${String(memberCount)} ${memberLabel} · ${INVITE_LANDING_COPY.invitedBy} ${invitedByName}`
     : `${String(memberCount)} ${memberLabel}`;
+  const overflowCount = memberCount - memberNames.length;
 
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
@@ -79,14 +86,33 @@ export function InviteLandingView({
       )}
 
       {memberNames.length > 0 && (
-        <div className="rounded-lg border p-4 space-y-1">
+        <div className="rounded-lg border p-4 space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {INVITE_LANDING_COPY.whoIsInHeading}
           </p>
+          <AvatarGroup
+            role="group"
+            aria-label={INVITE_LANDING_COPY.whoIsInAvatarGroupLabel}
+          >
+            {memberNames.map((name, index) => (
+              <Avatar key={`${name}-${String(index)}`} aria-label={name}>
+                <AvatarFallback>
+                  {name.trim().charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+            {overflowCount > 0 && (
+              <AvatarGroupCount
+                aria-label={`+${String(overflowCount)}${INVITE_LANDING_COPY.memberOverflowSuffix}`}
+              >
+                +{String(overflowCount)}
+              </AvatarGroupCount>
+            )}
+          </AvatarGroup>
           <p className="text-sm text-muted-foreground">
             {memberNames.join(", ")}
-            {memberCount > memberNames.length &&
-              `, +${String(memberCount - memberNames.length)}${INVITE_LANDING_COPY.memberOverflowSuffix}`}
+            {overflowCount > 0 &&
+              `, +${String(overflowCount)}${INVITE_LANDING_COPY.memberOverflowSuffix}`}
           </p>
         </div>
       )}

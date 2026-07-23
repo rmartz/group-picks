@@ -108,6 +108,53 @@ describe("who's in overflow count", () => {
   });
 });
 
+describe("who's in avatar stack", () => {
+  it("renders one avatar per previewed member with its initial", () => {
+    render(
+      <InviteLandingView
+        {...makeDefaultProps()}
+        memberCount={2}
+        memberNames={["Alex", "Jamie"]}
+        signInHref="/sign-in"
+      />,
+    );
+    const group = screen.getByLabelText(
+      INVITE_LANDING_COPY.whoIsInAvatarGroupLabel,
+    );
+    expect(group.textContent).toContain("A");
+    expect(group.textContent).toContain("J");
+  });
+
+  it("shows a +N overflow avatar when memberCount exceeds the preview names", () => {
+    render(
+      <InviteLandingView
+        {...makeDefaultProps()}
+        memberCount={10}
+        memberNames={["Alex", "Jamie", "Sam"]}
+        signInHref="/sign-in"
+      />,
+    );
+    const group = screen.getByLabelText(
+      INVITE_LANDING_COPY.whoIsInAvatarGroupLabel,
+    );
+    expect(group.textContent).toContain("+7");
+  });
+
+  it("does not render the avatar stack when member names are empty", () => {
+    render(
+      <InviteLandingView
+        {...makeDefaultProps()}
+        memberCount={0}
+        memberNames={[]}
+        signInHref="/sign-in"
+      />,
+    );
+    expect(
+      screen.queryByLabelText(INVITE_LANDING_COPY.whoIsInAvatarGroupLabel),
+    ).toBeNull();
+  });
+});
+
 describe("currently picking section", () => {
   it("renders the pick title when a current pick is provided", () => {
     render(
