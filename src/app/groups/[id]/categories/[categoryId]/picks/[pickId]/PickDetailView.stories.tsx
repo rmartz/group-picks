@@ -78,6 +78,26 @@ type Story = StoryObj<typeof PickDetailView>;
 
 export const OpenPick: Story = {};
 
+export const OpenPickLiveResults: Story = {
+  args: {
+    pick: { ...mockPick, resultsVisible: true },
+    closedPickResults: mockClosedPickResults,
+  },
+};
+
+export const OpenPickLockedResults: Story = {
+  args: {
+    pick: {
+      ...mockPick,
+      resultsVisible: false,
+      dueDate: new Date("2025-06-04T09:00:00.000Z"),
+    },
+    rankedCount: 3,
+    memberCount: 5,
+    now: new Date("2025-06-01T00:00:00.000Z"),
+  },
+};
+
 export const ClosedPickNonCreator: Story = {
   args: {
     pick: mockClosedPick,
