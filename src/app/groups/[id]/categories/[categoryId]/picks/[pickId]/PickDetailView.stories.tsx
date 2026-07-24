@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { userEvent, within } from "storybook/test";
 
 import type { ClosedPickResultEntry } from "@/lib/ranking-score";
 import type { Option } from "@/lib/types/option";
@@ -6,6 +7,7 @@ import type { GroupPick } from "@/lib/types/pick";
 import { RankingMode } from "@/lib/types/pick";
 import { RankingTier } from "@/lib/types/ranking";
 
+import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { PickDetailView } from "./PickDetailView";
 
 const mockPick: GroupPick = {
@@ -83,6 +85,14 @@ export const OpenPickLiveResults: Story = {
     pick: { ...mockPick, resultsVisible: true },
     closedPickResults: mockClosedPickResults,
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
+      }),
+    );
+  },
 };
 
 export const OpenPickLockedResults: Story = {
@@ -95,6 +105,14 @@ export const OpenPickLockedResults: Story = {
     rankedCount: 3,
     memberCount: 5,
     now: new Date("2025-06-01T00:00:00.000Z"),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole("tab", {
+        name: PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks,
+      }),
+    );
   },
 };
 
