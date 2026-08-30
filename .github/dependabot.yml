@@ -4,11 +4,16 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # Wait 7 days after a version is published before opening an update PR, so a
-    # compromised release has time to be detected and yanked before we pull it
-    # in (supply-chain exposure reduction).
-    cooldown:
-      default-days: 7
+    # NOTE: Do NOT re-add a `cooldown` here. Dependabot enforces npm cooldown by
+    # passing pnpm a `minimumReleaseAge` during lockfile regeneration; whenever any
+    # transitive dep in the fast-moving Storybook/Vite toolchain (e.g. `terser`) has
+    # a release inside the window, pnpm hard-fails with
+    # ERR_PNPM_NO_MATURE_MATCHING_VERSION instead of falling back to an older mature
+    # version. That breaks the whole grouped run, so every dependency fails and the
+    # PR is closed as `update_no_longer_possible` — silently starving the repo of
+    # security updates. A lockfile-freshness cooldown cannot coexist with Dependabot
+    # always resolving to latest. (The github-actions ecosystem below keeps its
+    # cooldown: those runs succeed and it guards the tj-actions supply-chain class.)
     commit-message:
       prefix: "chore"
       include: "scope"
