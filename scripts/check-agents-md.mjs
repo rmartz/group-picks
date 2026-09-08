@@ -102,6 +102,7 @@ function main() {
 
   if (violations.length > 0) {
     console.error("Agent directive-file convention violations:\n");
+    violations.sort();
     for (const violation of violations) console.error(`  ✗ ${violation}`);
     console.error(
       `\n${violations.length} violation(s). Fix them so that every AGENTS.md has a` +
