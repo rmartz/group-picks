@@ -34,6 +34,7 @@ const ALLOWED_TYPES = [
   "DataModel",
   "Domain",
   "Index",
+  "Reference",
   "Workflow",
 ];
 const INDEX = "index.md";

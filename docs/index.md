@@ -21,9 +21,14 @@ Every page declares one `type` in its frontmatter. The canonical vocabulary for 
 | `Architecture` | Cross-cutting structure: layering, the stack, how pieces fit.         |
 | `DataModel`    | Persistence shape: database paths, document schemas, converters.      |
 | `Domain`       | A single product domain: its lifecycle, rules, and data-layer module. |
+| `Reference`    | An external standard, format, or convention this repo follows.        |
 | `Workflow`     | A repeatable operational process: deploy, config, release.            |
 
 ## Pages
+
+### Reference
+
+- [OKF format](okf-format.md) — how these docs follow Google's Open Knowledge Format, with a link to the authoritative spec for any format questions.
 
 ### Architecture
 
