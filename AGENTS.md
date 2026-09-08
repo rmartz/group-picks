@@ -110,6 +110,12 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 ## Documentation
 
 - Keep documentation in sync with the code — outdated docs are worse than no docs.
+- **Reference docs live under `docs/`** as OKF (Open Knowledge Format) pages: every `.md` opens
+  with YAML frontmatter (`type`, `title`, `description`; optional `resource`, `tags`), and the
+  tree is navigable from `docs/index.md` — every page is linked from its directory's `index.md`,
+  and every subdirectory `index.md` from its parent. Both rules are enforced in CI by
+  `scripts/validate-docs.mjs` (run locally with `pnpm run docs:validate`); see
+  [`docs/index.md`](docs/index.md) for the frontmatter spec and `type` vocabulary.
 
 ## Agent Directive Files
 
