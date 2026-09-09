@@ -4,7 +4,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # NOTE: Do NOT re-add a `cooldown` here. Dependabot enforces npm cooldown by
+    # NOTE: Do NOT add a `cooldown` here. Dependabot enforces an npm cooldown by
     # passing pnpm a `minimumReleaseAge` during lockfile regeneration; whenever any
     # transitive dep in the fast-moving Storybook/Vite toolchain (e.g. `terser`) has
     # a release inside the window, pnpm hard-fails with
@@ -12,8 +12,7 @@ updates:
     # version. That breaks the whole grouped run, so every dependency fails and the
     # PR is closed as `update_no_longer_possible` — silently starving the repo of
     # security updates. A lockfile-freshness cooldown cannot coexist with Dependabot
-    # always resolving to latest. (The github-actions ecosystem below keeps its
-    # cooldown: those runs succeed and it guards the tj-actions supply-chain class.)
+    # always resolving to latest, so cooldown is disabled for this ecosystem.
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -119,8 +118,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    cooldown:
-      default-days: 7
+    # NOTE: Do NOT add a `cooldown` here. Dependabot's cooldown for github-actions
+    # is leaky: it suppresses the initial bump PR but immediately raises a follow-up
+    # once the window passes, providing no real protection while adding delay. SHA
+    # pinning (enforced by `action-pins.yml`) is the actual supply-chain control;
+    # cooldown adds no security benefit on top of it.
     commit-message:
       prefix: "chore"
       include: "scope"
