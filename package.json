@@ -19,6 +19,7 @@
     "storybook-tests": "vitest --project=storybook",
     "prepare": "husky",
     "agents:validate": "node scripts/check-agents-md.mjs",
+    "docs:validate": "node scripts/validate-docs.mjs",
     "env:validate": "node scripts/validate-config.mjs",
     "pins:actions": "node scripts/check-action-pins.mjs",
     "pins:check": "node scripts/check-package-pins.mjs",

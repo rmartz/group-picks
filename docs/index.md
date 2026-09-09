@@ -21,9 +21,14 @@ Every page declares one `type` in its frontmatter. The canonical vocabulary for 
 | `Architecture` | Cross-cutting structure: layering, the stack, how pieces fit.         |
 | `DataModel`    | Persistence shape: database paths, document schemas, converters.      |
 | `Domain`       | A single product domain: its lifecycle, rules, and data-layer module. |
+| `Reference`    | An external standard, format, or convention this repo follows.        |
 | `Workflow`     | A repeatable operational process: deploy, config, release.            |
 
 ## Pages
+
+### Reference
+
+- [OKF format](okf-format.md) — how these docs follow Google's Open Knowledge Format, with a link to the authoritative spec for any format questions.
 
 ### Architecture
 
@@ -47,4 +52,6 @@ Every page declares one `type` in its frontmatter. The canonical vocabulary for 
 
 ## Authoring
 
-When adding a page, give it frontmatter (`type` is required; `title`, `description`, `resource`, `tags` are recommended) and add it to the relevant section above. See the docs-authoring directive in `AGENTS.md`.
+When adding a page, give it frontmatter (`type`, `title`, and `description` are required; `resource` and `tags` are recommended — a `resource` path, if given, must exist) and link it from the relevant section above so the tree stays navigable from this index. A page in a subdirectory is linked from that directory's `index.md`, and the subdirectory's `index.md` is linked from its parent — so every page is reachable by following links from here.
+
+Both rules are enforced in CI by `scripts/validate-docs.mjs` (run locally with `pnpm run docs:validate`). See the documentation directive in `AGENTS.md`.
