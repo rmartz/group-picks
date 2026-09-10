@@ -74,6 +74,52 @@ describe("frontmatterViolations: index.md rejects any frontmatter beyond okf_ver
   });
 });
 
+describe("frontmatterViolations: index.md edge cases — malformed, empty, and subdirectory restrictions", () => {
+  it("flags malformed frontmatter (no closing fence) on root index.md", () => {
+    const content = "---\nokf_version: \"0.2\"\n# no closing fence";
+    const violations = frontmatterViolations("index.md", content);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatch(/malformed frontmatter/);
+  });
+
+  it("flags malformed frontmatter (no closing fence) on a subdirectory index.md", () => {
+    const content = "---\nokf_version: \"0.2\"\n# no closing fence";
+    const violations = frontmatterViolations("guides/index.md", content);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatch(/malformed frontmatter/);
+  });
+
+  it("flags an empty frontmatter block on root index.md", () => {
+    const content = ["---", "---", "", "# Base"].join("\n");
+    const violations = frontmatterViolations("index.md", content);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatch(/empty --- block/);
+  });
+
+  it("flags an empty frontmatter block on a subdirectory index.md", () => {
+    const content = ["---", "---", "", "# Guides"].join("\n");
+    const violations = frontmatterViolations("guides/index.md", content);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatch(/empty --- block/);
+  });
+
+  it("rejects okf_version on a subdirectory index.md", () => {
+    const content = ["---", 'okf_version: "0.2"', "---", "", "# Guides"].join(
+      "\n",
+    );
+    const violations = frontmatterViolations("guides/index.md", content);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatch(/subdirectory index files carry no frontmatter/);
+    expect(violations[0]).toMatch(/okf_version/);
+  });
+
+  it("accepts a deeply-nested subdirectory index.md with no frontmatter", () => {
+    expect(
+      frontmatterViolations("guides/auth/index.md", "# Auth\n"),
+    ).toEqual([]);
+  });
+});
+
 describe("frontmatterViolations: content (non-index) pages still require a valid OKF type", () => {
   it("accepts a content page with a valid type, title, and description", () => {
     expect(frontmatterViolations("invites.md", CONTENT_PAGE)).toEqual([]);

@@ -97,13 +97,31 @@ export function frontmatterViolations(pageRel, content) {
   const fm = parseFrontmatter(content);
 
   if (posix.basename(pageRel) === INDEX) {
-    if (!fm) return [];
+    const hasOpener = content.split("\n")[0]?.trim() === "---";
+    if (!hasOpener) return [];
+    if (fm === undefined) {
+      return [
+        `${label}: malformed frontmatter (opening --- has no closing fence)`,
+      ];
+    }
+    if (Object.keys(fm).length === 0) {
+      return [
+        `${label}: index files carry no frontmatter (empty --- block is not allowed)`,
+      ];
+    }
+    // Only the bundle-root index.md may carry okf_version (OKF §8); subdirectory
+    // index files must carry no frontmatter at all.
+    const isRoot = pageRel === INDEX;
+    const allowedKeys = isRoot ? INDEX_ALLOWED_KEYS : [];
     const disallowed = Object.keys(fm)
-      .filter((key) => !INDEX_ALLOWED_KEYS.includes(key))
+      .filter((key) => !allowedKeys.includes(key))
       .sort();
     if (disallowed.length === 0) return [];
+    const constraint = isRoot
+      ? "beyond `okf_version`"
+      : "(subdirectory index files carry no frontmatter at all)";
     return [
-      `${label}: index files carry no frontmatter beyond \`okf_version\`` +
+      `${label}: index files carry no frontmatter ${constraint}` +
         ` (disallowed: ${disallowed.join(", ")})`,
     ];
   }
