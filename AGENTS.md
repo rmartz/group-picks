@@ -110,10 +110,12 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 ## Documentation
 
 - Keep documentation in sync with the code — outdated docs are worse than no docs.
-- **Reference docs live under `docs/`** as OKF (Open Knowledge Format) pages: every `.md` opens
-  with YAML frontmatter (`type`, `title`, `description`; optional `resource`, `tags`), and the
+- **Reference docs live under `docs/`** as OKF (Open Knowledge Format) pages: every content page
+  opens with YAML frontmatter (`type`, `title`, `description`; optional `resource`, `tags`), and the
   tree is navigable from `docs/index.md` — every page is linked from its directory's `index.md`,
-  and every subdirectory `index.md` from its parent. Both rules are enforced in CI by
+  and every subdirectory `index.md` from its parent. The reserved `index.md` is exempt from the
+  frontmatter requirement (OKF §8/§11): it carries no frontmatter beyond an optional `okf_version`.
+  Both rules are enforced in CI by
   `scripts/validate-docs.mjs` (run locally with `pnpm run docs:validate`); see
   [`docs/index.md`](docs/index.md) for the frontmatter spec and `type` vocabulary.
 

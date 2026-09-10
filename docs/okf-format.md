@@ -23,7 +23,7 @@ Every `.md` file under `docs/` is an OKF page and must satisfy two rules, both e
 
 ### 1. Frontmatter
 
-Each page opens with a `---`-fenced YAML block:
+Each content page opens with a `---`-fenced YAML block (the reserved `index.md` is exempt — see below):
 
 ```yaml
 ---
@@ -40,6 +40,8 @@ tags: [invites, tokens] # optional
 - **`description`** (required) — a one-line summary.
 - **`resource`** (optional) — a repo-relative path to what the page documents; if present, it must exist.
 - **`tags`** (optional) — free-form keywords.
+
+**The reserved `index.md` is the one exception.** Per OKF §8 (and §11, which requires the reserved `index.md` to follow §8), an index file carries **no frontmatter**, with a single exception: a bundle-root `index.md` MAY carry an `okf_version` key. So `index.md` is exempt from the `type`/`title`/`description` requirement above, and CI rejects any frontmatter on it beyond `okf_version` — an index is a directory listing, not a typed content page.
 
 The `type` vocabulary is a closed set — a local narrowing of OKF's open `type` field, so pages stay consistently categorized. The current values and their meanings are listed in the [documentation index](index.md#type-vocabulary). Introducing a genuinely new kind of page means extending both that table and `ALLOWED_TYPES` in `scripts/validate-docs.mjs`.
 

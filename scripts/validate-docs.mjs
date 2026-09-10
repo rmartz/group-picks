@@ -2,10 +2,12 @@
 /**
  * Validates the docs/ reference tree against two conventions:
  *
- *   1. OKF frontmatter — every docs/**\/*.md opens with a YAML frontmatter block
- *      carrying the OKF (Open Knowledge Format) core fields: a `type` in the
- *      repo's type vocabulary, a non-empty `title`, and a non-empty
- *      `description`. A `resource:` path, when present, must exist in the repo.
+ *   1. OKF frontmatter — every content page (docs/**\/*.md that is not an
+ *      `index.md`) opens with a YAML frontmatter block carrying the OKF (Open
+ *      Knowledge Format) core fields: a `type` in the repo's type vocabulary, a
+ *      non-empty `title`, and a non-empty `description`. A `resource:` path,
+ *      when present, must exist in the repo. The reserved `index.md` is exempt
+ *      (OKF §8/§11): it carries no frontmatter, save an optional `okf_version`.
  *
  *   2. Index coverage & navigability — every directory that holds docs has an
  *      `index.md`; every non-index page is linked from its own directory's
@@ -29,15 +31,19 @@ const docsDir = join(root, "docs");
 
 // Canonical OKF `type` vocabulary for this repo (documented in docs/index.md).
 // Extend both lists together when a genuinely new kind of page is introduced.
+// The reserved `index.md` is not typed (it carries no frontmatter, OKF §8), so
+// there is no `Index` type — content pages are one of the values below.
 const ALLOWED_TYPES = [
   "Architecture",
   "DataModel",
   "Domain",
-  "Index",
   "Reference",
   "Workflow",
 ];
 const INDEX = "index.md";
+// The one frontmatter key the reserved `index.md` may carry (OKF §8): a
+// bundle-root index MAY declare `okf_version`. Any other key is disallowed.
+const INDEX_ALLOWED_KEYS = ["okf_version"];
 
 /** All *.md files under docs/, as posix paths relative to docsDir, sorted. */
 function collectMdFiles() {
@@ -79,10 +85,47 @@ function parseFrontmatter(content) {
   return undefined; // no closing fence — treat as malformed
 }
 
-/** OKF frontmatter violations for a single page (posix path relative to docs). */
-function frontmatterViolations(pageRel) {
+/**
+ * OKF frontmatter violations for a single page, given its posix path relative
+ * to docs and its raw content. The reserved `index.md` (OKF §8/§11) is exempt
+ * from the `type`/`title`/`description` requirement — it carries no frontmatter
+ * beyond an optional `okf_version`, and any other key is a violation so the
+ * exemption can't be used to smuggle a typed index back in.
+ */
+export function frontmatterViolations(pageRel, content) {
   const label = `docs/${pageRel}`;
-  const fm = parseFrontmatter(readFileSync(join(docsDir, pageRel), "utf8"));
+  const fm = parseFrontmatter(content);
+
+  if (posix.basename(pageRel) === INDEX) {
+    const hasOpener = content.split("\n")[0]?.trim() === "---";
+    if (!hasOpener) return [];
+    if (fm === undefined) {
+      return [
+        `${label}: malformed frontmatter (opening --- has no closing fence)`,
+      ];
+    }
+    if (Object.keys(fm).length === 0) {
+      return [
+        `${label}: index files carry no frontmatter (empty --- block is not allowed)`,
+      ];
+    }
+    // Only the bundle-root index.md may carry okf_version (OKF §8); subdirectory
+    // index files must carry no frontmatter at all.
+    const isRoot = pageRel === INDEX;
+    const allowedKeys = isRoot ? INDEX_ALLOWED_KEYS : [];
+    const disallowed = Object.keys(fm)
+      .filter((key) => !allowedKeys.includes(key))
+      .sort();
+    if (disallowed.length === 0) return [];
+    const constraint = isRoot
+      ? "beyond `okf_version`"
+      : "(subdirectory index files carry no frontmatter at all)";
+    return [
+      `${label}: index files carry no frontmatter ${constraint}` +
+        ` (disallowed: ${disallowed.join(", ")})`,
+    ];
+  }
+
   if (!fm) {
     return [`${label}: missing frontmatter (no leading --- ... --- block)`];
   }
@@ -188,7 +231,9 @@ function coverageViolations(pages) {
 function main() {
   const pages = collectMdFiles();
   const violations = [
-    ...pages.flatMap(frontmatterViolations),
+    ...pages.flatMap((page) =>
+      frontmatterViolations(page, readFileSync(join(docsDir, page), "utf8")),
+    ),
     ...coverageViolations(pages),
   ].sort();
 
@@ -205,4 +250,7 @@ function main() {
   console.log(`docs/ — ${pages.length} page(s) OK`);
 }
 
-main();
+// Run as a CLI when invoked directly; stay importable (for tests) otherwise.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
+}
