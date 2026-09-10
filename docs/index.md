@@ -1,23 +1,19 @@
 ---
-type: Index
-title: group-picks knowledge base
-description: OKF-conformant reference knowledge for the group-picks codebase — architecture, data model, and per-domain notes agents retrieve before a task.
-tags: [okf, index, reference]
+okf_version: "0.2"
 ---
 
 # group-picks knowledge base
 
-This directory is an [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) bundle: one markdown file per concept, each carrying YAML frontmatter, linked together as a traversable graph. It holds **curated reference knowledge an agent retrieves before a task** — the detailed background that is too verbose to live in the always-in-context directive files (`AGENTS.md` / `CLAUDE.md`).
+This directory is an [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) bundle: one markdown file per concept, each content page carrying YAML frontmatter, linked together as a traversable graph. It holds **curated reference knowledge an agent retrieves before a task** — the detailed background that is too verbose to live in the always-in-context directive files (`AGENTS.md` / `CLAUDE.md`).
 
 Directives are policy (always in context); these pages are pull/retrieval reference. Keep that boundary: behavioral rules belong in `AGENTS.md`, explanatory background belongs here.
 
 ## `type` vocabulary
 
-Every page declares one `type` in its frontmatter. The canonical vocabulary for this repo:
+Every content page declares one `type` in its frontmatter. (This `index.md` is the reserved directory listing — OKF §8/§11 — so it is exempt: it carries no frontmatter beyond an optional `okf_version` and has no `type`.) The canonical vocabulary for this repo:
 
 | `type`         | Use for                                                               |
 | -------------- | --------------------------------------------------------------------- |
-| `Index`        | This file — the directory listing (reserved OKF convention).          |
 | `Architecture` | Cross-cutting structure: layering, the stack, how pieces fit.         |
 | `DataModel`    | Persistence shape: database paths, document schemas, converters.      |
 | `Domain`       | A single product domain: its lifecycle, rules, and data-layer module. |
