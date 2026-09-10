@@ -49,6 +49,12 @@ describe("closed chip and metadata", () => {
     renderView({ topCount: 5 });
     expect(screen.getByText("5")).toBeDefined();
   });
+
+  it("renders the live chip instead of the closed chip when live", () => {
+    renderView({ live: true });
+    expect(screen.getByText(CLOSED_PICK_RESULTS_COPY.liveChip)).toBeDefined();
+    expect(screen.queryByText(CLOSED_PICK_RESULTS_COPY.closedChip)).toBeNull();
+  });
 });
 
 describe("no results state", () => {
