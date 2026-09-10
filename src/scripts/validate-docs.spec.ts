@@ -76,14 +76,14 @@ describe("frontmatterViolations: index.md rejects any frontmatter beyond okf_ver
 
 describe("frontmatterViolations: index.md edge cases — malformed, empty, and subdirectory restrictions", () => {
   it("flags malformed frontmatter (no closing fence) on root index.md", () => {
-    const content = "---\nokf_version: \"0.2\"\n# no closing fence";
+    const content = '---\nokf_version: "0.2"\n# no closing fence';
     const violations = frontmatterViolations("index.md", content);
     expect(violations).toHaveLength(1);
     expect(violations[0]).toMatch(/malformed frontmatter/);
   });
 
   it("flags malformed frontmatter (no closing fence) on a subdirectory index.md", () => {
-    const content = "---\nokf_version: \"0.2\"\n# no closing fence";
+    const content = '---\nokf_version: "0.2"\n# no closing fence';
     const violations = frontmatterViolations("guides/index.md", content);
     expect(violations).toHaveLength(1);
     expect(violations[0]).toMatch(/malformed frontmatter/);
@@ -109,14 +109,16 @@ describe("frontmatterViolations: index.md edge cases — malformed, empty, and s
     );
     const violations = frontmatterViolations("guides/index.md", content);
     expect(violations).toHaveLength(1);
-    expect(violations[0]).toMatch(/subdirectory index files carry no frontmatter/);
+    expect(violations[0]).toMatch(
+      /subdirectory index files carry no frontmatter/,
+    );
     expect(violations[0]).toMatch(/okf_version/);
   });
 
   it("accepts a deeply-nested subdirectory index.md with no frontmatter", () => {
-    expect(
-      frontmatterViolations("guides/auth/index.md", "# Auth\n"),
-    ).toEqual([]);
+    expect(frontmatterViolations("guides/auth/index.md", "# Auth\n")).toEqual(
+      [],
+    );
   });
 });
 
