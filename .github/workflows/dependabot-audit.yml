@@ -11,6 +11,10 @@ permissions:
   pull-requests: read
   issues: write
 
+concurrency:
+  group: dependabot-audit
+  cancel-in-progress: false
+
 jobs:
   audit:
     name: Grouping-outcome audit

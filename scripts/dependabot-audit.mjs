@@ -21,6 +21,7 @@
 
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 // Groups Dependabot can name in a PR title. Kept broader than the current
 // .github/dependabot.yml on purpose: `prettier` and `typescript` were removed
@@ -29,6 +30,7 @@ import { writeFileSync } from "node:fs";
 const KNOWN_GROUPS = [
   "dev-dependencies",
   "eslint",
+  "github-actions",
   "prettier",
   "production-dependencies",
   "react",
@@ -89,13 +91,15 @@ function groupOf(title) {
 // auto-attributed, so the tool undercounts those. Future fix PRs should name the
 // Dependabot PR ("Dependabot PR #N") so they are captured — see
 // docs/dependabot-grouping.md.
-function fixReferences(otherPrs, dependabotNums) {
+function fixReferences(otherPrs, dependabotNums, repo) {
   const refs = new Map();
   const add = (num, fixPr) => {
     if (!dependabotNums.has(num)) return;
     if (!refs.has(num)) refs.set(num, []);
     if (!refs.get(num).includes(fixPr)) refs.get(num).push(fixPr);
   };
+  const escapedRepo = repo.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  const pullUrlRe = new RegExp(`/${escapedRepo}/pull/(\\d+)\\b`, "g");
   for (const pr of otherPrs) {
     if (pr.state !== "MERGED") continue;
     const text = `${pr.title}\n${pr.body || ""}`;
@@ -104,7 +108,7 @@ function fixReferences(otherPrs, dependabotNums) {
       add(Number(m[1]), pr.number);
     }
     if (namesDependabot) {
-      for (const m of text.matchAll(/\/pull\/(\d+)\b/g)) {
+      for (const m of text.matchAll(pullUrlRe)) {
         add(Number(m[1]), pr.number);
       }
     }
@@ -134,9 +138,9 @@ function outcomeOf(pr, fixRefs) {
 
 // Pure classification: given the Dependabot PRs, the other PRs, and the repo
 // slug, produce { rows, groups } ready for rendering. Exported for testing.
-export function buildReport(dependabotPrs, otherPrs) {
+export function buildReport(dependabotPrs, otherPrs, repo) {
   const nums = new Set(dependabotPrs.map((p) => p.number));
-  const fixRefs = fixReferences(otherPrs, nums);
+  const fixRefs = fixReferences(otherPrs, nums, repo);
   // Fix PRs that repaired lockfile corruption — a merge-mechanics failure that
   // is independent of which group happened to merge, flagged so its rows are
   // not misread as a grouping signal.
@@ -195,6 +199,7 @@ function renderMarkdown({ rows, groups }, repo) {
     (r) => r.outcome === NEEDED_FIX || r.outcome === STUCK,
   );
   const clean = rows.filter((r) => r.outcome === CLEAN).length;
+  const pending = rows.filter((r) => r.outcome === PENDING).length;
   const churn = rows.filter((r) => r.outcome === CHURN).length;
 
   const lines = [];
@@ -206,23 +211,23 @@ function renderMarkdown({ rows, groups }, repo) {
   lines.push("");
   lines.push(
     `**${clean} clean** · **${interventions.length} needed intervention** · ` +
-      `${churn} routine supersede-churn (excluded from rates).`,
+      `${pending} pending · ${churn} routine supersede-churn (excluded from rates).`,
   );
   lines.push("");
   lines.push("## Per-group intervention rate");
   lines.push("");
   lines.push(
-    "Intervention = needed a merged fix PR, or open-and-red. Churn and still-pending PRs are excluded from the denominator.",
+    "Intervention = needed a merged fix PR, or open-and-red. Pending and churn PRs are excluded from the denominator.",
   );
   lines.push("");
   lines.push(
-    "| Group | Clean | Needed fix | Stuck | Churn | Intervention rate |",
+    "| Group | Clean | Needed fix | Stuck | Pending | Churn | Intervention rate |",
   );
-  lines.push("| --- | --: | --: | --: | --: | --- |");
+  lines.push("| --- | --: | --: | --: | --: | --: | --- |");
   for (const [name, bucket] of [...groups.entries()].sort()) {
     const r = rate(bucket);
     lines.push(
-      `| \`${name}\` | ${bucket.clean} | ${bucket[NEEDED_FIX]} | ${bucket.stuck} | ${bucket.churn} | ${r.label} |`,
+      `| \`${name}\` | ${bucket.clean} | ${bucket[NEEDED_FIX]} | ${bucket.stuck} | ${bucket.pending} | ${bucket.churn} | ${r.label} |`,
     );
   }
   lines.push("");
@@ -308,13 +313,14 @@ function main() {
   ).filter(
     (pr) =>
       pr.author?.login !== "app/dependabot" &&
-      pr.author?.login !== "dependabot",
+      pr.author?.login !== "dependabot" &&
+      pr.author?.login !== "dependabot[bot]",
   );
 
-  const report = buildReport(dependabotPrs, otherPrs);
+  const report = buildReport(dependabotPrs, otherPrs, repo);
   const markdown = renderMarkdown(report, repo);
   process.stdout.write(`${markdown}\n`);
   if (args.out) writeFileSync(args.out, `${markdown}\n`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();
