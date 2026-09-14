@@ -9,8 +9,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CLOSED_PICK_RESULTS_COPY } from "../ClosedPickResultsView.copy";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "../copy";
+import { LOCKED_TOP_PICKS_COPY } from "../LockedTopPicks.copy";
 import { PickDetailView } from "../PickDetailView";
-import { TOP_PICKS_VIEW_COPY } from "../TopPicksView.copy";
 import { makeEntry, makePick } from "./helpers";
 
 afterEach(() => {
@@ -104,12 +104,12 @@ describe("closed state: renders ClosedPickResultsView", () => {
     expect(screen.getByTestId("closed-pick-results-view")).toBeDefined();
   });
 
-  it("does not render the locked placeholder when closed", () => {
+  it("does not render the lock screen when closed", () => {
     renderView({
       pick: makePick({ closedAt: new Date("2025-06-01T00:00:00.000Z") }),
     });
 
-    expect(screen.queryByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeNull();
+    expect(screen.queryByText(LOCKED_TOP_PICKS_COPY.title)).toBeNull();
   });
 
   it("passes closedPickResults entries to ClosedPickResultsView", () => {
