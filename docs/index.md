@@ -43,6 +43,7 @@ Every content page declares one `type` in its frontmatter. (This `index.md` is t
 ### Workflows
 
 - [Debug login switcher](debug-login.md) — activating the preview-only debug user switcher: the `NEXT_PUBLIC_DEBUG_AUTH` flag, seeding, and verification.
+- [Dependabot grouping](dependabot-grouping.md) — how npm updates are grouped, and the audit that keeps the grouping evidence-based.
 - [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and schema validation.
 - [Staging OAuth domain](staging-oauth-domain.md) — pin a stable staging alias and allowlist it in Firebase Authorized domains so Google/Apple OAuth works on previews.
 
