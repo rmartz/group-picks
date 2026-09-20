@@ -4,7 +4,7 @@ const mockWithSentryConfig = vi
   .fn()
   .mockImplementation((config: object) => config);
 
-vi.mock("@sentry/nextjs", () => ({
+vi.mock("@sentry/nextjs/config", () => ({
   withSentryConfig: mockWithSentryConfig,
 }));
 
