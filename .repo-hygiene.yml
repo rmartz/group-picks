@@ -1,0 +1,26 @@
+# @rmartz/repo-hygiene per-check configuration.
+# `checks` is omitted in the caller workflow, so the default-on set runs
+# (conflict-markers, action-pins, docs-links, md-pairing, okf, okf-index,
+# file-caps). Each check below carries an explicit severity so its gating
+# behavior is intentional rather than inherited.
+checks:
+  # Deterministic, error-tier gates. action-pins replaces the retired
+  # home-grown action-pins.yml.
+  conflict-markers:
+    severity: error
+  action-pins:
+    severity: error
+  docs-links:
+    severity: error
+    roots: [docs]
+
+  # Migration ramps — reported, not gating, until the tree is confirmed clean
+  # and each is flipped to `error` in its own follow-up PR. The repo already has
+  # its own docs/AGENTS conventions, so start these advisory to avoid a
+  # first-PR backlog blocking merge.
+  okf:
+    severity: warn
+  okf-index:
+    severity: warn
+  md-pairing:
+    severity: warn

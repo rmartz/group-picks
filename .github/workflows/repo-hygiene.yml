@@ -1,0 +1,23 @@
+name: Repo Hygiene
+
+# Runs the @rmartz/repo-hygiene suite (conflict markers, Actions SHA pins,
+# Markdown link integrity, OKF frontmatter, file-size caps, ...) via the
+# composite Action. `checks` is intentionally omitted so the default-on set runs
+# and a newly-added default-on check auto-joins on the next Dependabot bump with
+# no edit here. Per-check severity lives in .repo-hygiene.yml.
+on: [pull_request, push]
+
+permissions:
+  contents: read
+  packages: read # read the public @rmartz/repo-hygiene package from GitHub Packages
+
+jobs:
+  hygiene:
+    name: Hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: rmartz/repo-hygiene-action@66118369122afacf29241703137f60cbfa0315f0 # v1.0.0
+        with:
+          config: .repo-hygiene.yml
