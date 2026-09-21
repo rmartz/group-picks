@@ -1,0 +1,31 @@
+name: bot-automerge
+
+# Enables GitHub-native auto-merge for trusted bot PRs (Dependabot patch/minor
+# bumps; release-please release PRs) via the bot-automerge-action composite
+# Action. It posts no check-run — it only makes an eligible bot PR auto-merge,
+# and the repo's required checks (CI gates + merge-safety) are what it waits on.
+# Safe only because merge-safety and the CI gates are required on the default
+# branch. Triggers on pull_request_target because enabling auto-merge on a
+# Dependabot PR needs base-context write. SHA-pinned, Dependabot-maintained.
+#
+# release-please-token is intentionally omitted: group-picks ships no package and
+# runs no release-please, so only the Dependabot path applies and it uses the
+# built-in github.token.
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: read
+
+jobs:
+  bot-automerge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: rmartz/bot-automerge-action@5ce5706808ecf07238081047327e1908255da4df # v1.0.1
+        with:
+          pr: ${{ github.event.pull_request.number }}
