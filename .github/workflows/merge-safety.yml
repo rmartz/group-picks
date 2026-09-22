@@ -6,10 +6,17 @@ name: merge-safety
 # fleet contract — require the status check named exactly `merge-safety` on the
 # default branch. Reusable workflow, SHA-pinned and Dependabot-maintained.
 on:
-  pull_request:
+  # pull_request_target (not pull_request) so the check still fires on an unmergeable
+  # PR — GitHub cannot build the refs/pull/N/merge commit a pull_request run checks
+  # out, so a required merge-safety check would hang forever on a conflicting PR
+  # (rmartz/ai-tools#272).
+  pull_request_target:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   push:
     branches: [main]
+  # Re-hold / release open PRs when the base branch's own CI flips red/green.
+  check_suite:
+    types: [completed]
   workflow_dispatch:
     inputs:
       pr:
