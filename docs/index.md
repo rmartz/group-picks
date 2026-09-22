@@ -46,6 +46,7 @@ Every content page declares one `type` in its frontmatter. (This `index.md` is t
 - [Dependabot grouping](dependabot-grouping.md) — how npm updates are grouped, and the audit that keeps the grouping evidence-based.
 - [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and schema validation.
 - [Staging OAuth domain](staging-oauth-domain.md) — pin a stable staging alias and allowlist it in Firebase Authorized domains so Google/Apple OAuth works on previews.
+- [Storybook CI](storybook-ci.md) — the shared `rmartz/storybook-ci` caller workflows, what stayed in-repo, and the fine-grained PAT the screenshot gallery needs.
 
 ## Authoring
 

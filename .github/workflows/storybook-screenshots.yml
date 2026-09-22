@@ -1,0 +1,37 @@
+name: Storybook Screenshots
+
+# Thin caller for the shared rmartz/storybook-ci screenshots workflow. It
+# replaces the in-repo capture (scripts/capture-screenshots.mjs +
+# scripts/post-screenshots-comment.mjs), the per-PR `gh-screenshots-pr-<N>`
+# image branch and its `contents: write` grant, and screenshots-cleanup.yml:
+# upstream hosts the gallery images as GitHub user-attachments via `gh --attach`,
+# so there is no branch to create and none to clean up.
+#
+# `on.paths` is safe here precisely because this workflow is advisory and never a
+# required check (the opposite of storybook-tests.yml). The filter is `src/**`
+# rather than `*.stories.*` because the upstream resolver default is
+# `colocation`: a component edited without touching its story still resolves to
+# that story, which our changed-stories-only capture missed.
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - ".storybook/**"
+
+# A caller's `permissions:` block is exhaustive — every scope it omits becomes
+# `none` — and the reusable workflow checks THIS repo out, so `contents: read` is
+# required alongside the `pull-requests: write` used to post the gallery comment.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  screenshots:
+    # No `concurrency:` or `continue-on-error:` block: per-PR concurrency, the
+    # advisory isolation, and the fork-PR skip are all centralized upstream.
+    # `secrets: inherit` is what forwards STORYBOOK_SCREENSHOT_PAT — a
+    # fine-grained PAT scoped to this repo with `Pull requests: Read and write`.
+    # Until that secret exists the job posts a non-blocking advisory PR comment
+    # and skips the capture; it never fails a build. See docs/storybook-ci.md.
+    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@731dada2cdeb712b5443c4e2b29a3065f90ffd81 # v1.2.1
+    secrets: inherit
