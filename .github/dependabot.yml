@@ -106,8 +106,8 @@ updates:
     # NOTE: Do NOT add a `cooldown` here. Dependabot's cooldown for github-actions
     # is leaky: it suppresses the initial bump PR but immediately raises a follow-up
     # once the window passes, providing no real protection while adding delay. SHA
-    # pinning (enforced by `action-pins.yml`) is the actual supply-chain control;
-    # cooldown adds no security benefit on top of it.
+    # pinning (enforced by repo-hygiene's `action-pins` check) is the actual
+    # supply-chain control; cooldown adds no security benefit on top of it.
     commit-message:
       prefix: "chore"
       include: "scope"
