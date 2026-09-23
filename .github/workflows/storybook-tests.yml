@@ -1,0 +1,38 @@
+name: Storybook Tests
+
+# Thin caller for the shared rmartz/storybook-ci reusable workflow. The
+# operational reasoning this repo used to carry by hand — Chromium provisioning
+# and binary caching with an apt-retry, docs-only change gating, fail-vs-cancel
+# budgeting — now lives upstream once, so a fix there reaches us through a
+# Dependabot pin bump instead of an edit here.
+#
+# Deliberately NO `on.paths`: gating is the shared workflow's `detect-changes`
+# job plus its per-job `if:`. `Storybook Tests` is a required check on the
+# default branch, and a required check that never runs because its paths did not
+# match hangs the PR forever; a *skipped* job, by contrast, counts as passing.
+#
+# The check context this reports is `storybook-tests / Storybook Tests`, not the
+# bare `Storybook Tests` the in-repo job used — the default-branch ruleset's
+# required check must be renamed to match. See docs/storybook-ci.md.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  storybook-tests:
+    # `run-build: false` keeps the gating Storybook build in ci-actions.yml
+    # (`Storybook Build`) rather than moving it here. That job does not only
+    # build: it then renders canary Redux-connected stories from the built
+    # bundle (scripts/check-storybook-render.mjs) to guard the Vite 8 / Rolldown
+    # reselect tree-shaking regression (#381). The shared workflow's build job
+    # has no post-build hook, so adopting it would silently drop that watchdog.
+    # Everything else here runs on the shared defaults: `pnpm exec vitest run
+    # --project storybook` resolves against our `storybook` vitest project.
+    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@731dada2cdeb712b5443c4e2b29a3065f90ffd81 # v1.2.1
+    with:
+      run-build: false
