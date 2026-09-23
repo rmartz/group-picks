@@ -22,10 +22,21 @@ permissions:
 
 jobs:
   bot-automerge:
+    # Skip the job outright on PRs the CLI could never trust, so a human PR shows a
+    # free `skipped` instead of checking out and installing the CLI just to no-op.
+    # The three conditions mirror the CLI's own detectBotPrType exactly —
+    # Dependabot by author, release-please by branch prefix OR pending label — so
+    # nothing eligible is skipped. It is deliberately not an author test:
+    # release-please run under a PAT authors its release PR as that real user, not
+    # a [bot] account, so an author-only guard would skip release PRs.
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]'
+      || startsWith(github.event.pull_request.head.ref, 'release-please--')
+      || contains(github.event.pull_request.labels.*.name, 'autorelease: pending')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: rmartz/bot-automerge-action@5ce5706808ecf07238081047327e1908255da4df # v1.0.1
+      - uses: rmartz/bot-automerge-action@a46eafc1396993ffc04918f452b3d1c0e3c80f4f # v1.1.1
         with:
           pr: ${{ github.event.pull_request.number }}
