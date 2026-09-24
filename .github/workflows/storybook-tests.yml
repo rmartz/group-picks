@@ -20,19 +20,27 @@ on:
   push:
     branches: [main]
 
+# A caller's `permissions:` block is exhaustive and a called workflow can only
+# narrow it. The shared workflow declares `packages: read` (so a consumer's
+# scoped .npmrc can resolve GitHub Packages); it is inert here but must be
+# granted, or the called jobs would request a scope the caller withheld.
 permissions:
   contents: read
+  packages: read
 
 jobs:
   storybook-tests:
-    # `run-build: false` keeps the gating Storybook build in ci-actions.yml
-    # (`Storybook Build`) rather than moving it here. That job does not only
-    # build: it then renders canary Redux-connected stories from the built
-    # bundle (scripts/check-storybook-render.mjs) to guard the Vite 8 / Rolldown
-    # reselect tree-shaking regression (#381). The shared workflow's build job
-    # has no post-build hook, so adopting it would silently drop that watchdog.
-    # Everything else here runs on the shared defaults: `pnpm exec vitest run
-    # --project storybook` resolves against our `storybook` vitest project.
-    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@731dada2cdeb712b5443c4e2b29a3065f90ffd81 # v1.2.1
+    # The shared build job (`storybook-tests / Storybook Build`) builds Storybook
+    # and then renders canary Redux-connected stories from the built bundle
+    # (scripts/check-storybook-render.mjs) to guard the Vite 8 / Rolldown
+    # reselect tree-shaking regression (#381) — a render break that neither a
+    # compile-only build nor the vitest story suite (dev transform) catches.
+    # `build-needs-browser` provisions the same cached Playwright Chromium the
+    # test job uses, at the default ~/.cache/ms-playwright path the script's
+    # `playwright` import launches from. Tests run on the shared default: `pnpm
+    # exec vitest run --project storybook` resolves against our `storybook`
+    # vitest project.
+    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@ff758949491f6d22298273b424dd79144c5dd543 # v1.5.2
     with:
-      run-build: false
+      build-needs-browser: true
+      build-command: pnpm build-storybook && node scripts/check-storybook-render.mjs

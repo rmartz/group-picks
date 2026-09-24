@@ -21,8 +21,11 @@ on:
 # A caller's `permissions:` block is exhaustive — every scope it omits becomes
 # `none` — and the reusable workflow checks THIS repo out, so `contents: read` is
 # required alongside the `pull-requests: write` used to post the gallery comment.
+# `packages: read` is inert here (no scoped .npmrc) but the shared workflow
+# declares it, and a called workflow can only narrow the caller's grant.
 permissions:
   contents: read
+  packages: read
   pull-requests: write
 
 jobs:
@@ -33,5 +36,5 @@ jobs:
     # fine-grained PAT scoped to this repo with `Pull requests: Read and write`.
     # Until that secret exists the job posts a non-blocking advisory PR comment
     # and skips the capture; it never fails a build. See docs/storybook-ci.md.
-    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@731dada2cdeb712b5443c4e2b29a3065f90ffd81 # v1.2.1
+    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@ff758949491f6d22298273b424dd79144c5dd543 # v1.5.2
     secrets: inherit
