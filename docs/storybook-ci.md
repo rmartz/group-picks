@@ -1,7 +1,7 @@
 ---
 type: Workflow
 title: Storybook CI
-description: How this repo consumes the shared rmartz/storybook-ci reusable workflows for Storybook tests and per-PR screenshot galleries, what stayed in-repo, and the PAT the gallery needs.
+description: How this repo consumes the shared rmartz/storybook-ci reusable workflows for Storybook tests and per-PR screenshot galleries, the built-bundle render canary, and the PAT the gallery needs.
 resource: .github/workflows/storybook-screenshots.yml
 tags: [storybook, ci, screenshots, pat]
 ---
@@ -18,10 +18,10 @@ us through a pin bump instead of an edit.
 
 ## The two callers
 
-| File                                          | Role                   | Required check?                           |
-| --------------------------------------------- | ---------------------- | ----------------------------------------- |
-| `.github/workflows/storybook-tests.yml`       | Gating tests + build   | Yes — `storybook-tests / Storybook Tests` |
-| `.github/workflows/storybook-screenshots.yml` | Advisory gallery       | No                                        |
+| File                                          | Role                 | Required check?                           |
+| --------------------------------------------- | -------------------- | ----------------------------------------- |
+| `.github/workflows/storybook-tests.yml`       | Gating tests + build | Yes — `storybook-tests / Storybook Tests` |
+| `.github/workflows/storybook-screenshots.yml` | Advisory gallery     | No                                        |
 
 **`storybook-tests.yml`** runs the `storybook` vitest browser project. It needs
 no `test-command`: the shared default (`pnpm exec vitest run --project
@@ -52,8 +52,8 @@ use `on.paths`. The filter is `src/**` (not `*.stories.*`) because the upstream
 resolver default is `colocation`: a component edited without touching its story
 still resolves to that story.
 
-Its `permissions:` block grants **both** `contents: read` and `pull-requests:
-write`. A caller's `permissions:` block is exhaustive — every scope it omits
+Its `permissions:` block grants `contents: read` and `packages: read` as well as
+`pull-requests: write`. A caller's `permissions:` block is exhaustive — every scope it omits
 becomes `none` — and the reusable workflow checks this repo out.
 
 ## The screenshot PAT
