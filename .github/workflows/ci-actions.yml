@@ -147,36 +147,6 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm tsc
 
-  storybook-build:
-    name: Storybook Build
-    needs: detect-changes
-    # Gate on the broad code_changed signal, NOT on story changes: a non-story
-    # change (a .storybook/ preset, a preview decorator, an addon/MDX config, a
-    # global CSS import) can break `pnpm build-storybook` without touching a
-    # *.stories.* file, and would ship green if this only ran on story changes
-    # (#372).
-    #
-    # This is the one Storybook job that did NOT move to the shared
-    # rmartz/storybook-ci workflow (storybook-tests.yml passes `run-build:
-    # false`), because it does more than build: it renders canary
-    # Redux-connected stories from the built bundle (check-storybook-render.mjs)
-    # to guard the Vite 8 / Rolldown reselect tree-shaking regression (#381) — a
-    # render break that a compile-only build can't catch. That watchdog keeps a
-    # Dependabot Vite 8 bump red until the bundler is fixed, which is why
-    # Chromium is installed here, and the shared build job has no post-build hook
-    # to carry it. Fold this job into the shared workflow once #381 closes.
-    if: needs.detect-changes.outputs.code_changed == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-        with:
-          playwright: chromium
-      - run: pnpm build-storybook
-      - name: Guard built-Storybook render (Vite 8 reselect regression)
-        run: node scripts/check-storybook-render.mjs
-
   build:
     name: Build
     needs: detect-changes

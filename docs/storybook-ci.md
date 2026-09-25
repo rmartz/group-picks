@@ -1,7 +1,7 @@
 ---
 type: Workflow
 title: Storybook CI
-description: How this repo consumes the shared rmartz/storybook-ci reusable workflows for Storybook tests and per-PR screenshot galleries, what stayed in-repo, and the PAT the gallery needs.
+description: How this repo consumes the shared rmartz/storybook-ci reusable workflows for Storybook tests and per-PR screenshot galleries, the built-bundle render canary, and the PAT the gallery needs.
 resource: .github/workflows/storybook-screenshots.yml
 tags: [storybook, ci, screenshots, pat]
 ---
@@ -18,10 +18,10 @@ us through a pin bump instead of an edit.
 
 ## The two callers
 
-| File                                          | Role             | Required check?                           |
-| --------------------------------------------- | ---------------- | ----------------------------------------- |
-| `.github/workflows/storybook-tests.yml`       | Gating tests     | Yes — `storybook-tests / Storybook Tests` |
-| `.github/workflows/storybook-screenshots.yml` | Advisory gallery | No                                        |
+| File                                          | Role                 | Required check?                           |
+| --------------------------------------------- | -------------------- | ----------------------------------------- |
+| `.github/workflows/storybook-tests.yml`       | Gating tests + build | Yes — `storybook-tests / Storybook Tests` |
+| `.github/workflows/storybook-screenshots.yml` | Advisory gallery     | No                                        |
 
 **`storybook-tests.yml`** runs the `storybook` vitest browser project. It needs
 no `test-command`: the shared default (`pnpm exec vitest run --project
@@ -30,6 +30,21 @@ storybook`) already resolves against `vitest.config.mts`. It carries **no**
 per-job `if:`, because a required check that never runs because its paths did not
 match hangs the PR forever, while a _skipped_ job counts as passing.
 
+It also runs the shared **`storybook-tests / Storybook Build`** job, with a
+`build-command` of `pnpm build-storybook && node
+scripts/check-storybook-render.mjs`. The second half renders canary
+Redux-connected stories from the built bundle to guard the Vite 8 / Rolldown
+reselect tree-shaking regression (#381) — a render break neither the compile-only
+build nor the vitest story suite (dev transform) catches. `build-needs-browser:
+true` has the shared job provision and cache Playwright Chromium (the same cache
+entry the test job uses) so the script can launch it. The in-repo
+`Storybook Build` job in `ci-actions.yml` that used to carry this is gone, and the
+local `setup` action no longer installs browsers.
+
+Both callers grant `packages: read` alongside their other scopes. It is inert in
+this repo (no scoped `.npmrc`), but the shared workflows declare it and a called
+workflow can only narrow the caller's grant.
+
 **`storybook-screenshots.yml`** builds Storybook, screenshots the stories a PR's
 changes touch, and posts them as one update-in-place PR comment whose images are
 GitHub user-attachments. It is advisory — never a merge gate — so it may safely
@@ -37,19 +52,9 @@ use `on.paths`. The filter is `src/**` (not `*.stories.*`) because the upstream
 resolver default is `colocation`: a component edited without touching its story
 still resolves to that story.
 
-Its `permissions:` block grants **both** `contents: read` and `pull-requests:
-write`. A caller's `permissions:` block is exhaustive — every scope it omits
+Its `permissions:` block grants `contents: read` and `packages: read` as well as
+`pull-requests: write`. A caller's `permissions:` block is exhaustive — every scope it omits
 becomes `none` — and the reusable workflow checks this repo out.
-
-## What stayed in-repo
-
-`Storybook Build` remains a job in `ci-actions.yml`, and the tests caller passes
-`run-build: false` so the shared workflow does not duplicate it. That job does
-more than build: it renders canary Redux-connected stories from the built bundle
-(`scripts/check-storybook-render.mjs`) to guard the Vite 8 / Rolldown reselect
-tree-shaking regression (#381). The shared build job has no post-build hook, so
-adopting it would silently drop that watchdog. Fold the job into the shared
-workflow once #381 closes.
 
 ## The screenshot PAT
 
@@ -79,9 +84,10 @@ component.
 
 The in-repo capture this replaced rendered each changed story twice — the PR
 version and the base-branch version — and posted them side by side (#403). The
-shared workflow captures **After only**. That regression is tracked upstream in
-[rmartz/storybook-ci#22](https://github.com/rmartz/storybook-ci/issues/22); when
-it lands, adopting it here is a pin bump.
+shared workflow captures **After only** by default. Upstream now supports
+Before/After as an opt-in `capture-base: true` input on the screenshots workflow
+([rmartz/storybook-ci#22](https://github.com/rmartz/storybook-ci/issues/22)); this
+repo has not enabled it yet, so adopting it is a one-line `with:` addition.
 
 ## Bumping the pin
 
