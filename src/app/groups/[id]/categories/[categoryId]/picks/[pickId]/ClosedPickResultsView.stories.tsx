@@ -40,6 +40,12 @@ type Story = StoryObj<typeof ClosedPickResultsView>;
 
 export const Default: Story = {};
 
+export const Live: Story = {
+  args: {
+    live: true,
+  },
+};
+
 export const WithReopen: Story = {
   args: {
     onReopen: () => undefined,

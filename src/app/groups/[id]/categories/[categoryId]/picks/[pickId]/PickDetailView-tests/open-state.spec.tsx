@@ -8,9 +8,9 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { PICK_DETAIL_SCAFFOLD_COPY } from "../copy";
+import { LOCKED_TOP_PICKS_COPY } from "../LockedTopPicks.copy";
 import { PickDetailView } from "../PickDetailView";
 import type { SuggestOptionSheetProps } from "../SuggestOptionSheet";
-import { TOP_PICKS_VIEW_COPY } from "../TopPicksView.copy";
 import { makePick, makeSuggestedOptionPayload } from "./helpers";
 
 let mockSuggestedOption = makeSuggestedOptionPayload();
@@ -103,31 +103,34 @@ describe("open state", () => {
     expect(screen.getByTestId("suggest-option-sheet")).toBeDefined();
   });
 
-  it("renders top picks tab as locked placeholder when open", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
+  it("renders live results (not the lock screen) for an open pick with results visible", () => {
+    renderView({
+      pick: makePick({ closedAt: undefined, resultsVisible: true }),
+    });
 
-    expect(screen.getByText(TOP_PICKS_VIEW_COPY.lockedMessage)).toBeDefined();
+    expect(screen.getByTestId("closed-pick-results-view")).toBeDefined();
+    expect(screen.queryByText(LOCKED_TOP_PICKS_COPY.title)).toBeNull();
   });
 
-  it("does not show the locked message in the options tab panel", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
+  it("renders the lock screen for an open pick with results hidden", () => {
+    renderView({
+      pick: makePick({ closedAt: undefined, resultsVisible: false }),
+    });
+
+    expect(screen.getByText(LOCKED_TOP_PICKS_COPY.title)).toBeDefined();
+    expect(screen.getByText(LOCKED_TOP_PICKS_COPY.explanation)).toBeDefined();
+    expect(screen.getByText(LOCKED_TOP_PICKS_COPY.adminNote)).toBeDefined();
+    expect(screen.queryByTestId("closed-pick-results-view")).toBeNull();
+  });
+
+  it("does not show the lock screen in the options tab panel", () => {
+    renderView({
+      pick: makePick({ closedAt: undefined, resultsVisible: false }),
+    });
 
     const optionsPanel = screen.getByRole("tabpanel");
     expect(
-      within(optionsPanel).queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
-    ).toBeNull();
-  });
-
-  it("does not show the locked message in the ranking tab panel", () => {
-    renderView({ pick: makePick({ closedAt: undefined }) });
-
-    fireEvent.click(
-      screen.getByRole("tab", { name: PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking }),
-    );
-
-    const rankingPanel = screen.getByRole("tabpanel");
-    expect(
-      within(rankingPanel).queryByText(TOP_PICKS_VIEW_COPY.lockedMessage),
+      within(optionsPanel).queryByText(LOCKED_TOP_PICKS_COPY.title),
     ).toBeNull();
   });
 

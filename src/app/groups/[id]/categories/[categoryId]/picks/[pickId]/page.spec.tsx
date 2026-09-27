@@ -73,6 +73,8 @@ interface CapturedPickDetailProps {
     runnersUp: ClosedPickResultEntry[];
   };
   topPickAttribution: Record<string, OptionTierAttribution>;
+  rankedCount: number;
+  memberCount: number;
 }
 
 const capturedProps: CapturedPickDetailProps[] = [];
@@ -126,6 +128,7 @@ function setupClosedPickDefaults() {
   mockGetPicksByCategory.mockResolvedValue([]);
   mockGetOptionsByCategory.mockResolvedValue([]);
   mockGetRankingByUser.mockResolvedValue({});
+  mockGetAllRankingsForPick.mockResolvedValue({});
   mockGetMemberDisplayNames.mockResolvedValue([
     { uid: "uid-current", name: "Alice" },
     { uid: "uid-member2", name: "Bob" },
@@ -214,12 +217,19 @@ describe("PickDetailPage — former-member exclusion", () => {
   });
 });
 
-describe("PickDetailPage — open pick short-circuit", () => {
-  it("passes empty closedPickResults for an open pick", async () => {
-    capturedProps.length = 0;
-    computeRankedResultsSpy.mockClear();
-
+describe("PickDetailPage — open pick results visibility", () => {
+  function setupOpenPick(resultsVisible: boolean) {
     setupOpenPickDefaults();
+    mockGetPickById.mockResolvedValue({
+      id: "pick-1",
+      title: "Test Pick",
+      topCount: 3,
+      categoryId: "cat-1",
+      closedAt: undefined,
+      createdAt: new Date(),
+      creatorId: "uid-current",
+      resultsVisible,
+    });
     mockGetOptionsByPick.mockResolvedValue([
       {
         id: "opt-a",
@@ -227,40 +237,48 @@ describe("PickDetailPage — open pick short-circuit", () => {
         pickId: "pick-1",
         ownerIds: ["uid-current"],
       },
-      {
-        id: "opt-b",
-        title: "Option B",
-        pickId: "pick-1",
-        ownerIds: ["uid-current"],
-      },
     ]);
+  }
+
+  it("short-circuits computeRankedResults for an open pick with results hidden", async () => {
+    capturedProps.length = 0;
+    computeRankedResultsSpy.mockClear();
+
+    setupOpenPick(false);
 
     await renderPage();
 
-    expect(capturedProps).toHaveLength(1);
+    expect(computeRankedResultsSpy).not.toHaveBeenCalled();
     expect(capturedProps[0]?.closedPickResults).toEqual({
       topPicks: [],
       runnersUp: [],
     });
   });
 
-  it("does not invoke computeRankedResults for an open pick", async () => {
+  it("computes live results for an open pick with results visible", async () => {
     capturedProps.length = 0;
     computeRankedResultsSpy.mockClear();
 
-    setupOpenPickDefaults();
-    mockGetOptionsByPick.mockResolvedValue([
-      {
-        id: "opt-a",
-        title: "Option A",
-        pickId: "pick-1",
-        ownerIds: ["uid-current"],
-      },
-    ]);
+    setupOpenPick(true);
 
     await renderPage();
 
-    expect(computeRankedResultsSpy).not.toHaveBeenCalled();
+    expect(computeRankedResultsSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the members-ranked progress counts for an open hidden pick", async () => {
+    capturedProps.length = 0;
+
+    setupOpenPick(false);
+    mockGetAllRankingsForPick.mockResolvedValue({
+      "uid-current": { "opt-a": RankingTier.Yes },
+      "uid-member2": {},
+    });
+
+    await renderPage();
+
+    expect(capturedProps[0]?.rankedCount).toBe(1);
+    expect(capturedProps[0]?.memberCount).toBe(2);
   });
 });
 

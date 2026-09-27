@@ -18,6 +18,7 @@ interface ClosedPickResultsViewProps {
   onReopen?: () => void;
   isReopening?: boolean;
   reopenError?: string;
+  live?: boolean;
 }
 
 function groupByRank(
@@ -89,6 +90,7 @@ export function ClosedPickResultsView({
   onReopen,
   isReopening = false,
   reopenError,
+  live = false,
 }: ClosedPickResultsViewProps) {
   const [expandedOptionId, setExpandedOptionId] = useState<string | undefined>(
     undefined,
@@ -106,7 +108,9 @@ export function ClosedPickResultsView({
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-          {CLOSED_PICK_RESULTS_COPY.closedChip}
+          {live
+            ? CLOSED_PICK_RESULTS_COPY.liveChip
+            : CLOSED_PICK_RESULTS_COPY.closedChip}
         </span>
         <span className="text-xs text-muted-foreground">
           {CLOSED_PICK_RESULTS_COPY.topCountPrefix} <span>{topCount}</span>

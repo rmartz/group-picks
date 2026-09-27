@@ -19,10 +19,10 @@ import { reopenPick } from "@/services/picks";
 import { ClosedPickResultsView } from "./ClosedPickResultsView";
 import { PICK_DETAIL_SCAFFOLD_COPY } from "./copy";
 import { EmptyPickView } from "./EmptyPickView";
+import { LockedTopPicks } from "./LockedTopPicks";
 import { OptionList } from "./OptionList";
 import { SuggestOptionSheet } from "./SuggestOptionSheet";
 import { TierRanking } from "./TierRanking";
-import { TOP_PICKS_VIEW_COPY } from "./TopPicksView.copy";
 
 interface PickDetailViewProps {
   pick: GroupPick;
@@ -41,6 +41,9 @@ interface PickDetailViewProps {
   };
   topPickAttribution?: Record<string, OptionTierAttribution>;
   isAdmin?: boolean;
+  rankedCount?: number;
+  memberCount?: number;
+  now?: Date;
 }
 
 export function PickDetailView({
@@ -57,6 +60,9 @@ export function PickDetailView({
   closedPickResults,
   topPickAttribution = {},
   isAdmin = false,
+  rankedCount = 0,
+  memberCount = 0,
+  now,
 }: PickDetailViewProps) {
   const router = useRouter();
   const [options, setOptions] = useState<Option[]>(initialOptions);
@@ -65,6 +71,7 @@ export function PickDetailView({
   const [reopenError, setReopenError] = useState<string | undefined>(undefined);
   const closedAt = pick.closedAt;
   const isOpen = closedAt === undefined;
+  const resultsVisible = pick.resultsVisible !== false;
   const uniqueOwnerCount = new Set(options.flatMap((opt) => opt.ownerIds)).size;
   const breadcrumbs = [
     { label: groupName, href: `/groups/${groupId}` },
@@ -193,7 +200,7 @@ export function PickDetailView({
           <TabsTrigger value="ranking">
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.ranking}
           </TabsTrigger>
-          <TabsTrigger value="top-picks" disabled={isOpen}>
+          <TabsTrigger value="top-picks">
             {PICK_DETAIL_SCAFFOLD_COPY.tabs.topPicks}
           </TabsTrigger>
         </TabsList>
@@ -239,11 +246,7 @@ export function PickDetailView({
         </TabsContent>
 
         <TabsContent value="top-picks" className="mt-4" keepMounted>
-          {closedAt === undefined ? (
-            <p className="text-sm text-muted-foreground">
-              {TOP_PICKS_VIEW_COPY.lockedMessage}
-            </p>
-          ) : (
+          {!isOpen ? (
             <ClosedPickResultsView
               topCount={pick.topCount}
               topPicks={closedPickResults.topPicks}
@@ -252,6 +255,20 @@ export function PickDetailView({
               isReopening={isReopening}
               reopenError={reopenError}
               topPickAttribution={topPickAttribution}
+            />
+          ) : resultsVisible ? (
+            <ClosedPickResultsView
+              live
+              topCount={pick.topCount}
+              topPicks={closedPickResults.topPicks}
+              runnersUp={closedPickResults.runnersUp}
+            />
+          ) : (
+            <LockedTopPicks
+              rankedCount={rankedCount}
+              memberCount={memberCount}
+              dueDate={pick.dueDate}
+              now={now}
             />
           )}
         </TabsContent>

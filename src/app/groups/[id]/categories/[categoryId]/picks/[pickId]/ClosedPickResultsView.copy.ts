@@ -1,6 +1,7 @@
 export const CLOSED_PICK_RESULTS_COPY = {
   attributionHeading: "How members ranked this option",
   closedChip: "closed",
+  liveChip: "live",
   noMembersLabel: "No members",
   noResultsMessage: "No options were added to this pick.",
   reopenCard: {

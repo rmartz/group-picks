@@ -39,6 +39,11 @@ export default async function PickDetailPage({
   if (!pick) notFound();
 
   const isClosed = pick.closedAt !== undefined;
+  const resultsVisible = pick.resultsVisible !== false;
+  // Results are shown (and therefore computed) when the pick is closed or when
+  // it is open with live results enabled. An open pick with results hidden
+  // shows the lock screen, so the expensive aggregation is short-circuited.
+  const shouldComputeResults = isClosed || resultsVisible;
 
   const [
     currentOptions,
@@ -50,7 +55,9 @@ export default async function PickDetailPage({
     getOptionsByPick(pickId),
     getPicksByCategory(categoryId),
     getRankingByUser(pickId, uid),
-    isClosed ? getAllRankingsForPick(pickId) : Promise.resolve({}),
+    // Rankings are needed for computed results and for the lock-screen
+    // "members ranked" progress count, so they are always fetched.
+    getAllRankingsForPick(pickId),
     isClosed ? getMemberDisplayNames(group.memberIds) : Promise.resolve([]),
   ]);
 
@@ -80,14 +87,21 @@ export default async function PickDetailPage({
     ),
   ) as Record<string, Record<string, RankingTier>>;
 
-  const closedPickResults = isClosed
+  const closedPickResults = shouldComputeResults
     ? computeRankedResults(filteredRankings, currentOptions, pick.topCount)
     : { topPicks: [], runnersUp: [] };
-  const topPickAttribution = computeOptionTierAttribution(
-    filteredRankings,
-    currentOptions,
-    memberNames,
-  );
+  const topPickAttribution = isClosed
+    ? computeOptionTierAttribution(
+        filteredRankings,
+        currentOptions,
+        memberNames,
+      )
+    : {};
+
+  const rankedCount = Object.values(filteredRankings).filter(
+    (tiers) => Object.keys(tiers).length > 0,
+  ).length;
+  const memberCount = group.memberIds.length;
 
   let priorPickBannerData: PriorPickBannerData | undefined;
   if (
@@ -149,6 +163,9 @@ export default async function PickDetailPage({
       closedPickResults={closedPickResults}
       topPickAttribution={topPickAttribution}
       isAdmin={isGroupAdmin(uid, group)}
+      rankedCount={rankedCount}
+      memberCount={memberCount}
+      now={new Date()}
     />
   );
 }
