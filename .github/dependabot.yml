@@ -12,7 +12,10 @@ updates:
     # version. That breaks the whole grouped run, so every dependency fails and the
     # PR is closed as `update_no_longer_possible` — silently starving the repo of
     # security updates. A lockfile-freshness cooldown cannot coexist with Dependabot
-    # always resolving to latest, so cooldown is disabled for this ecosystem.
+    # always resolving to latest, so no explicit cooldown is declared for this
+    # ecosystem. (Since 2026-07-14 Dependabot applies a 3-day default wait even
+    # with no `cooldown` configured; this repo has no `@rmartz/*` npm deps to
+    # exempt from it.)
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -103,11 +106,18 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # NOTE: Do NOT add a `cooldown` here. Dependabot's cooldown for github-actions
-    # is leaky: it suppresses the initial bump PR but immediately raises a follow-up
-    # once the window passes, providing no real protection while adding delay. SHA
-    # pinning (enforced by repo-hygiene's `action-pins` check) is the actual
-    # supply-chain control; cooldown adds no security benefit on top of it.
+    # Cooldown: since 2026-07-14 Dependabot waits 3 days after a release before
+    # proposing it, even with no `cooldown` configured. Third-party actions keep
+    # that default; SHA pinning (enforced by repo-hygiene's `action-pins` check)
+    # remains the primary supply-chain control. Only first-party `rmartz/*`
+    # actions and reusable workflows are exempt: they're published from our own
+    # repos with provenance, so the wait adds no protection and only holds fixes
+    # back from the fleet.
+    cooldown:
+      # Explicit, so declaring the block can't change the third-party default.
+      default-days: 3
+      exclude:
+        - "rmartz/*"
     commit-message:
       prefix: "chore"
       include: "scope"
