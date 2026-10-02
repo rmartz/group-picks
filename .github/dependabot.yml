@@ -121,14 +121,12 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    # Group minor and patch action bumps into one PR; major bumps match no
-    # group and are raised as individual PRs, since they are the most likely to
-    # need a workflow change and warrant isolated review (mirrors the npm
-    # groups above).
+    # Every action bump, majors included, lands in one PR (unlike the npm groups
+    # above, where majors are individual). bot-automerge holds a group containing
+    # a major for human review (fetch-metadata reports the group's highest
+    # update-type), and a major that breaks CI is split out into its own fix PR
+    # rather than holding the rest of the group back.
     groups:
       github-actions:
-        update-types:
-          - "minor"
-          - "patch"
         patterns:
           - "*"
