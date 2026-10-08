@@ -46,6 +46,7 @@ Every content page declares one `type` in its frontmatter. (This `index.md` is t
 - [Dependabot grouping](dependabot-grouping.md) — how npm updates are grouped, and the audit that keeps the grouping evidence-based.
 - [Deployment config](deployment-config.md) — public env config in `deployment/{env}.yml` and schema validation.
 - [pr-policy](pr-policy.md) — the shared PR content checks that post the `pr-policy` verdict; this repo keeps the UAT gate, so a code PR waits for `no UAT needed` or `UAT passed`.
+- [pr-lifecycle](pr-lifecycle.md) — the shared reconciler that keeps each PR's lifecycle labels in step with its current facts; labels only for now, no auto-merge arming.
 - [Staging OAuth domain](staging-oauth-domain.md) — pin a stable staging alias and allowlist it in Firebase Authorized domains so Google/Apple OAuth works on previews.
 - [Storybook CI](storybook-ci.md) — the shared `rmartz/storybook-ci` caller workflows, what stayed in-repo, and the fine-grained PAT the screenshot gallery needs.
 
