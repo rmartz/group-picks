@@ -29,9 +29,15 @@ Two axes decide how a bump is grouped:
   - `react` keeps **all** update-types because it spans the prod/dev split
     (`react` / `react-dom` are prod, `@types/react*` are dev); its minor/patch
     would otherwise scatter across the two catch-alls instead of staying atomic.
-  - `vite`, `eslint`, `storybook`, and `tailwind` restrict to **major** only —
+  - `vite`, `storybook`, and `tailwind` restrict to **major** only —
     their minor/patch already move in lockstep inside the catch-alls, so the major
     is the only bump that would fragment the family into standalone PRs.
+- **CI-sensitive tools** — the `ci` group holds eslint (with `@eslint/js`,
+  `typescript-eslint`, and its plugins) and prettier (with `prettier-plugin-*`),
+  with **no** update-types filter. This is a policy group, not a risk bet:
+  pr-policy's `title` check requires a `ci` type for any eslint/prettier version
+  change, so one riding in a catch-all would block the whole weekly batch.
+  `eslint-plugin-storybook` stays with the earlier `storybook` group.
 
 ## Why it must be evidence-based
 
@@ -58,14 +64,16 @@ a-priori risk model:
 
 Because `prettier` and `typescript` were the only pure-risk, non-lockstep groups
 and neither had earned its keep, they were **removed** as a deliberate A/B test.
-Their minor bumps now rejoin the `dev-dependencies` batch and their majors surface
-as individual PRs, like any other package. The audit then measures whether they
-actually fail at a higher rate than the baseline.
+`typescript` minor bumps now rejoin the `dev-dependencies` batch and its majors
+surface as individual PRs, like any other package. The audit then measures
+whether it actually fails at a higher rate than the baseline. (`prettier` has
+since moved into the `ci` group for the pr-policy title gate — a policy reason,
+not a risk one — so it no longer participates in the experiment.)
 
 Everything the constraints protect was **kept**: dev/prod separation, `react`
-(spans the prod/dev split), the lockstep families (`vite`, `eslint`, `storybook`,
-`tailwind`), and the majors-as-individual-PRs policy the two major incidents
-justify.
+(spans the prod/dev split), the lockstep families (`vite`, `storybook`,
+`tailwind`, and eslint inside `ci`), and the majors-as-individual-PRs policy the
+two major incidents justify.
 
 **Decision rule:** restore a group here only once the audit shows its members
 actually accrue interventions at a higher rate than the catch-all baseline.
