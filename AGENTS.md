@@ -25,7 +25,7 @@ After creating a git worktree (`git worktree add .git-worktrees/<name> -b <branc
 
 ### Pre-commit hook architecture
 
-This repo uses a two-hook split, matching the pattern in `rmartz/dotfiles`:
+This repo uses a two-hook split, matching the pattern used by the maintainer's shared agent tooling:
 
 - **`.husky/pre-commit`** — runs for human commits in the root worktree only. Detects worktrees via `[ -f ".git" ]` (a worktree's `.git` is a file, not a directory) and exits immediately there, so Husky's `node_modules` dependency is never a problem in agent contexts.
 - **`scripts/hooks/pre-commit`** — runs for agent commits in `.git-worktrees/`. Contains the same checks as the Husky hook plus the `node_modules` self-healing guard (since new worktrees may not have had `pnpm install` run).
@@ -38,7 +38,7 @@ Agent worktrees use this hook via `core.hooksPath=scripts/hooks`. This is a shar
 git config core.hooksPath scripts/hooks
 ```
 
-Run this after cloning or when setting up a fresh root checkout. `new-worktree.py` will automate this step once `rmartz/dotfiles` is updated to detect `scripts/hooks/pre-commit` as an alternative hook path alongside `claude/hooks/pre-commit`.
+Run this after cloning or when setting up a fresh root checkout. `new-worktree.py` will automate this step once the shared agent tooling is updated to detect `scripts/hooks/pre-commit` as an alternative hook path alongside `claude/hooks/pre-commit`.
 
 ## Deployment Config
 
