@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Block commits that introduce merge-conflict markers.
 #
-# Mirrors the detection in rmartz/dotfiles check_conflict_markers.py: a file is
+# Mirrors the detection in the shared agent tooling's check_conflict_markers.py: a file is
 # flagged only when it contains an unambiguous *angle* marker — a line starting
 # with seven "<" or seven ">" (`<<<<<<< HEAD`, `>>>>>>> branch`). These never
 # occur in normal source or Markdown, so a Markdown setext underline or a lone
