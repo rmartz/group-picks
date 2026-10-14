@@ -27,7 +27,7 @@ updates:
       # major to one is broken without the rest (a `react` major without
       # `react-dom`, one `@storybook/*` without the others). Listed first, and
       # ordered so first-match precedence resolves the overlaps: storybook before
-      # eslint (catches `eslint-plugin-storybook`) and before vite (catches
+      # ci (catches `eslint-plugin-storybook`) and before vite (catches
       # `@storybook/*-vite*`).
       #
       # Same-scope families (all dev, or all prod) restrict to `major`: their
@@ -61,15 +61,23 @@ updates:
           - "@vitest/*"
         update-types:
           - "major"
-      eslint:
+      ci:
+        # CI-sensitive tools in one group: pr-policy requires a `ci` title for
+        # any eslint/prettier version change (the formatter/linter can fail files
+        # a PR never touched), so they must not ride in a catch-all where they
+        # would block every routine bump. Plugins and configs move in lockstep
+        # with their tool. Unlike the families above, no update-types filter, so
+        # a major brings its family with it and a minor/patch never falls through
+        # to the dev-dependencies catch-all. `eslint-plugin-storybook` stays in
+        # the earlier storybook group (first match wins).
         patterns:
           - "eslint"
           - "@eslint/js"
           - "typescript-eslint"
           - "eslint-plugin-react-hooks"
           - "eslint-plugin-simple-import-sort"
-        update-types:
-          - "major"
+          - "prettier"
+          - "prettier-plugin-*"
       tailwind:
         patterns:
           - "tailwindcss"
@@ -81,12 +89,14 @@ updates:
       # *assumption* that their minor bumps are more likely to force a code
       # change, but a full audit of Dependabot history found neither had ever
       # caught a real breakage (each fired only once — a superseded prettier PR
-      # and a still-open typescript major). With the groups gone, prettier and
-      # typescript minor bumps rejoin the dev-dependencies batch and their majors
-      # surface as individual PRs — like any other package — so
+      # and a still-open typescript major). With the group gone, typescript minor
+      # bumps rejoin the dev-dependencies batch and its majors surface as
+      # individual PRs — like any other package — so
       # `scripts/dependabot-audit.mjs` can measure whether they actually fail at a
       # higher rate than the baseline. Restore a group here only if the audit
-      # shows it earns one. See docs/dependabot-grouping.md.
+      # shows it earns one. (prettier has since moved into the `ci` group above
+      # for an unrelated, policy reason — the pr-policy title gate — not risk.)
+      # See docs/dependabot-grouping.md.
       dev-dependencies:
         dependency-type: development
         update-types:

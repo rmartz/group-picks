@@ -25,9 +25,11 @@ import { fileURLToPath } from "node:url";
 
 // Groups Dependabot can name in a PR title. Kept broader than the current
 // .github/dependabot.yml on purpose: `prettier` and `typescript` were removed
-// from the config (#479) but still appear in historical PR titles, so they must
-// stay here for those PRs to classify correctly.
+// from the config (#479), and `eslint` was folded into `ci`, but all still
+// appear in historical PR titles, so they must stay here for those PRs to
+// classify correctly.
 const KNOWN_GROUPS = [
+  "ci",
   "dev-dependencies",
   "eslint",
   "github-actions",
