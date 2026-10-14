@@ -12,7 +12,7 @@ name: bot-automerge
 # GitHub App, not the built-in github.token: a merge enabled with GITHUB_TOKEN
 # fires no push workflows, so a bot merge would reach main with no CI or deploy
 # run. App-authored events do trigger them, and the App has its own rate-limit
-# pool, separate from the user's (rmartz/scripts#22).
+# pool, separate from the user's.
 on:
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
@@ -56,6 +56,6 @@ jobs:
           # workflows, so a bot merge would reach main with no push-triggered CI,
           # release, or merge-safety run (rmartz/bot-automerge-action#31).
           # App-authored events do trigger them, and the App has its own
-          # rate-limit pool, separate from the user's (rmartz/scripts#22). The
-          # token step fails closed if the App secrets are missing.
+          # rate-limit pool, separate from the user's. The token step fails
+          # closed if the App secrets are missing.
           token: ${{ steps.app-token.outputs.token }}
