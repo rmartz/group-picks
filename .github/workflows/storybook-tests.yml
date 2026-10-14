@@ -40,7 +40,7 @@ jobs:
     # `playwright` import launches from. Tests run on the shared default: `pnpm
     # exec vitest run --project storybook` resolves against our `storybook`
     # vitest project.
-    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@ff758949491f6d22298273b424dd79144c5dd543 # v1.5.2
+    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@1c03f5ef224d6f008d2b3c3bb87a536bcac3ecdb # v1.5.3
     with:
       build-needs-browser: true
       build-command: pnpm build-storybook && node scripts/check-storybook-render.mjs
