@@ -1,7 +1,7 @@
 ---
 type: Workflow
 title: pr-policy
-description: The shared @rmartz/pr-policy PR content checks, run via rmartz/pr-policy-action on pull_request_target and on pr-lifecycle's sign-off status, which post the pr-policy verdict; as a Next.js app this repo keeps the UAT gate.
+description: The shared @rmartz/pr-policy PR content checks, run via rmartz/pr-policy-action on pull_request_target, which post the pr-policy verdict; as a Next.js app this repo keeps the UAT gate.
 resource: .github/workflows/pr-policy.yml
 tags: [ci, github-actions, pr-policy, uat]
 ---
@@ -24,16 +24,11 @@ means the author has something to fix (a bad title, for example), and pending
 means a person has to act.
 
 **This repo keeps the UAT gate**, because it is a Next.js app with something to
-user-test. Which sign-off a PR needs is decided by
-[pr-lifecycle](pr-lifecycle.md), which posts it as the `pr-lifecycle/sign-off`
-commit status; pr-policy gates on that status, and falls back to its own
-classification while a head has none. A PR that could be user-facing stays
-pending until it carries a trusted `no UAT needed` or a person's `UAT passed`.
-The caller must not set `skip-uat`.
-
-**The `status` trigger** re-runs the gate when the sign-off status lands, which
-can be after pr-policy has already run for that push. The job's `if:` skips
-every other status context.
+user-test. A code PR stays pending until it carries `no UAT needed` (the review
+agent's call) or a person's `UAT passed` (the legacy `tested` label also
+counts). Test-only, docs, CI, dependency-only, metadata-only, and
+`refactor`-titled PRs are exempt automatically. The caller must not set
+`skip-uat`.
 
 The verdict is posted twice: as the `pr-policy` check-run and as a `pr-policy`
 commit status. The status keeps the merge gate working when GitHub supersedes
