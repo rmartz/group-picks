@@ -54,6 +54,15 @@ describe("buildReport: group classification", () => {
     expect(rows[0]?.group).toBe("ci");
   });
 
+  it("classifies a storybook-ci named-group PR apart from the storybook family", () => {
+    const pr = makeDepPr({
+      title:
+        "chore(deps): bump the storybook-ci group across 1 directory with 2 updates",
+    });
+    const { rows } = buildReport([pr], [], REPO);
+    expect(rows[0]?.group).toBe("storybook-ci");
+  });
+
   it("classifies an ungrouped GitHub Actions ecosystem bump as github-actions", () => {
     const pr = makeDepPr({ title: "bump actions/checkout from 3 to 4" });
     const { rows } = buildReport([pr], [], REPO);
