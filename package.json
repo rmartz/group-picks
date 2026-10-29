@@ -58,7 +58,9 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@babel/core": "7.29.7",
     "@eslint/js": "^10.0.1",
+    "@rolldown/plugin-babel": "0.2.4",
     "@storybook/addon-a11y": "^10.6.3",
     "@storybook/addon-docs": "^10.6.3",
     "@storybook/addon-vitest": "^10.6.3",
@@ -72,6 +74,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "@vitest/browser": "^5.0.5",
     "@vitest/browser-playwright": "^5.0.5",
+    "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-simple-import-sort": "^14.0.0",

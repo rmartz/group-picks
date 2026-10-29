@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import type { InviteMode } from "@/lib/types/invite";
 import { regenerateInvite } from "@/services/groups";
@@ -15,6 +15,11 @@ interface InviteSectionProps {
   initialMode: InviteMode;
 }
 
+// The page origin never changes while the page is loaded.
+function subscribeToNothing() {
+  return () => undefined;
+}
+
 export function InviteSection({
   groupId,
   initialToken,
@@ -22,7 +27,13 @@ export function InviteSection({
   initialMode,
 }: InviteSectionProps) {
   const [token, setToken] = useState(initialToken);
-  const [origin, setOrigin] = useState("");
+  // The origin only exists in the browser; the server snapshot keeps the
+  // first client render matching the server-rendered HTML.
+  const origin = useSyncExternalStore(
+    subscribeToNothing,
+    () => window.location.origin,
+    () => "",
+  );
   const [expiresAt, setExpiresAt] = useState(
     initialExpiresAt ? new Date(initialExpiresAt) : undefined,
   );
@@ -35,7 +46,6 @@ export function InviteSection({
   );
 
   useEffect(() => {
-    setOrigin(window.location.origin);
     return () => {
       if (copyTimeoutRef.current !== undefined) {
         clearTimeout(copyTimeoutRef.current);
