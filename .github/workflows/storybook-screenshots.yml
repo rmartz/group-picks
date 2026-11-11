@@ -37,4 +37,6 @@ jobs:
     # Until that secret exists the job posts a non-blocking advisory PR comment
     # and skips the capture; it never fails a build. See docs/storybook-ci.md.
     uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@2cf1c787fd9cf92ff16fc177f4f49028c34e4c48 # v2.0.1
+    with:
+      node-version: 26.x
     secrets: inherit

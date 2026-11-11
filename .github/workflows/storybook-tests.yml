@@ -44,3 +44,4 @@ jobs:
     with:
       build-needs-browser: true
       build-command: pnpm build-storybook && node scripts/check-storybook-render.mjs
+      node-version: 26.x
