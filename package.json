@@ -4,6 +4,9 @@
   "description": "Collaborative group decision-making — picks, rankings, and recurring Snap Picks for groups",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "26.x"
+  },
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "dev": "next dev",
