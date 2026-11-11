@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 // jwks-rsa/src/utils.js runs `const jose = require("jose")`. jose@6 is ESM-only,
 // so any runtime that cannot require() an ES module throws ERR_REQUIRE_ESM. On
 // Vercel that runtime is Turbopack's middleware external-module loader — which
-// does NOT use Node 24's native require(ESM) support, so the middleware crashed
+// does NOT use Node 26's native require(ESM) support, so the middleware crashed
 // on every request. We pin jose to the last CJS-capable major (5.x) via
 // pnpm.overrides in package.json.
 //
