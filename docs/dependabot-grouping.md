@@ -23,7 +23,10 @@ Two axes decide how a bump is grouped:
   tooling updates, and vice versa.
 - **Majors are individual by default.** A major bump matches no catch-all, so it
   is raised as its own PR — majors are the most likely to need a code change and
-  warrant isolated review.
+  warrant isolated review. The exception is `@types/node`, whose majors are
+  ignored: the types track the Node runtime's major (`.nvmrc`, the setup
+  action's `node-version`, the Vercel runtime), which Dependabot never bumps, so
+  the types major moves by hand with the runtime upgrade.
 - **Version-locked families** override the above for packages whose versions must
   move together, so a major to one is broken without the rest:
   - `react` keeps **all** update-types because it spans the prod/dev split
