@@ -36,7 +36,7 @@ jobs:
     # fine-grained PAT scoped to this repo with `Pull requests: Read and write`.
     # Until that secret exists the job posts a non-blocking advisory PR comment
     # and skips the capture; it never fails a build. See docs/storybook-ci.md.
-    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@652cb863dd5fca4df6cdc56b0ccc698efb7b80e6 # v2.0.2
+    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@79ff7e72084243ecf5962ddec52d098215a3d08c # v3.0.2
     with:
       node-version: 26.x
     secrets: inherit
