@@ -25,9 +25,6 @@ export default withSentryConfig(nextConfig, {
     excludeDebugStatements: true,
   },
 
-  // Create a proxy API route to bypass ad-blockers
-  tunnelRoute: "/monitoring",
-
   // Suppress non-CI output
   silent: !process.env["CI"],
 });

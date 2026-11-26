@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 import { sentryDataCollection } from "./sentry.data-collection";
+import { SENTRY_TUNNEL_PATH } from "./sentry.tunnel";
 
 const enableSensitiveData =
   process.env.NODE_ENV === "development" &&
@@ -16,4 +17,7 @@ Sentry.init({
 
   // Attach local variable values to stack frames (development + opt-in only)
   includeLocalVariables: enableSensitiveData,
+
+  // Answer the browser's tunnel requests (see sentry.client.config.ts)
+  integrations: [Sentry.serveTunnelIntegration({ path: SENTRY_TUNNEL_PATH })],
 });
