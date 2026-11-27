@@ -20,7 +20,7 @@ Validation also runs automatically in the pre-commit hook and in CI (`.github/wo
 
 ## Deploying to Vercel
 
-The previous deploy tooling (`vercel-deploy-scripts`, providing `sync-env` / `generate-local-env`) and the local config editor (`scripts/update-config.sh`) have been removed. Pushing the YAML values to Vercel and pulling a local `.env.local` will be handled by a dedicated CLI, **`envctl`** (usage TBD) — a local-only env-management tool that is intentionally not wired into CI. Until it lands, manage env values directly with the `vercel` CLI (a devDependency).
+The previous deploy tooling (`sync-env` / `generate-local-env`) and the local config editor (`scripts/update-config.sh`) have been removed. Pushing the YAML values to Vercel and pulling a local `.env.local` will be handled by a dedicated CLI, **`envctl`** (usage TBD) — a local-only env-management tool that is intentionally not wired into CI. Until it lands, manage env values directly with the `vercel` CLI (a devDependency).
 
 ## Secret scanning
 
