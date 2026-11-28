@@ -45,7 +45,7 @@ Run this after cloning or when setting up a fresh root checkout. `new-worktree.p
 Public (non-secret) environment config lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml`. Only `NEXT_PUBLIC_*` and explicitly allowlisted keys are permitted; patterns matching `*SECRET*`, `*_TOKEN*`, or `*PRIVATE_KEY*` are hard-denied.
 
 - Public config values in `deployment/{env}.yml` are edited by hand. Validate against the schema with `pnpm run env:validate` (also run by the pre-commit hook and in CI via `.github/workflows/validate-config.yml`).
-- Pushing config to Vercel and pulling a local `.env.local` will be handled by the `envctl` CLI (usage TBD) — a local-only tool, intentionally not wired into CI. Until it lands, use the `vercel` CLI directly. The previous `vercel-deploy-scripts` tooling (`sync-env` / `generate-local-env`) has been removed.
+- Pushing config to Vercel and pulling a local `.env.local` will be handled by the `envctl` CLI (usage TBD) — a local-only tool, intentionally not wired into CI. Until it lands, use the `vercel` CLI directly.
 - There is no secret scanning at present: the VDS-based CI secret scan and the local pre-commit gitleaks scan have both been removed. Secret scanning will return under the new env-management design.
 
 ## Continuous Integration
