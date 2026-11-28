@@ -17,16 +17,7 @@ name: Preview Deploy
 
 on:
   pull_request:
-    types:
-      [
-        opened,
-        synchronize,
-        reopened,
-        edited,
-        labeled,
-        unlabeled,
-        ready_for_review,
-      ]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
 
 permissions:
   contents: read

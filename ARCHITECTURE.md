@@ -215,7 +215,7 @@ Flat config (`eslint.config.js`) with:
 
 ### Vercel
 
-- Label-gated preview deployments: a preview is built only while a PR carries the `UAT ready` label (`.github/workflows/preview-deploy.yml`, a caller of the shared `rmartz/vercel-preview-ci` workflow); native preview builds are disabled by `git.deploymentEnabled` in `vercel.json`
+- Gated preview deployments: a preview is built only for a PR whose title has a functional type (`feat`, `fix`, `perf`, `revert`) or that carries the `preview` label; `no preview` or `do not merge` skips it (`.github/workflows/preview-deploy.yml`, a caller of the shared `rmartz/vercel-preview-ci` workflow); native preview builds are disabled by `git.deploymentEnabled` in `vercel.json`
 - Production deployment on merge to main
 - Root directory: project root (no subdirectory)
 
